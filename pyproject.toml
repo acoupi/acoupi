@@ -1,0 +1,19 @@
+[tool.pdm]
+
+[project]
+name = "acoupi"
+version = "0.1.0"
+description = "Classifier for bioacoustic devices"
+authors = [
+    {name = "Aude Vuilli", email = "santiago.mbal@gmail.com"},
+]
+dependencies = [
+    "pyalsaaudio>=0.9.2",
+]
+requires-python = ">=3.7"
+readme = "README.md"
+license = {text = "GPL-3.0"}
+
+[build-system]
+requires = ["pdm-pep517>=1.0"]
+build-backend = "pdm.pep517.api"
