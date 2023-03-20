@@ -26,6 +26,16 @@ class Detection:
     probability: float
 
 
+class RecordManager(ABC):
+    """The RecordManager is responsible for deciding if a recording
+    should be made."""
+
+    @abstractmethod
+    def should_record(self) -> bool:
+        """Determine if a recording should be made"""
+        ...
+
+
 class AudioRecorder(ABC):
     """The AudioRecorder is responsible for recording audio from the
     microphone"""
