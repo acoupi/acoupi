@@ -1,4 +1,5 @@
 """Definition of ScheduleManagers."""
+from acoupi.config import DEFAULT_RECORDING_INTERVAL
 from acoupi.types import ScheduleManager
 
 __all__ = [
@@ -9,7 +10,7 @@ __all__ = [
 class ConstantScheduleManager(ScheduleManager):
     """Will wait for a constant amount of time between each recording."""
 
-    def __init__(self, interval: float):
+    def __init__(self, interval: float = DEFAULT_RECORDING_INTERVAL):
         """Initialize the schedule manager."""
 
         self.interval = interval
