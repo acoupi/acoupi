@@ -30,6 +30,7 @@ class AudioRecorder(ABC):
     """The AudioRecorder is responsible for recording audio from the
     microphone"""
 
+    @abstractmethod
     def record(self) -> Recording:
         """Record audio from the microphone and return the recording.
 
