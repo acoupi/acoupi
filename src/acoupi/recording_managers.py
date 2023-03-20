@@ -1,5 +1,6 @@
 """Definition of recording managers"""
 import datetime
+from typing import List
 from dataclasses import dataclass
 
 from acoupi.types import RecordManager
@@ -38,7 +39,7 @@ class IntervalRecordingManager(RecordManager):
 class MultiIntervalRecordingManager(RecordManager):
     """A RecordManager that records during multiple intervals of time."""
 
-    def __init__(self, intervals: list[Interval], timezone: datetime.tzinfo):
+    def __init__(self, intervals: List[Interval], timezone: datetime.tzinfo):
         self.intervals = intervals
         self.timezone = timezone
 
