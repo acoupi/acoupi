@@ -26,6 +26,19 @@ class Detection:
     probability: float
 
 
+class ScheduleManager(ABC):
+    """The ScheduleManager is responsible for determining the interval
+    between recordings"""
+
+    @abstractmethod
+    def time_until_next_recording(self) -> int:
+        """Return the number of seconds until the next recording should be made.
+
+        This should return 0 if a recording should be made immediately.
+        """
+        ...
+
+
 class RecordManager(ABC):
     """The RecordManager is responsible for deciding if a recording
     should be made."""
