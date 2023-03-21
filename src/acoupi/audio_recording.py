@@ -20,9 +20,7 @@ class PyAudioRecorder():
 #class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
 
-    def __init__(self, duration: float = DEFAULT_RECORDING_DURATION, sample_rate: float = DEFAULT_SAMPLE_RATE, 
-                    channels: int = DEFAULT_AUDIO_CHANNELS, chunk: int = DEFAULT_CHUNK_SIZE, 
-                    lat: float = LATITUDE, lon: float = LONGITUDE):
+    def __init__(self, duration: float = DEFAULT_RECORDING_DURATION, sample_rate: float = DEFAULT_SAMPLE_RATE, channels: int = DEFAULT_AUDIO_CHANNELS, chunk: int = DEFAULT_CHUNK_SIZE, lat: float = LATITUDE, lon: float = LONGITUDE):
         
         # Audio Duration
         self.duration = duration
@@ -35,8 +33,14 @@ class PyAudioRecorder():
         # Device Location 
         self.lat = lat
         self.lon = lon
+    
+    def findAudioDevice():
+        p = pyaudio.PyAudio()
+        device_info = p.get_default_input_device_info()
+        device_index = device_info['index']
+        return device_index
 
-    def record_audio(self) -> Recording:
+    def record_audio(self,device_index) -> Recording:
         """Record a 3 second temporary audio file at 192KHz. Return the temporary path of the file."""       
         
         date_time = datetime.now().strftime('%Y%m%d-%H%M%S') 
@@ -56,7 +60,8 @@ class PyAudioRecorder():
                             channels=self.channels,
                             rate=self.sample_rate,
                             input=True,
-                            frames_per_buffer=self.chunk)
+                            frames_per_buffer=self.chunk,
+                            input_device_index=device_index)
 
             #Initialise array to store audio frames
             frames = []
@@ -82,4 +87,5 @@ class PyAudioRecorder():
             return temp_audio_path
 
 a = PyAudioRecorder(3,192000,1,1024,51.5381,-0.0099)
-PyAudioRecorder.record_audio(a)
+device_index = PyAudioRecorder.findAudioDevice()
+PyAudioRecorder.record_audio(a,device_index)
