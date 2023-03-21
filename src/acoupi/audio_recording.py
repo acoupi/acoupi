@@ -30,8 +30,8 @@ class PyAudioRecorder():
         # Device Location 
         #self.lat = lat
         #self.lon = lon
-	self.lat = 51.5128
-	self.lon = -0.0918
+        self.lat = 51.5128
+        self.lon = -0.0918
 
     def record_audio(self) -> Recording:
         """Record a 3 second temporary audio file at 192KHz. Return the temporary path of the file."""
@@ -80,5 +80,5 @@ class PyAudioRecorder():
 
         return audiof_path
 
-a = PyAudioRecorder(3,192000,1,1024,51.1023,-0.1843)
+a = PyAudioRecorder(3,192000,1,1024)
 record_audio(a)
