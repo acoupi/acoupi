@@ -6,15 +6,16 @@ import wave
 from typing import Optional, List
 from dataclasses import dataclass
 
-from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
-from acoupi.types import Recording, AudioRecorder
+from acoupi_config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
+from acoupi_types import Recording, AudioRecorder
 
 
 # __all__ = [
     #"... all the names of the created class"
 # ]
 
-class PyAudioRecorder(AudioRecorder):
+class PyAudioRecorder():
+#class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
 
     def __init__(self, duration: float = DEFAULT_RECORDING_DURATION, sample_rate: float = DEFAULT_SAMPLE_RATE, channels: int = DEFAULT_AUDIO_CHANNELS, chunk: int = DEFAULT_CHUNK_SIZE):
@@ -27,8 +28,10 @@ class PyAudioRecorder(AudioRecorder):
         self.chunk = chunk
         
         # Device Location 
-        self.lat = lat
-        self.lon = lon
+        #self.lat = lat
+        #self.lon = lon
+	self.lat = 51.5128
+	self.lon = -0.0918
 
     def record_audio(self) -> Recording:
         """Record a 3 second temporary audio file at 192KHz. Return the temporary path of the file."""
@@ -77,6 +80,5 @@ class PyAudioRecorder(AudioRecorder):
 
         return audiof_path
 
-
-record_audio(self)
-        
+a = PyAudioRecorder(3,192000,1,1024,51.1023,-0.1843)
+record_audio(a)
