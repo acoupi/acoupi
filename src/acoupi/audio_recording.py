@@ -69,9 +69,9 @@ class PyAudioRecorder():
         # Write the recorded audio to a temporary file
         with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as audiof:
             audiof(b''.join(frames))    
-            temp_audiof_name = audif.name
-
-            return audiof   
+            temp_audiof = audif.name
+            print(temp_audiof)
+            return temp_audiof
         
         #audiof_path.write('Some random data)')
         #audiof_path.close()
@@ -87,4 +87,4 @@ class PyAudioRecorder():
         #audio_file.close()
 
 a = PyAudioRecorder(3,192000,1,1024,51.5381,-0.0099)
-record_audio(a)
+PyAudioRecorder.record_audio(a)
