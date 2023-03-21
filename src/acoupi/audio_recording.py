@@ -1,8 +1,10 @@
 """Definition of audio recorder"""
 from datetime import datetime
+import tempfile
 from tempfile import TemporaryFile, NamedTemporaryFile
 import pyaudio
 import wave 
+import sounddevice
 from typing import Optional, List
 from dataclasses import dataclass
 
@@ -35,10 +37,11 @@ class PyAudioRecorder():
 
     def record_audio(self) -> Recording:
         """Record a 3 second temporary audio file at 192KHz. Return the temporary path of the file."""
-        
-        datetime = datetime.now().strftime('%Y%m%d-%H%M%S') 
+       
+        date_time = datetime.now().strftime('%Y%m%d-%H%M%S') 
         #audiof = tempfile.TemporaryFile(mode='w+')
-        audiof_path = tempfile.NamedTEmporaryFile()
+        #audiof_path = tempfile.NamedTemporyFile()
+        audiofile_name = ''.join('rec_%s_%s_%s' %(date_time,self.lat, self.lon) + '.wav')
 
         #Create interface to audio port
         p = pyaudio.PyAudio()
@@ -64,21 +67,17 @@ class PyAudioRecorder():
         p.terminate()
 
         # Open and Set the data of the WAV file
-
-        #audiof_path.write('Some random data)')
-        #audiof_path.close()
-        #audiof_path.name = ''.join('rec_%s_%s_%s_%s' %(start_datetime, week_number, self.lat, self.lon) + '.wav')
-
-        audio_file = wave.open(audiof_path, 'wb')
-        audio_file.setnchannels(channels)
+        audio_file = wave.open(audiofile_name, 'wb')
+        print(audio_file)
+        audio_file.setnchannels(self.channels)
         audio_file.setsampwidth(p.get_sample_size(pyaudio.paInt16))
-        audio_file.setframerate(sample_rate)
+        audio_file.setframerate(self.sample_rate)
 
         #Write and Close the File
         audio_file.writeframes(b''.join(frames))
         audio_file.close()
 
-        return audiof_path
+        return audiofile_name
 
 a = PyAudioRecorder(3,192000,1,1024)
-record_audio(a)
+PyAudioRecorder.record_audio(a)
