@@ -1,6 +1,6 @@
 """Definition of audio recorder"""
 from datetime import datetime
-from tempfile import TemporaryFile, NamedTEmporaryFile
+from tempfile import TemporaryFile, NamedTemporaryFile
 import pyaudio
 import wave 
 from typing import Optional, List
@@ -78,5 +78,5 @@ class PyAudioRecorder(AudioRecorder):
         return audiof_path
 
 
-
+record_audio(self)
         
