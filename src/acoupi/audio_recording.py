@@ -38,44 +38,38 @@ class PyAudioRecorder():
 
     def record_audio(self) -> Recording:
         """Record a 3 second temporary audio file at 192KHz. Return the temporary path of the file."""       
+        
         date_time = datetime.now().strftime('%Y%m%d-%H%M%S') 
-        #audiof = tempfile.TemporaryFile(mode='w+')
-        #audiof_path = tempfile.NamedTemporyFile()
-        #audiofile_name = ''.join('rec_%s_%s_%s' %(date_time,self.lat, self.lon) + '.wav')
+   
+        #Create a temporary file to record audio
+        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_audiof:
 
-        #Create an new instace of PyAudio
-        p = pyaudio.PyAudio()
+            #Create an new instace of PyAudio
+            p = pyaudio.PyAudio()
         
-        #Open new audio stream to start recording
-        stream = p.open(format=pyaudio.paInt16,
-                        channels=self.channels,
-                        rate=self.sample_rate,
-                        input=True,
-                        frames_per_buffer=self.chunk)
+            #Open new audio stream to start recording
+            stream = p.open(format=pyaudio.paInt16,
+                            channels=self.channels,
+                            rate=self.sample_rate,
+                            input=True,
+                            frames_per_buffer=self.chunk)
 
-        #Initialise array to store frames
-        frames = []
+            #Initialise array to store audio frames
+            frames = []
+            for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
+                data = stream.read(self.chunk)
+                frames.append(data)
 
-        #Store data in chunk of 3seconds
-        for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
-            data = stream.read(self.chunk)
-            frames.append(data)
+            #Stop Recording and close the port interface
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
 
-        #Stop Recording and close the port interface
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
-
-        # Write the recorded audio to a temporary file
-        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as audiof:
-            audiof(b''.join(frames))    
-            temp_audiof = audif.name
-            print(temp_audiof)
-            return temp_audiof
-        
-        #audiof_path.write('Some random data)')
-        #audiof_path.close()
-        #audiof_path.name = ''.join('rec_%s_%s_%s_%s' %(start_datetime, week_number, self.lat, self.lon) + '.wav')
+            # Write the recorded audio to a temporary file
+            temp_audiof.write(b''.join(frames))    
+            temp_audiof_name = temp_audiof.name
+            print(temp_audiof_name)
+            return temp_temp_audiof_nameaudiof
 
         #audio_file = wave.open(audiof_path, 'wb')
         #audio_file.setnchannels(channels)
