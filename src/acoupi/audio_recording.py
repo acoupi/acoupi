@@ -43,6 +43,10 @@ class PyAudioRecorder():
    
         #Create a temporary file to record audio
         with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_audiof:
+            
+            # Get the temporary file path from the created temporary audio file
+            temp_audio_path = temp_audiof.name
+            print(temp_audio_path)
 
             #Create an new instace of PyAudio
             p = pyaudio.PyAudio()
@@ -65,20 +69,17 @@ class PyAudioRecorder():
             stream.close()
             p.terminate()
 
-            # Write the recorded audio to a temporary file
-            temp_audiof.write(b''.join(frames))    
-            temp_audiof_name = temp_audiof.name
-            print(temp_audiof_name)
-            return temp_temp_audiof_nameaudiof
+            #Create a WAV file to write the audio data
+            temp_audio_file = wave.open(temp_audio_path, 'wb')
+            temp_audio_file.setnchannels(self.channels)
+            temp_audio_file.setsampwidth(p.get_sample_size(pyaudio.paInt16))
+            temp_audio_file.setframerate(self.sample_rate)
 
-        #audio_file = wave.open(audiof_path, 'wb')
-        #audio_file.setnchannels(channels)
-        #audio_file.setsampwidth(p.get_sample_size(pyaudio.paInt16))
-        #audio_file.setframerate(sample_rate)
+            # Write the audio data to the temporary file
+            temp_audio_file.writeframes(b''.join(frames))    
+            temp_audio_file.close()
 
-        #Write and Close the File
-        #audio_file.writeframes(b''.join(frames))
-        #audio_file.close()
+            return temp_audio_path
 
 a = PyAudioRecorder(3,192000,1,1024,51.5381,-0.0099)
 PyAudioRecorder.record_audio(a)
