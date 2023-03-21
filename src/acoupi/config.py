@@ -1,5 +1,9 @@
 """Configuration file with default configuration of Acoupi."""
 
+"""Default device parameters."""
+LATITUDE = 51.5381
+LONGITUDE = -0.0099
+
 """Default audio recording parameters."""
 DEFAULT_SAMPLE_RATE = 192000
 DEFAULT_AUDIO_CHANNELS = 1
