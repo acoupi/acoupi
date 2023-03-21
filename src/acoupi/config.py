@@ -1,6 +1,6 @@
 """Configuration file with default configuration of Acoupi."""
 
-"""Default device parameters."""
+"""Default device parameters"""
 LATITUDE = 51.5381
 LONGITUDE = -0.0099
 
