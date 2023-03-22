@@ -1,10 +1,9 @@
 """Definition of recording managers"""
 import datetime
-from typing import List
 from dataclasses import dataclass
+from typing import List
 
 from acoupi.types import RecordManager
-
 
 __all__ = [
     "IntervalRecordingManager",
@@ -30,10 +29,9 @@ class IntervalRecordingManager(RecordManager):
         self.interval = interval
         self.timezone = timezone
 
-    def should_record(self) -> bool:
+    def should_record(self, time: datetime.time) -> bool:
         """Determine if a recording should be made"""
-        now = datetime.datetime.now(tz=self.timezone)
-        return self.interval.start <= now.time() <= self.interval.end
+        return self.interval.start <= time <= self.interval.end
 
 
 class MultiIntervalRecordingManager(RecordManager):
@@ -43,9 +41,9 @@ class MultiIntervalRecordingManager(RecordManager):
         self.intervals = intervals
         self.timezone = timezone
 
-    def should_record(self) -> bool:
+    def should_record(self, time: datetime.time) -> bool:
         """Determine if a recording should be made"""
-        now = datetime.datetime.now(tz=self.timezone)
         return any(
-            interval.start <= now.time() <= interval.end for interval in self.intervals
+            interval.start <= time <= interval.end
+            for interval in self.intervals
         )
