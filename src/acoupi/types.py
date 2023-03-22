@@ -1,7 +1,7 @@
 """This module contains the types used by the aucupi"""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+import datetime
 from typing import List, Optional
 
 
@@ -10,7 +10,7 @@ class Recording:
     """A Recording is a single audio file recorded from the microphone"""
 
     path: str
-    datetime: datetime
+    datetime: datetime.datetime
     duration: float
     samplerate: int
     device_id: Optional[str]
@@ -44,7 +44,7 @@ class RecordManager(ABC):
     should be made."""
 
     @abstractmethod
-    def should_record(self) -> bool:
+    def should_record(self, time: datetime.time) -> bool:
         """Determine if a recording should be made"""
         ...
 
