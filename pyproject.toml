@@ -1,4 +1,8 @@
 [tool.pdm]
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest>=7.2.2",
+]
 
 [project]
 name = "acoupi"
@@ -18,3 +22,6 @@ license = {text = "GPL-3.0"}
 [build-system]
 requires = ["pdm-pep517>=1.0"]
 build-backend = "pdm.pep517.api"
+
+[tool.black]
+line-length = 79
