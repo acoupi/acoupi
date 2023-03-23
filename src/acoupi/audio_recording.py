@@ -8,15 +8,11 @@ import sounddevice
 from typing import Optional, List
 from dataclasses import dataclass
 
-from acoupi_config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, LATITUDE, LONGITUDE
-from acoupi_types import Recording, AudioRecorder
+from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, LATITUDE, LONGITUDE
+from acoupi.types import Recording, AudioRecorder
 
 
-# __all__ = [
-    #"... all the names of the created class"
-# ]
-
-class PyAudioRecorder():
+class PyAudioRecorder(AudioRecorder):
 #class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
 
@@ -85,7 +81,3 @@ class PyAudioRecorder():
             temp_audio_file.close()
 
             return temp_audio_path
-
-a = PyAudioRecorder(3,192000,1,1024,51.5381,-0.0099)
-device_index = PyAudioRecorder.findAudioDevice()
-PyAudioRecorder.record_audio(a,device_index)
