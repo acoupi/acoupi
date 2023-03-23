@@ -12,17 +12,17 @@ class Deployment:
     This includes the latitude, longitude, and deployment start.
     """
 
-    latitude: Optional[float]
-    """The latitude of the site where the device is deployed."""
-
-    longitude: Optional[float]
-    """The longitude of the site where the device is deployed."""
-
     start: datetime.datetime
     """The datetime when the device was deployed."""
 
     device_id: str
     """The ID of the device."""
+
+    latitude: Optional[float] = None
+    """The latitude of the site where the device is deployed."""
+
+    longitude: Optional[float] = None
+    """The longitude of the site where the device is deployed."""
 
 
 @dataclass
@@ -40,9 +40,6 @@ class Recording:
 
     samplerate: int
     """The samplerate of the recording in Hz"""
-
-    deployment: Optional[Deployment] = None
-    """The deployment information for the recording"""
 
 
 @dataclass
@@ -138,6 +135,16 @@ class Store(ABC):
     1. If the detection should be stored
     2. How the detection should be stored
     """
+
+    @abstractmethod
+    def get_current_deployment(self) -> Deployment:
+        """Get the current deployment from the local filesystem"""
+        ...
+
+    @abstractmethod
+    def store_deployment(self, deployment: Deployment) -> None:
+        """Store the deployment locally"""
+        ...
 
     @abstractmethod
     def store_recording(self, recording: Recording) -> None:
