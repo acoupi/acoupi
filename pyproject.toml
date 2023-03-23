@@ -9,7 +9,8 @@ name = "acoupi"
 version = "0.1.0"
 description = "Classifier for bioacoustic devices"
 authors = [
-    {name = "Aude Vuilli", email = "santiago.mbal@gmail.com"},
+    {name = "Aude Vuilli", email = "aude.vuilliomenet.18@ucl.ac.uk"},
+    {name = "Santiago Martinez Balvanera", email = "santiago.balvanera.20@ucl.uk.ac"},
 ]
 dependencies = [
     "pyalsaaudio>=0.9.2",
