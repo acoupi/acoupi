@@ -1,6 +1,7 @@
 """Test the SQLite store."""
 import os
 import sqlite3
+import datetime
 from pathlib import Path
 from typing import Generator
 
@@ -81,7 +82,7 @@ def test_detection_table_has_correct_columns(sqlite_store) -> None:
 
 def test_deployment_table_has_correct_columns(sqlite_store) -> None:
     """Test that the deployment table has the correct columns"""
-    expected_columns = {"id", "site_name", "latitude", "longitude"}
+    expected_columns = {"id", "latitude", "longitude", "device_id"}
     db_path = sqlite_store.db_path
 
     # Check that the tables are there
@@ -158,14 +159,26 @@ def test_can_instantiate_multiple_stores_to_the_same_sqlite_file(tmp_path: Path)
     assert store2 is not None
 
 
-def test_recordings_can_be_registered(sqlite_store) -> None:
+def test_recordings_can_be_registered(sqlite_store: SqliteStore) -> None:
     """Test that recordings can be registered"""
+    now = datetime.datetime.now()
+
     recording = Recording(
         path="test/path",
         duration=10.0,
         samplerate=44100,
-        channels=2,
-        datetime=datetime.now(),
+        datetime=now,
     )
-    sqlite_store.register_recording(recording)
-    assert sqlite_store.get_recording(1) == recording
+    sqlite_store.store_recording(recording)
+
+    # Check that the recording is there
+    with sqlite3.connect(str(sqlite_store.db_path)) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM recording;")
+        row = cursor.fetchone()
+        assert row[1] == "test/path"
+        assert row[2] == 10.0
+        assert row[3] == 44100
+        assert row[4] == 1
+        assert row[5] == now.isoformat()
+
