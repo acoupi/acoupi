@@ -1,21 +1,48 @@
 """This module contains the types used by the aucupi"""
+import datetime
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-import datetime
 from typing import List, Optional
 
 
 @dataclass
+class Deployment:
+    """A Deployment captures information about the device deployment.
+
+    This includes the latitude, longitude, and deployment start.
+    """
+
+    latitude: Optional[float]
+    """The latitude of the site where the device is deployed."""
+
+    longitude: Optional[float]
+    """The longitude of the site where the device is deployed."""
+
+    start: datetime.datetime
+    """The datetime when the device was deployed."""
+
+    device_id: str
+    """The ID of the device."""
+
+
+@dataclass
 class Recording:
-    """A Recording is a single audio file recorded from the microphone"""
+    """A Recording is a single audio file recorded from the microphone."""
 
     path: str
+    """The path to the audio file in the local filesystem"""
+
     datetime: datetime.datetime
+    """The datetime when the recording was made"""
+
     duration: float
+    """The duration of the recording in seconds"""
+
     samplerate: int
-    device_id: Optional[str]
-    lat: Optional[float]
-    lon: Optional[float]
+    """The samplerate of the recording in Hz"""
+
+    deployment: Optional[Deployment] = None
+    """The deployment information for the recording"""
 
 
 @dataclass
@@ -23,7 +50,10 @@ class Detection:
     """A Detection is a single prediction from a model."""
 
     species_name: str
+    """The name of the species predicted by the model"""
+
     probability: float
+    """The probability of the prediction"""
 
 
 class ScheduleManager(ABC):
@@ -108,6 +138,11 @@ class Store(ABC):
     1. If the detection should be stored
     2. How the detection should be stored
     """
+
+    @abstractmethod
+    def store_recording(self, recording: Recording) -> None:
+        """Store the recording locally"""
+        ...
 
     @abstractmethod
     def store_detections(
