@@ -6,15 +6,12 @@ from uuid import UUID
 
 from pony.orm.core import EntityMeta
 
-EntityType = EntityMeta
-
-
 __all__ = [
     "Models",
 ]
 
 
-class Deployment(EntityType):
+class Deployment(EntityMeta):
     id: UUID
     """Unique ID of the deployment."""
 
@@ -37,7 +34,7 @@ class Deployment(EntityType):
     """Messages that were sent about the deployment."""
 
 
-class Recording(EntityType):
+class Recording(EntityMeta):
     id: UUID
     """Unique ID of the recording"""
 
@@ -63,7 +60,7 @@ class Recording(EntityType):
     """Messages that were sent about the recording"""
 
 
-class Detection(EntityType):
+class Detection(EntityMeta):
     id: UUID
     """Unique ID of the detection"""
 
@@ -80,7 +77,7 @@ class Detection(EntityType):
     """Messages that were sent about the detection"""
 
 
-class MessageStatus(EntityType):
+class MessageStatus(EntityMeta):
     id: int
     """Unique ID of the message status"""
 
@@ -98,7 +95,7 @@ class MessageStatus(EntityType):
     detection_message: Optional["DetectionMessage"]
 
 
-class DeploymentMessage(EntityType):
+class DeploymentMessage(EntityMeta):
     id: int
     """Unique ID of the deployment message"""
 
@@ -109,7 +106,7 @@ class DeploymentMessage(EntityType):
     """Message status of the message"""
 
 
-class RecordingMessage(EntityType):
+class RecordingMessage(EntityMeta):
     id: int
     """Unique ID of the recording message"""
 
@@ -120,7 +117,7 @@ class RecordingMessage(EntityType):
     """Message status of the message"""
 
 
-class DetectionMessage(EntityType):
+class DetectionMessage(EntityMeta):
     id: int
     """Unique ID of the detection message"""
 
