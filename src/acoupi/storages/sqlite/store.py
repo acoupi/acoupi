@@ -1,8 +1,10 @@
 """Module defining the SqliteStore class"""
-from typing import List
+import datetime
+from typing import List, Optional
 
 from pony import orm
 
+from acoupi.storages.sqlite import types as db_types
 from acoupi.storages.sqlite.database import create_database
 from acoupi.types import Deployment, Detection, Recording, Store
 
@@ -24,27 +26,69 @@ class SqliteStore(Store):
         self.db.bind(provider="sqlite", filename=db_path, create_db=True)
         self.db.generate_mapping(create_tables=True)
 
-    def get_current_deployment(self) -> Deployment:
-        """Get the current deployment"""
-        return Deployment()
+    @orm.db_session
+    def _get_deployment_by_started_on(self, started_on: datetime.datetime):
+        """Get the deployment by the started_on datetime"""
+        deployment = self.models.Deployment.get(started_on=started_on)
 
-    def store_deployment(self, deployment: Deployment) -> None:
-        """Store the deployment locally"""
-        pass
+        if deployment is None:
+            raise ValueError("No deployment found")
+
+        return deployment
 
     @orm.db_session
-    def store_recording(self, recording: Recording) -> None:
+    def get_current_deployment(self) -> Deployment:
+        """Get the current deployment"""
+        deployment = (
+            orm.select(d for d in self.models.Deployment)
+            .order_by(orm.desc(self.models.Deployment.started_on))
+            .first()
+        )
+
+        if deployment is None:
+            raise ValueError("No deployment found")
+
+        return Deployment(
+            started_on=deployment.started_on,
+            device_id=deployment.device_id,
+            latitude=deployment.latitude,
+            longitude=deployment.longitude,
+        )
+
+    @orm.db_session
+    def store_deployment(self, deployment: Deployment) -> None:
+        """Store the deployment locally"""
+        self.models.Deployment(
+            started_on=deployment.started_on,
+            device_id=deployment.device_id,
+            latitude=deployment.latitude,
+            longitude=deployment.longitude,
+        )
+        orm.commit()
+
+    @orm.db_session
+    def store_recording(
+        self,
+        recording: Recording,
+        deployment: Optional[Deployment] = None,
+    ) -> None:
         """Store the recording locally"""
+        if deployment is None:
+            deployment_db = self.get_current_deployment()
+        else:
+            deployment_db = self._get_deployment_by_started_on(
+                deployment.started_on
+            )
+
         self.models.Recording(
             path=recording.path,
             duration_s=recording.duration,
             samplerate_hz=recording.samplerate,
             channels=1,
             datetime=recording.datetime,
-            deployment=recording.deployment,
+            deployment=deployment_db,
         )
         orm.commit()
-
 
     def store_detections(
         self,
