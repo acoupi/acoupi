@@ -1,29 +1,15 @@
 """Database models for the acoupi database."""
-
-from collections import namedtuple
 from datetime import datetime
 from typing import Tuple
 from uuid import UUID
 
 from pony.orm import Database, Optional, PrimaryKey, Required, Set
 
+from acoupi.storages.sqlite.types import Models
+
 __all__ = [
     "create_database",
-    "Models",
 ]
-
-Models = namedtuple(
-    "Models",
-    [
-        "Recording",
-        "Deployment",
-        "Detection",
-        "MessageStatus",
-        "DeploymentMessage",
-        "RecordingMessage",
-        "DetectionMessage",
-    ],
-)
 
 
 def create_database() -> Tuple[Database, Models]:
@@ -41,6 +27,9 @@ def create_database() -> Tuple[Database, Models]:
 
         device_id = Required(str)
         """Device ID of the deployment."""
+
+        started_on = Required(datetime, unique=True)
+        """Datetime when the deployment started. Should be unique."""
 
         latitude = Optional(float)
         """Latitude of the deployment site. Can be None if unknown."""
