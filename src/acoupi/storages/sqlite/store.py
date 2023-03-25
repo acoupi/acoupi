@@ -1,4 +1,4 @@
-"""Module defining the SqliteStore class"""
+"""Module defining the SqliteStore class."""
 import datetime
 from typing import List, Optional
 
@@ -11,7 +11,47 @@ from acoupi.types import Deployment, Detection, Recording, Store
 
 
 class SqliteStore(Store):
-    """Sqlite store implementation"""
+    """Sqlite store implementation.
+
+    The store is used to store the recordings, detections and deployments
+    locally. The data is stored in a sqlite database file in the given path.
+
+    Under the hood, the store uses the Pony ORM to interact with the database.
+    The database schema is defined in the database module and contains the
+    following tables:
+
+    - Deployment: Contains the deployment information. Each deployment is
+    associated with a device, and has a start datetime. The deployment can also
+    have a latitude and longitude associated with it.
+
+    - Recording: Contains the recording information. Each recording is
+    associated with a deployment, and has a datetime, duration, sample rate and
+    number of channels.
+
+    - Detection: Contains the detection information. Each detection is
+    associated with a recording, and has a species name and a probability.
+
+    The store is thread-safe, and can be used from multiple threads
+    simultaneously.
+
+    Attributes:
+        db_path: Path to the database file. Can be set to :memory: to use an
+        in-memory database.
+
+        db: The Pony ORM database object.
+
+        models: The Pony ORM models.
+
+    """
+
+    db_path: str
+    """Path to the database file."""
+
+    db: orm.Database
+    """The Pony ORM database object."""
+
+    models: db_types.Models
+    """The Pony ORM models."""
 
     def __init__(self, db_path: str) -> None:
         """Initialise the Sqlite Store.
@@ -19,7 +59,8 @@ class SqliteStore(Store):
         Will create a database file at the given path if it does not exist.
 
         Args:
-            db_path: Path to the database file
+            db_path: Path to the database file. Can be set to :memory: to use
+            an in-memory database.
 
         """
         self.db_path = db_path
@@ -34,8 +75,7 @@ class SqliteStore(Store):
         The current deployment is the one with the latest started_on datetime.
 
         If no deployment is found, a new deployment will be registered with the
-        current datetime, and the latitude and longitude set to
-        None.
+        current datetime, and the latitude and longitude set to None.
 
         Returns:
             The current deployment
