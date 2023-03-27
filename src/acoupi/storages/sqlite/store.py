@@ -38,7 +38,7 @@ class SqliteStore(Store):
         db_path: Path to the database file. Can be set to :memory: to use an
         in-memory database.
 
-        db: The Pony ORM database object.
+        database: The Pony ORM database object.
 
         models: The Pony ORM models.
 
@@ -47,7 +47,7 @@ class SqliteStore(Store):
     db_path: str
     """Path to the database file."""
 
-    db: orm.Database
+    database: orm.Database
     """The Pony ORM database object."""
 
     models: db_types.Models
@@ -64,9 +64,9 @@ class SqliteStore(Store):
 
         """
         self.db_path = db_path
-        self.db, self.models = create_database()
-        self.db.bind(provider="sqlite", filename=db_path, create_db=True)
-        self.db.generate_mapping(create_tables=True)
+        self.database, self.models = create_database()
+        self.database.bind(provider="sqlite", filename=db_path, create_db=True)
+        self.database.generate_mapping(create_tables=True)
 
     @orm.db_session
     def get_current_deployment(self) -> Deployment:
@@ -127,8 +127,8 @@ class SqliteStore(Store):
         recording associated with the detections.
 
         If the recording has not been stored yet, it will be created. In this
-        case, you can also provide the deployment associated with the recording,
-        otherwise the current deployment will be used.
+        case, you can also provide the deployment associated with the
+        recording, otherwise the current deployment will be used.
 
         Args:
             recording: The recording associated with the detections.
@@ -168,11 +168,11 @@ class SqliteStore(Store):
     @orm.db_session
     def _get_recording_by_datetime(
         self,
-        datetime: datetime.datetime,
+        date: datetime.datetime,
     ) -> db_types.Recording:
-        """Get the recording by the datetime"""
+        """Get the recording by the datetime."""
         recording: Optional[db_types.Recording] = self.models.Recording.get(
-            datetime=datetime
+            datetime=date
         )  # type: ignore
 
         if recording is None:
@@ -186,7 +186,7 @@ class SqliteStore(Store):
         recording: Recording,
         deployment: Optional[Deployment] = None,
     ) -> db_types.Recording:
-        """Create a recording"""
+        """Create a recording."""
         if deployment is None:
             deployment_db = self._get_current_deployment()
         else:
@@ -210,7 +210,7 @@ class SqliteStore(Store):
         recording: Recording,
         deployment: Optional[Deployment] = None,
     ) -> db_types.Recording:
-        """Get or create a recording"""
+        """Get or create a recording."""
         try:
             db_recording = self._get_recording_by_datetime(recording.datetime)
         except ValueError:
@@ -225,7 +225,7 @@ class SqliteStore(Store):
     def _get_deployment_by_started_on(
         self, started_on: datetime.datetime
     ) -> db_types.Deployment:
-        """Get the deployment by the started_on datetime"""
+        """Get the deployment by the started_on datetime."""
         deployment: Optional[db_types.Deployment] = self.models.Deployment.get(
             started_on=started_on
         )  # type: ignore
@@ -239,7 +239,7 @@ class SqliteStore(Store):
     def _create_deployment(
         self, deployment: Deployment
     ) -> db_types.Deployment:
-        """Create a deployment"""
+        """Create a deployment."""
         db_deployment = self.models.Deployment(
             id=deployment.id,
             started_on=deployment.started_on,
@@ -253,7 +253,7 @@ class SqliteStore(Store):
     def _get_or_create_deployment(
         self, deployment: Deployment
     ) -> db_types.Deployment:
-        """Get or create a deployment"""
+        """Get or create a deployment."""
         try:
             db_deployment = self._get_deployment_by_started_on(
                 deployment.started_on
@@ -269,7 +269,7 @@ class SqliteStore(Store):
         detection: Detection,
         db_recording: db_types.Recording,
     ) -> db_types.Detection:
-        """Create a detection"""
+        """Create a detection."""
         db_detection = self.models.Detection(
             id=detection.id,
             recording=db_recording,
