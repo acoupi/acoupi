@@ -2,6 +2,7 @@
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest>=7.2.2",
+    "pony-stubs>=0.5.2",
 ]
 
 [project]
@@ -28,3 +29,10 @@ build-backend = "pdm.pep517.api"
 
 [tool.black]
 line-length = 79
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
+[tool.mypy]
+mypy_path = ".venv/lib/python3.10/site-packages"

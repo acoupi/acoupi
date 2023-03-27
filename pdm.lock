@@ -64,6 +64,12 @@ version = "0.7.16"
 summary = "Pony Object-Relational Mapper"
 
 [[package]]
+name = "pony-stubs"
+version = "0.5.2"
+requires_python = ">=3.7,<4.0"
+summary = "Type stubs for Pony ORM"
+
+[[package]]
 name = "pyalsaaudio"
 version = "0.9.2"
 summary = "ALSA bindings"
@@ -124,7 +130,7 @@ summary = "Backport of pathlib-compatible object wrapper for zip files"
 
 [metadata]
 lock_version = "4.1"
-content_hash = "sha256:6484b22c726ace5e9a6c7c30f34fa8fe6b07d76c010c56686679dd7f1982d1b3"
+content_hash = "sha256:862a9409e85a383c50005f44054013b657dda33a6b6aaa20ca9b7e43fc400e06"
 
 [metadata.files]
 "attrs 22.2.0" = [
@@ -224,6 +230,10 @@ content_hash = "sha256:6484b22c726ace5e9a6c7c30f34fa8fe6b07d76c010c56686679dd7f1
 "pony 0.7.16" = [
     {url = "https://files.pythonhosted.org/packages/16/3c/28d42c569dc8d4d11bf512bc4f5beb54834a1fd132ab84274133fa4827c7/pony-0.7.16.tar.gz", hash = "sha256:5f45fc67587f4520c560a57148cc573b097d42f82f5cb200d72c957b5708198d"},
     {url = "https://files.pythonhosted.org/packages/68/2e/d7f36d21ce7e1df1d7a02bdb38541ccf5f9c18c2656ae3698acee29447a4/pony-0.7.16-py3-none-any.whl", hash = "sha256:608a1c1d662983bad2590e650f2bbc1cd6ed48558894ad8f50da4739ff98f614"},
+]
+"pony-stubs 0.5.2" = [
+    {url = "https://files.pythonhosted.org/packages/52/73/e04a44e996636053dddbd56fbd3e2138db68b9d4adba73819a561f979bdc/pony_stubs-0.5.2-py3-none-any.whl", hash = "sha256:c446481b1e6699676e8fc5c22b59429c18e00d1e663990cd98dae843acaf395a"},
+    {url = "https://files.pythonhosted.org/packages/db/16/07daf8f5c69018663f9e7679371d471aee35627f70a5b591200cf5389408/pony-stubs-0.5.2.tar.gz", hash = "sha256:65a2739d4c6848eb00e5d8c74c8f25a92f960809b011e3138694665f8a4a5adc"},
 ]
 "pyalsaaudio 0.9.2" = [
     {url = "https://files.pythonhosted.org/packages/a9/bd/24f576c07953671edfeba2545c3c92c46e97384f622957ecf95967c2b456/pyalsaaudio-0.9.2.tar.gz", hash = "sha256:e74a66d6c7a6bcceb990df66d3ebc0fe382fc9d765f35f050f9d98c695304b36"},
