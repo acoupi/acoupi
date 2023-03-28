@@ -8,15 +8,49 @@ import sounddevice
 from typing import Optional, List
 from dataclasses import dataclass
 
-from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, LATITUDE, LONGITUDE
-from acoupi.types import Recording, AudioRecorder
+from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
+from acoupi.types import Deployment, Recording, AudioRecorder
 
+class getDeployment_Info(Deployment):
+
+    def __init__(self,latitude: float,longitude:float):
+
+        self.lat = latitude
+        self.lon = longitude
+
+    def read_deployment_config(self):
+
+        #cfg = ... get information from config file
+        lat = cfg['latitude']
+        lon = cfg['longitude']
+
+        return lat, lon
+
+
+class getRecording_Info(Recording):
+
+    def __init__(self, path: str, time: datetime.now, duration: float, samplerate: int):
+
+        self.path = path
+        self.time = time
+        self.duration = duration
+        self.sample_rate = samplerate
+
+    def recording_info(self):
+
+        return 
 
 class PyAudioRecorder(AudioRecorder):
 #class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
 
-    def __init__(self, duration: float = DEFAULT_RECORDING_DURATION, sample_rate: float = DEFAULT_SAMPLE_RATE, channels: int = DEFAULT_AUDIO_CHANNELS, chunk: int = DEFAULT_CHUNK_SIZE, lat: float = LATITUDE, lon: float = LONGITUDE):
+    def __init__(self, 
+                duration: float = DEFAULT_RECORDING_DURATION, 
+                sample_rate: float = DEFAULT_SAMPLE_RATE, 
+                channels: int = DEFAULT_AUDIO_CHANNELS, 
+                chunk: int = DEFAULT_CHUNK_SIZE, 
+                lat: float = LATITUDE, 
+                lon: float = LONGITUDE):
         
         # Audio Duration
         self.duration = duration
