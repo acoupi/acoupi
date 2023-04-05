@@ -1,4 +1,4 @@
-"""This module contains the types used by the aucupi"""
+"""This module contains the types used by the aucupi."""
 import datetime
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -64,31 +64,38 @@ class Detection:
 
 
 class ScheduleManager(ABC):
-    """The ScheduleManager is responsible for determining the interval
-    between recordings"""
+    """Manage time between recordings.
+
+    The ScheduleManager is responsible for determining the interval between
+    recordings.
+    """
 
     @abstractmethod
     def time_until_next_recording(self) -> int:
-        """Return the number of seconds until the next recording should be made.
+        """Return the number of seconds until the next recording.
 
         This should return 0 if a recording should be made immediately.
         """
-        ...
 
 
 class RecordManager(ABC):
-    """The RecordManager is responsible for deciding if a recording
-    should be made."""
+    """Decide if a recording should be made.
+
+    The RecordManager is responsible for deciding if a recording
+    should be made.
+    """
 
     @abstractmethod
     def should_record(self, time: datetime.time) -> bool:
-        """Determine if a recording should be made"""
-        ...
+        """Determine if a recording should be made."""
 
 
 class AudioRecorder(ABC):
-    """The AudioRecorder is responsible for recording audio from the
-    microphone"""
+    """Record audio from the microphone.
+
+    The AudioRecorder is responsible for recording audio from the
+    microphone.
+    """
 
     @abstractmethod
     def record(self) -> Recording:
@@ -101,21 +108,24 @@ class AudioRecorder(ABC):
         Other metadata, such as the device_id, lat, and lon, can be
         optionally returned.
         """
-        ...
 
 
 class ProcessingFilter(ABC):
-    """The ProcessingFilter is responsible for determining if a recording
-    should be processed by the model."""
+    """Determine if a recording should be processed by the model.
+
+    The ProcessingFilter is responsible for determining if a recording
+    should be processed by the model.
+    """
 
     @abstractmethod
     def should_process_recording(self, recording: Recording) -> bool:
-        """Determine if the recording should be processed by the model"""
-        ...
+        """Determine if the recording should be processed by the model."""
 
 
 class Model(ABC):
-    """The Model is responsible for running the model on the audio file
+    """Model for making predictions.
+
+    The Model is responsible for running the model on the audio file
     and returning the predicted detections.
 
     Detections should be returned as a list of Detection objects.
@@ -131,17 +141,18 @@ class Model(ABC):
 
         Can optionally use deployment info to enhance predictions.
         """
-        ...
 
 
 class DetectorFilter(ABC):
-    """The DetectorFilter is responsible for determining if a detection
-    should be saved."""
+    """Determine if a detection should be saved.
+
+    The DetectorFilter is responsible for determining if a detection
+    should be saved.
+    """
 
     @abstractmethod
     def should_store_detection(self, detection: Detection) -> bool:
-        """Determine if the detection should be stored locally"""
-        ...
+        """Determine if the detection should be stored locally."""
 
 
 class Store(ABC):
@@ -155,13 +166,11 @@ class Store(ABC):
 
     @abstractmethod
     def get_current_deployment(self) -> Deployment:
-        """Get the current deployment from the local filesystem"""
-        ...
+        """Get the current deployment from the local filesystem."""
 
     @abstractmethod
     def store_deployment(self, deployment: Deployment) -> None:
-        """Store the deployment locally"""
-        ...
+        """Store the deployment locally."""
 
     @abstractmethod
     def store_recording(
@@ -174,7 +183,6 @@ class Store(ABC):
         If the deployment is not provided, it should be retrieved from
         the local filesystem.
         """
-        ...
 
     @abstractmethod
     def store_detections(
@@ -182,12 +190,13 @@ class Store(ABC):
         recording: Recording,
         detections: List[Detection],
     ) -> None:
-        """Store the detection locally"""
-        ...
+        """Store the detection locally."""
 
 
 class RecordingFilter(ABC):
-    """The RecordingFilter is responsible for determining if a recording
+    """Determine if a recording should be kept.
+
+    The RecordingFilter is responsible for determining if a recording
     should be kept or deleted. It can use the detections, the recording
     itself, and internal state to determine if the recording should be kept.
     """
@@ -198,19 +207,19 @@ class RecordingFilter(ABC):
         recording: Recording,
         detections: List[Detection],
     ) -> bool:
-        """Determine if the recording should be kept"""
-        ...
+        """Determine if the recording should be kept."""
 
 
 class RecordingManager(ABC):
-    """The RecordingManager is responsible for saving and deleting recordings"""
+    """Save and delete recordings.
+
+    The RecordingManager is responsible for saving and deleting recordings.
+    """
 
     @abstractmethod
     def save_recording(self, recording: Recording) -> None:
-        """Save the recording to the local filesystem"""
-        ...
+        """Save the recording to the local filesystem."""
 
     @abstractmethod
     def delete_recording(self, recording: Recording) -> None:
-        """Delete the recording"""
-        ...
+        """Delete the recording."""
