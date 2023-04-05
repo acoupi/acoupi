@@ -1,4 +1,16 @@
-"""Definition of Recording Filters"""
+"""Recording filters for filtering recordings based on detections.
+
+Recording filters are used to determine if a recording should be kept after
+processing. This is useful for example if you want to only keep recordings that
+satisfy certain criteria, such as those that contain detections of a certain
+species or that surpass a certain probability threshold. This can be used to
+reduce the storage burden of a large number of recordings. 
+
+Recording filters are implemented as classes that inherit from RecordingFilter.
+The class should implement the should_keep_recording method, which takes a
+Recording object and a list of Detections and returns a boolean indicating if
+the recording should be kept.
+"""
 from typing import List
 
 from acoupi.types import Detection, Recording, RecordingFilter
@@ -23,7 +35,6 @@ class NegativeRecordingFilter(RecordingFilter):
         Returns:
             bool
         """
-
         return False
 
 
@@ -46,7 +57,6 @@ class PositiveRecordingFilter(RecordingFilter):
         Returns:
             bool
         """
-
         return True
 
 
@@ -57,9 +67,10 @@ class ThresholdRecordingFilter(RecordingFilter):
         """Initialize the filter.
 
         Args:
-            threshold: The threshold to use.
+            threshold: The probability threshold to use. Will only
+            keep recordings with detections with a probability
+            greater than or equal to this threshold.
         """
-
         self.threshold = threshold
 
     def should_keep_recording(
@@ -76,8 +87,9 @@ class ThresholdRecordingFilter(RecordingFilter):
         Returns:
             bool
         """
-
-        return any(detection.probability >= self.threshold for detection in detections)
+        return any(
+            detection.probability >= self.threshold for detection in detections
+        )
 
 
 class FocusSpeciesRecordingFilter(RecordingFilter):
@@ -87,9 +99,12 @@ class FocusSpeciesRecordingFilter(RecordingFilter):
         """Initialize the filter.
 
         Args:
-            species: The species to focus on.
+            species: The species to focus on. Should be a list of
+            species names.
+            threshold: The probability threshold to use. Will only
+            keep recordings with detections with a probability
+            greater than or equal to this threshold.
         """
-
         self.species = species
         self.threshold = threshold
 
@@ -107,7 +122,6 @@ class FocusSpeciesRecordingFilter(RecordingFilter):
         Returns:
             bool
         """
-
         return any(
             detection.probability >= self.threshold
             and detection.species_name in self.species
