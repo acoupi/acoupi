@@ -86,7 +86,7 @@ class RecordManager(ABC):
     """
 
     @abstractmethod
-    def should_record(self, time: datetime.time) -> bool:
+    def should_record(self, time: datetime.datetime) -> bool:
         """Determine if a recording should be made."""
 
 
