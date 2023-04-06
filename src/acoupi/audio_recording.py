@@ -5,12 +5,15 @@ from tempfile import TemporaryFile, NamedTemporaryFile
 import pyaudio
 import wave 
 import sounddevice
+import yaml
 from typing import Optional, List
 from dataclasses import dataclass
 #test
 
-from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
-from acoupi.types import Deployment, Recording, AudioRecorder
+#from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
+#from acoupi.types import Deployment, Recording, AudioRecorder
+from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
+from acoupi_types import Deployment, Recording, AudioRecorder
 
 # Load Configuration
 with open("config.yaml") as f:
@@ -41,7 +44,6 @@ class getRecording_Info(Recording):
         self.sample_rate = samplerate
 
     def recording_info(self):
-
         return 
 
 class PyAudioRecorder(AudioRecorder):
@@ -119,3 +121,5 @@ class PyAudioRecorder(AudioRecorder):
             temp_audio_file.close()
 
             return temp_audio_path
+
+#PyAudioRecorder()
