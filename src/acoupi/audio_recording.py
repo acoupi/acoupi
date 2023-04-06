@@ -9,23 +9,23 @@ from typing import Optional, List
 from dataclasses import dataclass
 #test
 
-from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
+from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, LATITUDE, LONGITUDE
 from acoupi.types import Deployment, Recording, AudioRecorder
 
-class getDeployment_Info(Deployment):
-
-    def __init__(self,latitude: float,longitude:float):
-
-        self.lat = latitude
-        self.lon = longitude
-
-    def read_deployment_config(self):
-
-        #cfg = ... get information from config file
-        lat = cfg['latitude']
-        lon = cfg['longitude']
-
-        return lat, lon
+# class getDeployment_Info(Deployment):
+# 
+#     def __init__(self,latitude: float,longitude:float):
+# 
+#         self.lat = latitude
+#         self.lon = longitude
+# 
+#     def read_deployment_config(self):
+# 
+#         #cfg = ... get information from config file
+#         lat = cfg['latitude']
+#         lon = cfg['longitude']
+# 
+#         return lat, lon
 
 
 class getRecording_Info(Recording):
