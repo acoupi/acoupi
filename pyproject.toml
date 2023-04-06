@@ -3,6 +3,10 @@
 dev = [
     "pytest>=7.2.2",
     "pony-stubs>=0.5.2",
+    "coverage[toml]>=7.2.2",
+    "sphinx>=5.3.0",
+    "furo>=2023.3.27",
+    "sphinx-copybutton>=0.5.1",
 ]
 
 [project]
@@ -39,3 +43,8 @@ mypy_path = ".venv/lib/python3.10/site-packages"
 
 [tool.pydocstyle]
 convention = "google"
+
+[tool.coverage.run]
+source = [
+    "src/acoupi",
+]

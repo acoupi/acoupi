@@ -1,4 +1,5 @@
 TEST_DIR := tests/
+SRC_DIR := src/
 DOCS_SOURCE_DIR := docs/source/
 DOCS_BUILD_DIR := docs/build/
 
@@ -31,14 +32,19 @@ coverage:
 	coverage report -m
 	coverage html
 
-lint:
-	pylint --exclude=.tox
+lint/pyright:
+	pyright $(SRC_DIR)
+
+lint/pylint:
+	pylint $(SRC_DIR)
+
+lint/black:
+	black --check $(SRC_DIR)
+
+lint: lint/pyright lint/pylint lint/black
 
 test:
 	pytest --verbose --color=yes $(TEST_DIR)
-
-tox:
-	tox
 
 clean-docs:
 	rm -rf $(DOCS_BUILD_DIR)
