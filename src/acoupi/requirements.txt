@@ -1,0 +1,12 @@
+PyYAML
+tzlocal
+#wheel 
+#setuptools
+numpy
+pandas 
+scikit-learn
+matplotlib
+librosa 
+sounddevice
+#paho-mqtt
+#ffmpeg-python
