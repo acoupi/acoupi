@@ -4,21 +4,52 @@ import tempfile
 from tempfile import TemporaryFile, NamedTemporaryFile
 import pyaudio
 import wave 
+import yaml
 import sounddevice
 import yaml
 from typing import Optional, List
 from dataclasses import dataclass
 #test
 
+<<<<<<< HEAD
+from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
+from acoupi.types import Recording, AudioRecorder
+=======
 #from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
 #from acoupi.types import Deployment, Recording, AudioRecorder
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
 from acoupi_types import Deployment, Recording, AudioRecorder
+>>>>>>> 5b9b0012b92c0c4ead6cabcc49bacf109c1c1d80
 
 # Load Configuration
 with open("config.yaml") as f:
     cfg = yaml.load(f, Loader=yaml.FullLoader)
 
+<<<<<<< HEAD
+# class getDeployment_Info(Deployment):
+#     def __init__(self,latitude: float,longitude:float):
+#         self.lat = latitude
+#         self.lon = longitude
+# 
+#     def read_deployment_config(self):
+#         #cfg = ... get information from config file
+#         lat = cfg['latitude']
+#         lon = cfg['longitude']
+#         return lat, lon
+
+class getRecording_Info(Recording):
+
+    def __init__(self, path: str, time: datetime.now, duration: float, samplerate: int):
+
+        self.path = path
+        self.time = time
+        self.duration = duration
+        self.sample_rate = samplerate
+
+    def recording_info(self):
+        return 
+
+=======
 # class getDeployment_Info(Deployment):
 # 
 #     def __init__(self,latitude: float,longitude:float):
@@ -46,10 +77,19 @@ class getRecording_Info(Recording):
     def recording_info(self):
         return 
 
+>>>>>>> 5b9b0012b92c0c4ead6cabcc49bacf109c1c1d80
 class PyAudioRecorder(AudioRecorder):
 #class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
 
+<<<<<<< HEAD
+    def __init__(self, duration: float = DEFAULT_RECORDING_DURATION, 
+                sample_rate: float = DEFAULT_SAMPLE_RATE, 
+                channels: int = DEFAULT_AUDIO_CHANNELS, 
+                chunk: int = DEFAULT_CHUNK_SIZE, 
+                lat: float = cfg['location']['latitude'], 
+                lon: float = cfg['location']['longitude']):
+=======
     def __init__(self, 
                 duration: float = DEFAULT_RECORDING_DURATION, 
                 sample_rate: float = DEFAULT_SAMPLE_RATE, 
@@ -57,6 +97,7 @@ class PyAudioRecorder(AudioRecorder):
                 chunk: int = DEFAULT_CHUNK_SIZE, 
                 lat: float = cfg['location']['latitude'], 
                 lon: float = cfg['location']['longitude']):
+>>>>>>> 5b9b0012b92c0c4ead6cabcc49bacf109c1c1d80
         
         # Audio Duration
         self.duration = duration
@@ -76,9 +117,12 @@ class PyAudioRecorder(AudioRecorder):
         device_index = device_info['index']
         return device_index
 
-    def record_audio(self,device_index) -> Recording:
+    #def record_audio(self,device_index) -> Recording:
+    def record(self) -> Recording:
         """Record a 3 second temporary audio file at 192KHz. Return the temporary path of the file."""       
         
+        device_index = self.findAudioDevice()
+
         date_time = datetime.now().strftime('%Y%m%d-%H%M%S') 
    
         #Create a temporary file to record audio
@@ -120,6 +164,6 @@ class PyAudioRecorder(AudioRecorder):
             temp_audio_file.writeframes(b''.join(frames))    
             temp_audio_file.close()
 
-            return temp_audio_path
-
-#PyAudioRecorder()
+            # Create a Recording object and return it
+            recording = getRecording_Info(path=temp_audio_path, time=datetime.now(), duration=self.duration, samplerate=self.sample_rate)
+            return recording
