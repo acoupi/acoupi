@@ -9,8 +9,12 @@ from typing import Optional, List
 from dataclasses import dataclass
 #test
 
-from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, LATITUDE, LONGITUDE
+from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
 from acoupi.types import Deployment, Recording, AudioRecorder
+
+# Load Configuration
+with open("config.yaml") as f:
+    cfg = yaml.load(f, Loader=yaml.FullLoader)
 
 # class getDeployment_Info(Deployment):
 # 
@@ -26,7 +30,6 @@ from acoupi.types import Deployment, Recording, AudioRecorder
 #         lon = cfg['longitude']
 # 
 #         return lat, lon
-
 
 class getRecording_Info(Recording):
 
@@ -50,8 +53,8 @@ class PyAudioRecorder(AudioRecorder):
                 sample_rate: float = DEFAULT_SAMPLE_RATE, 
                 channels: int = DEFAULT_AUDIO_CHANNELS, 
                 chunk: int = DEFAULT_CHUNK_SIZE, 
-                lat: float = LATITUDE, 
-                lon: float = LONGITUDE):
+                lat: float = cfg['location']['latitude'], 
+                lon: float = cfg['location']['longitude']):
         
         # Audio Duration
         self.duration = duration
