@@ -19,13 +19,16 @@ class Deployment:
     device_id: str
     """The ID of the device."""
 
+    device_name: str
+    """User provided name of the device."""
+
     latitude: Optional[float] = None
     """The latitude of the site where the device is deployed."""
 
     longitude: Optional[float] = None
     """The longitude of the site where the device is deployed."""
 
-    id: UUID = field(default_factory=uuid4)
+    deployment_id: UUID = field(default_factory=uuid4)
     """The unique ID of the deployment."""
 
 
@@ -45,7 +48,7 @@ class Recording:
     samplerate: int
     """The samplerate of the recording in Hz"""
 
-    id: UUID = field(default_factory=uuid4)
+    recording_id: UUID = field(default_factory=uuid4)
     """The unique ID of the recording"""
 
 
@@ -59,7 +62,7 @@ class Detection:
     probability: float
     """The probability of the prediction"""
 
-    id: UUID = field(default_factory=uuid4)
+    detection_id: UUID = field(default_factory=uuid4)
     """The unique ID of the detection"""
 
 
