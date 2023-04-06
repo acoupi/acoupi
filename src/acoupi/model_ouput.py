@@ -9,7 +9,7 @@ from acoupi.types import Detection
 
 class CleanModelOutput():
 
-    def __init__(self, detections: Dict{Detections}):
+    def __init__(self, detections: Dict[Detections]):
        
        self.detections = detections
 
