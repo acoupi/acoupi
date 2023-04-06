@@ -21,22 +21,22 @@ class SqliteStore(Store):
     following tables:
 
     - Deployment: Contains the deployment information. Each deployment is
-    associated with a device, and has a start datetime. The deployment can also
-    have a latitude and longitude associated with it.
+      associated with a device, and has a start datetime. The deployment can 
+      also have a latitude and longitude associated with it.
 
     - Recording: Contains the recording information. Each recording is
-    associated with a deployment, and has a datetime, duration, sample rate and
-    number of channels.
+      associated with a deployment, and has a datetime, duration, samplerate
+      and number of channels.
 
     - Detection: Contains the detection information. Each detection is
-    associated with a recording, and has a species name and a probability.
+      associated with a recording, and has a species name and a probability.
 
     The store is thread-safe, and can be used from multiple threads
     simultaneously.
 
     Attributes:
         db_path: Path to the database file. Can be set to :memory: to use an
-        in-memory database.
+            in-memory database.
 
         database: The Pony ORM database object.
 
@@ -60,7 +60,7 @@ class SqliteStore(Store):
 
         Args:
             db_path: Path to the database file. Can be set to :memory: to use
-            an in-memory database.
+                an in-memory database.
 
         """
         self.db_path = db_path
@@ -134,8 +134,8 @@ class SqliteStore(Store):
             recording: The recording associated with the detections.
             detections: The detections to store.
             deployment: The deployment associated with the recording. Only
-            provide if the recording has not been stored yet and you do not
-            want to use the current deployment.
+                provide if the recording has not been stored yet and you do not
+                want to use the current deployment.
         """
         recording_db = self._get_or_create_recording(
             recording,

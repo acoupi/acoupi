@@ -61,7 +61,12 @@ class PositiveRecordingFilter(RecordingFilter):
 
 
 class ThresholdRecordingFilter(RecordingFilter):
-    """A RecordingFilter that keeps recordings with confident detections."""
+    """A RecordingFilter that keeps recordings with confident detections.
+
+    This filter will keep recordings that contain confident detections. The
+    threshold argument can be used to set the minimum probability threshold for
+    a detection to be considered confident.
+    """
 
     def __init__(self, threshold: float):
         """Initialize the filter.
@@ -93,7 +98,13 @@ class ThresholdRecordingFilter(RecordingFilter):
 
 
 class FocusSpeciesRecordingFilter(RecordingFilter):
-    """A RecordingFilter that keeps recordings with detections of species."""
+    """A RecordingFilter that keeps recordings with detections of species.
+
+    This filter will keep recordings that contain confident detections of 
+    the species provided in the species argument. The threshold argument
+    can be used to set the minimum probability threshold for a detection
+    to be considered confident.
+    """
 
     def __init__(self, species: List[str], threshold: float = 0.5):
         """Initialize the filter.

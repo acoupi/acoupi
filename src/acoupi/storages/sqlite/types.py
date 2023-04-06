@@ -4,14 +4,23 @@ from datetime import datetime
 from typing import List, NamedTuple, Optional
 from uuid import UUID
 
-from pony.orm.core import EntityMeta
+from pony.orm import core
 
 __all__ = [
     "Models",
+    "Deployment",
+    "Recording",
+    "Detection",
+    "MessageStatus",
+    "DeploymentMessage",
+    "RecordingMessage",
+    "DetectionMessage",
 ]
 
 
-class Deployment(EntityMeta):
+class Deployment(core.EntityMeta):
+    """Deployment ORM model."""
+
     id: UUID
     """Unique ID of the deployment."""
 
@@ -34,7 +43,9 @@ class Deployment(EntityMeta):
     """Messages that were sent about the deployment."""
 
 
-class Recording(EntityMeta):
+class Recording(core.EntityMeta):
+    """Recording ORM model."""
+
     id: UUID
     """Unique ID of the recording"""
 
@@ -60,7 +71,9 @@ class Recording(EntityMeta):
     """Messages that were sent about the recording"""
 
 
-class Detection(EntityMeta):
+class Detection(core.EntityMeta):
+    """Detection ORM model."""
+
     id: UUID
     """Unique ID of the detection"""
 
@@ -77,7 +90,9 @@ class Detection(EntityMeta):
     """Messages that were sent about the detection"""
 
 
-class MessageStatus(EntityMeta):
+class MessageStatus(core.EntityMeta):
+    """Message status ORM model."""
+
     id: int
     """Unique ID of the message status"""
 
@@ -95,7 +110,9 @@ class MessageStatus(EntityMeta):
     detection_message: Optional["DetectionMessage"]
 
 
-class DeploymentMessage(EntityMeta):
+class DeploymentMessage(core.EntityMeta):
+    """Deployment message ORM model."""
+
     id: int
     """Unique ID of the deployment message"""
 
@@ -106,7 +123,9 @@ class DeploymentMessage(EntityMeta):
     """Message status of the message"""
 
 
-class RecordingMessage(EntityMeta):
+class RecordingMessage(core.EntityMeta):
+    """Recording message ORM model."""
+
     id: int
     """Unique ID of the recording message"""
 
@@ -117,7 +136,9 @@ class RecordingMessage(EntityMeta):
     """Message status of the message"""
 
 
-class DetectionMessage(EntityMeta):
+class DetectionMessage(core.EntityMeta):
+    """Detection message ORM model."""
+
     id: int
     """Unique ID of the detection message"""
 

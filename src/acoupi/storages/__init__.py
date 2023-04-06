@@ -10,6 +10,7 @@ The class should implement the methods for storing and retrieving
 data, as well as the methods for retrieving the current deployment
 and the recordings and detections for a given deployment. See
 the Storage class for more details.
+
 """
 
 from acoupi.storages.sqlite import SqliteStore
