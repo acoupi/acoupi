@@ -1,0 +1,46 @@
+#!bin/bash
+export USER=$USER
+export HOME=$HOME
+
+# Install git and other packages
+echo "Installing dependencies"
+sudo apt install git alsa-utils libasound2-dev wget cmake #pulseaudio 
+# Install python3 and python3 libs
+sudo apt install python3-dev python3-pip python3-venv python3-pyaudio
+
+# Move to home directory
+# cd ~
+# echo "Cloning Acoupi repository - Main branch" 
+# branch=main
+# git clone -b $branch --depth=1 https://github.com/audevuilli/acoupi.git ${HOME}/acoupi
+
+# Move to git directory
+# cd ~/acoupi
+# Create a virtual python environment
+#echo "Establishing a python virtual environment"
+#python3 -m venv acoupi
+#source ./acoupi/bin/activate
+
+# Install packages with pip
+echo "Installing libraries package"
+pip3 install -U -r $HOME/acoupi/requirements.txt
+
+# Create directory to store audio files
+#echo "Creating necessary directories"
+#sudo -u ${USER} mkdir -p audio/audio_files
+#sudo -u ${USER} mkdir -p audio/analysed
+
+# Move the .service files to lib/systemd/system - Enable and Start it
+services = ("acoupi_audiorec.service" 
+            "acoupi_runmodel.service"
+            "acoupi_saveresults.service"
+            "acoupi_senddata.service")
+
+for service in "${services[@]}"
+do 
+    sudo ln -sf $HOME/acoupi/services/$service /usr/lib/systemd/system
+    sudo systemctl enable $service
+    sudo systemctl start $service
+
+    systemctl is-active --quiet $service && echo acoupi services are running || echo acoupi services are not running
+done
