@@ -17,10 +17,10 @@ class BatDetect2(Model):
 
         self.recording = recording
 
-    def runModel(self, recording) -> List[Detection]:
+    def run(self, recording) -> List[Detection]:
 
         # Get the audio path of the recorded file
-        audio_file_path = reocrding.path
+        audio_file_path = recording.path
 
         # Load the audio rile and compute spectrograms
         audio = api.load_audio(audio_file_path)
