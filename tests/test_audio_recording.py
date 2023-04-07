@@ -12,4 +12,4 @@ def test_audio_recording():
 
     # record audio
     recording = recorder.record()
-    assert recorder.record(recording) 
+    assert recording.path
