@@ -18,10 +18,10 @@ audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION,
                                  sample_rate=DEFAULT_SAMPLE_RATE,
                                  channels=DEFAULT_AUDIO_CHANNELS,
                                  chunk=DEFAULT_CHUNK_SIZE)
-cdetections = CleanModelOutput()
+#cdetection = CleanModelOutput()
 
 # Record audio
-recording = recorder.record()
+recording = audio_recorder.record()
 # check if an audio file has been recorded
 print(f"Recorded file: {recording.path}")
 
@@ -33,5 +33,6 @@ detection = model.run(recording)
 print(f"Detection: {detection}")
 
 # Clean Model Output
-clean_predict = cdetections.get_highest_pdetection(detections)
-print(f"Clean Predictions : {clean_predict}")
+cdetection = CleanModelOutput(detection)
+clean_predict = cdetection.get_highest_pdetection()
+print(f"Clean Prediction : {clean_predict}")
