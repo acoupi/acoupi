@@ -10,8 +10,8 @@ from acoupi_types import Detection
 class CleanModelOutput():
 
     def __init__(self, detection: Detection):
-       
-       self.detection = detection
+   # def __init__(self):
+        self.detection = detection
 
 
     def get_highest_pdetection(self):
