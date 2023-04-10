@@ -1,0 +1,14 @@
+[Unit]
+Description=Acoupi Device: Record, Analyse, and Save Results of Audio Recording
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/acoupi/src/acoupi
+ExecStart=/home/pi/acoupi/src/acoupi/.venv/bin/python3 audio_recording.py
+Restart=always
+RestartSec=9
+TimeoutSec=30
+
+[Install]
+WantedBy=multi-user.target

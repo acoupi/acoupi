@@ -10,6 +10,10 @@ DEFAULT_AUDIO_CHANNELS = 1
 DEFAULT_CHUNK_SIZE = 2048
 # DEFAULT_CHUNK_SIZE = 1024
 
+"""Default start and end audio recording"""
+START_RECORDING = "15:00"
+END_RECORDING = "12:00"
+
 """Default audio recording lenght in seconds."""
 DEFAULT_RECORDING_DURATION = 3
 
