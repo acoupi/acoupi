@@ -9,9 +9,9 @@ from acoupi_types import Detection
 
 class CleanModelOutput():
 
-    def __init__(self, detections: Dict[Detections]):
+    def __init__(self, detection: Detection):
        
-       self.detections = detections
+       self.detection = detection
 
 
     def get_highest_pdetection(self):
@@ -20,7 +20,7 @@ class CleanModelOutput():
         keep_detections = {}
 
         # Loop through all the detections in the analysed file 
-        for ann in self.detections['pred_dict']['annotation']:
+        for ann in self.detection['pred_dict']['annotation']:
             bat_class = ann['class']
             class_prob = ann['class_prob']
             det_prob = ann['det_prob']
