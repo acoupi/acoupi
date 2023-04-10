@@ -30,7 +30,6 @@ model = BatDetect2(recording=recording)
 
 # Run model - Get detections
 detection = model.run(recording)
-print(f"Detection: {detection}")
 
 # Clean Model Output
 cdetection = CleanModelOutput(detection)
