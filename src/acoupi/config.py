@@ -16,4 +16,7 @@ DEFAULT_RECORDING_DURATION = 3
 """Default recording interval in seconds."""
 DEFAULT_RECORDING_INTERVAL = 9
 
+"""Default detection probabilities threshold"""
+DETECTION_THRESHOLD = 0.04
+
 

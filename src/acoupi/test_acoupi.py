@@ -34,5 +34,5 @@ print(f"Detection: {detection}")
 
 # Clean Model Output
 cdetection = CleanModelOutput(detection)
-clean_predict = cdetection.get_highest_pdetection()
+clean_predict = cdetection.getDetection_aboveThreshold()
 print(f"Clean Prediction : {clean_predict}")

@@ -1,6 +1,7 @@
 """ Cleaning Model Output """
 from typing import List, Dict
 from acoupi_types import Detection
+from config import DETECTION_THRESHOLD
 #from acoupi.types import Detection
 
 # run the model
@@ -9,32 +10,40 @@ from acoupi_types import Detection
 
 class CleanModelOutput():
 
-    def __init__(self, detection: Detection):
-   # def __init__(self):
-        self.detection = detection
+    def __init__(self, detection: Detection, threshold: float = DETECTION_THRESHOLD):
+
+       self.detection = detection
+       self.threshold = threshold
 
 
-    def get_highest_pdetection(self):
+    def getDetection_aboveThreshold(self):
+        
+        # Iterate through all detections - Keep only the one above threshold
+        keep_detections = [ann for ann in detection if ann['det_prob'] > threshold]
+
+        return keep_detections
+
+        
+    def getDetection_highestbySpecies(self):
         
         # Create new dictionary to keep the detections
-        keep_detections = {}
+        keep_detections = []
 
         # Loop through all the detections in the analysed file 
-        for ann in self.detection['pred_dict']['annotation']:
+        for ann in Detections:
             bat_class = ann['class']
-            class_prob = ann['class_prob']
             det_prob = ann['det_prob']
-            
-            # Keep all the different detected classes 
-            if bat_class not in keep_detections:
-                keep_detections[bat_class] = {'class_prob': class_prob, 'det_prob': det_prob}
-            else:
-                # Check class_prob - keep the highest class_prob of all detections
-                if class_prob > keep_detections[bat_class]['class_prob']:
-                    keep_detections[bat_class]['class_prob'] = class_prob
-                    keep_detections[bat_class]['det_prob'] = det_prob
-                elif class_prob == keep_detections[bat_class]['class_prob'] and det_prob > keep_detections[bat_class]['det_prob']:
-                    keep_detections[bat_class]['det_prob'] = det_prob
+
+            # Check if the detection probability is above the threshold
+            if det_prob > threshold:
+                # Check if bat_class is already in final result list keep_detection
+                if bat_class not in keep_detections:
+                    keep_detections[bat_class] = ann
+                else:
+                    # Check if det_prob is higher than the previous final result in list keep_detections
+                    if det_prob > keep_detections[bat_class]['det_prob']:
+                        keep_detections[bat_class] = ann
+                    print(keep_detections)
         
         return keep_detections
 
