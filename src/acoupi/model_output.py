@@ -19,7 +19,7 @@ class CleanModelOutput():
     def getDetection_aboveThreshold(self):
         
         # Iterate through all detections - Keep only the one above threshold
-        keep_detections = [ann for ann in detection if ann['det_prob'] > threshold]
+        keep_detections = [ann for ann in self.detection if ann['det_prob'] > self.threshold]
 
         return keep_detections
 
@@ -30,12 +30,12 @@ class CleanModelOutput():
         keep_detections = []
 
         # Loop through all the detections in the analysed file 
-        for ann in Detections:
+        for ann in self.detection:
             bat_class = ann['class']
             det_prob = ann['det_prob']
 
             # Check if the detection probability is above the threshold
-            if det_prob > threshold:
+            if det_prob > self.threshold:
                 # Check if bat_class is already in final result list keep_detection
                 if bat_class not in keep_detections:
                     keep_detections[bat_class] = ann
