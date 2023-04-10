@@ -1,5 +1,6 @@
 import threading
 import datetime
+import yaml
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, START_RECORDING, END_RECORDING
 from audio_recording import PyAudioRecorder
@@ -24,6 +25,10 @@ from recording_managers import MultiIntervalRecordingManager
 #storage = SqliteStore(config["storage"])
 
 def main():
+
+    with open("config.yaml") as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+
     # Create audio_recorder object
     audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
                                  sample_rate=DEFAULT_SAMPLE_RATE,
@@ -32,7 +37,7 @@ def main():
                                  device_index=DEVICE_INDEX)
 
     recording_manager = MultiIntervalRecordingManager(
-        [START_RECORDING, "24:00"],["00:00", END_RECORDING],
+        [config['start_recording'], "24:00"],["00:00", config['end_recording']],
         timezone=config["timezone"],
     )
                                 
