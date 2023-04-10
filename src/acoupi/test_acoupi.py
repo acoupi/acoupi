@@ -2,7 +2,7 @@ from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDI
 from audio_recording import PyAudioRecorder
 from model import BatDetect2
 from model_output import CleanModelOutput
-from schedule_managers import ConstantScheduleManager
+#from schedule_managers import ConstantScheduleManager
 
 #from acoupi.file_managers import FileManager
 #from acoupi.audio_recording import PyAudioRecorder
@@ -16,12 +16,8 @@ from schedule_managers import ConstantScheduleManager
 #  config = yaml.load(f, Loader=yaml.FullLoader)
 
 # Create scheduler manager
-scheduler = ConstantScheduler(DEFAULT_RECORDING_INTERVAL) 
+#scheduler = ConstantScheduleManager(DEFAULT_RECORDING_INTERVAL) 
 #storage = SqliteStore(config["storage"])
-recording_manager = MultiIntervalRecordingManager(
-    [[START_RECORDING, "24:00"],["00:00", END_RECORDING],],
-    timezone=config["timezone"],
-    )
 
 # Create audio_recorder object
 audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
