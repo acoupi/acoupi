@@ -2,7 +2,7 @@ from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDI
 from audio_recording import PyAudioRecorder
 from model import BatDetect2
 from model_output import CleanModelOutput
-from scheduler_managers import ConstantScheduler
+from schedule_managers import ConstantScheduleManager
 
 #from acoupi.file_managers import FileManager
 #from acoupi.audio_recording import PyAudioRecorder
