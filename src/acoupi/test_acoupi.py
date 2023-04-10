@@ -1,3 +1,6 @@
+import threading
+import datetime
+
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, START_RECORDING, END_RECORDING
 from audio_recording import PyAudioRecorder
 from model import BatDetect2
@@ -19,43 +22,47 @@ from model_output import CleanModelOutput
 #scheduler = ConstantScheduleManager(DEFAULT_RECORDING_INTERVAL) 
 #storage = SqliteStore(config["storage"])
 
-# Create audio_recorder object
-audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
+def main():
+    # Create audio_recorder object
+    audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
                                  sample_rate=DEFAULT_SAMPLE_RATE,
                                  channels=DEFAULT_AUDIO_CHANNELS,
                                  chunk=DEFAULT_CHUNK_SIZE,
                                  device_index=DEVICE_INDEX)
                                 
-def process():
-    # Schedule next processing
-    threading.Timer(DEFAULT_RECORDING_INTERVAL, process).start()
+    def process():
+        # Schedule next processing
+        threading.Timer(DEFAULT_RECORDING_INTERVAL, process).start()
 
-     # Check if we should record
-    if not recording_manager.should_record(datetime.datetime.now().time()):
-        return
-    
-    # Record audio
-    recording = audio_recorder.record()
-    # check if an audio file has been recorded
-    print(f"Recorded file: {recording.path}")
+        # Check if we should record
+        #if not recording_manager.should_record(datetime.datetime.now().time()):
+        #    return
 
-    # Load model 
-    model = BatDetect2(recording=recording)
+        # Record audio
+        recording = audio_recorder.record()
+        # check if an audio file has been recorded
+        print(f"Recorded file: {recording.path}")
 
-    # Run model - Get detections
-    detection = model.run(recording)
-    
-    # Clean Model Output
-    cdetection = CleanModelOutput(detection)
-    clean_predict = cdetection.getDetection_aboveThreshold()
-    print(f"Clean Prediction : {clean_predict}")
+        # Load model 
+        model = BatDetect2(recording=recording)
 
-    # Save detections to local store
-    #storage.store_detections(recording, clean_predict)
-    #print("Detections stored")
+        # Run model - Get detections
+        detection = model.run(recording)
 
-    # Delete recording
-    #file_manager.delete_recording(recording)
+        # Clean Model Output
+        cdetection = CleanModelOutput(detection)
+        clean_predict = cdetection.getDetection_aboveThreshold()
+        print(f"Clean Prediction : {clean_predict}")
 
-# Start processing
-process()
+        # Save detections to local store
+        #storage.store_detections(recording, clean_predict)
+        #print("Detections stored")
+
+        # Delete recording
+        #file_manager.delete_recording(recording)
+
+    # Start processing
+    process()
+
+if __name__ == "__main__":
+    main()
