@@ -6,7 +6,7 @@ from bat_detect import api
 #from acoupi.audio_recording import PyAudioRecorder
 
 from acoupi_types import Model, Recording, Detection
-from audio_recording import PyAudioRecorder
+#from audio_recording import PyAudioRecorder
 
 
 class BatDetect2(Model):
