@@ -18,5 +18,4 @@ DEFAULT_RECORDING_INTERVAL = 9
 
 """Default detection probabilities threshold"""
 DETECTION_THRESHOLD = 0.04
-
-
+DEVICE_INDEX = 0
