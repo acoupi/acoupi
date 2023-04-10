@@ -6,6 +6,7 @@ from audio_recording import PyAudioRecorder
 from model import BatDetect2
 from model_output import CleanModelOutput
 #from schedule_managers import ConstantScheduleManager
+from recording_managers import MultiIntervalRecordingManager
 
 #from acoupi.file_managers import FileManager
 #from acoupi.audio_recording import PyAudioRecorder
@@ -35,8 +36,8 @@ def main():
         threading.Timer(DEFAULT_RECORDING_INTERVAL, process).start()
 
         # Check if we should record
-        #if not recording_manager.should_record(datetime.datetime.now().time()):
-        #    return
+        if not recording_managers.should_record(datetime.datetime.now().time()):
+            return
 
         # Record audio
         recording = audio_recorder.record()
