@@ -10,16 +10,16 @@ from config import DETECTION_THRESHOLD
 
 class CleanModelOutput():
 
-    def __init__(self, detection: Detection, threshold: float = DETECTION_THRESHOLD):
+    def __init__(self, detections: Detection, threshold: float = DETECTION_THRESHOLD):
 
-       self.detection = detection
+       self.detections = detections
        self.threshold = threshold
 
 
     def getDetection_aboveThreshold(self):
         
         # Iterate through all detections - Keep only the one above threshold
-        keep_detections = [ann for ann in self.detection if ann['det_prob'] > self.threshold]
+        keep_detections = [ann for ann in self.detections if ann['det_prob'] > self.threshold]
 
         return keep_detections
 
@@ -30,7 +30,7 @@ class CleanModelOutput():
         keep_detections = []
 
         # Loop through all the detections in the analysed file 
-        for ann in self.detection:
+        for ann in self.detections:
             bat_class = ann['class']
             det_prob = ann['det_prob']
 
