@@ -6,8 +6,8 @@ location:
   latitude: 51.5381
   longitude: -0.0099
 
-timezone: UTC
+timezone: Europe/London
 
 # Audio Recording Parameters
-start_recording: 16:00
+start_recording: 12:00
 end_recording: 08:00
