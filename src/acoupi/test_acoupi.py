@@ -37,15 +37,14 @@ def main():
                                  chunk=DEFAULT_CHUNK_SIZE,
                                  device_index=DEVICE_INDEX)
 
-    recording_manager = MultiIntervalRecordingManager(
-        [config['start_recording'], "24:00"],["00:00", config['end_recording']], ZoneInfo(config['timezone']))
+    recording_manager = MultiIntervalRecordingManager([[config['start_recording'], "24:00"],["00:00", config['end_recording']]], ZoneInfo(config['timezone']))
                                 
     def process():
         # Schedule next processing
         threading.Timer(DEFAULT_RECORDING_INTERVAL, process).start()
 
         # Check if we should record
-        if not recording_manager.should_record(datetime.datetime.now().time()):
+        if not recording_manager.should_record(datetime.now().time()):
             return
 
         # Record audio
