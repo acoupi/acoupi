@@ -213,10 +213,11 @@ class RecordingFilter(ABC):
         """Determine if the recording should be kept."""
 
 
-class RecordingManager(ABC):
-    """Save and delete recordings.
+class FileManager(ABC):
+    """Save and delete files.
 
-    The RecordingManager is responsible for saving and deleting recordings.
+    The FileManager is responsible for saving and deleting recordings
+    to the local filesystem.
     """
 
     @abstractmethod
