@@ -38,10 +38,7 @@ def main():
                                  device_index=DEVICE_INDEX)
 
     recording_manager = MultiIntervalRecordingManager(
-        [config['start_recording'], "24:00"],
-        ["00:00", config['end_recording']],
-        ZoneInfo(config['timezone']),
-    )
+        [config['start_recording'], "24:00"],["00:00", config['end_recording']], ZoneInfo(config['timezone']))
                                 
     def process():
         # Schedule next processing
