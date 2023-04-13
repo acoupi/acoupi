@@ -41,11 +41,9 @@ def main():
     start_time = datetime.strptime(config['start_recording'],"%H:%M:%S").time()
     end_time = datetime.strptime(config['end_recording'], "%H:%M:%S").time()
 
-    recording_intervals = [ Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
-                            Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
+    recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
+                           Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
 
-    print(recording_intervals) 
-    print("")
     recording_manager = MultiIntervalRecordingManager(recording_intervals, ZoneInfo(config['timezone']))
                                 
     def process():
@@ -60,13 +58,19 @@ def main():
         recording = audio_recorder.record()
         # check if an audio file has been recorded
         print(f"Recorded file: {recording.path}")
+        print("")
 
         # Load model 
         model = BatDetect2(recording=recording)
+        print("Model Loaded")
 
         # Run model - Get detections
         detection = model.run(recording)
-
+        print('Get Detection from Models')
+        print("")
+        
+        print('Clean Model Outputs')
+        print("")
         # Clean Model Output
         cdetection = CleanModelOutput(detection)
         clean_predict = cdetection.getDetection_aboveThreshold()
