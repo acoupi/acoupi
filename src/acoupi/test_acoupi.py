@@ -38,12 +38,14 @@ def main():
                                  device_index=DEVICE_INDEX)
 
     # Create Interval start_time, end_time object
-    start_time = datetime.strptime(config['start_recording'], "%H:%M").time()
-    end_time = datetime.strptime(config['end_recording'], "%H:%M").time()
+    start_time = datetime.strptime(config['start_recording'],"%H:%M:%S").time()
+    end_time = datetime.strptime(config['end_recording'], "%H:%M:%S").time()
 
-    recording_intervals = [ Interval(start=start_time, end=datetime.time(23,59)), 
-                            Interval(start=datetime.time(0,0), end=end_time)]
+    recording_intervals = [ Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
+                            Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
 
+    print(recording_intervals) 
+    print("")
     recording_manager = MultiIntervalRecordingManager(recording_intervals, ZoneInfo(config['timezone']))
                                 
     def process():
