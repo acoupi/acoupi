@@ -21,7 +21,7 @@ class BatDetect2(Model):
 
         # Get the audio path of the recorded file
         audio_file_path = recording.path
-
+        print(f"Audio file Path input model: {audio_file_path}")
         # Load the audio rile and compute spectrograms
         audio = api.load_audio(audio_file_path)
         spec = api.generate_spectrogram(audio)
