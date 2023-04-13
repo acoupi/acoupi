@@ -69,7 +69,7 @@ class Detection:
 class RecordingScheduler(ABC):
     """Manage time between recordings.
 
-    The ScheduleManager is responsible for determining the interval between
+    The RecordingScheduler is responsible for determining the interval between
     recordings.
     """
 
@@ -81,10 +81,10 @@ class RecordingScheduler(ABC):
         """
 
 
-class RecordManager(ABC):
+class RecordingCriterion(ABC):
     """Decide if a recording should be made.
 
-    The RecordManager is responsible for deciding if a recording
+    The RecordingCriterion is responsible for deciding if a recording
     should be made.
     """
 
