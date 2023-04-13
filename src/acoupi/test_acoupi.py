@@ -9,6 +9,7 @@ from model import BatDetect2
 from model_output import CleanModelOutput
 #from schedule_managers import ConstantScheduleManager
 from recording_managers import MultiIntervalRecordingManager, Interval
+#from recording_filters import ThresholdRecordingFilter
 
 #from acoupi.file_managers import FileManager
 #from acoupi.audio_recording import PyAudioRecorder
@@ -45,6 +46,9 @@ def main():
                            Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
 
     recording_manager = MultiIntervalRecordingManager(recording_intervals, ZoneInfo(config['timezone']))
+
+    # recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
+
                                 
     def process():
         # Schedule next processing
@@ -65,12 +69,13 @@ def main():
         print("Model Loaded")
 
         # Run model - Get detections
-        detection = model.run(recording)
-        print('Get Detection from Models')
+        detections = model.run(recording)
+        print('Clean Model Output - Detections')
         print("")
-        
-        print('Clean Model Outputs')
-        print("")
+
+        # Recording Filter
+        #clean_detection = recording_filter(recording, detections)
+
         # Clean Model Output
         cdetection = CleanModelOutput(detection)
         clean_predict = cdetection.getDetection_aboveThreshold()
