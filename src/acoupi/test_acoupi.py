@@ -1,5 +1,6 @@
 import threading
-import datetime
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import yaml
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL
@@ -37,8 +38,9 @@ def main():
                                  device_index=DEVICE_INDEX)
 
     recording_manager = MultiIntervalRecordingManager(
-        [config['start_recording'], "24:00"],["00:00", config['end_recording']],
-        timezone=config['timezone'],
+        [config['start_recording'], "24:00"],
+        ["00:00", config['end_recording']],
+        ZoneInfo(config['timezone']),
     )
                                 
     def process():
