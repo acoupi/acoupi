@@ -66,7 +66,7 @@ class Detection:
     """The unique ID of the detection"""
 
 
-class ScheduleManager(ABC):
+class RecordingScheduler(ABC):
     """Manage time between recordings.
 
     The ScheduleManager is responsible for determining the interval between
@@ -146,10 +146,10 @@ class Model(ABC):
         """
 
 
-class DetectorFilter(ABC):
+class DetectionFilter(ABC):
     """Determine if a detection should be saved.
 
-    The DetectorFilter is responsible for determining if a detection
+    The DetectionFilter is responsible for determining if a detection
     should be saved.
     """
 
