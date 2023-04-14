@@ -1,12 +1,13 @@
 """Module defining the SqliteStore class."""
 import datetime
 from typing import List, Optional
+from uuid import UUID
 
 from pony import orm
 
 from acoupi import utils
 from acoupi.storages.sqlite import types as db_types
-from acoupi.storages.sqlite.database import create_database
+from acoupi.storages.sqlite.database import create_base_models
 from acoupi.types import Deployment, Detection, Recording, Store
 
 
@@ -21,7 +22,7 @@ class SqliteStore(Store):
     following tables:
 
     - Deployment: Contains the deployment information. Each deployment is
-      associated with a device, and has a start datetime. The deployment can 
+      associated with a device, and has a start datetime. The deployment can
       also have a latitude and longitude associated with it.
 
     - Recording: Contains the recording information. Each recording is
@@ -50,7 +51,7 @@ class SqliteStore(Store):
     database: orm.Database
     """The Pony ORM database object."""
 
-    models: db_types.Models
+    models: db_types.BaseModels
     """The Pony ORM models."""
 
     def __init__(self, db_path: str) -> None:
@@ -64,7 +65,8 @@ class SqliteStore(Store):
 
         """
         self.db_path = db_path
-        self.database, self.models = create_database()
+        self.database = orm.Database()
+        self.models = create_base_models(self.database)
         self.database.bind(provider="sqlite", filename=db_path, create_db=True)
         self.database.generate_mapping(create_tables=True)
 
@@ -85,6 +87,7 @@ class SqliteStore(Store):
             id=deployment.id,
             started_on=deployment.started_on,
             device_id=deployment.device_id,
+            name=deployment.name,
             latitude=deployment.latitude,
             longitude=deployment.longitude,
         )
@@ -146,6 +149,125 @@ class SqliteStore(Store):
             self._create_detection(detection, recording_db)
 
     @orm.db_session
+    def get_recordings(
+        self,
+        include: Optional[List[UUID]] = None,
+        exclude: Optional[List[UUID]] = None,
+    ) -> List[Recording]:
+        """Get the recordings from the local filesystem.
+
+        Args:
+            include: A list of recording IDs to include. If None, all
+                recordings are included.
+            exclude: A list of recording IDs to exclude. If None, no
+                recordings are excluded. Can not be used simultaneously
+                with include.
+
+        Returns:
+            A list of recordings.
+        """
+        if exclude is not None and include is not None:
+            raise ValueError("Can not use both include and exclude.")
+
+        recordings = self.models.Recording.select()
+
+        if include is not None:
+            recordings = recordings.filter(lambda r: r.id in include)
+
+        if exclude is not None:
+            recordings = recordings.filter(lambda r: r.id not in exclude)
+
+        return [
+            Recording(
+                id=recording.id,
+                path=recording.path,
+                datetime=recording.datetime,
+                duration=recording.duration_s,
+                samplerate=recording.samplerate_hz,
+            )
+            for recording in recordings
+        ]
+
+    @orm.db_session
+    def get_detections(
+        self,
+        include: Optional[List[UUID]] = None,
+        exclude: Optional[List[UUID]] = None,
+    ) -> List[Detection]:
+        """Get the detections from the local filesystem.
+
+        Args:
+            include: A list of detection IDs to include. If None, all
+                detections are included.
+            exclude: A list of detection IDs to exclude. If None, no
+                detections are excluded. Can not be used simultaneously
+                with include.
+
+        Returns:
+            A list of detections.
+        """
+        if exclude is not None and include is not None:
+            raise ValueError("Can not use both include and exclude.")
+
+        detections = self.models.Detection.select()
+
+        if include is not None:
+            detections = detections.filter(lambda d: d.id in include)
+
+        if exclude is not None:
+            detections = detections.filter(lambda d: d.id not in exclude)
+
+        return [
+            Detection(
+                id=detection.id,
+                species_name=detection.species_name,
+                probability=detection.probability,
+            )
+            for detection in detections
+        ]
+
+    @orm.db_session
+    def get_deployments(
+        self,
+        include: Optional[List[UUID]] = None,
+        exclude: Optional[List[UUID]] = None,
+    ) -> List[Deployment]:
+        """Get the deployments from the local filesystem.
+
+        Args:
+            include: A list of deployment IDs to include. If None, all
+                deployments are included.
+            exclude: A list of deployment IDs to exclude. If None, no
+                deployments are excluded. Can not be used simultaneously
+                with include.
+
+        Returns:
+            A list of deployments.
+        """
+        if exclude is not None and include is not None:
+            raise ValueError("Can not use both include and exclude.")
+
+        deployments = self.models.Deployment.select()
+
+        if include is not None:
+            deployments = deployments.filter(lambda d: d.id in include)
+
+        if exclude is not None:
+            deployments = deployments.filter(lambda d: d.id not in exclude)
+
+        return [
+            Deployment(
+                id=deployment.id,
+                started_on=deployment.started_on,
+                device_id=deployment.device_id,
+                name=deployment.name,
+                latitude=deployment.latitude,
+                longitude=deployment.longitude,
+            )
+            for deployment in deployments
+        ]
+
+    @orm.db_session
     def _get_current_deployment(self) -> db_types.Deployment:
         """Get the current deployment in the database."""
         db_deployment = (
@@ -155,9 +277,11 @@ class SqliteStore(Store):
         )
 
         if db_deployment is None:
+            # TODO: Think better about the default values
             db_deployment = self.models.Deployment(
                 started_on=datetime.datetime.now(),
                 device_id=utils.get_rpi_serial_number(),
+                name=utils.get_rpi_host_name(),
                 latitude=None,
                 longitude=None,
             )
@@ -244,6 +368,7 @@ class SqliteStore(Store):
             id=deployment.id,
             started_on=deployment.started_on,
             device_id=deployment.device_id,
+            name=deployment.name,
             latitude=deployment.latitude,
             longitude=deployment.longitude,
         )

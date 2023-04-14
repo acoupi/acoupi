@@ -2,6 +2,7 @@
 import datetime
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import List, Optional
 from uuid import UUID, uuid4
 
@@ -19,8 +20,8 @@ class Deployment:
     device_id: str
     """The ID of the device."""
 
-    device_name: str
-    """User provided name of the device."""
+    name: str
+    """User provided name of the deployment."""
 
     latitude: Optional[float] = None
     """The latitude of the site where the device is deployed."""
@@ -28,7 +29,7 @@ class Deployment:
     longitude: Optional[float] = None
     """The longitude of the site where the device is deployed."""
 
-    deployment_id: UUID = field(default_factory=uuid4)
+    id: UUID = field(default_factory=uuid4)
     """The unique ID of the deployment."""
 
 
@@ -36,7 +37,7 @@ class Deployment:
 class Recording:
     """A Recording is a single audio file recorded from the microphone."""
 
-    path: str
+    path: Optional[str]
     """The path to the audio file in the local filesystem"""
 
     datetime: datetime.datetime
@@ -48,7 +49,7 @@ class Recording:
     samplerate: int
     """The samplerate of the recording in Hz"""
 
-    recording_id: UUID = field(default_factory=uuid4)
+    id: UUID = field(default_factory=uuid4)
     """The unique ID of the recording"""
 
 
@@ -62,29 +63,38 @@ class Detection:
     probability: float
     """The probability of the prediction"""
 
-    detection_id: UUID = field(default_factory=uuid4)
+    id: UUID = field(default_factory=uuid4)
     """The unique ID of the detection"""
 
 
-class ScheduleManager(ABC):
+class RecordingScheduler(ABC):
     """Manage time between recordings.
 
-    The ScheduleManager is responsible for determining the interval between
+    The RecordingScheduler is responsible for determining the interval between
     recordings.
     """
 
     @abstractmethod
-    def time_until_next_recording(self) -> int:
+    def time_until_next_recording(
+        self,
+        time: Optional[datetime.datetime] = None,
+    ) -> int:
         """Return the number of seconds until the next recording.
 
         This should return 0 if a recording should be made immediately.
+
+        Args:
+            time: The time to use for determining the next recording.
+                Defaults to None.
         """
 
 
-class RecordManager(ABC):
+class RecordingCondition(ABC):
     """Decide if a recording should be made.
 
-    The RecordManager is responsible for deciding if a recording
+    Only do a recording if the RecordingCondition is met.
+
+    The RecordingCondition is responsible for deciding if a recording
     should be made.
     """
 
@@ -146,10 +156,10 @@ class Model(ABC):
         """
 
 
-class DetectorFilter(ABC):
+class DetectionFilter(ABC):
     """Determine if a detection should be saved.
 
-    The DetectorFilter is responsible for determining if a detection
+    The DetectionFilter is responsible for determining if a detection
     should be saved.
     """
 
@@ -161,10 +171,8 @@ class DetectorFilter(ABC):
 class Store(ABC):
     """The Store is responsible for storing the detections locally.
 
-    It is called after the model has run. This should decide:
-
-    1. If the detection should be stored
-    2. How the detection should be stored
+    The store keeps track of all the recordings, detections, and
+    deployments made.
     """
 
     @abstractmethod
@@ -195,6 +203,63 @@ class Store(ABC):
     ) -> None:
         """Store the detection locally."""
 
+    @abstractmethod
+    def get_recordings(
+        self,
+        include: Optional[List[UUID]] = None,
+        exclude: Optional[List[UUID]] = None,
+    ) -> List[Recording]:
+        """Get the recordings from the local filesystem.
+
+        Args:
+            include: A list of recording IDs to include. If None, all
+                recordings are included.
+            exclude: A list of recording IDs to exclude. If None, no
+                recordings are excluded. Can not be used simultaneously
+                with include.
+
+        Returns:
+            A list of recordings.
+        """
+
+    @abstractmethod
+    def get_detections(
+        self,
+        include: Optional[List[UUID]] = None,
+        exclude: Optional[List[UUID]] = None,
+    ) -> List[Detection]:
+        """Get the detections from the local filesystem.
+
+        Args:
+            include: A list of detection IDs to include. If None, all
+                detections are included.
+            exclude: A list of detection IDs to exclude. If None, no
+                detections are excluded. Can not be used simultaneously
+                with include.
+
+        Returns:
+            A list of detections.
+        """
+
+    @abstractmethod
+    def get_deployments(
+        self,
+        include: Optional[List[UUID]] = None,
+        exclude: Optional[List[UUID]] = None,
+    ) -> List[Deployment]:
+        """Get the deployments from the local filesystem.
+
+        Args:
+            include: A list of deployment IDs to include. If None, all
+                deployments are included.
+            exclude: A list of deployment IDs to exclude. If None, no
+                deployments are excluded. Can not be used simultaneously
+                with include.
+
+        Returns:
+            A list of deployments.
+        """
+
 
 class RecordingFilter(ABC):
     """Determine if a recording should be kept.
@@ -213,10 +278,11 @@ class RecordingFilter(ABC):
         """Determine if the recording should be kept."""
 
 
-class RecordingManager(ABC):
-    """Save and delete recordings.
+class FileManager(ABC):
+    """Save and delete files.
 
-    The RecordingManager is responsible for saving and deleting recordings.
+    The FileManager is responsible for saving and deleting recordings
+    to the local filesystem.
     """
 
     @abstractmethod
@@ -226,3 +292,105 @@ class RecordingManager(ABC):
     @abstractmethod
     def delete_recording(self, recording: Recording) -> None:
         """Delete the recording."""
+
+
+class ResponseStatus(Enum):
+    """The status of a message."""
+
+    SUCCESS = "success"
+    """The message was received successfully."""
+
+    FAILED = "failed"
+    """The message failed to send."""
+
+    ERROR = "error"
+    """The message was sent, but there was an error."""
+
+    TIMEOUT = "timeout"
+    """The message timed out."""
+
+
+@dataclass
+class Message:
+    """The message to be sent to the remote server."""
+
+    sent_on: datetime.datetime
+    """The datetime the message was sent."""
+
+    device_id: str
+    """The ID of the device sending the message."""
+
+    message: str
+    """The message to be sent. Usually a JSON string."""
+
+
+@dataclass
+class Response:
+    """The response from sending a message."""
+
+    received_on: datetime.datetime
+    """The datetime the message was received."""
+
+    status: ResponseStatus
+    """The status of the message."""
+
+    message: Message
+    """The message that was sent."""
+
+    content: Optional[str] = None
+    """The content of the response."""
+
+
+class Messenger(ABC):
+    """Send messages to a remote server.
+
+    The Messenger is responsible for sending messages to
+    a remote server
+    """
+
+    @abstractmethod
+    def send_message(self, message: Message) -> Response:
+        """Send the message to a remote server."""
+
+
+class MessageStore(ABC):
+    """Keeps track of messages that have been sent."""
+
+    store: Store
+    """Has access to the local store."""
+
+    @abstractmethod
+    def get_unsynced_recordings(self) -> List[Recording]:
+        """Get the recordings that have not been synced to the server."""
+
+    @abstractmethod
+    def get_unsynced_detections(self) -> List[Detection]:
+        """Get the detections that have not been synced to the server."""
+
+    @abstractmethod
+    def get_unsynced_deployments(self) -> List[Deployment]:
+        """Get the deployments that have not been synced to the server."""
+
+    @abstractmethod
+    def store_recording_message(
+        self,
+        recording: Recording,
+        response: Response,
+    ) -> None:
+        """Register a recording message with the store."""
+
+    @abstractmethod
+    def store_deployment_message(
+        self,
+        deployment: Deployment,
+        response: Response,
+    ) -> None:
+        """Register a deployment message with the store."""
+
+    @abstractmethod
+    def store_detection_message(
+        self,
+        detection: Detection,
+        response: Response,
+    ) -> None:
+        """Register a detection message with the store."""

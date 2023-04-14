@@ -8,7 +8,7 @@ from audio_recording import PyAudioRecorder
 from model import BatDetect2
 from model_output import CleanModelOutput
 #from schedule_managers import ConstantScheduleManager
-from recording_managers import MultiIntervalRecordingManager, Interval
+from recording_conditions import IsInIntervals, Interval
 #from recording_filters import ThresholdRecordingFilter
 
 #from acoupi.file_managers import FileManager
@@ -45,7 +45,7 @@ def main():
     recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
                            Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
 
-    recording_manager = MultiIntervalRecordingManager(recording_intervals, ZoneInfo(config['timezone']))
+    recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
 
     # recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
 
@@ -55,7 +55,7 @@ def main():
         threading.Timer(DEFAULT_RECORDING_INTERVAL, process).start()
 
         # Check if we should record
-        if not recording_manager.should_record(datetime.now()):
+        if not recording_condition.should_record(datetime.now()):
             return
 
         # Record audio
@@ -77,8 +77,13 @@ def main():
         #clean_detection = recording_filter(recording, detections)
 
         # Clean Model Output
+<<<<<<< HEAD
         cdetections = CleanModelOutput(detections)
         clean_predict = cdetections.getDetection_aboveThreshold()
+=======
+        cdetection = CleanModelOutput(detections)
+        clean_predict = cdetection.getDetection_aboveThreshold()
+>>>>>>> 4265145eafabe7e78f24d30e30c412a26f4e402d
         print(f"Clean Prediction : {clean_predict}")
 
         # Save detections to local store
