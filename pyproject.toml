@@ -23,6 +23,7 @@ dependencies = [
     "pyaudio>=0.2.13",
     "sounddevice>=0.4.6",
     "pyyaml>=6.0",
+    "paho-mqtt>=1.6.1",
 ]
 requires-python = ">=3.7"
 readme = "README.md"
