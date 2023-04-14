@@ -298,21 +298,47 @@ class ResponseStatus(Enum):
     """The status of a message."""
 
     SUCCESS = "success"
-    """The message was sent successfully."""
+    """The message was received successfully."""
 
     FAILED = "failed"
     """The message failed to send."""
+
+    ERROR = "error"
+    """The message was sent, but there was an error."""
+
+    TIMEOUT = "timeout"
+    """The message timed out."""
+
+
+@dataclass
+class Message:
+    """The message to be sent to the remote server."""
+
+    sent_on: datetime.datetime
+    """The datetime the message was sent."""
+
+    device_id: str
+    """The ID of the device sending the message."""
+
+    message: str
+    """The message to be sent. Usually a JSON string."""
 
 
 @dataclass
 class Response:
     """The response from sending a message."""
 
+    received_on: datetime.datetime
+    """The datetime the message was received."""
+
     status: ResponseStatus
     """The status of the message."""
 
-    message: Optional[str] = None
-    """Response message."""
+    message: Message
+    """The message that was sent."""
+
+    content: Optional[str] = None
+    """The content of the response."""
 
 
 class Messenger(ABC):
@@ -323,20 +349,8 @@ class Messenger(ABC):
     """
 
     @abstractmethod
-    def send_detection(self, recording: str, detection: str) -> Response:
-        """Send the detection to a remote server."""
-
-    @abstractmethod
-    def send_recording(
-        self,
-        recording: str,
-        deployment: Deployment,
-    ) -> Response:
-        """Send the recording to a remote server."""
-
-    @abstractmethod
-    def send_deployment(self, deployment: str) -> Response:
-        """Send the deployment to a remote server."""
+    def send_message(self, message: Message) -> Response:
+        """Send the message to a remote server."""
 
 
 class MessageStore(ABC):

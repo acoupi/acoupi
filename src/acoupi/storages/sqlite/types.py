@@ -110,7 +110,7 @@ class DeploymentMessage(core.EntityMeta):
     id: int
     """Unique ID of the deployment message"""
 
-    deployment: Deployment
+    deployment_id: UUID
     """Deployment that the message belongs to"""
 
     message_status: MessageStatus
@@ -123,7 +123,7 @@ class RecordingMessage(core.EntityMeta):
     id: int
     """Unique ID of the recording message"""
 
-    recording: Recording
+    recording_id: UUID
     """Recording that the message belongs to"""
 
     message_status: MessageStatus
@@ -136,7 +136,7 @@ class DetectionMessage(core.EntityMeta):
     id: int
     """Unique ID of the detection message"""
 
-    detection: Detection
+    detection_id: UUID
     """Detection that the message belongs to"""
 
     message_status: MessageStatus

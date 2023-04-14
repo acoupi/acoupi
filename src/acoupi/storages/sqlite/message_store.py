@@ -36,9 +36,7 @@ class SqliteMessageStore(types.MessageStore):
         """Initialize the message store."""
         self.db_path = db_path
         self.database = orm.Database()
-        self.models = create_message_models(
-            self.database,
-        )
+        self.models = create_message_models(self.database)
         self.database.bind(provider="sqlite", filename=db_path, create_db=True)
         self.database.generate_mapping(create_tables=True)
         self.store = store
@@ -50,6 +48,18 @@ class SqliteMessageStore(types.MessageStore):
         response: types.Response,
     ) -> None:
         """Register a recording message with the store."""
+        status = self.models.MessageStatus(
+            response_ok=response.status == types.ResponseStatus.SUCCESS,
+            response_code=response.status.value,
+            sent_on=response.message.sent_on,
+        )
+
+        self.models.RecordingMessage(
+            recording_id=recording.id,
+            message_status=status,
+        )
+
+        orm.commit()
 
     @orm.db_session
     def store_deployment_message(
@@ -58,6 +68,18 @@ class SqliteMessageStore(types.MessageStore):
         response: types.Response,
     ) -> None:
         """Register a deployment message with the store."""
+        status = self.models.MessageStatus(
+            response_ok=response.status == types.ResponseStatus.SUCCESS,
+            response_code=response.status.value,
+            sent_on=response.message.sent_on,
+        )
+
+        self.models.DeploymentMessage(
+            deployment_id=deployment.id,
+            message_status=status,
+        )
+
+        orm.commit()
 
     @orm.db_session
     def store_detection_message(
@@ -66,6 +88,18 @@ class SqliteMessageStore(types.MessageStore):
         response: types.Response,
     ) -> None:
         """Register a detection message with the store."""
+        status = self.models.MessageStatus(
+            response_ok=response.status == types.ResponseStatus.SUCCESS,
+            response_code=response.status.value,
+            sent_on=response.message.sent_on,
+        )
+
+        self.models.DetectionMessage(
+            detection_id=detection.id,
+            message_status=status,
+        )
+
+        orm.commit()
 
     @orm.db_session
     def get_unsynced_detections(self) -> List[types.Detection]:
@@ -74,22 +108,16 @@ class SqliteMessageStore(types.MessageStore):
         Returns:
             The unsynced detections
         """
-        detections = orm.select(
-            d
-            for d in self.store.models.Detection
-            if not any(
-                message.message_status.response_ok
-                for message in d.detection_messages
+        synced_detections = [
+            detection_id
+            for detection_id in orm.select(
+                m.detection_id
+                for m in self.models.DetectionMessage
+                if m.message_status.response_ok
             )
-        )
-        return [
-            types.Detection(
-                id=detection.id,
-                species_name=detection.species_name,
-                probability=detection.probability,
-            )
-            for detection in detections
         ]
+
+        return self.store.get_detections(exclude=synced_detections)
 
     @orm.db_session
     def get_unsynced_recordings(self) -> List[types.Recording]:
@@ -98,24 +126,16 @@ class SqliteMessageStore(types.MessageStore):
         Returns:
             The unsynced recordings
         """
-        recordings = orm.select(
-            r
-            for r in self.store.models.Recording
-            if not any(
-                message.message_status.response_ok
-                for message in r.recording_messages
+        synced_recordings = [
+            recording_id
+            for recording_id in orm.select(
+                m.recording_id
+                for m in self.models.RecordingMessage
+                if m.message_status.response_ok
             )
-        )
-        return [
-            types.Recording(
-                id=recording.id,
-                path=recording.path,
-                datetime=recording.datetime,
-                duration=recording.duration_s,
-                samplerate=recording.samplerate_hz,
-            )
-            for recording in recordings
         ]
+
+        return self.store.get_recordings(exclude=synced_recordings)
 
     @orm.db_session
     def get_unsynced_deployments(self) -> List[types.Deployment]:
@@ -124,22 +144,13 @@ class SqliteMessageStore(types.MessageStore):
         Returns:
             The unsynced deployments
         """
-        deployments = orm.select(
-            d
-            for d in self.store.models.Deployment
-            if not any(
-                message.message_status.response_ok
-                for message in d.deployment_messages
+        synced_deployments = [
+            deployment_id
+            for deployment_id in orm.select(
+                m.deployment_id
+                for m in self.models.DeploymentMessage
+                if m.message_status.response_ok
             )
-        )
-        return [
-            types.Deployment(
-                id=deployment.id,
-                started_on=deployment.started_on,
-                device_id=deployment.device_id,
-                name=deployment.device_name,
-                latitude=deployment.latitude,
-                longitude=deployment.longitude,
-            )
-            for deployment in deployments
         ]
+
+        return self.store.get_deployments(exclude=synced_deployments)
