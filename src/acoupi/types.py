@@ -2,6 +2,7 @@
 import datetime
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import List, Optional
 from uuid import UUID, uuid4
 
@@ -291,3 +292,91 @@ class FileManager(ABC):
     @abstractmethod
     def delete_recording(self, recording: Recording) -> None:
         """Delete the recording."""
+
+
+class ResponseStatus(Enum):
+    """The status of a message."""
+
+    SUCCESS = "success"
+    """The message was sent successfully."""
+
+    FAILED = "failed"
+    """The message failed to send."""
+
+
+@dataclass
+class Response:
+    """The response from sending a message."""
+
+    status: ResponseStatus
+    """The status of the message."""
+
+    message: Optional[str] = None
+    """Response message."""
+
+
+class Messenger(ABC):
+    """Send messages to a remote server.
+
+    The Messenger is responsible for sending messages to
+    a remote server
+    """
+
+    @abstractmethod
+    def send_detection(self, recording: str, detection: str) -> Response:
+        """Send the detection to a remote server."""
+
+    @abstractmethod
+    def send_recording(
+        self,
+        recording: str,
+        deployment: Deployment,
+    ) -> Response:
+        """Send the recording to a remote server."""
+
+    @abstractmethod
+    def send_deployment(self, deployment: str) -> Response:
+        """Send the deployment to a remote server."""
+
+
+class MessageStore(ABC):
+    """Keeps track of messages that have been sent."""
+
+    store: Store
+    """Has access to the local store."""
+
+    @abstractmethod
+    def get_unsynced_recordings(self) -> List[Recording]:
+        """Get the recordings that have not been synced to the server."""
+
+    @abstractmethod
+    def get_unsynced_detections(self) -> List[Detection]:
+        """Get the detections that have not been synced to the server."""
+
+    @abstractmethod
+    def get_unsynced_deployments(self) -> List[Deployment]:
+        """Get the deployments that have not been synced to the server."""
+
+    @abstractmethod
+    def store_recording_message(
+        self,
+        recording: Recording,
+        response: Response,
+    ) -> None:
+        """Register a recording message with the store."""
+
+    @abstractmethod
+    def store_deployment_message(
+        self,
+        deployment: Deployment,
+        response: Response,
+    ) -> None:
+        """Register a deployment message with the store."""
+
+    @abstractmethod
+    def store_detection_message(
+        self,
+        detection: Detection,
+        response: Response,
+    ) -> None:
+        """Register a detection message with the store."""
