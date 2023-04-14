@@ -1,11 +1,11 @@
-"""Test the recording managers."""
+"""Test the recording conditions."""
 
 import datetime
 
-from acoupi.recording_managers import (
+from acoupi.recording_conditions import (
     Interval,
-    IntervalRecordingManager,
-    MultiIntervalRecordingManager,
+    IsInInterval,
+    IsInIntervals,
 )
 
 
@@ -16,7 +16,7 @@ def test_interval_recording_manager_is_inclusive():
         end=datetime.time(11, 0),
     )
 
-    recording_manager = IntervalRecordingManager(
+    recording_manager = IsInInterval(
         interval,
         timezone=datetime.timezone.utc,
     )
@@ -61,7 +61,7 @@ def test_multiple_interval_recording_manager():
         ),
     ]
 
-    recording_manager = MultiIntervalRecordingManager(
+    recording_manager = IsInIntervals(
         intervals,
         timezone=datetime.timezone.utc,
     )

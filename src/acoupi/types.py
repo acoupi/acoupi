@@ -28,7 +28,7 @@ class Deployment:
     longitude: Optional[float] = None
     """The longitude of the site where the device is deployed."""
 
-    deployment_id: UUID = field(default_factory=uuid4)
+    id: UUID = field(default_factory=uuid4)
     """The unique ID of the deployment."""
 
 
@@ -48,7 +48,7 @@ class Recording:
     samplerate: int
     """The samplerate of the recording in Hz"""
 
-    recording_id: UUID = field(default_factory=uuid4)
+    id: UUID = field(default_factory=uuid4)
     """The unique ID of the recording"""
 
 
@@ -62,7 +62,7 @@ class Detection:
     probability: float
     """The probability of the prediction"""
 
-    detection_id: UUID = field(default_factory=uuid4)
+    id: UUID = field(default_factory=uuid4)
     """The unique ID of the detection"""
 
 
@@ -74,17 +74,26 @@ class RecordingScheduler(ABC):
     """
 
     @abstractmethod
-    def time_until_next_recording(self) -> int:
+    def time_until_next_recording(
+        self,
+        time: Optional[datetime.datetime] = None,
+    ) -> int:
         """Return the number of seconds until the next recording.
 
         This should return 0 if a recording should be made immediately.
+
+        Args:
+            time: The time to use for determining the next recording.
+                Defaults to None.
         """
 
 
-class RecordingCriterion(ABC):
+class RecordingCondition(ABC):
     """Decide if a recording should be made.
 
-    The RecordingCriterion is responsible for deciding if a recording
+    Only do a recording if the RecordingCondition is met.
+
+    The RecordingCondition is responsible for deciding if a recording
     should be made.
     """
 
@@ -227,3 +236,4 @@ class FileManager(ABC):
     @abstractmethod
     def delete_recording(self, recording: Recording) -> None:
         """Delete the recording."""
+
