@@ -236,4 +236,3 @@ class FileManager(ABC):
     @abstractmethod
     def delete_recording(self, recording: Recording) -> None:
         """Delete the recording."""
-

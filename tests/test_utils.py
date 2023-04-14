@@ -1,6 +1,7 @@
 """Test the utils module."""
 import unittest.mock as um
 from acoupi import utils
+import pytest
 
 
 TEST_CPUINFO = '''
@@ -31,3 +32,12 @@ def test_patched_rpi_serial_number(patched_rpi_serial_number: str) -> None:
     serial = utils.get_rpi_serial_number()
     assert patched_rpi_serial_number == '1234567890ABCDEF'
     assert patched_rpi_serial_number == serial
+
+
+@pytest.mark.skipif(
+    not utils.is_rpi(),
+    reason='Test only runs on Raspberry Pi',
+)
+def test_get_rpi_hostname():
+    """Test the get_rpi_host_name function."""
+    assert utils.get_rpi_host_name() == "pi"
