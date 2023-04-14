@@ -58,6 +58,5 @@ class HighestbySpecies_DetectionFilter(DetectionFilter):
                     # Check if det_prob is higher than the previous final result in list keep_detections
                     if det_prob > keep_detections[bat_class]['det_prob']:
                         keep_detections[bat_class] = ann
-                    print(keep_detections)
         
         return keep_detections
