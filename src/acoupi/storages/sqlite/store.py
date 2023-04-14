@@ -85,6 +85,7 @@ class SqliteStore(Store):
             id=deployment.id,
             started_on=deployment.started_on,
             device_id=deployment.device_id,
+            device_name=deployment.device_name,
             latitude=deployment.latitude,
             longitude=deployment.longitude,
         )
@@ -158,6 +159,7 @@ class SqliteStore(Store):
             db_deployment = self.models.Deployment(
                 started_on=datetime.datetime.now(),
                 device_id=utils.get_rpi_serial_number(),
+                device_name=utils.get_rpi_hostname(),
                 latitude=None,
                 longitude=None,
             )

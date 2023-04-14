@@ -13,20 +13,20 @@ from acoupi.types import Deployment, Detection, Recording
 
 @pytest.fixture(scope="function")
 def sqlite_store(tmp_path: Path) -> Generator[SqliteStore, None, None]:
-    """Create a store"""
+    """Create a store."""
     db_path = tmp_path / "test.db"
     yield SqliteStore(str(db_path))
     db_path.unlink()
 
 
 def test_sqlite_store_creates_a_database_file(sqlite_store) -> None:
-    """Test that the store creates a database file"""
+    """Test that the store creates a database file."""
     db_path = sqlite_store.db_path
     assert os.path.isfile(db_path)
 
 
 def test_database_has_correct_tables(sqlite_store) -> None:
-    """Test that the database has the correct tables"""
+    """Test that the database has the correct tables."""
     expected_tables = {
         "recording",
         "deployment",
@@ -47,7 +47,7 @@ def test_database_has_correct_tables(sqlite_store) -> None:
 
 
 def test_recording_table_has_correct_columns(sqlite_store) -> None:
-    """Test that the recording table has the correct columns"""
+    """Test that the recording table has the correct columns."""
     expected_columns = {
         "id",
         "path",
@@ -67,7 +67,7 @@ def test_recording_table_has_correct_columns(sqlite_store) -> None:
 
 
 def test_detection_table_has_correct_columns(sqlite_store) -> None:
-    """Test that the detection table has the correct columns"""
+    """Test that the detection table has the correct columns."""
     expected_columns = {"id", "probability", "species_name", "recording_id"}
     db_path = sqlite_store.db_path
 
@@ -79,7 +79,7 @@ def test_detection_table_has_correct_columns(sqlite_store) -> None:
 
 
 def test_deployment_table_has_correct_columns(sqlite_store) -> None:
-    """Test that the deployment table has the correct columns"""
+    """Test that the deployment table has the correct columns."""
     expected_columns = {
         "id",
         "started_on",
@@ -97,7 +97,7 @@ def test_deployment_table_has_correct_columns(sqlite_store) -> None:
 
 
 def test_message_status_table_has_correct_columns(sqlite_store) -> None:
-    """Test that the message_status table has the correct columns"""
+    """Test that the message_status table has the correct columns."""
     expected_columns = {
         "id",
         "response_ok",
@@ -114,7 +114,7 @@ def test_message_status_table_has_correct_columns(sqlite_store) -> None:
 
 
 def test_deployment_message_table_has_correct_columns(sqlite_store) -> None:
-    """Test that the deployment_message table has the correct columns"""
+    """Test that the deployment_message table has the correct columns."""
     expected_columns = {"id", "deployment_id", "message_status_id"}
     db_path = sqlite_store.db_path
 
@@ -126,7 +126,7 @@ def test_deployment_message_table_has_correct_columns(sqlite_store) -> None:
 
 
 def test_recording_message_table_has_correct_columns(sqlite_store) -> None:
-    """Test that the recording_message table has the correct columns"""
+    """Test that the recording_message table has the correct columns."""
     expected_columns = {"id", "recording_id", "message_status_id"}
     db_path = sqlite_store.db_path
 
@@ -138,7 +138,7 @@ def test_recording_message_table_has_correct_columns(sqlite_store) -> None:
 
 
 def test_detection_message_table_has_correct_columns(sqlite_store) -> None:
-    """Test that the detection_message table has the correct columns"""
+    """Test that the detection_message table has the correct columns."""
     expected_columns = {"id", "detection_id", "message_status_id"}
     db_path = sqlite_store.db_path
 
@@ -152,7 +152,7 @@ def test_detection_message_table_has_correct_columns(sqlite_store) -> None:
 def test_can_instantiate_multiple_stores_with_the_same_sqlite_file(
     tmp_path: Path,
 ) -> None:
-    """Test that we can instantiate multiple stores to the same sqlite file"""
+    """Test that we can instantiate multiple stores to the same sqlite file."""
     # Arrange
     db_path = tmp_path / "test.db"
 
@@ -166,7 +166,7 @@ def test_can_instantiate_multiple_stores_with_the_same_sqlite_file(
 
 
 def test_can_store_a_deployment(sqlite_store: SqliteStore) -> None:
-    """Test that we can store a deployment"""
+    """Test that we can store a deployment."""
     # Arrange
     now = datetime.datetime.now()
     deployment = Deployment(
@@ -174,6 +174,7 @@ def test_can_store_a_deployment(sqlite_store: SqliteStore) -> None:
         latitude=1.0,
         longitude=2.0,
         device_id="test_device",
+        device_name="test_device",
     )
 
     # Act
@@ -196,7 +197,7 @@ def test_get_current_deployment_returns_new_if_no_deployment_exists(
     patched_rpi_serial_number: str,
     patched_now,
 ) -> None:
-    """Test that get_current_deployment fails if no deployment exists"""
+    """Test that get_current_deployment fails if no deployment exists."""
     # Arrange
     # Patch the current time
     now = patched_now()
@@ -220,7 +221,7 @@ def test_get_current_deployment_returns_new_if_no_deployment_exists(
 def test_get_current_deployment_gets_latest_deployment(
     sqlite_store: SqliteStore,
 ) -> None:
-    """Test that get_current_deployment gets the latest deployment"""
+    """Test that get_current_deployment gets the latest deployment."""
     # Arrange
     start_1 = datetime.datetime.now()
     start_2 = datetime.datetime.now() - datetime.timedelta(days=10)
@@ -229,12 +230,14 @@ def test_get_current_deployment_gets_latest_deployment(
         latitude=1.0,
         longitude=2.0,
         device_id="test_device",
+        device_name="test_device",
     )
     deployment2 = Deployment(
         started_on=start_2,
         latitude=3.0,
         longitude=4.0,
         device_id="test_device",
+        device_name="test_device",
     )
     sqlite_store.store_deployment(deployment1)
     sqlite_store.store_deployment(deployment2)
@@ -249,7 +252,7 @@ def test_get_current_deployment_gets_latest_deployment(
 def test_deployment_id_in_db_is_same_as_in_python(
     sqlite_store: SqliteStore,
 ) -> None:
-    """Test that the deployment_id in the db is the same as in python"""
+    """Test that the deployment_id in the db is the same as in python."""
     # Arrange
     now = datetime.datetime.now()
     deployment = Deployment(
@@ -257,6 +260,7 @@ def test_deployment_id_in_db_is_same_as_in_python(
         latitude=1.0,
         longitude=2.0,
         device_id="test_device",
+        device_name="test_device",
     )
 
     # Act
@@ -275,7 +279,7 @@ def test_recordings_can_be_registered(
     sqlite_store: SqliteStore,
     patched_rpi_serial_number: str,
 ) -> None:
-    """Test that recordings can be registered"""
+    """Test that recordings can be registered."""
     # Arrange
     now = datetime.datetime.now()
     recording = Recording(
@@ -304,7 +308,7 @@ def test_recordings_can_be_registered(
 def test_recording_can_be_registered_with_custom_deployment(
     sqlite_store: SqliteStore,
 ):
-    """Test that recordings can be registered with a custom deployment"""
+    """Test that recordings can be registered with a custom deployment."""
     # Arrange
     now = datetime.datetime.now()
     deployment = Deployment(
@@ -312,6 +316,7 @@ def test_recording_can_be_registered_with_custom_deployment(
         latitude=1.0,
         longitude=2.0,
         device_id="test_device",
+        device_name="test_device",
     )
     sqlite_store.store_deployment(deployment)
     recording = Recording(
