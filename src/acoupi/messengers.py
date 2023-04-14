@@ -1,10 +1,44 @@
 """Messengers for the acoupi package."""
-from typing import Optional
 import datetime
+from typing import Optional
 
 import paho.mqtt.client as mqtt
 
 from acoupi import types
+
+__all__ = [
+    "MQTTMessenger",
+    "build_deployment_message",
+    "build_recording_message",
+    "build_detection_message",
+]
+
+
+def build_deployment_message(deployment: types.Deployment) -> types.Message:
+    """Build a deployment message."""
+    return types.Message(
+        message=deployment.asdict(),
+        sent_on=datetime.datetime.now(),
+        device_id=deployment.device_id,
+    )
+
+
+def build_recording_message(recording: types.Recording) -> types.Message:
+    """Build a recording message."""
+    return types.Message(
+        message=recording.asdict(),
+        sent_on=datetime.datetime.now(),
+        device_id="device",  # TODO: get device id from recording
+    )
+
+
+def build_detection_message(detection: types.Detection) -> types.Message:
+    """Build a detection message."""
+    return types.Message(
+        message=detection.asdict(),
+        sent_on=datetime.datetime.now(),
+        device_id="device",  # TODO: get device id from detection
+    )
 
 
 class MQTTMessenger(types.Messenger):
@@ -46,6 +80,10 @@ class MQTTMessenger(types.Messenger):
                 payload=message.message,
             )
             response.wait_for_publish(timeout=5)
+
+            if not response.rc == mqtt.MQTT_ERR_SUCCESS:
+                status = types.ResponseStatus.ERROR
+
         except ValueError:
             status = types.ResponseStatus.ERROR
         except RuntimeError:
