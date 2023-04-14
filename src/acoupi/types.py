@@ -19,8 +19,8 @@ class Deployment:
     device_id: str
     """The ID of the device."""
 
-    device_name: str
-    """User provided name of the device."""
+    name: str
+    """User provided name of the deployment."""
 
     latitude: Optional[float] = None
     """The latitude of the site where the device is deployed."""
@@ -36,7 +36,7 @@ class Deployment:
 class Recording:
     """A Recording is a single audio file recorded from the microphone."""
 
-    path: str
+    path: Optional[str]
     """The path to the audio file in the local filesystem"""
 
     datetime: datetime.datetime
@@ -170,10 +170,8 @@ class DetectionFilter(ABC):
 class Store(ABC):
     """The Store is responsible for storing the detections locally.
 
-    It is called after the model has run. This should decide:
-
-    1. If the detection should be stored
-    2. How the detection should be stored
+    The store keeps track of all the recordings, detections, and
+    deployments made.
     """
 
     @abstractmethod
@@ -203,6 +201,63 @@ class Store(ABC):
         detections: List[Detection],
     ) -> None:
         """Store the detection locally."""
+
+    @abstractmethod
+    def get_recordings(
+        self,
+        include: Optional[List[UUID]] = None,
+        exclude: Optional[List[UUID]] = None,
+    ) -> List[Recording]:
+        """Get the recordings from the local filesystem.
+
+        Args:
+            include: A list of recording IDs to include. If None, all
+                recordings are included.
+            exclude: A list of recording IDs to exclude. If None, no
+                recordings are excluded. Can not be used simultaneously
+                with include.
+
+        Returns:
+            A list of recordings.
+        """
+
+    @abstractmethod
+    def get_detections(
+        self,
+        include: Optional[List[UUID]] = None,
+        exclude: Optional[List[UUID]] = None,
+    ) -> List[Detection]:
+        """Get the detections from the local filesystem.
+
+        Args:
+            include: A list of detection IDs to include. If None, all
+                detections are included.
+            exclude: A list of detection IDs to exclude. If None, no
+                detections are excluded. Can not be used simultaneously
+                with include.
+
+        Returns:
+            A list of detections.
+        """
+
+    @abstractmethod
+    def get_deployments(
+        self,
+        include: Optional[List[UUID]] = None,
+        exclude: Optional[List[UUID]] = None,
+    ) -> List[Deployment]:
+        """Get the deployments from the local filesystem.
+
+        Args:
+            include: A list of deployment IDs to include. If None, all
+                deployments are included.
+            exclude: A list of deployment IDs to exclude. If None, no
+                deployments are excluded. Can not be used simultaneously
+                with include.
+
+        Returns:
+            A list of deployments.
+        """
 
 
 class RecordingFilter(ABC):

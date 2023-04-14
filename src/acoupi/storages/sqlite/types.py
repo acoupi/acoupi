@@ -7,7 +7,7 @@ from uuid import UUID
 from pony.orm import core
 
 __all__ = [
-    "Models",
+    "BaseModels",
     "Deployment",
     "Recording",
     "Detection",
@@ -27,6 +27,9 @@ class Deployment(core.EntityMeta):
     device_id: str
     """Device ID of the deployment."""
 
+    name: str
+    """Deployment name"""
+
     started_on: datetime
     """Datetime when the deployment started. Should be unique."""
 
@@ -36,11 +39,8 @@ class Deployment(core.EntityMeta):
     longitude: Optional[float]
     """Longitude of the deployment site. Can be None if unknown."""
 
-    recordings = List["Recording"]
+    recordings: List["Recording"]
     """Recordings that belong to the deployment."""
-
-    deployment_messages = List["DeploymentMessage"]
-    """Messages that were sent about the deployment."""
 
 
 class Recording(core.EntityMeta):
@@ -67,9 +67,6 @@ class Recording(core.EntityMeta):
     detections: List["Detection"]
     """Detections that were made on the recording"""
 
-    recording_messages: List["RecordingMessage"]
-    """Messages that were sent about the recording"""
-
 
 class Detection(core.EntityMeta):
     """Detection ORM model."""
@@ -85,9 +82,6 @@ class Detection(core.EntityMeta):
 
     recording: Recording
     """Recording that the detection belongs to"""
-
-    detection_messages: List["DetectionMessage"]
-    """Messages that were sent about the detection"""
 
 
 class MessageStatus(core.EntityMeta):
@@ -149,12 +143,17 @@ class DetectionMessage(core.EntityMeta):
     """Message status of the message"""
 
 
-class Models(NamedTuple):
-    """Container for all ORM models."""
+class BaseModels(NamedTuple):
+    """Container for models."""
 
     Deployment: Deployment
     Recording: Recording
     Detection: Detection
+
+
+class MessageModels(NamedTuple):
+    """Container for message models."""
+
     MessageStatus: MessageStatus
     DeploymentMessage: DeploymentMessage
     RecordingMessage: RecordingMessage

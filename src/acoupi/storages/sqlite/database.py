@@ -1,21 +1,18 @@
 """Database models for the acoupi database."""
 from datetime import datetime
-from typing import Tuple
 from uuid import UUID
 
 from pony import orm
 
-from acoupi.storages.sqlite.types import Models
+from acoupi.storages.sqlite.types import BaseModels, MessageModels
 
 __all__ = [
-    "create_database",
+    "create_base_models",
 ]
 
 
-def create_database() -> Tuple[orm.Database, Models]:
+def create_base_models(database: orm.Database) -> BaseModels:
     """Create the database and return the database and models."""
-    database = orm.Database()
-
     BaseModel = database.Entity
 
     class Deployment(BaseModel):  # type: ignore
@@ -25,7 +22,10 @@ def create_database() -> Tuple[orm.Database, Models]:
         """Unique ID of the deployment."""
 
         device_id = orm.Required(str)
-        """Device ID of the deployment."""
+        """Device ID."""
+
+        name = orm.Required(str)
+        """Deployment name."""
 
         started_on = orm.Required(datetime, unique=True)
         """Datetime when the deployment started. Should be unique."""
@@ -38,9 +38,6 @@ def create_database() -> Tuple[orm.Database, Models]:
 
         recordings = orm.Set("Recording")
         """Recordings that belong to the deployment."""
-
-        deployment_messages = orm.Set("DeploymentMessage")
-        """Messages that were sent about the deployment."""
 
     class Recording(BaseModel):  # type: ignore
         _table_ = "recording"
@@ -71,9 +68,6 @@ def create_database() -> Tuple[orm.Database, Models]:
         detections = orm.Set("Detection")
         """Detections that were made on the recording."""
 
-        recording_messages = orm.Set("RecordingMessage")
-        """Messages that were sent about the recording."""
-
     class Detection(BaseModel):  # type: ignore
         _table_ = "detection"
 
@@ -89,8 +83,17 @@ def create_database() -> Tuple[orm.Database, Models]:
         recording = orm.Required(Recording, column="recording_id")
         """Recording that the detection belongs to"""
 
-        detection_messages = orm.Set("DetectionMessage")
-        """Messages that were sent about the detection"""
+    return BaseModels(
+        Recording=Recording,  # type: ignore
+        Deployment=Deployment,  # type: ignore
+        Detection=Detection,  # type: ignore
+    )
+
+
+def create_message_models(
+    database: orm.Database,
+) -> MessageModels:
+    BaseModel = database.Entity
 
     class MessageStatus(BaseModel):  # type: ignore
         _table_ = "message_status"
@@ -117,10 +120,12 @@ def create_database() -> Tuple[orm.Database, Models]:
         id = orm.PrimaryKey(int, auto=True)
         """Unique ID of the deployment message"""
 
-        deployment = orm.Required(Deployment, column="deployment_id")
+        deployment_id = orm.Required(UUID, column="deployment_id")
         """Deployment that the message belongs to"""
 
-        message_status = orm.Required(MessageStatus, column="message_status_id")
+        message_status = orm.Required(
+            MessageStatus, column="message_status_id"
+        )
         """Message status of the message"""
 
     class RecordingMessage(BaseModel):  # type: ignore
@@ -129,10 +134,13 @@ def create_database() -> Tuple[orm.Database, Models]:
         id = orm.PrimaryKey(int, auto=True)
         """Unique ID of the recording message"""
 
-        recording = orm.Required(Recording, column="recording_id")
+        recording_id = orm.Required(UUID, column="recording_id")
         """Recording that the message belongs to"""
 
-        message_status = orm.Required(MessageStatus, column="message_status_id")
+        message_status = orm.Required(
+            MessageStatus,
+            column="message_status_id",
+        )
         """Message status of the message"""
 
     class DetectionMessage(BaseModel):  # type: ignore
@@ -141,16 +149,16 @@ def create_database() -> Tuple[orm.Database, Models]:
         id = orm.PrimaryKey(int, auto=True)
         """Unique ID of the detection message"""
 
-        detection = orm.Required(Detection, column="detection_id")
+        detection_id = orm.Required(UUID, column="detection_id")
         """Detection that the message belongs to"""
 
-        message_status = orm.Required(MessageStatus, column="message_status_id")
+        message_status = orm.Required(
+            MessageStatus,
+            column="message_status_id",
+        )
         """Message status of the message"""
 
-    return database, Models(
-        Recording=Recording,  # type: ignore
-        Deployment=Deployment,  # type: ignore
-        Detection=Detection,  # type: ignore
+    return MessageModels(
         MessageStatus=MessageStatus,  # type: ignore
         DeploymentMessage=DeploymentMessage,  # type: ignore
         RecordingMessage=RecordingMessage,  # type: ignore
