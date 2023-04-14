@@ -62,25 +62,25 @@ def main():
 
         # Record audio
         print("")
-        print(f"Recording Audio Start: {time.time()}")
+        print(f"Recording Audio Start: {time.asctime()}")
         recording = audio_recorder.record()
-        print(f"Recording Audio End: {time.time()}")
+        print(f"Recording Audio End: {time.asctime()}")
         # check if an audio file has been recorded
         print("")
         print(f"Recorded file: {recording.path}")
-        print(f"Recording Time: {recording.datetime}")
+        #print(f"Recording Time: {recording.time}")
 
         # Load model 
         print("")
-        print(f"Loading BatDetect2 Model Start: {time.time()}")
+        print(f"Loading BatDetect2 Model Start: {time.asctime()}")
         model = BatDetect2(recording=recording)
-        print(f"Loading BatDetect2 Model End: {time.time()}")
+        print(f"Loading BatDetect2 Model End: {time.asctime()}")
 
         # Run model - Get detections
         print("")
-        print(f"Running Model BatDetect2 Start: {time.time()}")
+        print(f"Running Model BatDetect2 Start: {time.asctime()}")
         detections = model.run(recording)
-        print(f"Running Model BatDetect2 End: {time.time()}")
+        print(f"Running Model BatDetect2 End: {time.asctime()}")
         print("")
 
         # Detection Filter
@@ -91,20 +91,10 @@ def main():
         #clean_detection = recording_filter(recording, detections)
 
         # Clean Model Output
-<<<<<<< HEAD
-<<<<<<< HEAD
-        cdetections = CleanModelOutput(detections)
-        clean_predict = cdetections.getDetection_aboveThreshold()
-=======
+        print(f"Start Cleaning Model Output {time.asctime()}")
         cdetection = CleanModelOutput(detections)
         clean_predict = cdetection.getDetection_aboveThreshold()
->>>>>>> 4265145eafabe7e78f24d30e30c412a26f4e402d
-=======
-        print(f"Start Cleaning Model Output {time.time()}")
-        cdetection = CleanModelOutput(detections)
-        clean_predict = cdetection.getDetection_aboveThreshold()
-        print(f"End Cleaning Model Output {time.time()}")
->>>>>>> 05099022f25aeeb38c900fcea82959af44e91579
+        print(f"End Cleaning Model Output {time.asctime()}")
         print(f"Clean Prediction : {clean_predict}")
 
         # Save detections to local store
