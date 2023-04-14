@@ -77,8 +77,8 @@ def main():
         #clean_detection = recording_filter(recording, detections)
 
         # Clean Model Output
-        cdetection = CleanModelOutput(detection)
-        clean_predict = cdetection.getDetection_aboveThreshold()
+        cdetections = CleanModelOutput(detections)
+        clean_predict = cdetections.getDetection_aboveThreshold()
         print(f"Clean Prediction : {clean_predict}")
 
         # Save detections to local store
