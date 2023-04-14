@@ -1,4 +1,5 @@
 import threading
+import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import yaml
@@ -6,6 +7,7 @@ import yaml
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL
 from audio_recording import PyAudioRecorder
 from model import BatDetect2
+from detection_filters import Threshold_DetectionFilter
 from model_output import CleanModelOutput
 #from schedule_managers import ConstantScheduleManager
 from recording_conditions import IsInIntervals, Interval
@@ -59,24 +61,37 @@ def main():
             return
 
         # Record audio
-        recording = audio_recorder.record()
-        # check if an audio file has been recorded
-        print(f"Recorded file: {recording.path}")
         print("")
+        print(f"Recording Audio Start: {time.time()}")
+        recording = audio_recorder.record()
+        print(f"Recording Audio End: {time.time()}")
+        # check if an audio file has been recorded
+        print("")
+        print(f"Recorded file: {recording.path}")
+        print(f"Recording Time: {recording.datetime}")
 
         # Load model 
+        print("")
+        print(f"Loading BatDetect2 Model Start: {time.time()}")
         model = BatDetect2(recording=recording)
-        print("Model Loaded")
+        print(f"Loading BatDetect2 Model End: {time.time()}")
 
         # Run model - Get detections
+        print("")
+        print(f"Running Model BatDetect2 Start: {time.time()}")
         detections = model.run(recording)
-        print('Clean Model Output - Detections')
+        print(f"Running Model BatDetect2 End: {time.time()}")
         print("")
 
-        # Recording Filter
+        # Detection Filter
+        store_detections = Threshold_DetectionFilter(detections)
+        print("Store Detections - Threshold DF")
+        print(store_detections)
+        print("")
         #clean_detection = recording_filter(recording, detections)
 
         # Clean Model Output
+<<<<<<< HEAD
 <<<<<<< HEAD
         cdetections = CleanModelOutput(detections)
         clean_predict = cdetections.getDetection_aboveThreshold()
@@ -84,6 +99,12 @@ def main():
         cdetection = CleanModelOutput(detections)
         clean_predict = cdetection.getDetection_aboveThreshold()
 >>>>>>> 4265145eafabe7e78f24d30e30c412a26f4e402d
+=======
+        print(f"Start Cleaning Model Output {time.time()}")
+        cdetection = CleanModelOutput(detections)
+        clean_predict = cdetection.getDetection_aboveThreshold()
+        print(f"End Cleaning Model Output {time.time()}")
+>>>>>>> 05099022f25aeeb38c900fcea82959af44e91579
         print(f"Clean Prediction : {clean_predict}")
 
         # Save detections to local store
