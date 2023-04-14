@@ -50,7 +50,7 @@ def main():
 
     def process1_recordaudio():
         # Schedule next processing
-        threading.Timer(DEFAULT_RECORDING_INTERVAL, process).start()
+        threading.Timer(DEFAULT_RECORDING_INTERVAL, process1_recordaudio).start()
 
         # Check if we should record
         if not recording_condition.should_record(datetime.now()):
@@ -63,15 +63,16 @@ def main():
         print(f"Recording Audio End: {time.asctime()}")
 
         # Send audio recording path to process2_analyseaudio()
-        queue.put(recording)
+        return recording
+        #queue.put(recording)
     
-    def process2_analyseaudio(audio_recording):
-
-        # Load BatDetect2 model
-        model = BatDetect2()
+    def process2_analyseaudio():
 
         # Get the audio recording from process 1
-        recording = queue.get()
+        recording = process1_recordaudio()
+
+        # Load BatDetect2 model
+        model = BatDetect2(recording=recording)
         
         # Check audio recording file path 
         print("")
@@ -89,7 +90,7 @@ def main():
     # Create the first process
     p1 = multiprocessing.Process(target=process1_recordaudio)
     # Create the second process, passing queue object as argument
-    p2 = multiprocessing.Process(target=process2_analyseaudio, args=(queue,))
+    p2 = multiprocessing.Process(target=process2_analyseaudio)
 
 
     # Start both processes
