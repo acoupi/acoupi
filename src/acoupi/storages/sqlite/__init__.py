@@ -55,8 +55,14 @@ Example:
     >>> store.store_detections(recording, [detection])
 
 """
+# TODO: Mention message stores as well.
+# TODO: Add example for message store.
+# TODO: Extend the SqliteStore example to include get_recordings and
+# get_detections methods.
+from acoupi.storages.sqlite.message_store import SqliteMessageStore
 from acoupi.storages.sqlite.store import SqliteStore
 
 __all__ = [
     "SqliteStore",
+    "SqliteMessageStore",
 ]

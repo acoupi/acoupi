@@ -12,10 +12,8 @@ and the recordings and detections for a given deployment. See
 the Storage class for more details.
 
 """
+# TODO: Mention message stores as well.
 
-from acoupi.storages.sqlite import SqliteStore
+from acoupi.storages.sqlite import SqliteMessageStore, SqliteStore
 
-
-__all__ = [
-    "SqliteStore",
-]
+__all__ = ["SqliteStore", "SqliteMessageStore"]
