@@ -1,4 +1,5 @@
 """Process templates for Acoupi."""
+from typing import Callable
 
 from acoupi import types
 from acoupi.messengers import (
@@ -8,13 +9,27 @@ from acoupi.messengers import (
 )
 
 
-def build_sync_data_process(
+def build_send_data_process(
     message_store: types.MessageStore,
     messenger: types.Messenger,
-):
-    def sync_data():
-        """Process to sync data."""
+) -> Callable[[], None]:
+    """Build a process to send data to a remote server.
 
+    Use this function to build a process that will send data to a remote server
+    using your preferred messenger and message store. This function will return
+    a function that can be used to start the process.
+
+    Args:
+        message_store: The message store to use. The message store
+            is used to get unsynced data and store any messages that are sent.
+        messenger: The messenger to use.
+
+    Returns:
+        A function that can be used to start the process.
+    """
+
+    def send_data_process() -> None:
+        """Process to sync data."""
         # Sync deployments
         for deployment in message_store.get_unsynced_deployments():
             message = build_deployment_message(deployment)
@@ -32,3 +47,5 @@ def build_sync_data_process(
             message = build_detection_message(detection)
             response = messenger.send_message(message)
             message_store.store_detection_message(detection, response)
+
+    return send_data_process

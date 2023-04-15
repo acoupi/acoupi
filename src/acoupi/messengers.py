@@ -1,5 +1,7 @@
 """Messengers for the acoupi package."""
 import datetime
+import json
+from dataclasses import asdict
 from typing import Optional
 
 import paho.mqtt.client as mqtt
@@ -17,7 +19,7 @@ __all__ = [
 def build_deployment_message(deployment: types.Deployment) -> types.Message:
     """Build a deployment message."""
     return types.Message(
-        message=deployment.asdict(),
+        message=json.dumps(asdict(deployment)),
         sent_on=datetime.datetime.now(),
         device_id=deployment.device_id,
     )
@@ -26,7 +28,7 @@ def build_deployment_message(deployment: types.Deployment) -> types.Message:
 def build_recording_message(recording: types.Recording) -> types.Message:
     """Build a recording message."""
     return types.Message(
-        message=recording.asdict(),
+        message=json.dumps(asdict(recording)),
         sent_on=datetime.datetime.now(),
         device_id="device",  # TODO: get device id from recording
     )
@@ -35,7 +37,7 @@ def build_recording_message(recording: types.Recording) -> types.Message:
 def build_detection_message(detection: types.Detection) -> types.Message:
     """Build a detection message."""
     return types.Message(
-        message=detection.asdict(),
+        message=json.dumps(asdict(detection)),
         sent_on=datetime.datetime.now(),
         device_id="device",  # TODO: get device id from detection
     )

@@ -12,7 +12,7 @@ method, which takes a Recording object and returns a boolean indicating if the
 recording should be processed by the model.
 
 Keep in mind that the should_process_recording method is called for every
-recording in the dataset, so it should be as efficient as possible.
+recording, so it should be as efficient as possible.
 """
 from acoupi.types import ProcessingFilter, Recording
 
