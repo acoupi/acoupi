@@ -286,8 +286,12 @@ class FileManager(ABC):
     """
 
     @abstractmethod
-    def save_recording(self, recording: Recording) -> None:
-        """Save the recording to the local filesystem."""
+    def save_recording(self, recording: Recording) -> str:
+        """Save the recording to the local filesystem.
+
+        Returns:
+            The path to the recording.
+        """
 
     @abstractmethod
     def delete_recording(self, recording: Recording) -> None:
