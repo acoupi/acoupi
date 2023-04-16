@@ -321,7 +321,7 @@ class SqliteStore(Store):
             path=recording.path,
             duration_s=recording.duration,
             samplerate_hz=recording.samplerate,
-            channels=1,
+            channels=recording.channels,
             datetime=recording.datetime,
             deployment=deployment_db,
         )

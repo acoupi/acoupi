@@ -231,6 +231,7 @@ def test_recordings_can_be_registered(
         duration=10.0,
         samplerate=44100,
         datetime=now,
+        channels=2,
     )
 
     # Act
@@ -244,6 +245,7 @@ def test_recordings_can_be_registered(
         row = cursor.fetchone()
         assert row["path"] == "test/path"
         assert row["duration_s"] == 10.0
+        assert row["channels"] == 2
         assert row["samplerate_hz"] == 44100
         assert row["datetime"] == now.isoformat(sep=" ")
         assert row["id"] == recording.id.bytes

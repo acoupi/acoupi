@@ -37,9 +37,6 @@ class Deployment:
 class Recording:
     """A Recording is a single audio file recorded from the microphone."""
 
-    path: Optional[str]
-    """The path to the audio file in the local filesystem"""
-
     datetime: datetime.datetime
     """The datetime when the recording was made"""
 
@@ -48,6 +45,12 @@ class Recording:
 
     samplerate: int
     """The samplerate of the recording in Hz"""
+
+    path: Optional[str] = None
+    """The path to the audio file in the local filesystem"""
+
+    channels: int = 1
+    """The number of channels in the recording. Defaults to 1."""
 
     id: UUID = field(default_factory=uuid4)
     """The unique ID of the recording"""

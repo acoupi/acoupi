@@ -59,7 +59,7 @@ def create_base_models(database: orm.Database) -> BaseModels:
         samplerate_hz = orm.Required(int)
         """Samplerate of the recording in Hz"""
 
-        channels = orm.Required(int)
+        channels = orm.Required(int, default=1)
         """Number of channels in the recording"""
 
         deployment = orm.Required(Deployment, column="deployment_id")
