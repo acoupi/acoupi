@@ -10,7 +10,7 @@ from audio_recording import PyAudioRecorder
 from model import BatDetect2
 from detection_filters import Threshold_DetectionFilter
 from model_output import CleanModelOutput
-#from schedule_managers import ConstantScheduleManager
+from schedule_managers import RecordingScheduler
 from recording_conditions import IsInIntervals, Interval
 #from recording_filters import ThresholdRecordingFilter
 
@@ -29,6 +29,8 @@ def main():
 
     with open("config.yaml") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
+
+    scheduler = ConstantIntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
     # Create audio_recorder object
     audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
@@ -49,8 +51,11 @@ def main():
     # recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
 
     def process():
-        # Schedule next processing
-        threading.Timer(DEFAULT_RECORDING_INTERVAL, process).start()
+
+        # Get the time 
+        now = datetime.now()
+        # Schedule next recording - Use Scheduler to determine when next recording should happen.
+        threading.Timer(scheduler.time_until_next_recording(now), process).start()
 
         # Check if we should record
         if not recording_condition.should_record(datetime.now()):
@@ -69,7 +74,7 @@ def main():
         # Load model 
         print("")
         print(f"Loading BatDetect2 Model Start: {time.asctime()}")
-        model = BatDetect2()
+        model = BatDetect2(recording=recording)
         print(f"Loading BatDetect2 Model End: {time.asctime()}")
         # Run model - Get detections
         print("")

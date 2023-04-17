@@ -10,7 +10,7 @@ from audio_recording import PyAudioRecorder
 from model import BatDetect2
 from detection_filters import Threshold_DetectionFilter
 from model_output import CleanModelOutput
-#from schedule_managers import ConstantScheduleManager
+from schedule_managers import RecordingScheduler
 from recording_conditions import IsInIntervals, Interval
 #from recording_filters import ThresholdRecordingFilter
 
@@ -29,6 +29,8 @@ def main():
 
     with open("config.yaml") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
+
+    scheduler = ConstantIntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
     # Create audio_recorder object
     audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
@@ -49,8 +51,11 @@ def main():
     # recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
 
     def process1_recordaudio():
-        # Schedule next processing
-        threading.Timer(DEFAULT_RECORDING_INTERVAL, process1_recordaudio).start()
+
+        # Get the time 
+        now = datetime.now()
+        # Schedule next recording - Use Scheduler to determine when next recording should happen.
+        threading.Timer(scheduler.time_until_next_recording(now), process).start()
 
         # Check if we should record
         if not recording_condition.should_record(datetime.now()):
@@ -83,7 +88,7 @@ def main():
         # Run model - Get detections
         print("")
         print(f"Running Model BatDetect2 Start: {time.asctime()}")
-        detections = model.run()
+        detections = model.run(recording)
         print(f"Running Model BatDetect2 End: {time.asctime()}")
 
     # Create Queue to communicate between the 2 processes
@@ -107,7 +112,8 @@ def main():
     print(f"End Process2 - Analyse Audio: {time.asctime()}")
     p2.join()
 
-                                
+if __name__ == "__main__":
+    main()                             
     # def process():
     #     # Schedule next processing
     #     threading.Timer(DEFAULT_RECORDING_INTERVAL, process).start()
