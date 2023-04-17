@@ -12,7 +12,7 @@ made.
 """
 from acoupi.config import DEFAULT_RECORDING_INTERVAL
 from acoupi.types import RecordingScheduler
-from datetime import datetime
+import datetime
 
 __all__ = [
     "IntervalScheduler",
@@ -43,7 +43,7 @@ class IntervalScheduler(RecordingScheduler):
         
         """
         if not time:
-            time = datetime.now()
+            time = datetime.datetime.now()
         next_recording_time = (time + datetime.timedelta(seconds=self.interval)).replace(microsecond=0)
         return int((next_recording_time - time).total_seconds())
         
