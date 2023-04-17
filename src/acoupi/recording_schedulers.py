@@ -12,6 +12,7 @@ made.
 """
 from acoupi.config import DEFAULT_RECORDING_INTERVAL
 from acoupi.types import RecordingScheduler
+from datetime import datetime
 
 __all__ = [
     "IntervalScheduler",
@@ -32,6 +33,17 @@ class IntervalScheduler(RecordingScheduler):
         """
         self.interval = interval
 
-    def time_until_next_recording(self) -> float:
-        """Return the time until the next recording."""
-        return self.interval
+    def time_until_next_recording(self, time: datetime = None) -> float:
+        """Return the number of second until the next recording.
+        Should return 0 if a recording should be made immediately. 
+
+        Args:
+            time: The time to use for determining the next recording. 
+            Defaults to None.
+        
+        """
+        if not time:
+            time = datetime.now()
+        next_recording_time = (time + datetime.timedelta(seconds=self.interval)).replace(microsecond=0)
+        return int((next_recording_time - time).total_seconds())
+        
