@@ -74,7 +74,7 @@ def main():
         #recording = process1_recordaudio()
 
         # Load BatDetect2 model
-        model = BatDetect2(recording=recording)
+        model = BatDetect2(recording=audio_recording)
         
         # Check audio recording file path 
         print("")
@@ -83,10 +83,9 @@ def main():
         # Run model - Get detections
         print("")
         print(f"Running Model BatDetect2 Start: {time.asctime()}")
-        detections = model.run(recording)
+        detections = model.run()
         print(f"Running Model BatDetect2 End: {time.asctime()}")
 
-if __name__ == "__main__":
     # Create Queue to communicate between the 2 processes
     queue = multiprocessing.Queue()
 
