@@ -46,6 +46,9 @@ class Recording:
     samplerate: int
     """The samplerate of the recording in Hz"""
 
+    deployment: Optional[Deployment] = None
+    """The deployment that the recording belongs to"""
+
     path: Optional[str] = None
     """The path to the audio file in the local filesystem"""
 
@@ -65,6 +68,9 @@ class Detection:
 
     probability: float
     """The probability of the prediction"""
+
+    recording: Optional[Recording] = None
+    """The recording that the detection was made on"""
 
     id: UUID = field(default_factory=uuid4)
     """The unique ID of the detection"""
