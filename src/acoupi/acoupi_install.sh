@@ -40,7 +40,8 @@ pip3 install .
 
 # Create directory to store audio files
 #echo "Creating necessary directories"
-#sudo -u ${USER} mkdir -p audio/audio_files
+#sudo -u ${USER} mkdir -p src/acoupi/storage/bats
+#sudo -u ${USER} mkdir -p src/acoupi/storage/no_bats
 #sudo -u ${USER} mkdir -p audio/analysed
 
 # Move the .service files to lib/systemd/system - Enable and Start it

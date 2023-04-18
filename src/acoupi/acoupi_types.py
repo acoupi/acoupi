@@ -37,6 +37,9 @@ class Deployment:
 class Recording:
     """A Recording is a single audio file recorded from the microphone."""
 
+    path: Optional[str]
+    """The path to the audio file in the local filesystem"""
+
     datetime: datetime.datetime
     """The datetime when the recording was made"""
 
@@ -45,15 +48,6 @@ class Recording:
 
     samplerate: int
     """The samplerate of the recording in Hz"""
-
-    deployment: Optional[Deployment] = None
-    """The deployment that the recording belongs to"""
-
-    path: Optional[str] = None
-    """The path to the audio file in the local filesystem"""
-
-    channels: int = 1
-    """The number of channels in the recording. Defaults to 1."""
 
     id: UUID = field(default_factory=uuid4)
     """The unique ID of the recording"""
@@ -68,9 +62,6 @@ class Detection:
 
     probability: float
     """The probability of the prediction"""
-
-    recording: Optional[Recording] = None
-    """The recording that the detection was made on"""
 
     id: UUID = field(default_factory=uuid4)
     """The unique ID of the detection"""
@@ -295,12 +286,8 @@ class FileManager(ABC):
     """
 
     @abstractmethod
-    def save_recording(self, recording: Recording) -> str:
-        """Save the recording to the local filesystem.
-
-        Returns:
-            The path to the recording.
-        """
+    def save_recording(self, recording: Recording) -> None:
+        """Save the recording to the local filesystem."""
 
     @abstractmethod
     def delete_recording(self, recording: Recording) -> None:
