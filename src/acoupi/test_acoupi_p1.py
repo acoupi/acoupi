@@ -12,6 +12,7 @@ from detection_filters import Threshold_DetectionFilter
 from model_output import CleanModelOutput
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
+from storages.sqlite import SqliteStore
 #from recording_filters import ThresholdRecordingFilter
 
 #from acoupi.file_managers import FileManager
@@ -48,6 +49,8 @@ def main():
 
     recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
 
+    storage = SqliteStore(config['sqlite']['storage'])
+
     # recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
 
     def process():
@@ -69,7 +72,7 @@ def main():
         # check if an audio file has been recorded
         print("")
         print(f"Recorded file: {recording.path}")
-        #print(f"Recording Time: {recording.time}")
+        print(f"Recording Time: {recording.datetime}")
 
         # Load model 
         print("")
@@ -97,8 +100,8 @@ def main():
         print(f"End Cleaning Model Output {time.asctime()}")
         print(f"Clean Prediction : {clean_predict}")
 
-    #     # Save detections to local store
-    #     #storage.store_detections(recording, clean_predict)
+        # Save detections to local store
+        storage.store_detections(recording, store_detections)
     #     #print("Detections stored")
 
     #     # Delete recording
