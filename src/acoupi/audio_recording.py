@@ -1,5 +1,5 @@
 """Definition of audio recorder"""
-from datetime import datetime
+import datetime
 import tempfile
 from tempfile import TemporaryFile, NamedTemporaryFile
 import pyaudio
@@ -16,10 +16,10 @@ from acoupi_types import Deployment, Recording, AudioRecorder
 
 class getRecording_Info(Recording):
 
-    def __init__(self, path: str, time: datetime.now, duration: float, samplerate: int):
+    def __init__(self, path: str, datetime: datetime.datetime, duration: float, samplerate: int):
 
         self.path = path
-        self.time = time
+        self.datetime = datetime
         self.duration = duration
         self.sample_rate = samplerate
 
@@ -63,8 +63,9 @@ class PyAudioRecorder(AudioRecorder):
         
         #device_index = self.findAudioDevice()
 
-        date_time = datetime.now().strftime('%Y%m%d-%H%M%S') 
-   
+        #self.datetime = datetime.datetime.now().strftime('%Y%m%d-%H%M%S') 
+        self.datetime = datetime.datetime.now()
+        
         #Create a temporary file to record audio
         with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_audiof:
             
@@ -105,6 +106,6 @@ class PyAudioRecorder(AudioRecorder):
             temp_audio_file.close()
 
             # Create a Recording object and return it
-            recording = getRecording_Info(path=temp_audio_path, time=datetime.now(), duration=self.duration, samplerate=self.sample_rate)
+            recording = getRecording_Info(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
             return recording
 
