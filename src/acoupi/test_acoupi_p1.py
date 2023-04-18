@@ -1,14 +1,14 @@
-import threading
+#import threading
 import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import yaml
-import multiprocessing 
+#import multiprocessing 
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL
 from audio_recording import PyAudioRecorder
 from model import BatDetect2
-from detection_filters import Threshold_DetectionFilter
+#from detection_filters import Threshold_DetectionFilter
 from model_output import CleanModelOutput
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
@@ -31,7 +31,7 @@ def main():
     with open("config.yaml") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
-    scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
+    #scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
     # Create audio_recorder object
     audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
@@ -41,13 +41,13 @@ def main():
                                  device_index=DEVICE_INDEX)
 
     # Create Interval start_time, end_time object
-    start_time = datetime.strptime(config['start_recording'],"%H:%M:%S").time()
-    end_time = datetime.strptime(config['end_recording'], "%H:%M:%S").time()
+    #start_time = datetime.strptime(config['start_recording'],"%H:%M:%S").time()
+    #end_time = datetime.strptime(config['end_recording'], "%H:%M:%S").time()
 
     recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
                            Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
 
-    recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
+    #recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
 
     storage = SqliteStore(config['sqlite']['storage'])
 
