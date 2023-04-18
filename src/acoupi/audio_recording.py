@@ -14,7 +14,8 @@ from dataclasses import dataclass
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX
 from acoupi_types import Deployment, Recording, AudioRecorder
 
-class getRecording_Info(Recording):
+
+""" class getRecording_Info():
 
     def __init__(self, path: str, datetime: datetime.datetime, duration: float, samplerate: int):
 
@@ -24,7 +25,7 @@ class getRecording_Info(Recording):
         self.sample_rate = samplerate
 
     def recording_info(self):
-        return 
+        return """
 
 class PyAudioRecorder(AudioRecorder):
 #class PyAudioRecorder(AudioRecorder):
@@ -106,6 +107,5 @@ class PyAudioRecorder(AudioRecorder):
             temp_audio_file.close()
 
             # Create a Recording object and return it
-            recording = getRecording_Info(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
+            recording = Recording(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
             return recording
-
