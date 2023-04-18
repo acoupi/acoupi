@@ -1,4 +1,6 @@
 #!bin/bash
+#sudo apt update
+#sudo apt upgrade
 export USER=$USER
 export HOME=$HOME
 
@@ -29,6 +31,12 @@ bash $HOME/src/acoupi/script/install_pyaudio.sh
 echo "Installing libraries package"
 #pip3 install -U -r $HOME/src/acoupi/requirements.txt
 pip3 install . 
+
+## Install sqlite database
+#sudo apt install sqlite3
+## Create a new database file 
+#sqlite3 acoupi.db
+## Create all the necessary tables in acoupi.db
 
 # Create directory to store audio files
 #echo "Creating necessary directories"
