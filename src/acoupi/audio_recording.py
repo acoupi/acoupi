@@ -1,4 +1,17 @@
-"""Definition of audio recorder"""
+"""Implementation of AudioRecorder for acoupi.
+
+Audio recorder is used to record audio files. Audio recorder (PyAudioRecorder) 
+is implemented as class that inherit from AudioRecorder. The class should implement 
+the record() method which return a temporary audio file based on the dataclass Recording.
+The dataclass Recording takes a datetime.datetime object, a path from type str, 
+a duration from type float, and samplerate from type float. 
+
+The audio recorder takes arguments related to the audio device. It specifies the acoutics 
+parameters of recording an audio file. These are the samplerate, the duration, the number
+of audio channels, the chunk size, and the index of the audio device. The index of the audio 
+device corresponds to the index of the USB port the device is connected to. The audio recorder 
+return a temporary .wav file.
+"""
 import datetime
 import tempfile
 from tempfile import TemporaryFile, NamedTemporaryFile
@@ -12,20 +25,8 @@ from dataclasses import dataclass
 #from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
 #from acoupi.types import Deployment, Recording, AudioRecorder
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX
-from acoupi_types import Deployment, Recording, AudioRecorder
+from acoupi_types import Recording, AudioRecorder
 
-
-""" class getRecording_Info():
-
-    def __init__(self, path: str, datetime: datetime.datetime, duration: float, samplerate: int):
-
-        self.path = path
-        self.datetime = datetime
-        self.duration = duration
-        self.sample_rate = samplerate
-
-    def recording_info(self):
-        return """
 
 class PyAudioRecorder(AudioRecorder):
 #class PyAudioRecorder(AudioRecorder):
@@ -36,8 +37,6 @@ class PyAudioRecorder(AudioRecorder):
                 channels: int = DEFAULT_AUDIO_CHANNELS, 
                 chunk: int = DEFAULT_CHUNK_SIZE, 
                 device_index: int = DEVICE_INDEX): 
-                #lat: float = cfg['location']['latitude'], 
-                #lon: float = cfg['location']['longitude']):
         
         # Audio Duration
         self.duration = duration
@@ -48,23 +47,10 @@ class PyAudioRecorder(AudioRecorder):
         self.chunk = chunk
         self.device_index = device_index
         
-        # Device Location 
-        #self.lat = lat
-        #self.lon = lon
-    
-    def findAudioDevice(self):
-        p = pyaudio.PyAudio()
-        device_info = p.get_default_input_device_info()
-        device_index = device_info['index']
-        return device_index
 
-    #def record_audio(self,device_index) -> Recording:
     def record(self) -> Recording:
         """Record a 3 second temporary audio file at 192KHz. Return the temporary path of the file."""       
         
-        #device_index = self.findAudioDevice()
-
-        #self.datetime = datetime.datetime.now().strftime('%Y%m%d-%H%M%S') 
         self.datetime = datetime.datetime.now()
         
         #Create a temporary file to record audio
@@ -72,7 +58,6 @@ class PyAudioRecorder(AudioRecorder):
             
             # Get the temporary file path from the created temporary audio file
             temp_audio_path = temp_audiof.name
-            print(f"New Audio File: {temp_audio_path}")
 
             #Create an new instace of PyAudio
             p = pyaudio.PyAudio()
