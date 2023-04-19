@@ -188,16 +188,9 @@ class RecordingFilter(ABC):
         """Determine if the recording should be kept."""
 
 
-class SavingManager(ABC):
-    """The SavingManager is responsible for saving the recordings
-    and detections locally. 
+class RecordingSavingManager(ABC):
+    """The Recording SavingManager is responsible for saving the recordings locally. 
     """
-
-    #@abstractmethod
-    #def find_treshold(self, 
-    #    treshold: Threshold, 
-    #    detections: List[Detection]
-    #) -> bool:
 
     @abstractmethod
     def save_recording(
@@ -207,10 +200,16 @@ class SavingManager(ABC):
     ) -> None:
         """Save the recording locally."""
 
+
+class DetectionSavingManager(ABC):
+    """The Detection SavingManager is responsible for saving the detections locally. 
+    """
+    
     @abstractmethod
     def save_detections(
         self, 
-        detections: List[Detection]
+        detections: List[Detection],
+        bool: DetectionFilter
     ) -> None:
         """Save the detection locally"""
 

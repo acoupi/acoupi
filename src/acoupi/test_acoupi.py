@@ -14,7 +14,7 @@ from model import BatDetect2
 from model_output import CleanModelOutput
 from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
-from saving_managers import Directories, RecordingSavingManager, DetectionSavingManager
+from saving_managers import Directories, SaveRecording, SaveDetection
 
 
 # Create scheduler manager
@@ -55,10 +55,11 @@ def main():
     print(f'Directories Recording Save True: {save_dir_recording.dirpath_true}')
     print(f'Directories Recording Save False: {save_dir_recording.dirpath_false}')
     save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
-    print(f'Directories Detection Save: {save_dir_detection}')
-    print('')
+
     # Create the recording savingmanager object
-    recording_savingmanager = RecordingSavingManager(save_dir_recording)
+    recording_savingmanager = SaveRecording(save_dir_recording)
+    # Create the detection savingmanager object
+    recording_savingmanager = SaveDetection(save_dir_detection)
    
     def process():
 

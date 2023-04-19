@@ -15,7 +15,8 @@ which takes a XXX, XXX, and XXX object.
 from dataclasses import dataclass
 from typing import List
 
-from acoupi_types import Detection, Recording, DetectionFilter, RecordingFilter, SavingManager
+from acoupi_types import Recording, RecordingFilter, RecordingSavingManager
+from acoupi_types import Detection, DetectionFilter, DetectionSavingManager
 
 @dataclass 
 class Directories:
@@ -28,14 +29,13 @@ class Directories:
     """Directory path to save recordings if audio recording contain no detections."""
 
 
-class RecordingSavingManager(SavingManager):
+class SaveRecording(RecordingSavingManager):
     """A Recording SavingManager that save audio recordings."""
 
     def __init__(self, save_dir: Directories):
         """Initiatilise the Recording SavingManager.
         
         Args:
-            recording: The audio recording to be saved. 
             save_dir: Path of the directories where the recording should be saved.  
         """
         self.save_dir = save_dir
@@ -51,19 +51,19 @@ class RecordingSavingManager(SavingManager):
     ### Recording object = path, datetime, duration, samplerate, id
 
 
-class DetectionSavingManager(SavingManager):
+class SaveDetection(DetectionSavingManager):
     """A Recording SavingManager that save audio recordings."""
 
-    def __init__(self, detections: List[Detection]):
+    def __init__(self, save_dir: Directories):
         """Initiatilise the Recording SavingManager.
         
         Args:
-            recording: The audio recording to be saved. 
+            save_dir: Path of the directories where the detections should be saved.   
         """
-        self.detections = detections
+        self.save_dir = save_dir
     
-    def save_detections(self):
+    def save_detections(self, detections: List[Detection], bool: DetectionFilter):
         """Determine where and how the detections should be saved."""
-        ...
+        sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
     
     ### Detection object = species_name, probability
