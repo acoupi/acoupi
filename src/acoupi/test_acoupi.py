@@ -114,7 +114,7 @@ def main():
         
         # Clean Model Output
         print(f"Start Cleaning Model Output {time.asctime()}")
-        cdetection = CleanModelOutput(detections)
+        cdetection = CleanModelOutput(detections, threshold=DEFAULT_THRESHOLD)
         clean_predict = cdetection.getDetection_aboveThreshold()
         print(f"End Cleaning Model Output {time.asctime()}")
         print(f"Clean Prediction : {clean_predict}")
