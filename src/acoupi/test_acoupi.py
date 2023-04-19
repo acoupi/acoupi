@@ -59,7 +59,7 @@ def main():
     # Create the recording savingmanager object
     recording_savingmanager = SaveRecording(save_dir_recording)
     # Create the detection savingmanager object
-    recording_savingmanager = SaveDetection(save_dir_detection)
+    detection_savingmanager = SaveDetection(save_dir_detection)
    
     def process():
 
@@ -107,9 +107,9 @@ def main():
         print("")
 
         # Recording Saving Manager
-        save_recording = recording_savingmanager.save_recording(recording, keep_recording_bool)
-        print(f"Saving Recording Directory: {save_recording.sdir}")
-        print(f"Saving Recording Path: {save_recording.recording.path}")
+        save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)
+        print(f"Saving Recording Directory: {save_rec.sdir}")
+        print(f"Saving Recording Path: {save_rec.recording.path}")
         print("")
         
         # Clean Model Output
