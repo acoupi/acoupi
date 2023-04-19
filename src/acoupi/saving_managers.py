@@ -14,6 +14,7 @@ which takes a XXX, XXX, and XXX object.
 
 from dataclasses import dataclass
 from typing import List
+import os
 
 from acoupi_types import Recording, RecordingFilter, RecordingSavingManager
 from acoupi_types import Detection, DetectionFilter, DetectionSavingManager
@@ -45,7 +46,10 @@ class SaveRecording(RecordingSavingManager):
 
         """
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
-        recording_filename = recording.path
+        recording_path = recording.path
+        recording_filename = recording.datetime
+        # Move recording to the path it should be save
+        os.rename(recording_path, os.join(sdir+'/'+recording_filename))
         return sdir, recording_filename
     ### Recording object = path, datetime, duration, samplerate, id
 
