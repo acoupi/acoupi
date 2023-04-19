@@ -93,7 +93,7 @@ class ThresholdRecordingFilter(RecordingFilter):
             bool
         """
         return any(
-            detection.probability >= self.threshold for detection in detections
+            annotation for annotation in detections if annotation['det_prob'] >= self.threshold
         )
 
 
