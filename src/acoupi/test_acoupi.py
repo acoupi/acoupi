@@ -5,14 +5,14 @@ from zoneinfo import ZoneInfo
 import yaml
 #import multiprocessing 
 
-from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL
+from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DETECTION_THRESHOLD
 from audio_recording import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
 from model import BatDetect2
 from model_output import CleanModelOutput
-#from detection_filters import Threshold_DetectionFilter
-#from recording_filters import ThresholdRecordingFilter
+from detection_filters import Threshold_DetectionFilter
+from recording_filters import ThresholdRecordingFilter
 from saving_managers import RecordingSavingManager, DetectionSavingManager
 
 
@@ -45,7 +45,9 @@ def main():
     # Create the recording_condition object - check if it is time to record audio (time.now() IsInInterval)
     recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
 
-    # recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
+    # Create recording_filter and detection_filter object
+    detection_filter = Threshold_DetectionFilter(DETECTION_THRESHOLD)
+    recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
 
     def process():
 
@@ -80,16 +82,18 @@ def main():
         print(f"Running Model BatDetect2 Start: {time.asctime()}")
         detections = model.run(recording)
         print(f"Running Model BatDetect2 End: {time.asctime()}")
-        print("")
-        print(f"Detections species name: {detections.species_name}")
-        print(f"Detections probability: {detections.probability}")
 
         # Detection Filter
-        store_detections = Threshold_DetectionFilter(detections)
-        print("Store Detections - Threshold DF")
-        print(store_detections)
-        print("")
+        #store_detections = Threshold_DetectionFilter(detections)
+        #print("Store Detections - Threshold DF")
+        keep_detection_bool = detection_filter.should_keep_detection(detections)
+        print(f"Threshold Detection Filter Decision: {keep_detection_bool}")
 
+        # Recording Filter
+        keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
+        print(f"Threshold Recording Filter Decision: {keep_recording_bool}")
+        print("")
+        
         # Clean Model Output
         print(f"Start Cleaning Model Output {time.asctime()}")
         cdetection = CleanModelOutput(detections)
