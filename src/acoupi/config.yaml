@@ -9,8 +9,8 @@ location:
 timezone: Europe/London
 
 # Audio Recording Parameters
-start_recording: '20:00:00'
-end_recording: '08:00:00'
+start_recording: '08:00:00'
+end_recording: '22:00:00'
 
 # Sqlite Database
 sqlite:
