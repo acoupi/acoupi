@@ -17,7 +17,7 @@ from saving_managers import RecordingSavingManager, DetectionSavingManager
 
 
 # Create scheduler manager
-#scheduler = ConstantScheduleManager(DEFAULT_RECORDING_INTERVAL) 
+scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) 
 
 def main():
 
@@ -56,6 +56,8 @@ def main():
 
         # Check if we should record
         if not recording_condition.should_record(datetime.now()):
+            print("Outside Recording Interval")
+            print(f"Recording Start at: {start_time} and End at: {end_time}")
             return
 
         # Record audio
