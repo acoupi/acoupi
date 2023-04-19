@@ -108,7 +108,9 @@ def main():
 
         # Recording Saving Manager
         save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)
-        print(f"Saving Recording Directory: {save_rec.sdir}")
+        print(save_rec)
+        print("")
+        #print(f"Saving Recording Directory: {save_rec.sdir}")
         print(f"Saving Recording Path: {save_rec.recording.path}")
         print("")
         
