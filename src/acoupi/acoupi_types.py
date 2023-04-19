@@ -202,7 +202,7 @@ class SavingManager(ABC):
     @abstractmethod
     def save_recording(
         self, 
-        recording: Recording
+        bool: RecordingFilter
     ) -> None:
         """Save the recording locally."""
 
