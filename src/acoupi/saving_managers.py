@@ -31,17 +31,16 @@ class Directories:
 class RecordingSavingManager(SavingManager):
     """A Recording SavingManager that save audio recordings."""
 
-    def __init__(self, recording: Recording, save_dir: Directories):
+    def __init__(self, save_dir: Directories):
         """Initiatilise the Recording SavingManager.
         
         Args:
             recording: The audio recording to be saved. 
             save_dir: Path of the directories where the recording should be saved.  
         """
-        self.recording = recording
         self.save_dir = save_dir
     
-    def save_recording(self, bool: RecordingFilter):
+    def save_recording(self, recording: Recording, bool: RecordingFilter):
         """Determine where and how the recording should be saved.
 
         """

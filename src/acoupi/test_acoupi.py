@@ -51,8 +51,11 @@ def main():
     recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
 
     # Specify Directories to save recordings and detections. 
-    save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_fasle=DIR_RECORDING_FALSE)
-    save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_fasle=DIR_DETECTION_FALSE)
+    save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
+    save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
+
+    # Create the recording savingmanager object
+    recording_savingmanager = RecordingSavingManager(save_dir_recording)
    
     def process():
 
@@ -100,8 +103,7 @@ def main():
         print("")
 
         # Recording Saving Manager
-        recording_saving_manager = RecordingSavingManager(recording, save_dir_recording)
-        save_recording = recording_saving_manager.save_recording(keep_recording_bool)
+        save_recording = recording_savingmanager.save_recording(recording, keep_recording_bool)
         print(f"Saving Recording Directory: {save_recording.sdir}")
         print(f"Saving Recording Path: {save_recording.recording.path}")
         print("")
