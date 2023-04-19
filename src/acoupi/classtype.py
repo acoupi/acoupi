@@ -20,18 +20,6 @@ from config import DETECTION_THRESHOLD
 
 
 ## --------------- STEP 1 : Record Audio Files ------------------ ##
-class getRecording_Info(Recording):
-
-    def __init__(self, idpath: str, datetime: datetime.datetime, duration: float, samplerate: int):
-
-        self.path = path
-        self.datetime = datetime
-        self.duration = duration
-        self.sample_rate = samplerate
-
-    def recording_info(self):
-        return 
-
 class PyAudioRecorder(AudioRecorder):
 #class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
@@ -100,7 +88,7 @@ class PyAudioRecorder(AudioRecorder):
             temp_audio_file.close()
 
             # Create a Recording object and return it
-            recording = getRecording_Info(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
+            recording = Recording(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
             return recording
 
 

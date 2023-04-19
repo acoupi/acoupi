@@ -1,4 +1,4 @@
-#import threading
+import threading
 import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -7,24 +7,17 @@ import yaml
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL
 from audio_recording import PyAudioRecorder
-from model import BatDetect2
-#from detection_filters import Threshold_DetectionFilter
-from model_output import CleanModelOutput
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
-from storages.sqlite import SqliteStore
+from model import BatDetect2
+from model_output import CleanModelOutput
+#from detection_filters import Threshold_DetectionFilter
 #from recording_filters import ThresholdRecordingFilter
+from saving_managers import RecordingSavingManager, DetectionSavingManager
 
-#from acoupi.file_managers import FileManager
-#from acoupi.audio_recording import PyAudioRecorder
-#from acoupi.models import BatDetect2
-#from acoupi.recording_managers import MultiIntervalRecordingManager
-#from acoupi.scheduler_managers import ConstantScheduler
-#from acoupi.storages.sqlite import SqliteStore
 
 # Create scheduler manager
 #scheduler = ConstantScheduleManager(DEFAULT_RECORDING_INTERVAL) 
-#storage = SqliteStore(config["storage"])
 
 def main():
 
@@ -33,7 +26,7 @@ def main():
 
     #scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
-    # Create audio_recorder object
+    # Create audio_recorder object to initiate audio recording
     audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
                                  sample_rate=DEFAULT_SAMPLE_RATE,
                                  channels=DEFAULT_AUDIO_CHANNELS,
@@ -41,15 +34,16 @@ def main():
                                  device_index=DEVICE_INDEX)
 
     # Create Interval start_time, end_time object
-    #start_time = datetime.strptime(config['start_recording'],"%H:%M:%S").time()
-    #end_time = datetime.strptime(config['end_recording'], "%H:%M:%S").time()
+    # Audio recording will only happen in the specific time interval 
+    start_time = datetime.strptime(config['start_recording'],"%H:%M:%S").time()
+    end_time = datetime.strptime(config['end_recording'], "%H:%M:%S").time()
 
+    # Create the recording_interval object
     recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
                            Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
 
-    #recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
-
-    storage = SqliteStore(config['sqlite']['storage'])
+    # Create the recording_condition object - check if it is time to record audio (time.now() IsInInterval)
+    recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
 
     # recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
 
@@ -85,13 +79,14 @@ def main():
         detections = model.run(recording)
         print(f"Running Model BatDetect2 End: {time.asctime()}")
         print("")
+        print(f"Detections species name: {detections.species_name}")
+        print(f"Detections probability: {detections.probability}")
 
         # Detection Filter
         store_detections = Threshold_DetectionFilter(detections)
         print("Store Detections - Threshold DF")
         print(store_detections)
         print("")
-        #clean_detection = recording_filter(recording, detections)
 
         # Clean Model Output
         print(f"Start Cleaning Model Output {time.asctime()}")
@@ -99,15 +94,11 @@ def main():
         clean_predict = cdetection.getDetection_aboveThreshold()
         print(f"End Cleaning Model Output {time.asctime()}")
         print(f"Clean Prediction : {clean_predict}")
+        print("")
 
         # Save detections to local store
-        storage.store_detections(recording, store_detections)
-    #     #print("Detections stored")
 
-    #     # Delete recording
-    #     #file_manager.delete_recording(recording)
-
-    # # Start processing
+    # Start processing
     process()
 
 if __name__ == "__main__":

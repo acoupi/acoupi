@@ -168,6 +168,27 @@ class DetectionFilter(ABC):
         """Determine if the detection should be stored locally."""
 
 
+class SavingManager(ABC):
+    """The SavingManager is responsible for saving the recordings
+    and detections locally. 
+    """
+
+    @abstractmethod
+    def save_recording(
+        self, 
+        recording: Recording,
+        detections: List[Detection]
+    ) -> None:
+        """Save the recording locally."""
+
+    @abstractmethod
+    def save_detection(
+        self, 
+        detections: List[Detection]
+    ) -> None:
+        """Save the detection locally"""
+
+
 class Store(ABC):
     """The Store is responsible for storing the detections locally.
 
