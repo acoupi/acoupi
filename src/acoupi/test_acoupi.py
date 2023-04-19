@@ -52,8 +52,11 @@ def main():
 
     # Specify Directories to save recordings and detections. 
     save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
+    print(f'Directories Recording Save: {save_dir_recording}')
+    print(f'Directories Recording Save True: {save_dir_recording.dirpath_true}')
     save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
-
+    print(f'Directories Detection Save: {save_dir_detection}')
+    print('')
     # Create the recording savingmanager object
     recording_savingmanager = RecordingSavingManager(save_dir_recording)
    
