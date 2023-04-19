@@ -29,4 +29,7 @@ DIR_RECORDING_FALSE = 'storage/no_bats/recordings'
 DIR_DETECTION_TRUE = 'storage/bats/detections'
 DIR_DETECTION_FALSE = 'storage/no_bats/detections'
 
+"""Default timeformat to name the audio recording files"""
+DEFAULT_TIMEFORMAT = '%d%m%Y_%H%M%S' #Day-Month-Year Hour-Minute-Second
+
 DEVICE_INDEX = 1

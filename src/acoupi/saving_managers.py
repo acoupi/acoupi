@@ -33,7 +33,7 @@ class Directories:
 class SaveRecording(RecordingSavingManager):
     """A Recording SavingManager that save audio recordings."""
 
-    def __init__(self, save_dir: Directories):
+    def __init__(self, timeformat: str, save_dir: Directories):
         """Initiatilise the Recording SavingManager.
         
         Args:
@@ -47,10 +47,10 @@ class SaveRecording(RecordingSavingManager):
         """
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
         recording_path = recording.path
-        recording_filename = recording.datetime.strftime('%Y%m%d-%H%M%S')
+        recording_filename = recording.datetime.strftime(self.timeformat)
         print(f'Recording Filename: {recording_filename}')
         # Move recording to the path it should be save
-        os.rename(recording_path, "".join(sdir+'/'+recording_filename))
+        os.rename(recording_path, "".join(sdir+'/'+recording_filename)+'.wav')
         return sdir, recording_filename
     ### Recording object = path, datetime, duration, samplerate, id
 

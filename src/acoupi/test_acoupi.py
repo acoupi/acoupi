@@ -7,6 +7,7 @@ import yaml
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DETECTION_THRESHOLD
 from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
+from config import DEFAULT_TIMEFORMAT
 from audio_recording import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
@@ -57,9 +58,9 @@ def main():
     save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
 
     # Create the recording savingmanager object
-    recording_savingmanager = SaveRecording(save_dir_recording)
+    recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
     # Create the detection savingmanager object
-    detection_savingmanager = SaveDetection(save_dir_detection)
+    detection_savingmanager = SaveDetection(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_detection)
    
     def process():
 
