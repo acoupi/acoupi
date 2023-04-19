@@ -13,18 +13,20 @@ which takes a XXX, XXX, and XXX object.
 """
 
 from dataclasses import dataclass
+from typing import List
 from acoupi_types import Detection, Recording, SavingManager
 
 class RecordingSavingManager(SavingManager):
     """A Recording SavingManager that save audio recordings."""
 
-    def __init__(self, recording: Recording, detections: List[Detections]):
+    def __init__(self, recording: Recording, detections: List[Detection]):
         """Initiatilise the Recording SavingManager.
         
         Args:
             recording: The audio recording to be saved. 
         """
         self.recording = recording
+        self.detections = detections
     
     def save_recording(self):
         """Determine where and how the recording should be saved."""
