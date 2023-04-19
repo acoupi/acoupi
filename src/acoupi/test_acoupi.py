@@ -6,6 +6,7 @@ import yaml
 #import multiprocessing 
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DETECTION_THRESHOLD
+from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
 from audio_recording import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
@@ -13,7 +14,7 @@ from model import BatDetect2
 from model_output import CleanModelOutput
 from detection_filters import Threshold_DetectionFilter
 from recording_filters import ThresholdRecordingFilter
-from saving_managers import RecordingSavingManager, DetectionSavingManager
+from saving_managers import Directories, RecordingSavingManager, DetectionSavingManager
 
 
 # Create scheduler manager
@@ -49,6 +50,10 @@ def main():
     detection_filter = Threshold_DetectionFilter(DETECTION_THRESHOLD)
     recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
 
+    # Specify Directories to save recordings and detections. 
+    save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_fasle=DIR_RECORDING_FALSE)
+    save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_fasle=DIR_DETECTION_FALSE)
+   
     def process():
 
         # Get the time 

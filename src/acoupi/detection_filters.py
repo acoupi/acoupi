@@ -14,7 +14,7 @@ class ThresholdDetectionFilter(DetectionFilter):
     SavingManager how to save detections.
     """
 
-    def __init__(self, threshold: float = DETECTION_THRESHOLD):
+    def __init__(self, threshold: float):
         """ Initiatlise the filter.
         
         Args: 

@@ -14,24 +14,43 @@ which takes a XXX, XXX, and XXX object.
 
 from dataclasses import dataclass
 from typing import List
-from acoupi_types import Detection, Recording, SavingManager
+
+from acoupi_types import Detection, Recording, DetectionFilter, RecordingFilter, SavingManager
+from config import RECORDING_DIR_TRUE, RECORDING_DIR_FALSE 
+
+@dataclass 
+class Directories:
+    """Directories where file can be savec."""
+
+    dirpath_true: str
+    """Directory path to save recordings if audio recording contains detections."""
+
+    dirpath_false: str
+    """Directory path to save recordings if audio recording contain no detections."""
+
 
 class RecordingSavingManager(SavingManager):
     """A Recording SavingManager that save audio recordings."""
 
-    def __init__(self, recording: Recording, detections: List[Detection]):
+    def __init__(self, recording: Recording, save_dir: Directories):
         """Initiatilise the Recording SavingManager.
         
         Args:
             recording: The audio recording to be saved. 
+            save_dir: Path of the directories where the recording should be saved.  
         """
         self.recording = recording
-        self.detections = detections
+        self.save_dir = save_dir
     
-    def save_recording(self):
-        """Determine where and how the recording should be saved."""
-        ...
+    def save_recording(self, bool: RecordingFilter):
+        """Determine where and how the recording should be saved.
 
+        """
+        saving_dir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
+        print(f'Saving Directory: {saving_dir}')
+        recording_filename = self.recording.path
+        print(f'Recording Path: {recording_filename}')
+    
     ### Recording object = path, datetime, duration, samplerate, id
 
 

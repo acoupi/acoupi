@@ -22,4 +22,11 @@ DEFAULT_RECORDING_INTERVAL = 9
 
 """Default detection probabilities threshold"""
 DETECTION_THRESHOLD = 0.1
+
+"""Default directories to save audio recordings and detections"""
+DIR_RECORDING_TRUE = 'storage/bats/recordings'
+DIR_RECORDING_FALSE = 'storage/no_bats/recordings'
+DIR_DETECTION_TRUE = 'storage/bats/detections'
+DIR_DETECTION_FALSE = 'storage/no_bats/detections'
+
 DEVICE_INDEX = 1
