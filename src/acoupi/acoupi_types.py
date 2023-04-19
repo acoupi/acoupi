@@ -166,7 +166,7 @@ class DetectionFilter(ABC):
     @abstractmethod
     def should_keep_detection(
         self, 
-        detection: List[Detection]
+        detections: List[Detection]
     ) -> bool:
         """Determine if the detection should be stored locally."""
 
