@@ -15,7 +15,7 @@ class BoolDetectionFilter(DetectionFilter):
             are above threshold, return False if detection are below threshod.
         """
     def save_manager(self, detections: List[Detection]) -> bool:
-        return any(detection.probability >= self.threshold for detection in detections)
+        return any(detection.det_prob >= self.threshold for detection in detections)
     
 
 class Threshold_DetectionFilter(DetectionFilter):
@@ -37,7 +37,7 @@ class Threshold_DetectionFilter(DetectionFilter):
 
     def should_keep_detection(self, detections: List[Detection]) -> bool:
 
-        return any(ann for ann in self.detections if ann['det_prob'] >= self.threshold)
+        return any(ann for ann in detections if ann['det_prob'] >= self.threshold)
 
 
 class HighestbySpecies_DetectionFilter(DetectionFilter):
