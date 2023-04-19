@@ -24,7 +24,6 @@ from dataclasses import dataclass
 
 #from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
 #from acoupi.types import Deployment, Recording, AudioRecorder
-from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX
 from acoupi_types import Recording, AudioRecorder
 
 
@@ -32,11 +31,11 @@ class PyAudioRecorder(AudioRecorder):
 #class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
 
-    def __init__(self, duration: float = DEFAULT_RECORDING_DURATION, 
-                sample_rate: float = DEFAULT_SAMPLE_RATE, 
-                channels: int = DEFAULT_AUDIO_CHANNELS, 
-                chunk: int = DEFAULT_CHUNK_SIZE, 
-                device_index: int = DEVICE_INDEX): 
+    def __init__(self, duration: float, 
+                sample_rate: float, 
+                channels: int, 
+                chunk: int, 
+                device_index: int): 
         
         # Audio Duration
         self.duration = duration

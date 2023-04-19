@@ -8,13 +8,13 @@ import yaml
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
 from config import DEFAULT_TIMEFORMAT
-from audio_recording import PyAudioRecorder
+from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
 from model import BatDetect2
-from model_output import CleanModelOutput
 from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
+from model_output import CleanModelOutput
 from saving_managers import Directories, SaveRecording, SaveDetection
 
 
@@ -26,7 +26,7 @@ def main():
     with open("config.yaml") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
-    scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
+    scheduler = IntervalScheduler(timeinterval=DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
     # Create audio_recorder object to initiate audio recording
     audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
@@ -48,8 +48,8 @@ def main():
     recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
 
     # Create recording_filter and detection_filter object
-    detection_filter = ThresholdDetectionFilter(DEFAULT_THRESHOLD)
-    recording_filter = ThresholdRecordingFilter(DEFAULT_THRESHOLD)
+    detection_filter = ThresholdDetectionFilter(threshold=DEFAULT_THRESHOLD)
+    recording_filter = ThresholdRecordingFilter(threshold=DEFAULT_THRESHOLD)
 
     # Specify Directories to save recordings and detections. 
     save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)

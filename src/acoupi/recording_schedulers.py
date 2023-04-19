@@ -10,7 +10,7 @@ RecordingScheduler. The class should implement the time_until_next_recording
 method, which returns the time in seconds until the next recording should be 
 made.
 """
-from config import DEFAULT_RECORDING_INTERVAL
+
 from acoupi_types import RecordingScheduler
 #from acoupi.config import DEFAULT_RECORDING_INTERVAL
 #from acoupi.types import RecordingScheduler
@@ -27,13 +27,13 @@ class IntervalScheduler(RecordingScheduler):
     interval: float
     """The interval between each recording. In seconds."""
 
-    def __init__(self, interval: float = DEFAULT_RECORDING_INTERVAL):
+    def __init__(self, timeinterval: float):
         """Initialize the recording scheduler.
 
         Args:
             interval: The interval between each recording. In seconds.
         """
-        self.interval = interval
+        self.timeinterval = timeinterval
 
     def time_until_next_recording(self, time: datetime = None) -> float:
         """Return the number of second until the next recording.
@@ -46,6 +46,6 @@ class IntervalScheduler(RecordingScheduler):
         """
         if not time:
             time = datetime.datetime.now()
-        next_recording_time = (time + datetime.timedelta(seconds=self.interval)).replace(microsecond=0)
+        next_recording_time = (time + datetime.timedelta(seconds=self.timeinterval)).replace(microsecond=0)
         return int((next_recording_time - time).total_seconds())
         
