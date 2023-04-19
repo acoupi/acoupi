@@ -12,7 +12,7 @@ from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
 from model import BatDetect2
 from model_output import CleanModelOutput
-from detection_filters import Threshold_DetectionFilter
+from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
 from saving_managers import Directories, RecordingSavingManager, DetectionSavingManager
 
@@ -47,7 +47,7 @@ def main():
     recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
 
     # Create recording_filter and detection_filter object
-    detection_filter = Threshold_DetectionFilter(DETECTION_THRESHOLD)
+    detection_filter = ThresholdDetectionFilter(DETECTION_THRESHOLD)
     recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
 
     # Specify Directories to save recordings and detections. 
@@ -97,6 +97,13 @@ def main():
         # Recording Filter
         keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
         print(f"Threshold Recording Filter Decision: {keep_recording_bool}")
+        print("")
+
+        # Recording Saving Manager
+        recording_saving_manager = RecordingSavingManager(recording, save_dir_recording)
+        save_recording = recording_saving_manager.save_recording(keep_recording_bool)
+        print(f"Saving Recording Directory: {save_recording.sdir}")
+        print(f"Saving Recording Path: {save_recording.recording.path}")
         print("")
         
         # Clean Model Output
