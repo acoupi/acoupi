@@ -12,7 +12,7 @@ SavingManager. The class should implement the XXX method,
 which takes a XXX, XXX, and XXX object. 
 """
 
-from dataclass import dataclass
+from dataclasses import dataclass
 from acoupi_types import Detection, Recording, SavingManager
 
 class RecordingSavingManager(SavingManager):
