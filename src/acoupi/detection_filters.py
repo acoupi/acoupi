@@ -1,6 +1,5 @@
 from typing import List, Dict
 from acoupi_types import Detection, DetectionFilter
-from config import DETECTION_THRESHOLD
 
 class ThresholdDetectionFilter(DetectionFilter):
     """A DetectionFilter that return True or False if any of the detections are above 
@@ -39,7 +38,7 @@ class ThresholdDetectionFilter(DetectionFilter):
 
 class HighestbySpecies_DetectionFilter(DetectionFilter):
 
-    def __init__(self, threshold: float = DETECTION_THRESHOLD):
+    def __init__(self, threshold: float):
         """ Initiatlise the filter.
         
         Args: 

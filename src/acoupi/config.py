@@ -21,7 +21,7 @@ DEFAULT_RECORDING_DURATION = 3
 DEFAULT_RECORDING_INTERVAL = 9
 
 """Default detection probabilities threshold"""
-DETECTION_THRESHOLD = 0.1
+DEFAULT_THRESHOLD = 0.1
 
 """Default directories to save audio recordings and detections"""
 DIR_RECORDING_TRUE = 'storage/bats/recordings'
@@ -30,6 +30,6 @@ DIR_DETECTION_TRUE = 'storage/bats/detections'
 DIR_DETECTION_FALSE = 'storage/no_bats/detections'
 
 """Default timeformat to name the audio recording files"""
-DEFAULT_TIMEFORMAT = '%d%m%Y_%H%M%S' #Day-Month-Year Hour-Minute-Second
+DEFAULT_TIMEFORMAT = '%Y%m%d_%H%M%S' #Year-Month-Day Hour-Minute-Second
 
 DEVICE_INDEX = 1

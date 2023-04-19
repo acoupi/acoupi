@@ -40,7 +40,8 @@ class SaveRecording(RecordingSavingManager):
             save_dir: Path of the directories where the recording should be saved.  
         """
         self.save_dir = save_dir
-    
+        self.timeformat = timeformat
+
     def save_recording(self, recording: Recording, bool: RecordingFilter):
         """Determine where and how the recording should be saved.
 
@@ -48,26 +49,26 @@ class SaveRecording(RecordingSavingManager):
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
         recording_path = recording.path
         recording_filename = recording.datetime.strftime(self.timeformat)
-        print(f'Recording Filename: {recording_filename}')
-        # Move recording to the path it should be save
+        # Move recording to the path it should be saved
         os.rename(recording_path, "".join(sdir+'/'+recording_filename)+'.wav')
-        return sdir, recording_filename
-    ### Recording object = path, datetime, duration, samplerate, id
+        return 
 
 
 class SaveDetection(DetectionSavingManager):
     """A Recording SavingManager that save audio recordings."""
 
-    def __init__(self, save_dir: Directories):
+    def __init__(self, timeformat: str, save_dir: Directories):
         """Initiatilise the Recording SavingManager.
         
         Args:
             save_dir: Path of the directories where the detections should be saved.   
         """
         self.save_dir = save_dir
-    
+        self.timeformat = timeformat
+
     def save_detections(self, detections: List[Detection], bool: DetectionFilter):
         """Determine where and how the detections should be saved."""
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
-    
+        # Move detection to the path it should be saved
+        #
     ### Detection object = species_name, probability

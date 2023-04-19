@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import yaml
 #import multiprocessing 
 
-from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DETECTION_THRESHOLD
+from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
 from config import DEFAULT_TIMEFORMAT
 from audio_recording import PyAudioRecorder
@@ -26,7 +26,7 @@ def main():
     with open("config.yaml") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
-    #scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
+    scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
     # Create audio_recorder object to initiate audio recording
     audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
@@ -48,8 +48,8 @@ def main():
     recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
 
     # Create recording_filter and detection_filter object
-    detection_filter = ThresholdDetectionFilter(DETECTION_THRESHOLD)
-    recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
+    detection_filter = ThresholdDetectionFilter(DEFAULT_THRESHOLD)
+    recording_filter = ThresholdRecordingFilter(DEFAULT_THRESHOLD)
 
     # Specify Directories to save recordings and detections. 
     save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
@@ -57,9 +57,8 @@ def main():
     print(f'Directories Recording Save False: {save_dir_recording.dirpath_false}')
     save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
 
-    # Create the recording savingmanager object
+    # Create the recording and detection SavingManager object
     recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
-    # Create the detection savingmanager object
     detection_savingmanager = SaveDetection(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_detection)
    
     def process():
@@ -97,8 +96,8 @@ def main():
         print(f"Running Model BatDetect2 End: {time.asctime()}")
 
         # Detection Filter
-        #store_detections = Threshold_DetectionFilter(detections)
-        #print("Store Detections - Threshold DF")
+        print("")
+        print(f"Probability Threshold: {DEFAULT_THRESHOLD}")
         keep_detection_bool = detection_filter.should_keep_detection(detections)
         print(f"Threshold Detection Filter Decision: {keep_detection_bool}")
 
@@ -110,9 +109,7 @@ def main():
         # Recording Saving Manager
         save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)
         print(save_rec)
-        print("")
-        #print(f"Saving Recording Directory: {save_rec.sdir}")
-        print(f"Saving Recording Path: {save_rec.recording.path}")
+        print("Recording Save")
         print("")
         
         # Clean Model Output

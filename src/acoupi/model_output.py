@@ -1,8 +1,6 @@
 """ Cleaning Model Output """
 from typing import List, Dict
 from acoupi_types import Detection
-from config import DETECTION_THRESHOLD
-#from acoupi.types import Detection
 
 # run the model
 # detections = du.process_file(audio_file, model, params, args, max_duration=max_duration)
@@ -10,7 +8,7 @@ from config import DETECTION_THRESHOLD
 
 class CleanModelOutput():
 
-    def __init__(self, detections: Detection, threshold: float = DETECTION_THRESHOLD):
+    def __init__(self, detections: Detection, threshold: float):
 
        self.detections = detections
        self.threshold = threshold
