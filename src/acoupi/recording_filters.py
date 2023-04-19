@@ -61,29 +61,27 @@ class PositiveRecordingFilter(RecordingFilter):
 
 
 class ThresholdRecordingFilter(RecordingFilter):
-    """A RecordingFilter that keeps recordings with confident detections.
+    """A RecordingFilter that return True or False if an audio recording contains any detections 
+    above a specified threshold. The threshold argument can be used to set the minimum probability 
+    threshold for a detection to be considered confident.
 
-    This filter will keep recordings that contain confident detections. The
-    threshold argument can be used to set the minimum probability threshold for
-    a detection to be considered confident.
+    IF True : Recording is likely to contain bat calls. 
+    IF False: Recording is unlikely to contain bat calls. 
+
+    The result of ThresholdRecordingFilter is used by the SavingManagers. It tells the 
+    SavingManager how to save detections.
     """
 
     def __init__(self, threshold: float):
         """Initialize the filter.
 
         Args:
-            threshold: The probability threshold to use. Will only
-            keep recordings with detections with a probability
-            greater than or equal to this threshold.
+            threshold: The probability threshold to use.
         """
         self.threshold = threshold
 
-    def should_keep_recording(
-        self,
-        recording: Recording,
-        detections: List[Detection],
-    ) -> bool:
-        """Determine if a recording should be kept.
+    def should_keep_recording(self, recording: Recording, detections: List[Detection]) -> bool:
+        """Classify if a recording contains bat calls or not.
 
         Args:
             recording: The recording to check.

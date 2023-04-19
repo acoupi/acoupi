@@ -2,42 +2,39 @@ from typing import List, Dict
 from acoupi_types import Detection, DetectionFilter
 from config import DETECTION_THRESHOLD
 
-#from acoupi.config  import DETECTION_THRESHOLD
-#from acoupi.types import Detection, DetectionFilter
-
-class BoolDetectionFilter(DetectionFilter):
-    """Determine if recording detects Bats."""
-    
-    def __init__(self, threshold: float = DETECTION_THRESHOLD):
-        """Initialise the filter. 
-        Args: 
-            threshold: Probability threshold to be used. Return True if some detections
-            are above threshold, return False if detection are below threshod.
-        """
-    def save_manager(self, detections: List[Detection]) -> bool:
-        return any(detection.det_prob >= self.threshold for detection in detections)
-    
-
-class Threshold_DetectionFilter(DetectionFilter):
-    """A DetectionFilter that keeps annotations with confident probability of detection.
-
-    This filter will keep all the detection annotations from the model output that are above a
-    threshold argument. The threshold argument can be used to set the minimum probability 
+class ThresholdDetectionFilter(DetectionFilter):
+    """A DetectionFilter that return True or False if any of the detections are above 
+    a specified threshold. The threshold argument can be used to set the minimum probability 
     threshold for an annotation to be considered confident.
+
+    IF True : Detections are likely to have identify a bat call. 
+    IF False: Detections are unlikely to have identify a bat call. 
+
+    The result of ThresholdDetectionFilter is used by the SavingManagers. It tells the 
+    SavingManager how to save detections.
     """
 
     def __init__(self, threshold: float = DETECTION_THRESHOLD):
         """ Initiatlise the filter.
         
         Args: 
-            threshold: Probability threshold to be used. Only keep detection annotations
-            with a probability greater or equal to this threshold.
+            threshold: The probability threshold to be used.
         """ 
         self.threshold = threshold
 
     def should_keep_detection(self, detections: List[Detection]) -> bool:
 
-        return any(ann for ann in detections if ann['det_prob'] >= self.threshold)
+        """
+        Args:
+            detections: Detections in a recording.
+
+        Returns:
+            bool
+        """
+
+        return any(
+            annotation for annotation in detections if annotation['det_prob'] >= self.threshold
+        )
 
 
 class HighestbySpecies_DetectionFilter(DetectionFilter):
@@ -46,8 +43,7 @@ class HighestbySpecies_DetectionFilter(DetectionFilter):
         """ Initiatlise the filter.
         
         Args: 
-            threshold: Probability threshold to be used. Only keep detection annotations
-            with a probability greater or equal to this threshold.
+            threshold: The probability threshold to be used.
         """ 
         self.threshold = threshold
     
@@ -72,3 +68,17 @@ class HighestbySpecies_DetectionFilter(DetectionFilter):
                         keep_detections[bat_class] = ann
         
         return keep_detections
+
+
+
+##. class BoolDetectionFilter(DetectionFilter):
+##.     """Determine if recording detects Bats."""
+##.     
+##.     def __init__(self, threshold: float = DETECTION_THRESHOLD):
+##.         """Initialise the filter. 
+##.         Args: 
+##.             threshold: Probability threshold to be used. Return True if some detections
+##.             are above threshold, return False if detection are below threshod.
+##.         """
+##.     def save_manager(self, detections: List[Detection]) -> bool:
+##.         return any(detection.det_prob >= self.threshold for detection in detections)
