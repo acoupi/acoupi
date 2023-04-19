@@ -5,6 +5,18 @@ from config import DETECTION_THRESHOLD
 #from acoupi.config  import DETECTION_THRESHOLD
 #from acoupi.types import Detection, DetectionFilter
 
+class BoolDetectionFilter(DetectionFilter):
+    """Determine if recording detects Bats."""
+    
+    def __init__(self, threshold: float = DETECTION_THRESHOLD):
+        """Initialise the filter. 
+        Args: 
+            threshold: Probability threshold to be used. Return True if some detections
+            are above threshold, return False if detection are below threshod.
+        """
+    def save_manager(self, detections: List[Detection]) -> bool:
+        return any(detection.probability >= self.threshold for detection in detections)
+    
 
 class Threshold_DetectionFilter(DetectionFilter):
     """A DetectionFilter that keeps annotations with confident probability of detection.
@@ -23,7 +35,7 @@ class Threshold_DetectionFilter(DetectionFilter):
         """ 
         self.threshold = threshold
 
-    def should_store_detection(self, detections: List[Detection]) -> bool:
+    def should_keep_detection(self, detections: List[Detection]) -> bool:
 
         return any(ann for ann in self.detections if ann['det_prob'] >= self.threshold)
 
@@ -39,7 +51,7 @@ class HighestbySpecies_DetectionFilter(DetectionFilter):
         """ 
         self.threshold = threshold
     
-    def should_store_detection(self, detections: List[Detection]) -> bool:
+    def should_keep_detection(self, detections: List[Detection]) -> bool:
 
         # Create new dictionary to keep the detections
         keep_detections = []

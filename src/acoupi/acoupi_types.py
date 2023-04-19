@@ -164,14 +164,40 @@ class DetectionFilter(ABC):
     """
 
     @abstractmethod
-    def should_store_detection(self, detection: Detection) -> bool:
+    def should_keep_detection(
+        self, 
+        detection: List[Detection]
+    ) -> bool:
         """Determine if the detection should be stored locally."""
+
+
+class RecordingFilter(ABC):
+    """Determine if a recording should be kept.
+
+    The RecordingFilter is responsible for determining if a recording
+    should be kept or deleted. It can use the detections, the recording
+    itself, and internal state to determine if the recording should be kept.
+    """
+
+    @abstractmethod
+    def should_keep_recording(
+        self,
+        recording: Recording,
+        detections: List[Detection],
+    ) -> bool:
+        """Determine if the recording should be kept."""
 
 
 class SavingManager(ABC):
     """The SavingManager is responsible for saving the recordings
     and detections locally. 
     """
+
+    #@abstractmethod
+    #def find_treshold(self, 
+    #    treshold: Threshold, 
+    #    detections: List[Detection]
+    #) -> bool:
 
     @abstractmethod
     def save_recording(
@@ -280,24 +306,6 @@ class Store(ABC):
         Returns:
             A list of deployments.
         """
-
-
-class RecordingFilter(ABC):
-    """Determine if a recording should be kept.
-
-    The RecordingFilter is responsible for determining if a recording
-    should be kept or deleted. It can use the detections, the recording
-    itself, and internal state to determine if the recording should be kept.
-    """
-
-    @abstractmethod
-    def should_keep_recording(
-        self,
-        recording: Recording,
-        detections: List[Detection],
-    ) -> bool:
-        """Determine if the recording should be kept."""
-
 
 class FileManager(ABC):
     """Save and delete files.
