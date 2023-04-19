@@ -46,7 +46,6 @@ class SaveRecording(RecordingSavingManager):
         """
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
         recording_filename = self.recording.path
-        print(f'Recording Path: {recording_filename}')
     
     ### Recording object = path, datetime, duration, samplerate, id
 
