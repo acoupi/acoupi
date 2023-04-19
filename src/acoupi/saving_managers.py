@@ -16,7 +16,6 @@ from dataclasses import dataclass
 from typing import List
 
 from acoupi_types import Detection, Recording, DetectionFilter, RecordingFilter, SavingManager
-from config import RECORDING_DIR_TRUE, RECORDING_DIR_FALSE 
 
 @dataclass 
 class Directories:
