@@ -98,12 +98,15 @@ def main():
         keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
         print("")
         print(f"Threshold Recording Filter Decision: {keep_recording_bool}")
-        print(f"Threshold Detection Filter - Decision: {keep_detections_bool}")
+        print(f"Threshold Detection Filter Decision: {keep_detections_bool}")
 
 
         # Recording and Detection Saving Manager
         save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
         save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
+        print("")
+        print(f"Recording save in folder: {save_rec.sdir}")
+        print(f"Detection save in folder: {save_det.sdir}")
         print("")
 
     # Start processing
