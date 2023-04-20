@@ -63,6 +63,10 @@ def main():
    
     def process():
 
+        # Get the thread ID
+        thread_id = threading.get_ident()
+        print(f"Starting thread: {thread_id}")
+
         # Get the time 
         now = datetime.now()
         # Schedule next recording - Use Scheduler to determine when next recording should happen.
@@ -102,7 +106,9 @@ def main():
         save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
         print("")
         print(f"Recording & Detection save - END: {time.asctime()}")
-        print("")
+
+        # Print when a thread ID is finished
+        print(f"Finishing thread: {thread_id} at {time.asctime()}")
 
     # Start processing
     process()
