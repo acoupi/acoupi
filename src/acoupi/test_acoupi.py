@@ -65,6 +65,8 @@ def main():
    
     def process():
 
+        print('System Running - Please Wait.')
+
         # Get the thread id
         thread_id = threading.get_ident()
 
