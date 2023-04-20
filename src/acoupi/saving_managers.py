@@ -84,10 +84,14 @@ class SaveDetection(DetectionSavingManager):
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
         sdet_filename = recording.datetime.strftime(self.timeformat)
 
+        # Check if clean_detections[] is not empty
+        if not clean_detections:
+            return
+
         # Create a file to save the detections
         with open(sdet_filename+'.csv','w', newline='') as csvfile:
             # Create a CSV writer to write the header row and data rows
-            writer = csv.DictWriter(csvfile, fieldnames=clean_detections[0].keys())
+            writer = csv.DictWriter(csvfile, fieldnames=clean_detections[0].keys()) if clean_detections else None
             writer.writeheader()
             writer.writerows([detection for detection in clean_detections])
 
