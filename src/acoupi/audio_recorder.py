@@ -18,7 +18,7 @@ from tempfile import TemporaryFile, NamedTemporaryFile
 import pyaudio
 import wave 
 import sounddevice
-import yaml
+import logging
 from typing import Optional, List
 from dataclasses import dataclass
 
@@ -26,7 +26,6 @@ from acoupi_types import Recording, AudioRecorder
 
 
 class PyAudioRecorder(AudioRecorder):
-#class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
 
     def __init__(self, duration: float, 
@@ -58,34 +57,40 @@ class PyAudioRecorder(AudioRecorder):
 
             #Create an new instace of PyAudio
             p = pyaudio.PyAudio()
-        
-            #Open new audio stream to start recording
-            stream = p.open(format=pyaudio.paInt16,
-                            channels=self.channels,
-                            rate=self.sample_rate,
-                            input=True,
-                            frames_per_buffer=self.chunk,
-                            input_device_index=self.device_index)
 
-            #Initialise array to store audio frames
+            # Make sure there is no-onging stream
+            stream = None
+            try:
+                # Create new audio stream
+                stream = p.open(format=pyaudio.paInt16,
+                                channels=self.channels,
+                                rate=self.sample_rate,
+                                input=True,
+                                frames_per_buffer=self.chunk,
+                                input_device_index=self.device_index)
+            except Exception as e:
+                logging.ERROR(f"Error opening audio stream: {e}")
+                if stream:
+                    stream.stop_stream()
+                    stream.close()
+                    p.terminate()
+                return None
+
+            # Create frames to store audio 
             frames = []
-            for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
-                data = stream.read(self.chunk, exception_on_overflow = False)
-                frames.append(data)
-            # try:
-            #     data = array.array('h')
-            #     for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
-            #         data.fromstring(strea.read(self.chunk))
-            # finally:
-            #     stream.stop_stream()
-            #     stream.close()
-            #     p.terminate()
+            try: 
+                # Record audio - read the audio stream
+                for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
+                    data = stream.read(self.chunk, exception_on_overflow = False)
+                    frames.append(data)
+            except Exception as e:
+                logging.ERROR(f"Error recording audio: {e}")
 
-
-            #Stop Recording and close the port interface
-            stream.stop_stream()
-            stream.close()
-            p.terminate()
+            finally:
+                #Stop Recording and close the port interface
+                stream.stop_stream()
+                stream.close()
+                p.terminate()
 
             #Create a WAV file to write the audio data
             temp_audio_file = wave.open(temp_audio_path, 'wb')
