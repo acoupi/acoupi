@@ -34,6 +34,9 @@ def main():
                                  chunk=DEFAULT_CHUNK_SIZE,
                                  device_index=DEVICE_INDEX)
 
+    # Create the model ojbect to analyse an audio recording
+    model = BatDetect2()
+
     # Create Interval start_time, end_time object
     # Audio recording will only happen in the specific time interval 
     start_time = datetime.strptime(START_RECORDING,"%H:%M:%S").time()
@@ -77,7 +80,7 @@ def main():
         print(f"Recording Audio End: {time.asctime()}")
 
         # Load model 
-        model = BatDetect2(recording=recording)
+        #model = BatDetect2(recording=recording)
 
         # Run model - Get detections
         print("")
