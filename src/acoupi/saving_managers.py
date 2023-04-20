@@ -71,6 +71,7 @@ class SaveDetection(DetectionSavingManager):
     def save_detections(self, detections: List[Detection], bool: DetectionFilter):
         """Determine where and how the detections should be saved."""
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
-        # Move detection to the path it should be saved
-        #
+        # Get Detection Output
+        getdetections = detections
+        return getdetections
     ### Detection object = species_name, probability

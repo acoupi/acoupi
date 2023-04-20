@@ -112,12 +112,16 @@ def main():
         print("Recording Save")
         print("")
         
+        # Detection Saving Manager
+        save_det = detection_savingmanager.save_detections(detections, keep_detection_bool)
+        print(save_det)
+
         # Clean Model Output
-        print(f"Start Cleaning Model Output {time.asctime()}")
-        cdetection = CleanModelOutput(detections, threshold=DEFAULT_THRESHOLD)
-        clean_predict = cdetection.getDetection_aboveThreshold()
-        print(f"End Cleaning Model Output {time.asctime()}")
-        print(f"Clean Prediction : {clean_predict}")
+        #print(f"Start Cleaning Model Output {time.asctime()}")
+        #cdetection = CleanModelOutput(detections, threshold=DEFAULT_THRESHOLD)
+        #clean_predict = cdetection.getDetection_aboveThreshold()
+        #print(f"End Cleaning Model Output {time.asctime()}")
+        #print(f"Clean Prediction : {clean_predict}")
         print("")
 
         # Save detections to local store
