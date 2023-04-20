@@ -19,6 +19,9 @@ from saving_managers import Directories, SaveRecording, SaveDetection
 # Create scheduler manager
 scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) 
 
+# Create global variable threading_id to keep track of the number of threads.
+thread_id = 0
+
 
 def main():
 
@@ -63,9 +66,10 @@ def main():
    
     def process():
 
-        # Get the thread ID
-        thread_id = threading.get_ident()
-        print(f"Starting thread: {thread_id}")
+        # Use the thread ID variable
+        global thread_id 
+        # Increament thread_id by 1 each time process is run!
+        thread_id += 1
 
         # Get the time 
         now = datetime.now()
@@ -79,36 +83,34 @@ def main():
             return
 
         # Record audio
-        print(f"Recording Audio Start: {time.asctime()}")
+        print(f"[Thread {thread_id}] Recording Audio Start: {time.asctime()}")
         recording = audio_recorder.record()
-        print(f"Recording Audio End: {time.asctime()}")
+        print(f"[Thread {thread_id}] Recording Audio End: {time.asctime()}")
 
         # Load model 
         #model = BatDetect2(recording=recording)
 
         # Run model - Get detections
         print("")
-        print(f"Running Model BatDetect2 Start: {time.asctime()}")
+        print(f"[Thread {thread_id}] Running Model BatDetect2 Start: {time.asctime()}")
         detections = model.run(recording)
-        print(f"Running Model BatDetect2 End: {time.asctime()}")
+        print(f"[Thread {thread_id}] Running Model BatDetect2 End: {time.asctime()}")
 
         # Detection and Recording Filter
         keep_detections_bool = detection_filter.should_keep_detections(detections) 
         clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
         keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
         print("")
-        print(f"Threshold Recording Filter Decision: {keep_recording_bool}")
-        print(f"Threshold Detection Filter Decision: {keep_detections_bool}")
+        print(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
+        print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
 
 
         # Recording and Detection Saving Manager
         save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
         save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
         print("")
-        print(f"Recording & Detection save - END: {time.asctime()}")
-
-        # Print when a thread ID is finished
-        print(f"Finishing thread: {thread_id} at {time.asctime()}")
+        print(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
+        print("")
 
     # Start processing
     process()
