@@ -113,7 +113,7 @@ def main():
         print(f"Recording Save in Directory: {save_rec}")
         
         # Detection Saving Manager
-        save_det = detection_savingmanager.save_detections(clean_detections, keep_detections_bool)
+        save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
         print("")
         print(f"Return Save Detection Object: {save_det}")
         print("")
