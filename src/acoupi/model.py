@@ -13,14 +13,14 @@ class BatDetect2(Model):
 
     "BatDetect2 Model to analyse the audio recording"
     
-    def __init__(self, recording: Recording):
+    #def __init__(self, recording: Recording):
 
-        self.recording = recording
+        #self.recording = recording
 
-    def run(self) -> List[Detection]:
+    def run(self, recording: Recording) -> List[Detection]:
 
         # Get the audio path of the recorded file
-        audio_file_path = self.recording.path
+        audio_file_path = recording.path
         # Load the audio rile and compute spectrograms
         audio = api.load_audio(audio_file_path)
         spec = api.generate_spectrogram(audio)
