@@ -6,15 +6,14 @@ import yaml
 #import multiprocessing 
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
+from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT
 from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
-from config import DEFAULT_TIMEFORMAT
 from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
 from model import BatDetect2
 from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
-from model_output import CleanModelOutput
 from saving_managers import Directories, SaveRecording, SaveDetection
 
 # Create scheduler manager
@@ -37,8 +36,10 @@ def main():
 
     # Create Interval start_time, end_time object
     # Audio recording will only happen in the specific time interval 
-    start_time = datetime.strptime(config['start_recording'],"%H:%M:%S").time()
-    end_time = datetime.strptime(config['end_recording'], "%H:%M:%S").time()
+    start_time = datetime.strptime(START_RECORDING,"%H:%M:%S").time()
+    end_time = datetime.strptime(END_RECORDING,"%H:%M:%S").time()
+    #start_time = datetime.strptime(config['start_recording'],"%H:%M:%S").time()
+    #end_time = datetime.strptime(config['end_recording'], "%H:%M:%S").time()
 
     # Create the recording_interval object
     recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
@@ -83,42 +84,27 @@ def main():
         print(f"Recording Time: {recording.datetime}")
 
         # Load model 
-        print("")
-        print(f"Loading BatDetect2 Model Start: {time.asctime()}")
         model = BatDetect2(recording=recording)
-        print(f"Loading BatDetect2 Model End: {time.asctime()}")
+
         # Run model - Get detections
         print("")
         print(f"Running Model BatDetect2 Start: {time.asctime()}")
         detections = model.run(recording)
-        print("")
         print(f"Running Model BatDetect2 End: {time.asctime()}")
 
-        # Detection Filter
-        print("")
-        print(f"Probability Threshold: {DEFAULT_THRESHOLD}")
+        # Detection and Recording Filter
         keep_detections_bool = detection_filter.should_keep_detections(detections) 
         clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
-        
-        # Recording Filter
         keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
         print("")
         print(f"Threshold Recording Filter Decision: {keep_recording_bool}")
         print(f"Threshold Detection Filter - Decision: {keep_detections_bool}")
 
 
-        # Recording Saving Manager
-        save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)
-        print("")
-        print(f"Recording Save in Directory: {save_rec}")
-        
-        # Detection Saving Manager
+        # Recording and Detection Saving Manager
+        save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
         save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
         print("")
-        print(f"Return Save Detection Object: {save_det}")
-        print("")
-
-        # Save detections to local store
 
     # Start processing
     process()

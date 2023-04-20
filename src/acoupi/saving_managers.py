@@ -23,6 +23,11 @@ import csv
 from acoupi_types import Recording, RecordingFilter, RecordingSavingManager
 from acoupi_types import Detection, DetectionFilter, DetectionSavingManager
 
+__all__ = [
+    "SaveRecording",
+    "SaveDetection",
+]
+
 @dataclass 
 class Directories:
     """Directories where file can be savec."""

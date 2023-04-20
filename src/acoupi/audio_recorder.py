@@ -22,8 +22,6 @@ import yaml
 from typing import Optional, List
 from dataclasses import dataclass
 
-#from acoupi.config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE
-#from acoupi.types import Deployment, Recording, AudioRecorder
 from acoupi_types import Recording, AudioRecorder
 
 
