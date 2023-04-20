@@ -86,5 +86,5 @@ class SaveDetection(DetectionSavingManager):
 
         # Move the detection file to the path it should be saved
         os.rename(sdet_filename+'.csv', ''.join(sdir+'/'+sdet_filename+'.csv'))
-        return sdir, sdet_file
+        return sdir
 
