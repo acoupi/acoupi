@@ -25,7 +25,7 @@ DEFAULT_RECORDING_DURATION = 3
 DEFAULT_RECORDING_INTERVAL = 9
 
 """Default detection probabilities threshold"""
-DEFAULT_THRESHOLD = 0.1
+DEFAULT_THRESHOLD = 0.8
 
 """Default directories to save audio recordings and detections"""
 DIR_RECORDING_TRUE = 'storage/bats/recordings'
