@@ -2,7 +2,6 @@ import threading
 import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
-import yaml
 #import multiprocessing 
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
@@ -20,9 +19,6 @@ from saving_managers import Directories, SaveRecording, SaveDetection
 scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) 
 
 def main():
-
-    with open("config.yaml") as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
 
     scheduler = IntervalScheduler(timeinterval=DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 

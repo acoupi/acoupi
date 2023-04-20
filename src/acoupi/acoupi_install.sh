@@ -12,8 +12,9 @@ sudo apt install python3-dev python3-pip python3-venv python3-pyaudio
 
 # Move to home directory
 # cd ~
-# echo "Cloning Acoupi repository - Main branch" 
-# branch=main
+# echo "Cloning Acoupi repository - RPi branch" 
+# branch=rpi
+# git clone -b rpi --depth=1 https://github.com/audevuilli/acoupi.git ${HOME}/acoupi
 # git clone -b $branch --depth=1 https://github.com/audevuilli/acoupi.git ${HOME}/acoupi
 
 # Move to git directory
@@ -42,7 +43,6 @@ pip3 install .
 #echo "Creating necessary directories"
 #sudo -u ${USER} mkdir -p src/acoupi/storage/bats
 #sudo -u ${USER} mkdir -p src/acoupi/storage/no_bats
-#sudo -u ${USER} mkdir -p audio/analysed
 
 # Move the .service files to lib/systemd/system - Enable and Start it
 services = ("acoupi_audiorec.service" 

@@ -1,4 +1,3 @@
-PyYAML
 tzlocal
 #wheel 
 #setuptools
@@ -9,4 +8,5 @@ matplotlib
 librosa 
 sounddevice
 #paho-mqtt
+#PyYAML
 #ffmpeg-python
