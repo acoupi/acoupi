@@ -59,7 +59,7 @@ def main():
     def process():
 
         # Get the thread id
-        thread_id = threading.get_indent()
+        thread_id = threading.get_ident()
 
         # Get the time 
         now = datetime.now()
