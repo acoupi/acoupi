@@ -4,39 +4,40 @@
 2. Setup RPI with username and password
 
 3. Make variable user and home system directory
-export USER=$USER
-export HOME=$HOME
+`export USER=$USER
+export HOME=$HOME`
 
-3. Check system update and upgrade
-sudo apt update 
-sudo apt upgrade
+4. Check system update and upgrade
+`sudo apt update 
+sudo apt upgrade`
 
-4. Install dependencies - git and other packages
+5. Install dependencies - git and other packages
 `sudo apt install git alsa-utils libasound2-dev wget cmake #pulseaudio`
-5. Install python3 and python3 libs
+
+6. Install python3 and python3 libs
 `sudo apt install python3-dev python3-pip python3-venv python3-pyaudio`
 
-5. Move to home directory if not and clone the Acoupi GitHug Repositiory - rpi branch 
+7. Move to home directory if not and clone the Acoupi GitHug Repositiory - rpi branch 
 cd ~
 `git clone -b rpi --depth=1 https://github.com/audevuilli/acoupi.git ${HOME}/acoupi`
 
-6. Install pyaudio using install_pyaudio.sh script
-`bash $HOME/acoupi/src/acoupi/script/install_pyaudio.sh
+8. Install pyaudio using install_pyaudio.sh script
+`bash $HOME/acoupi/src/acoupi/script/install_pyaudio.sh`
 
-7. Install libraries packages with pip
+9. Install libraries packages with pip
 `pip3 install -U -r $HOME/acoupi/src/acoupi/requirements.txt`
 
-8. Create directories to store audio files
+10. Create directories to store audio files
 `sudo -u ${USER} mkdir -p acoupi/src/acoupi/storage/bats`
 `sudo -u ${USER} mkdir -p acoupi/src/acoupi/storage/no_bats`
 
-9. Start service to run acoupi-batdetect2
-services = ("acoupi_batdetect2_testing.service")
-for service in "${services[@]}"
+11. Start service to run acoupi-batdetect2
+`services = ("acoupi_batdetect2_testing.service")`
+`for service in "${services[@]}"
 do 
     sudo ln -sf $HOME/acoupi/services/$service /usr/lib/systemd/system
     sudo systemctl enable $service
     sudo systemctl start $service
 
     systemctl is-active --quiet $service && echo acoupi services are running || echo acoupi services are not running
-done
+done`
