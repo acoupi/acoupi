@@ -1,8 +1,10 @@
 import threading
 import time
+from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 #import multiprocessing 
+import logging
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
@@ -14,6 +16,12 @@ from model import BatDetect2
 from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
 from saving_managers import Directories, SaveRecording, SaveDetection
+
+# Setup the main logger
+logging.basicConfig(filename='acoupi.log',filemode='w', 
+                    format='%(levelname)s - %(message)s',
+                    level=loggig.INFO
+                    )
 
 # Create scheduler manager
 scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) 
@@ -68,29 +76,37 @@ def main():
 
         # Check if we should record
         if not recording_condition.should_record(datetime.now()):
+            logging.info("Outside Recording Interval - Current Time is {time.asctime()}")
+            logging.info(f"Recording Start at: {start_time} and End at: {end_time}")
             print("Outside Recording Interval")
             print(f"Recording Start at: {start_time} and End at: {end_time}")
             return
 
         # Record audio
         print("")
-        print(f"[Thread {thread_id}] Recording Audio Start: {time.asctime()}")
+        print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
+        logging.info("[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         recording = audio_recorder.record()
-        print(f"[Thread {thread_id}] Recording Audio End: {time.asctime()}")
+        logging.info("[Thread {thread_id}] End Recording Audio: {time.asctime()}")
+        print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
 
         # Load model 
         #model = BatDetect2(recording=recording)
 
         # Run model - Get detections
         print("")
-        print(f"[Thread {thread_id}] Running Model BatDetect2 Start: {time.asctime()}")
+        print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
         detections = model.run(recording)
-        print(f"[Thread {thread_id}] Running Model BatDetect2 End: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
+        print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
 
         # Detection and Recording Filter
         keep_detections_bool = detection_filter.should_keep_detections(detections) 
         clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
         keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
+        logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
+        logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_recording_bool}")
         print("")
         print(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
         print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
@@ -99,6 +115,7 @@ def main():
         # Recording and Detection Saving Manager
         save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
         save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
+        logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
         print("")
         print(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
         print("")
