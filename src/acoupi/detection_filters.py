@@ -32,10 +32,10 @@ class ThresholdDetectionFilter(DetectionFilter):
         return any(annotation for annotation in detections if annotation['det_prob'] >= self.threshold)
 
 
-    def get_clean_detections(self, detections: List[Detection], bool: types.DetectionFilter) -> List[Detection]:
+    def get_clean_detections(self, detections: List[Detection], bool: bool) -> List[Detection]:
         """Get detection and clean them before saving."""
         if bool == True:
-            get_cleandetections = [annotation for annotation in self.detections if annotation['det_prob'] >= self.threshold]
+            get_cleandetections = [annotation for annotation in detections if annotation['det_prob'] >= self.threshold]
         else:
             get_cleandetections = []
         return get_cleandetections
