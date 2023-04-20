@@ -37,7 +37,8 @@ class SaveRecording(RecordingSavingManager):
         """Initiatilise the Recording SavingManager.
         
         Args:
-            save_dir: Path of the directories where the recording should be saved.  
+            save_dir: Path of the directories where the recording should be saved.
+            timeformat: Datetime format to use to name the recording file path.  
         """
         self.save_dir = save_dir
         self.timeformat = timeformat
@@ -61,7 +62,8 @@ class SaveDetection(DetectionSavingManager):
         """Initiatilise the Recording SavingManager.
         
         Args:
-            save_dir: Path of the directories where the detections should be saved.   
+            save_dir: Path of the directories where the detections should be saved.
+            timeformat: Datetime format to use to name the detections file path.   
         """
         self.save_dir = save_dir
         self.timeformat = timeformat
