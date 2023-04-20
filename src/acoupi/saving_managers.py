@@ -15,6 +15,7 @@ which takes a XXX, XXX, and XXX object.
 from dataclasses import dataclass
 from typing import List
 import os
+import csv
 
 from acoupi_types import Recording, RecordingFilter, RecordingSavingManager
 from acoupi_types import Detection, DetectionFilter, DetectionSavingManager
@@ -75,12 +76,15 @@ class SaveDetection(DetectionSavingManager):
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
         sdet_filename = recording.datetime.strftime(self.timeformat)
         print(f"Detection FileName: {sdet_filename}")
-        # Create a .txt file to save the detections
-        sdet_file = open(sdet_filename+'.txt','w')
-        sdet_file.write(clean_detections)
-        sdet_file.close()
-        # Move the detction file  to the path it hsould be saved
-        os.rename(detection_file, ''.join(sdir+'/'+sdet_file))
-         # Move detections to the path it should be saved
+
+        # Create a file to save the detections
+        with open(sdet_filename+'.csv','w', newline='') as csvfile:
+            # Create a CSV writer to write the header row and data rows
+            writer = csv.DictWriter(csvfile, fieldnames=clean_detections[0].keys())
+            writer.writeheader()
+            writer.writerows([detection for detection in clean_detections])
+
+        # Move the detection file to the path it should be saved
+        os.rename(sdet_filename+'.csv', ''.join(sdir+'/'+sdet_filename+'.csv'))
         return sdir, sdet_file
 
