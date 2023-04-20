@@ -164,11 +164,19 @@ class DetectionFilter(ABC):
     """
 
     @abstractmethod
-    def should_keep_detection(
+    def should_keep_detections(
         self, 
         detections: List[Detection]
     ) -> bool:
         """Determine if the detection should be stored locally."""
+    
+    @abstractmethod
+    def get_clean_detections(
+        self, 
+        detections: List[Detection],
+    ) -> List[Detection]:
+        """Return the clean detections according to detection filter configuration."""
+
 
 
 class RecordingFilter(ABC):
@@ -204,12 +212,11 @@ class RecordingSavingManager(ABC):
 class DetectionSavingManager(ABC):
     """The Detection SavingManager is responsible for saving the detections locally. 
     """
-    
+  
     @abstractmethod
     def save_detections(
         self, 
-        detections: List[Detection],
-        bool: DetectionFilter
+        clean_detections: List[Detection],
     ) -> None:
         """Save the detection locally"""
 

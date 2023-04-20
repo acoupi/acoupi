@@ -45,7 +45,7 @@ class SaveRecording(RecordingSavingManager):
 
     def save_recording(self, recording: Recording, bool: RecordingFilter):
         """Determine where and how the recording should be saved.
-
+        
         """
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
         recording_path = recording.path
@@ -68,7 +68,12 @@ class SaveDetection(DetectionSavingManager):
         self.save_dir = save_dir
         self.timeformat = timeformat
 
-    def save_detections(self, detections: List[Detection], bool: DetectionFilter):
+    def get_detections(self, detections: List[Detection], bool: DetectionFilter):
+        """Get detection and clean them before saving."""
+        
+        get_cleandetections = [annotation for annotation in self.detections if annotation['det_prob'] >= self.threshold]
+
+    def save_detections(self, clean_detections: List[Detection], bool: DetectionFilter):
         """Determine where and how the detections should be saved."""
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
         # Get Detection Output

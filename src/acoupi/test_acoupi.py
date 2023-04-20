@@ -98,8 +98,11 @@ def main():
         # Detection Filter
         print("")
         print(f"Probability Threshold: {DEFAULT_THRESHOLD}")
-        keep_detection_bool = detection_filter.should_keep_detection(detections)
-        print(f"Threshold Detection Filter Decision: {keep_detection_bool}")
+        keep_detections_bool = detection_filter.should_keep_detections(detections)
+        print(f"Threshold Detection Filter - Decision: {keep_detection_bool}")
+        keep_clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
+        print(f"Threshold Detection Filter - Clean Detections: {keep_clean_detections}")
+
 
         # Recording Filter
         keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
@@ -113,7 +116,7 @@ def main():
         print("")
         
         # Detection Saving Manager
-        save_det = detection_savingmanager.save_detections(detections, keep_detection_bool)
+        save_det = detection_savingmanager.save_detections(keep_clean_detections)
         print(save_det)
 
         # Clean Model Output
