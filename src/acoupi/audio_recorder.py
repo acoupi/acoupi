@@ -68,22 +68,30 @@ class PyAudioRecorder(AudioRecorder):
                             input_device_index=self.device_index)
 
             #Initialise array to store audio frames
-            frames = []
-            for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
-                data = stream.read((self.chunk)/2)
-                frames.append(data)
+            #frames = []
+            #for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
+            #    data = stream.read(self.chunk, exception_on_overflow = False)
+            #    frames.append(data)
+            # try:
+            #     data = array.array('h')
+            #     for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
+            #         data.fromstring(strea.read(self.chunk))
+            # finally:
+            #     stream.stop_stream()
+            #     stream.close()
+            #     p.terminate()
+
 
             #Stop Recording and close the port interface
-            stream.stop_stream()
-            stream.close()
-            p.terminate()
+            #stream.stop_stream()
+            #stream.close()
+            #p.terminate()
 
             #Create a WAV file to write the audio data
             temp_audio_file = wave.open(temp_audio_path, 'wb')
             temp_audio_file.setnchannels(self.channels)
             temp_audio_file.setsampwidth(p.get_sample_size(pyaudio.paInt16))
             temp_audio_file.setframerate(self.sample_rate)
-
             # Write the audio data to the temporary file
             temp_audio_file.writeframes(b''.join(frames))    
             temp_audio_file.close()

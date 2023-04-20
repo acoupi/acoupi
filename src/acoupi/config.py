@@ -10,7 +10,8 @@ DEFAULT_TIMEZONE = 'Europe/London'
 """Default audio recording parameters."""
 DEFAULT_SAMPLE_RATE = 192000
 DEFAULT_AUDIO_CHANNELS = 1
-DEFAULT_CHUNK_SIZE = 2048
+DEFAULT_CHUNK_SIZE = 4096
+# DEFAULT_CHUNK_SIZE = 2048
 # DEFAULT_CHUNK_SIZE = 1024
 
 """Default start and end audio recording"""
