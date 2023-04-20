@@ -83,6 +83,7 @@ def main():
             return
 
         # Record audio
+        print("")
         print(f"[Thread {thread_id}] Recording Audio Start: {time.asctime()}")
         recording = audio_recorder.record()
         print(f"[Thread {thread_id}] Recording Audio End: {time.asctime()}")
