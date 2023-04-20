@@ -51,7 +51,7 @@ class SaveRecording(RecordingSavingManager):
         recording_path = recording.path
         srec_filename = recording.datetime.strftime(self.timeformat)
         # Move recording to the path it should be saved
-        os.rename(recording_path, "".join(sdir+'/'+srec_filename)+'.wav')
+        os.rename(recording_path, ''.join(sdir+'/'+srec_filename)+'.wav')
         return sdir
 
 
@@ -75,7 +75,12 @@ class SaveDetection(DetectionSavingManager):
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
         sdet_filename = recording.datetime.strftime(self.timeformat)
         print(f"Detection FileName: {sdet_filename}")
+        # Create a .txt file to save the detections
+        sdet_file = open(sdet_filename+'.txt','w')
+        sdet_file.write(clean_detections)
+        sdet_file.close()
+        # Move the detction file  to the path it hsould be saved
+        os.rename(detection_file, ''.join(sdir+'/'+sdet_file))
          # Move detections to the path it should be saved
-        getdetections = clean_detections
-        return sdir, sdet_filename, getdetections
+        return sdir, sdet_file
 
