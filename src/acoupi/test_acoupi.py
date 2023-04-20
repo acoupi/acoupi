@@ -19,10 +19,6 @@ from saving_managers import Directories, SaveRecording, SaveDetection
 # Create scheduler manager
 scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) 
 
-# Create global variable threading_id to keep track of the number of threads.
-thread_id = 0
-
-
 def main():
 
     with open("config.yaml") as f:
@@ -66,10 +62,8 @@ def main():
    
     def process():
 
-        # Use the thread ID variable
-        global thread_id 
-        # Increament thread_id by 1 each time process is run!
-        thread_id += 1
+        # Get the thread id
+        thread_id = threading.get_indent()
 
         # Get the time 
         now = datetime.now()
