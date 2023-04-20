@@ -49,58 +49,53 @@ class PyAudioRecorder(AudioRecorder):
         
         self.datetime = datetime.datetime.now()
         
-        #Create a temporary file to record audio
-        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_audiof:
-            
-            # Get the temporary file path from the created temporary audio file
-            temp_audio_path = temp_audiof.name
-
-            #Create an new instace of PyAudio
-            p = pyaudio.PyAudio()
-
-            # Make sure there is no-onging stream
-            stream = None
+        while True:
             try:
-                # Create new audio stream
-                stream = p.open(format=pyaudio.paInt16,
-                                channels=self.channels,
-                                rate=self.sample_rate,
-                                input=True,
-                                frames_per_buffer=self.chunk,
-                                input_device_index=self.device_index)
-            except Exception as e:
-                logging.ERROR(f"Error opening audio stream: {e}")
-                if stream:
+                #Create a temporary file to record audio
+                with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_audiof:
+
+                    # Get the temporary file path from the created temporary audio file
+                    temp_audio_path = temp_audiof.name
+
+                    #Create an new instace of PyAudio
+                    p = pyaudio.PyAudio()
+
+                    # Create new audio stream
+                    stream = p.open(format=pyaudio.paInt16,
+                                        channels=self.channels,
+                                        rate=self.sample_rate,
+                                        input=True,
+                                        frames_per_buffer=self.chunk,
+                                        input_device_index=self.device_index)
+
+                    # Create frames to store audio 
+                    frames = []
+                    # Record audio - read the audio stream
+                    for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
+                        data = stream.read(self.chunk, exception_on_overflow = False)
+                        frames.append(data)
+
+                    #Stop Recording and close the port interface
                     stream.stop_stream()
                     stream.close()
                     p.terminate()
-                return None
 
-            # Create frames to store audio 
-            frames = []
-            try: 
-                # Record audio - read the audio stream
-                for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
-                    data = stream.read(self.chunk, exception_on_overflow = False)
-                    frames.append(data)
-            except Exception as e:
-                logging.ERROR(f"Error recording audio: {e}")
+                    #Create a WAV file to write the audio data
+                    temp_audio_file = wave.open(temp_audio_path, 'wb')
+                    temp_audio_file.setnchannels(self.channels)
+                    temp_audio_file.setsampwidth(p.get_sample_size(pyaudio.paInt16))
+                    temp_audio_file.setframerate(self.sample_rate)
+                    # Write the audio data to the temporary file
+                    temp_audio_file.writeframes(b''.join(frames))    
+                    temp_audio_file.close()
 
-            finally:
-                #Stop Recording and close the port interface
-                stream.stop_stream()
-                stream.close()
-                p.terminate()
-
-            #Create a WAV file to write the audio data
-            temp_audio_file = wave.open(temp_audio_path, 'wb')
-            temp_audio_file.setnchannels(self.channels)
-            temp_audio_file.setsampwidth(p.get_sample_size(pyaudio.paInt16))
-            temp_audio_file.setframerate(self.sample_rate)
-            # Write the audio data to the temporary file
-            temp_audio_file.writeframes(b''.join(frames))    
-            temp_audio_file.close()
-
-            # Create a Recording object and return it
-            recording = Recording(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
-            return recording
+                    # Create a Recording object and return it
+                    recording = Recording(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
+                    return recording
+            
+            except OSError as e:
+                if 'Invalid number of channels' in str(e):
+                    logging.ERROR('Invalid number of channels error caught, retrying in 5 seconds...')
+                    time.sleep(5)
+                else:
+                    raise e
