@@ -68,10 +68,10 @@ class PyAudioRecorder(AudioRecorder):
                             input_device_index=self.device_index)
 
             #Initialise array to store audio frames
-            #frames = []
-            #for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
-            #    data = stream.read(self.chunk, exception_on_overflow = False)
-            #    frames.append(data)
+            frames = []
+            for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
+                data = stream.read(self.chunk, exception_on_overflow = False)
+                frames.append(data)
             # try:
             #     data = array.array('h')
             #     for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
@@ -83,9 +83,9 @@ class PyAudioRecorder(AudioRecorder):
 
 
             #Stop Recording and close the port interface
-            #stream.stop_stream()
-            #stream.close()
-            #p.terminate()
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
 
             #Create a WAV file to write the audio data
             temp_audio_file = wave.open(temp_audio_path, 'wb')
