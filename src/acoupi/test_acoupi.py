@@ -27,15 +27,15 @@ def main():
 
     scheduler = IntervalScheduler(timeinterval=DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
+    # Create the model object to analyse an audio recording
+    model = BatDetect2()
+
     # Create audio_recorder object to initiate audio recording
     audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
                                  sample_rate=DEFAULT_SAMPLE_RATE,
                                  channels=DEFAULT_AUDIO_CHANNELS,
                                  chunk=DEFAULT_CHUNK_SIZE,
                                  device_index=DEVICE_INDEX)
-
-    # Create the model ojbect to analyse an audio recording
-    model = BatDetect2()
 
     # Create Interval start_time, end_time object
     # Audio recording will only happen in the specific time interval 
