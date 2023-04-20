@@ -49,10 +49,10 @@ class SaveRecording(RecordingSavingManager):
         """
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
         recording_path = recording.path
-        recording_filename = recording.datetime.strftime(self.timeformat)
+        srec_filename = recording.datetime.strftime(self.timeformat)
         # Move recording to the path it should be saved
-        os.rename(recording_path, "".join(sdir+'/'+recording_filename)+'.wav')
-        return 
+        os.rename(recording_path, "".join(sdir+'/'+srec_filename)+'.wav')
+        return sdir
 
 
 class SaveDetection(DetectionSavingManager):
@@ -68,10 +68,14 @@ class SaveDetection(DetectionSavingManager):
         self.save_dir = save_dir
         self.timeformat = timeformat
 
-    def save_detections(self, clean_detections: List[Detection], bool: DetectionFilter):
-        """Determine where and how the detections should be saved."""
+    def save_detections(self, recording: Recording, clean_detections: List[Detection], bool: DetectionFilter):
+        """Determine where and how the detections should be saved.
+        
+        """
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
-        # Get Detection Output
+        sdet_filename = recording.datetime.strftime(self.timeformat)
+        print(f"Detection FileName: {sdet_filename}")
+         # Move detections to the path it should be saved
         getdetections = clean_detections
-        return sdir, getdetections
-    ### Detection object = species_name, probability
+        return sdir, sdet_filename, getdetections
+

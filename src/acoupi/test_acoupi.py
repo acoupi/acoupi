@@ -17,9 +17,9 @@ from recording_filters import ThresholdRecordingFilter
 from model_output import CleanModelOutput
 from saving_managers import Directories, SaveRecording, SaveDetection
 
-
 # Create scheduler manager
 scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) 
+
 
 def main():
 
@@ -53,8 +53,6 @@ def main():
 
     # Specify Directories to save recordings and detections. 
     save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
-    print(f'Directories Recording Save True: {save_dir_recording.dirpath_true}')
-    print(f'Directories Recording Save False: {save_dir_recording.dirpath_false}')
     save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
 
     # Create the recording and detection SavingManager object
@@ -93,38 +91,31 @@ def main():
         print("")
         print(f"Running Model BatDetect2 Start: {time.asctime()}")
         detections = model.run(recording)
+        print("")
         print(f"Running Model BatDetect2 End: {time.asctime()}")
 
         # Detection Filter
         print("")
         print(f"Probability Threshold: {DEFAULT_THRESHOLD}")
-        keep_detections_bool = detection_filter.should_keep_detections(detections)
-        print(f"Threshold Detection Filter - Decision: {keep_detections_bool}")
+        keep_detections_bool = detection_filter.should_keep_detections(detections) 
         clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
-        print(f"Threshold Detection Filter - Clean Detections: {clean_detections}")
-
-
+        
         # Recording Filter
         keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
-        print(f"Threshold Recording Filter Decision: {keep_recording_bool}")
         print("")
+        print(f"Threshold Recording Filter Decision: {keep_recording_bool}")
+        print(f"Threshold Detection Filter - Decision: {keep_detections_bool}")
+
 
         # Recording Saving Manager
         save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)
-        print(save_rec)
-        print("Recording Save")
         print("")
+        print(f"Recording Save in Directory: {save_rec}")
         
         # Detection Saving Manager
         save_det = detection_savingmanager.save_detections(clean_detections, keep_detections_bool)
-        print(save_det)
-
-        # Clean Model Output
-        #print(f"Start Cleaning Model Output {time.asctime()}")
-        #cdetection = CleanModelOutput(detections, threshold=DEFAULT_THRESHOLD)
-        #clean_predict = cdetection.getDetection_aboveThreshold()
-        #print(f"End Cleaning Model Output {time.asctime()}")
-        #print(f"Clean Prediction : {clean_predict}")
+        print("")
+        print(f"Return Save Detection Object: {save_det}")
         print("")
 
         # Save detections to local store
