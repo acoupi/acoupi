@@ -1,3 +1,0 @@
-start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event
-0.6165,0.6303,23750,29668,Eptesicus serotinus,0.081,0.212,-1,Echolocation
-1.9235,1.9413,22890,27631,Nyctalus noctula,0.098,0.217,-1,Echolocation
