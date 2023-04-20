@@ -38,8 +38,6 @@ def main():
     # Audio recording will only happen in the specific time interval 
     start_time = datetime.strptime(START_RECORDING,"%H:%M:%S").time()
     end_time = datetime.strptime(END_RECORDING,"%H:%M:%S").time()
-    #start_time = datetime.strptime(config['start_recording'],"%H:%M:%S").time()
-    #end_time = datetime.strptime(config['end_recording'], "%H:%M:%S").time()
 
     # Create the recording_interval object
     recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
@@ -74,14 +72,9 @@ def main():
             return
 
         # Record audio
-        print("")
         print(f"Recording Audio Start: {time.asctime()}")
         recording = audio_recorder.record()
         print(f"Recording Audio End: {time.asctime()}")
-        # check if an audio file has been recorded
-        print("")
-        print(f"Recorded file: {recording.path}")
-        print(f"Recording Time: {recording.datetime}")
 
         # Load model 
         model = BatDetect2(recording=recording)
@@ -105,8 +98,7 @@ def main():
         save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
         save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
         print("")
-        print(f"Recording save in folder: {save_rec.sdir}")
-        print(f"Detection save in folder: {save_det.sdir}")
+        print(f"Recording & Detection save - END: {time.asctime()}")
         print("")
 
     # Start processing
