@@ -68,15 +68,10 @@ class SaveDetection(DetectionSavingManager):
         self.save_dir = save_dir
         self.timeformat = timeformat
 
-    def get_detections(self, detections: List[Detection], bool: DetectionFilter):
-        """Get detection and clean them before saving."""
-        
-        get_cleandetections = [annotation for annotation in self.detections if annotation['det_prob'] >= self.threshold]
-
     def save_detections(self, clean_detections: List[Detection], bool: DetectionFilter):
         """Determine where and how the detections should be saved."""
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
         # Get Detection Output
-        getdetections = detections
-        return getdetections
+        getdetections = clean_detections
+        return sdir, getdetections
     ### Detection object = species_name, probability
