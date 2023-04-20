@@ -6,7 +6,7 @@ import yaml
 #import multiprocessing 
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
-from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT
+from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
 from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
 from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
@@ -44,7 +44,7 @@ def main():
                            Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
 
     # Create the recording_condition object - check if it is time to record audio (time.now() IsInInterval)
-    recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
+    recording_condition = IsInIntervals(recording_intervals, ZoneInfo(DEFAULT_TIMEZONE))
 
     # Create recording_filter and detection_filter object
     detection_filter = ThresholdDetectionFilter(threshold=DEFAULT_THRESHOLD)

@@ -4,6 +4,9 @@
 LATITUDE = 51.5381
 LONGITUDE = -0.0099
 
+"""Default timezone of the deployed device"""
+DEFAULT_TIMEZONE = 'Europe/London'
+
 """Default audio recording parameters."""
 DEFAULT_SAMPLE_RATE = 192000
 DEFAULT_AUDIO_CHANNELS = 1
