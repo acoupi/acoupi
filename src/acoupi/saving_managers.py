@@ -7,9 +7,12 @@ and detections outputs can be saved into a specific format
 (i.e, .wav files, .csv files) and at a specific location 
 (i.e, rpi memory, external hardrive, folder XX/YY). 
 
-Saving managers are implemented as classes that inherit from 
-SavingManager. The class should implement the XXX method, 
-which takes a XXX, XXX, and XXX object. 
+Saving managers (SavingRecording and SavingDetection) are implemented as classes 
+that inherit from RecordingSavingManager and DetectionSavingManager. The classes 
+should implement the save_recording and save_detections methods. The save_recording 
+method takes the recording object, and the recording filter output. The save_detection
+methods also takes a recording object and the detection filter output. On top of these, 
+it takes a clean list of detection to be saved. 
 """
 
 from dataclasses import dataclass
@@ -53,7 +56,7 @@ class SaveRecording(RecordingSavingManager):
         srec_filename = recording.datetime.strftime(self.timeformat)
         # Move recording to the path it should be saved
         os.rename(recording_path, ''.join(sdir+'/'+srec_filename)+'.wav')
-        return sdir
+        return 
 
 
 class SaveDetection(DetectionSavingManager):
@@ -75,7 +78,6 @@ class SaveDetection(DetectionSavingManager):
         """
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
         sdet_filename = recording.datetime.strftime(self.timeformat)
-        print(f"Detection FileName: {sdet_filename}")
 
         # Create a file to save the detections
         with open(sdet_filename+'.csv','w', newline='') as csvfile:
@@ -86,5 +88,5 @@ class SaveDetection(DetectionSavingManager):
 
         # Move the detection file to the path it should be saved
         os.rename(sdet_filename+'.csv', ''.join(sdir+'/'+sdet_filename+'.csv'))
-        return sdir
+        return 
 
