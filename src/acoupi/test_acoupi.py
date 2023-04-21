@@ -48,6 +48,7 @@ def main():
     recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
                            Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
 
+    print(recording_intervals)
     # Create the recording_condition object - check if it is time to record audio (time.now() IsInInterval)
     recording_condition = IsInIntervals(recording_intervals, ZoneInfo(DEFAULT_TIMEZONE))
 
