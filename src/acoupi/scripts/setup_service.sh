@@ -1,5 +1,5 @@
-sudo ln -sf acoupi/src/acoupi/services/acoupi_testing.service /usr/lib/systemd/system
+sudo ln -sf $HOME/acoupi/src/acoupi/services/acoupi_testing.service /usr/lib/systemd/system
+sudo systemctl daemon-reload
 sudo systemctl enable acoupi_testing.service
 sudo systemctl start acoupi_testing.service
-
-systemctl is-active --quiet acoupi_testing.service && echo acoupi service is running || echo acoupi services is not running
+systemctl status acoupi_testing.service
