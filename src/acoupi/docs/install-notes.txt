@@ -32,7 +32,7 @@ sudo -u ${USER} mkdir -p acoupi/src/acoupi/storage/bats
 sudo -u ${USER} mkdir -p acoupi/src/acoupi/storage/no_bats
 
 9. Start service to run acoupi-batdetect2
-services = ("acoupi_batdetect2_testing.service")
+services = ("acoupi_testing.service")
 for service in "${services[@]}"
 do 
     sudo ln -sf $HOME/acoupi/services/$service /usr/lib/systemd/system
