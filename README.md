@@ -20,7 +20,7 @@ The implementation of BatDetect2 is based on components defined in Acoupi. To te
 
 **Acoupi-BatDetect2** comes with a range of configurable arguments that can be used to adjust the behaviour of the acoustic monitoring system. These arguments are defined in a file called [`config.py`](src/acoupi/config.py). By changing the value of an arugment, such as `DEFAULT_THRESHOLD`, the seystem will use the new value in place of the default value. 
 
-It is important to note that the argument names should not be changed, as doing so will require modifications to the `main.py` file. 
+It is important to note that the argument names should not be changed, as doing so will require modifications to the [`main.py`](src/acoupi/main.py) file. 
 
 To modify an argument, simply locate the relevant argument `config.py`and change the value to the new desired value. For example, to adjust the threshold of the detection filters, you can change the value of `DEFAULT_THRESHOLD` to a higher or lower value. By modifying the arguments, you can fine-tune the behaviour of Acoupi-BatDetect2 to better suit your specific needs and requirements. 
 
