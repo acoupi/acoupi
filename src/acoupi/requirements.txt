@@ -7,6 +7,7 @@ scikit-learn
 matplotlib
 librosa 
 sounddevice
+batdetect2
 #paho-mqtt
 #PyYAML
 #ffmpeg-python
