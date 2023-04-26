@@ -1,9 +1,9 @@
 # acoupi
-Classifier for bioacoustics devices. 
+Audio Classifier for single-board computer.  
 
 ## Diagram
 
-![diagram](acoupi.svg)
+![diagram](src/acoupi/docs/acoupi_progressdiagram.png)
 
 ## Development
 
