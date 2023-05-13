@@ -1,38 +1,38 @@
 import threading
 import time
+from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
-import yaml
-import multiprocessing 
+import logging
+#import multiprocessing 
 
-from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL
-from audio_recording import PyAudioRecorder
-from model import BatDetect2
-from detection_filters import Threshold_DetectionFilter
-from model_output import CleanModelOutput
+from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
+from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
+from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
+from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
-#from recording_filters import ThresholdRecordingFilter
+from model import BatDetect2
+from detection_filters import ThresholdDetectionFilter
+from recording_filters import ThresholdRecordingFilter
+from saving_managers import Directories, SaveRecording, SaveDetection
 
-#from acoupi.file_managers import FileManager
-#from acoupi.audio_recording import PyAudioRecorder
-#from acoupi.models import BatDetect2
-#from acoupi.recording_managers import MultiIntervalRecordingManager
-#from acoupi.scheduler_managers import ConstantScheduler
-#from acoupi.storages.sqlite import SqliteStore
+# Setup the main logger
+logging.basicConfig(filename='acoupi.log',filemode='w', 
+                    format='%(levelname)s - %(message)s',
+                    level=logging.INFO)
 
 # Create scheduler manager
-#scheduler = ConstantScheduleManager(DEFAULT_RECORDING_INTERVAL) 
-#storage = SqliteStore(config["storage"])
+scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) 
 
 def main():
 
-    with open("config.yaml") as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
+    scheduler = IntervalScheduler(timeinterval=DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
-    scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
+    # Create the model object to analyse an audio recording
+    model = BatDetect2()
 
-    # Create audio_recorder object
+    # Create audio_recorder object to initiate audio recording
     audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
                                  sample_rate=DEFAULT_SAMPLE_RATE,
                                  channels=DEFAULT_AUDIO_CHANNELS,
@@ -40,134 +40,77 @@ def main():
                                  device_index=DEVICE_INDEX)
 
     # Create Interval start_time, end_time object
-    start_time = datetime.strptime(config['start_recording'],"%H:%M:%S").time()
-    end_time = datetime.strptime(config['end_recording'], "%H:%M:%S").time()
+    # Audio recording will only happen in the specific time interval 
+    start_time = datetime.strptime(START_RECORDING,"%H:%M:%S").time()
+    end_time = datetime.strptime(END_RECORDING,"%H:%M:%S").time()
 
+    # Create the recording_interval object
     recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
                            Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
 
-    recording_condition = IsInIntervals(recording_intervals, ZoneInfo(config['timezone']))
+    print(recording_intervals)
+    # Create the recording_condition object - check if it is time to record audio (time.now() IsInInterval)
+    recording_condition = IsInIntervals(recording_intervals, ZoneInfo(DEFAULT_TIMEZONE))
 
-    # recording_filter = ThresholdRecordingFilter(DETECTION_THRESHOLD)
+    # Create recording_filter and detection_filter object
+    detection_filter = ThresholdDetectionFilter(threshold=DEFAULT_THRESHOLD)
+    recording_filter = ThresholdRecordingFilter(threshold=DEFAULT_THRESHOLD)
 
-    def process1_recordaudio():
+    # Specify Directories to save recordings and detections. 
+    save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
+    save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
+
+    # Create the recording and detection SavingManager object
+    recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
+    detection_savingmanager = SaveDetection(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_detection)
+   
+    def process():
+
+        print('System Running - Please Wait.')
+
+        # Get the thread id
+        thread_id = threading.get_ident()
 
         # Get the time 
         now = datetime.now()
         # Schedule next recording - Use Scheduler to determine when next recording should happen.
-        threading.Timer(scheduler.time_until_next_recording(now), process).start()
+        threading.Timer((scheduler.time_until_next_recording(now)), process).start()
 
         # Check if we should record
         if not recording_condition.should_record(datetime.now()):
+            logging.info(f"Outside Recording Interval - Current Time is {time.asctime()}")
+            logging.info(f"Recording Start at: {start_time} and End at: {end_time}")
             return
-        
+
         # Record audio
-        print("")
-        print(f"Recording Audio Start: {time.asctime()}")
+        #logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
+        print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         recording = audio_recorder.record()
-        print(f"Recording Audio End: {time.asctime()}")
-
-        # Send audio recording path to process2_analyseaudio()
-        # return recording
-        queue.put(recording)
-    
-    def process2_analyseaudio():
-
-        # Get the audio recording from process 1
-        audio_recording = queue.get()
-        print(audio_recording)
-        #recording = process1_recordaudio()
-
-        # Load BatDetect2 model
-        model = BatDetect2(recording=audio_recording)
-        
-        # Check audio recording file path 
-        print("")
-        print(f"Recorded file: {recording.path}")
+        print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
+        #logging.info(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
 
         # Run model - Get detections
-        print("")
-        print(f"Running Model BatDetect2 Start: {time.asctime()}")
+        #logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
+        print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
         detections = model.run(recording)
-        print(f"Running Model BatDetect2 End: {time.asctime()}")
+        print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
+        #logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
 
-    # Create Queue to communicate between the 2 processes
-    queue = multiprocessing.Queue()
+        # Detection and Recording Filter
+        keep_detections_bool = detection_filter.should_keep_detections(detections) 
+        clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
+        keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
+        logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
+        logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_recording_bool}")
 
-    # Create the first process
-    p1 = multiprocessing.Process(target=process1_recordaudio)
-    # Create the second process, passing queue object as argument
-    p2 = multiprocessing.Process(target=process2_analyseaudio, args=(queue,))
+        # Recording and Detection Saving Manager
+        save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
+        save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
+        logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
+        logging.info("")
 
-
-    # Start both processes
-    print(f"Start Process1 - Record Audio: {time.asctime()}")
-    p1.start()
-    print(f"Start Process2 - Analyse Audio: {time.asctime()}")
-    p2.start()
-
-    # Wait for both processes to finish
-    print(f"End Process1 - Record Audio: {time.asctime()}")
-    p1.join()
-    print(f"End Process2 - Analyse Audio: {time.asctime()}")
-    p2.join()
-
-if __name__ == "__main__":
-    main()                             
-    # def process():
-    #     # Schedule next processing
-    #     threading.Timer(DEFAULT_RECORDING_INTERVAL, process).start()
-
-    #     # Check if we should record
-    #     if not recording_condition.should_record(datetime.now()):
-    #         return
-
-    #     # Record audio
-    #     print("")
-    #     print(f"Recording Audio Start: {time.asctime()}")
-    #     recording = audio_recorder.record()
-    #     print(f"Recording Audio End: {time.asctime()}")
-    #     # check if an audio file has been recorded
-    #     print("")
-    #     print(f"Recorded file: {recording.path}")
-    #     #print(f"Recording Time: {recording.time}")
-
-    #     # Load model 
-    #     print("")
-    #     print(f"Loading BatDetect2 Model Start: {time.asctime()}")
-    #     model = BatDetect2(recording=recording)
-    #     print(f"Loading BatDetect2 Model End: {time.asctime()}")
-
-    #     # Run model - Get detections
-    #     print("")
-    #     print(f"Running Model BatDetect2 Start: {time.asctime()}")
-    #     detections = model.run(recording)
-    #     print(f"Running Model BatDetect2 End: {time.asctime()}")
-    #     print("")
-
-    #     # Detection Filter
-    #     store_detections = Threshold_DetectionFilter(detections)
-    #     print("Store Detections - Threshold DF")
-    #     print(store_detections)
-    #     print("")
-    #     #clean_detection = recording_filter(recording, detections)
-
-    #     # Clean Model Output
-    #     print(f"Start Cleaning Model Output {time.asctime()}")
-    #     cdetection = CleanModelOutput(detections)
-    #     clean_predict = cdetection.getDetection_aboveThreshold()
-    #     print(f"End Cleaning Model Output {time.asctime()}")
-    #     print(f"Clean Prediction : {clean_predict}")
-
-    #     # Save detections to local store
-    #     #storage.store_detections(recording, clean_predict)
-    #     #print("Detections stored")
-
-    #     # Delete recording
-    #     #file_manager.delete_recording(recording)
-
-    # # Start processing
-    # process()
+    # Start processing
+    process()
 
 if __name__ == "__main__":
     main()
