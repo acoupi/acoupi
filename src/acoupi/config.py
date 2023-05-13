@@ -15,17 +15,17 @@ DEFAULT_CHUNK_SIZE = 4096
 # DEFAULT_CHUNK_SIZE = 1024
 
 """Default start and end audio recording"""
-START_RECORDING = '19:00:00'
-END_RECORDING = '09:00:00'
+START_RECORDING = '20:00:00'
+END_RECORDING = '08:00:00'
 
 """Default audio recording lenght in seconds."""
 DEFAULT_RECORDING_DURATION = 3
 
 """Default recording interval in seconds."""
-DEFAULT_RECORDING_INTERVAL = 9
+DEFAULT_RECORDING_INTERVAL = 6
 
 """Default detection probabilities threshold"""
-DEFAULT_THRESHOLD = 0.8
+DEFAULT_THRESHOLD = 0.7
 
 """Default directories to save audio recordings and detections"""
 DIR_RECORDING_TRUE = 'storage/bats/recordings'
