@@ -24,7 +24,7 @@ DEFAULT_RECORDING_DURATION = 3
 DEFAULT_RECORDING_INTERVAL = 6
 
 """Default detection probabilities threshold"""
-DETECTION_THRESHOLD = 0.2
+DEFAULT_THRESHOLD = 0.2
 
 """Default timeformat to name the audio recording files"""
 DEFAULT_TIMEFORMAT = '%Y%m%d_%H%M%S' #Year-Month-Day Hour-Minute-Second
