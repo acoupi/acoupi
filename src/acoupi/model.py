@@ -11,9 +11,9 @@ class BatDetect2(Model):
 
     "BatDetect2 Model to analyse the audio recording"
     
-    def __init__(self, recording: Recording):
+    #def __init__(self, recording: Recording):
 
-        self.recording = recording
+        #self.recording = recording
 
     def run(self, recording) -> List[Detection]:
 

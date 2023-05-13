@@ -27,7 +27,7 @@ scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL)
 
 def main():
 
-    scheduler = IntervalScheduler(timeinterval=DEFAULT_RECORDING_INTERVAL) # every 10 seconds
+    scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
     # Create the model object to analyse an audio recording
     model = BatDetect2()
@@ -97,11 +97,11 @@ def main():
         #logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
 
         # Detection and Recording Filter
-        keep_detections_bool = detection_filter.should_keep_detections(detections) 
-        clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
-        keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
-        logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
-        logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_recording_bool}")
+        #keep_detections_bool = detection_filter.should_keep_detections(detections) 
+        #clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
+        #keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
+        #logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
+        #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_recording_bool}")
 
         # Recording and Detection Saving Manager
         #save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    

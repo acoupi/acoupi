@@ -43,7 +43,7 @@ class ThresholdDetectionFilter(DetectionFilter):
 
 class HighestbySpecies_DetectionFilter(DetectionFilter):
 
-    def __init__(self, threshold: float = DETECTION_THRESHOLD):
+    def __init__(self, threshold: float):
         """ Initiatlise the filter.
         
         Args: 

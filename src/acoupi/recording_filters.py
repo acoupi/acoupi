@@ -13,7 +13,8 @@ the recording should be kept.
 """
 from typing import List
 
-from acoupi.types import Detection, Recording, RecordingFilter
+from acoupi_types import Detection, Recording, RecordingFilter
+#from acoupi.types import Detection, Recording, RecordingFilter
 
 
 class NegativeRecordingFilter(RecordingFilter):
