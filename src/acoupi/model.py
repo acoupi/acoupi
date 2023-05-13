@@ -1,12 +1,10 @@
 """ Run BatDetect2 Model """
 from typing import List, Dict
-from bat_detect import api
+from batdetect2 import api
 
 #from acoupi.types import Model, Recording, Detection
-#from acoupi.audio_recording import PyAudioRecorder
 
 from acoupi_types import Model, Recording, Detection
-#from audio_recording import PyAudioRecorder
 
 
 class BatDetect2(Model):
