@@ -18,7 +18,6 @@ from tempfile import TemporaryFile, NamedTemporaryFile
 import pyaudio
 import wave 
 import sounddevice
-import yaml
 from typing import Optional, List
 from dataclasses import dataclass
 
