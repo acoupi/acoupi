@@ -1,12 +1,10 @@
 from typing import List, Dict
 from acoupi_types import Detection, DetectionFilter
-from config import DETECTION_THRESHOLD
 
-#from acoupi.config  import DETECTION_THRESHOLD
 #from acoupi.types import Detection, DetectionFilter
 
 
-class Threshold_DetectionFilter(DetectionFilter):
+class ThresholdDetectionFilter(DetectionFilter):
     """A DetectionFilter that keeps annotations with confident probability of detection.
 
     This filter will keep all the detection annotations from the model output that are above a
@@ -14,18 +12,33 @@ class Threshold_DetectionFilter(DetectionFilter):
     threshold for an annotation to be considered confident.
     """
 
-    def __init__(self, threshold: float = DETECTION_THRESHOLD):
+    def __init__(self, threshold: float):
         """ Initiatlise the filter.
         
         Args: 
-            threshold: Probability threshold to be used. Only keep detection annotations
-            with a probability greater or equal to this threshold.
+            threshold: Probability threshold to be used.
         """ 
         self.threshold = threshold
 
-    def should_store_detection(self, detections: List[Detection]) -> bool:
 
+    def should_store_detection(self, detections: List[Detection]) -> bool:
+        """
+        Args:
+            detections: Detections in a recording.   
+        Returns:
+            bool 
+        """
         return any(ann for ann in self.detections if ann['det_prob'] >= self.threshold)
+    
+
+    def get_clean_detections(self, detections: List[Detection], bool: bool) -> List[Detection]:
+        """Get detection and clean them before saving."""
+        if bool == True:
+            get_cleandetections = [annotation for annotation in detections if annotation['det_prob'] >= self.threshold]
+        else:
+            get_cleandetections = []
+        return get_cleandetections
+
 
 
 class HighestbySpecies_DetectionFilter(DetectionFilter):
