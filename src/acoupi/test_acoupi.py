@@ -8,14 +8,14 @@ import logging
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
-from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
+#from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
 from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
 from model import BatDetect2
 from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
-from saving_managers import Directories, SaveRecording, SaveDetection
+#from saving_managers import Directories, SaveRecording, SaveDetection
 
 # Setup the main logger
 logging.basicConfig(filename='acoupi.log',filemode='w', 
@@ -57,12 +57,12 @@ def main():
     recording_filter = ThresholdRecordingFilter(threshold=DEFAULT_THRESHOLD)
 
     # Specify Directories to save recordings and detections. 
-    save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
-    save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
+    #save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
+    #save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
 
     # Create the recording and detection SavingManager object
-    recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
-    detection_savingmanager = SaveDetection(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_detection)
+    #recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
+    #detection_savingmanager = SaveDetection(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_detection)
    
     def process():
 
@@ -104,10 +104,10 @@ def main():
         logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_recording_bool}")
 
         # Recording and Detection Saving Manager
-        save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
-        save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
-        logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
-        logging.info("")
+        #save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
+        #save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
+        #logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
+        #logging.info("")
 
     # Start processing
     process()
