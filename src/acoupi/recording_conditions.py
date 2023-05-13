@@ -14,7 +14,8 @@ import datetime
 from dataclasses import dataclass
 from typing import List
 
-from acoupi.types import RecordingCondition
+from acoupi_types import RecordingCondition
+#from acoupi.types import RecordingCondition
 
 __all__ = [
     "IsInInterval",
