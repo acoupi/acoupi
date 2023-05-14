@@ -36,13 +36,12 @@ class ThresholdDetectionFilter(DetectionFilter):
         if bool == True:
             get_cleandetections = [annotation for annotation in detections if annotation['det_prob'] >= self.threshold]
             
-            cleandetection_obj = [Detection(species_name = get_cleandetections['class'],
-                                probability = get_cleandetections['class_prob'],
-                                #detection_probability = get_cleandetections['det_prob'],
-                                id=uuid4()
-                                ) for clean_detection in clean_predict] 
+            cleandetection_obj = [Detection(species_name = detection['class'],
+                                class_probability = detection['class_prob'],
+                                soundevent_probability = detection['det_prob']
+                                ) for detection in get_cleandetections] 
 
-            cleandetection_obj = [Detection(**detection) for detection in get_cleandetections]
+            #cleandetection_obj = [Detection(**detection) for detection in cleandetection_obj]
         else:
             get_cleandetections = []
         return cleandetection_obj
