@@ -35,6 +35,7 @@ class ThresholdDetectionFilter(DetectionFilter):
         """Get detection and clean them before saving."""
         if bool == True:
             get_cleandetections = [annotation for annotation in detections if annotation['det_prob'] >= self.threshold]
+            get_cleandetection = [Detection(**detection) for detection in get_cleandetections]
         else:
             get_cleandetections = []
         return get_cleandetections
