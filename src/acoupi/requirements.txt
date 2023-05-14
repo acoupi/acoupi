@@ -9,5 +9,6 @@ matplotlib
 librosa 
 sounddevice
 batdetect2
+pony
 #paho-mqtt
 #ffmpeg-python
