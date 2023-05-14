@@ -74,8 +74,11 @@ class Detection(core.EntityMeta):
     id: UUID
     """Unique ID of the detection"""
 
-    probability: float
-    """Probability of the detection"""
+    class_probability: float
+    """Probability of the class (species name) detection"""
+
+    soundevent_probability: float
+    """Probability of the sound event (species call) detection"""
 
     species_name: str
     """Name of the species that was detected"""

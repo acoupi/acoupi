@@ -5,10 +5,14 @@ from uuid import UUID
 
 from pony import orm
 
-from acoupi import utils
-from acoupi.storages.sqlite import types as db_types
-from acoupi.storages.sqlite.database import create_base_models
-from acoupi.types import Deployment, Detection, Recording, Store
+from storages.sqlite import types as db_types
+from storages.sqlite.database import create_base_models
+from acoupi_types import Deployment, Detection, Recording, Store
+import acoupi_utils as utils
+#from acoupi import utils
+#from acoupi.storages.sqlite import types as db_types
+#from acoupi.storages.sqlite.database import create_base_models
+#from acoupi.types import Deployment, Detection, Recording, Store
 
 
 class SqliteStore(Store):
@@ -221,7 +225,8 @@ class SqliteStore(Store):
             Detection(
                 id=detection.id,
                 species_name=detection.species_name,
-                probability=detection.probability,
+                class_probability=detection.class_probability,
+                soundevent_probability=detection.soundevent_probability
             )
             for detection in detections
         ]
@@ -399,7 +404,8 @@ class SqliteStore(Store):
             id=detection.id,
             recording=db_recording,
             species_name=detection.species_name,
-            probability=detection.probability,
+            class_probability=detection.class_probability,
+            soundevent_probability=detection.soundevent_probability,
         )
         orm.commit()
         return db_detection

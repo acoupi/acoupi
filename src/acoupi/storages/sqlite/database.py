@@ -4,7 +4,8 @@ from uuid import UUID
 
 from pony import orm
 
-from acoupi.storages.sqlite.types import BaseModels, MessageModels
+from storages.sqlite.types import BaseModels, MessageModels
+#from acoupi.storages.sqlite.types import BaseModels, MessageModels
 
 __all__ = [
     "create_base_models",
@@ -74,8 +75,11 @@ def create_base_models(database: orm.Database) -> BaseModels:
         id = orm.PrimaryKey(UUID, auto=True)
         """Unique ID of the detection"""
 
-        probability = orm.Required(float)
-        """Probability of the detection"""
+        class_probability = orm.Required(float)
+        """Probability of the class (species name) detection"""
+
+        soundevent_probability = orm.Required(float)
+        """Probability of the sound event (species call) detection"""
 
         species_name = orm.Required(str)
         """Name of the species that was detected"""

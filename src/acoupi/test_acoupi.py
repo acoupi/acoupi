@@ -4,11 +4,11 @@ from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import logging
-
 #import multiprocessing 
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
+from config import DFAULT_DB_PATH
 #from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
 from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
@@ -16,8 +16,9 @@ from recording_conditions import IsInIntervals, Interval
 from model import BatDetect2
 from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
+from messengers import MQTTMessenger
 #from saving_managers import Directories, SaveRecording, SaveDetection
-from storages.sqlite import SqliteStore
+from storages.sqlite import SqliteStore, SqliteMessageStore
 
 # Setup the main logger
 logging.basicConfig(filename='acoupi.log',filemode='w', 
@@ -50,7 +51,6 @@ def main():
     recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
                            Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
 
-    print(recording_intervals)
     # Create the recording_condition object - check if it is time to record audio (time.now() IsInInterval)
     recording_condition = IsInIntervals(recording_intervals, ZoneInfo(DEFAULT_TIMEZONE))
 
@@ -59,19 +59,16 @@ def main():
     recording_filter = ThresholdRecordingFilter(threshold=DEFAULT_THRESHOLD)
 
     # Specify sqlite database to store detection
-    sqlitedb = SqliteStore(DEFAULT_SQLITEDB_PATH)
+    sqlitedb = SqliteStore(DFAULT_DB_PATH)
 
-    # Specify Directories to save recordings and detections. 
-    #save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
-    #save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
+    # Sending Detection to MQTT
 
-    # Create the recording and detection SavingManager object
-    #recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
-    #detection_savingmanager = SaveDetection(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_detection)
+    # Specify sqlite message to keep track of records sent
+    #transmission_message = SqliteMessageStore(DFAULT_DB_PATH, sqlitedb)
    
     def process():
 
-        print('System Running - Please Wait.')
+        #print('System Running - Please Wait.')
 
         # Get the thread id
         thread_id = threading.get_ident()
@@ -89,6 +86,7 @@ def main():
 
         # Record audio
         #logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
+        print("")
         print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         recording = audio_recorder.record()
         print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
@@ -99,24 +97,24 @@ def main():
         print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
         detections = model.run(recording)
         print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
+        print("")
         #logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
 
         # Detection and Recording Filter
         keep_detections_bool = detection_filter.should_store_detection(detections) 
         clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
-        print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_recording_bool}")
-        #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_recording_bool}")
+        print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
+        #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
         
         #keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
         #logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
         
-        # SqliteDB Store Detections
-        sqlitedb.store_detections(recording, detections)
+        # SqliteDB Store Recroding, Detections
+        sqlitedb.store_recording(recording)
+        sqlitedb.store_detections(recording, clean_detections)
+        print(f"[Thread {thread_id}] Recording and Detections saved in db.")
 
-        # Recording and Detection Saving Manager
-        #save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
-        #save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
-        #logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
+        # SqliteDB Message Store
         #logging.info("")
 
     # Start processing
