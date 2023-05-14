@@ -28,7 +28,7 @@ class ThresholdDetectionFilter(DetectionFilter):
         Returns:
             bool 
         """
-        return any(ann for ann in self.detections if ann['det_prob'] >= self.threshold)
+        return any(ann for ann in detections if ann['det_prob'] >= self.threshold)
     
 
     def get_clean_detections(self, detections: List[Detection], bool: bool) -> List[Detection]:
