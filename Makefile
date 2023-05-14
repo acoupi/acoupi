@@ -55,5 +55,5 @@ docs: clean-docs
 serve-coverage:
 	python -m http.server --directory htmlcov/ 8080
 
-serve-docs: docs
-	python -m http.server --directory $(DOCS_BUILD_DIR) 9090
+serve-docs:
+	sphinx-autobuild -b html $(DOCS_SOURCE_DIR) $(DOCS_BUILD_DIR)
