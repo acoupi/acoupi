@@ -9,6 +9,7 @@ import logging
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
+from config import DFAULT_DB_PATH
 #from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
 from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
@@ -50,7 +51,6 @@ def main():
     recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
                            Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
 
-    print(recording_intervals)
     # Create the recording_condition object - check if it is time to record audio (time.now() IsInInterval)
     recording_condition = IsInIntervals(recording_intervals, ZoneInfo(DEFAULT_TIMEZONE))
 
@@ -59,7 +59,7 @@ def main():
     recording_filter = ThresholdRecordingFilter(threshold=DEFAULT_THRESHOLD)
 
     # Specify sqlite database to store detection
-    sqlitedb = SqliteStore(DEFAULT_SQLITEDB_PATH)
+    sqlitedb = SqliteStore(DFAULT_DB_PATH)
 
     # Specify Directories to save recordings and detections. 
     #save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
@@ -110,7 +110,8 @@ def main():
         #keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
         #logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
         
-        # SqliteDB Store Detections
+        # SqliteDB Store Recroding, Detections
+        sqlitedb.store_detections(recording)
         sqlitedb.store_detections(recording, detections)
 
         # Recording and Detection Saving Manager
