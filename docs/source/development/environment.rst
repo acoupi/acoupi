@@ -1,2 +1,2 @@
-Development
+Environment
 ===========
