@@ -16,8 +16,9 @@ from recording_conditions import IsInIntervals, Interval
 from model import BatDetect2
 from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
+from messengers import MQTTMessenger
 #from saving_managers import Directories, SaveRecording, SaveDetection
-from storages.sqlite import SqliteStore
+from storages.sqlite import SqliteStore, SqliteMessageStore
 
 # Setup the main logger
 logging.basicConfig(filename='acoupi.log',filemode='w', 
@@ -60,13 +61,10 @@ def main():
     # Specify sqlite database to store detection
     sqlitedb = SqliteStore(DFAULT_DB_PATH)
 
-    # Specify Directories to save recordings and detections. 
-    #save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
-    #save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
+    # Sending Detection to MQTT
 
-    # Create the recording and detection SavingManager object
-    #recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
-    #detection_savingmanager = SaveDetection(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_detection)
+    # Specify sqlite message to keep track of records sent
+    #transmission_message = SqliteMessageStore(DFAULT_DB_PATH, sqlitedb)
    
     def process():
 
@@ -111,19 +109,12 @@ def main():
         #keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
         #logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
         
-        print(clean_detections)
-        
         # SqliteDB Store Recroding, Detections
         sqlitedb.store_recording(recording)
         sqlitedb.store_detections(recording, clean_detections)
         print(f"[Thread {thread_id}] Recording and Detections saved in db.")
 
         # SqliteDB Message Store
-        #sqlitedb.store_recording_message(recording)
-        # Recording and Detection Saving Manager
-        #save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
-        #save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
-        #logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
         #logging.info("")
 
     # Start processing

@@ -38,7 +38,9 @@ class ThresholdDetectionFilter(DetectionFilter):
             
             cleandetection_obj = [Detection(species_name = detection['class'],
                                 class_probability = detection['class_prob'],
-                                soundevent_probability = detection['det_prob']
+                                soundevent_probability = detection['det_prob'],
+                                #oundevent_start_time = detection['start_time'],
+                                #soundevent_end_time = detection['end_time'],
                                 ) for detection in get_cleandetections] 
 
             #cleandetection_obj = [Detection(**detection) for detection in cleandetection_obj]
