@@ -66,8 +66,11 @@ class Detection:
     species_name: str
     """The name of the species predicted by the model"""
 
-    probability: float
-    """The probability of the prediction"""
+    class_probability: float
+    """The probability of the class (species_name) prediction"""
+
+    soundevent_probability: float
+    """The probability of the sound event (call detection) prediction"""
 
     recording: Optional[Recording] = None
     """The recording that the detection was made on"""
