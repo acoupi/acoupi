@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import logging
+
 #import multiprocessing 
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
@@ -16,6 +17,7 @@ from model import BatDetect2
 from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
 #from saving_managers import Directories, SaveRecording, SaveDetection
+from storages.sqlite import SqliteStore
 
 # Setup the main logger
 logging.basicConfig(filename='acoupi.log',filemode='w', 
@@ -55,6 +57,9 @@ def main():
     # Create recording_filter and detection_filter object
     detection_filter = ThresholdDetectionFilter(threshold=DEFAULT_THRESHOLD)
     recording_filter = ThresholdRecordingFilter(threshold=DEFAULT_THRESHOLD)
+
+    # Specify sqlite database to store detection
+    sqlitedb = SqliteStore(DEFAULT_SQLITEDB_PATH)
 
     # Specify Directories to save recordings and detections. 
     #save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
@@ -97,11 +102,16 @@ def main():
         #logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
 
         # Detection and Recording Filter
-        #keep_detections_bool = detection_filter.should_keep_detections(detections) 
-        #clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
+        keep_detections_bool = detection_filter.should_store_detection(detections) 
+        clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
+        print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_recording_bool}")
+        #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_recording_bool}")
+        
         #keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
         #logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
-        #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_recording_bool}")
+        
+        # SqliteDB Store Detections
+        sqlitedb.store_detections(recording, detections)
 
         # Recording and Detection Saving Manager
         #save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
