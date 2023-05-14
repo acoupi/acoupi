@@ -4,9 +4,12 @@ from typing import List
 
 from pony import orm
 
-from acoupi import types
-from acoupi.storages.sqlite import types as db_types
-from acoupi.storages.sqlite.database import create_message_models
+import acoupi_types as types
+from storages.sqlite import types as db_types
+from storages.sqlite.database import create_message_models
+#from acoupi import types
+#from acoupi.storages.sqlite import types as db_types
+#from acoupi.storages.sqlite.database import create_message_models
 
 
 class SqliteMessageStore(types.MessageStore):
