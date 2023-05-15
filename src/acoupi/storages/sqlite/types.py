@@ -139,10 +139,10 @@ class DetectionMessage(core.EntityMeta):
     id: int
     """Unique ID of the detection message"""
 
-    detection_id: UUID
+    detection_id: List[UUID]
     """Detection that the message belongs to"""
 
-    message_status: MessageStatus
+    message_status: List[MessageStatus]
     """Message status of the message"""
 
 
