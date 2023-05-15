@@ -112,7 +112,8 @@ def main():
 
         # Detection and Recording Filter
         keep_detections_bool = detection_filter.should_store_detection(detections) 
-        clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
+        clean_detections_list = detection_filter.get_clean_detections_list(detections, keep_detections_bool)
+        clean_detections_obj = detection_filter.get_clean_detections_obj(detections, keep_detections_bool)
         keep_recording_bool = recording_filter.should_store_recording(recording, detections)
         print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
         #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}") 
@@ -120,22 +121,23 @@ def main():
         
         # SqliteDB Store Recroding, Detections
         sqlitedb.store_recording(recording)
-        sqlitedb.store_detections(recording, clean_detections)
+        sqlitedb.store_detections(recording, clean_detections_obj)
         print(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
 
         # Send Message via MQTT
-        mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections]
+        mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections_obj]
         response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
         print(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
 
         # Store Detection Message to SqliteDB
-        transmission_messagedb.store_detection_message(clean_detections, response)
+        transmission_messagedb.store_detection_message(clean_detections_obj, response)
         print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
         print(f"[Thread {thread_id}] Response Status: {response[0].status}")
 
         # Recording and Detection Saving Manager
         save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
-        save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
+        print(clean_detections_list)
+        save_det = detection_savingmanager.save_detections(recording, clean_detections_list, keep_detections_bool)
         #logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
         #logging.info("")
 
