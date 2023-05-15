@@ -118,9 +118,13 @@ def main():
         print(f"[Thread {thread_id}] Recording and Detections saved in db.")
 
         # Send Message via MQTT
-        mqtt_detections_message = build_detection_message(clean_detections)
-        mqtt_messenger.send_message(mqtt_detections_message)
+        mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections]
+        print("")
+        print(mqtt_detections_messages)
+        #mqtt_messenger.send_message(mqtt_detections_messages)
+        response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
         print(f"[Thread {thread_id}] Detections Message sent via MQTT.")
+        print(f"[Thread {thread_id} Response Status: {response.status}]"
 
         # SqliteDB Message Store
         #logging.info("")
