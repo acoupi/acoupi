@@ -183,7 +183,7 @@ class RecordingFilter(ABC):
     """
 
     @abstractmethod
-    def should_keep_recording(
+    def should_store_recording(
         self,
         recording: Recording,
         detections: List[Detection],
@@ -199,7 +199,7 @@ class DetectionFilter(ABC):
     """
 
     @abstractmethod
-    def should_keep_detections(
+    def should_store_detections(
         self, 
         detections: List[Detection]
     ) -> bool:
