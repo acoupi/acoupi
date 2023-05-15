@@ -8,6 +8,7 @@ import logging
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
 from config import DEFAULT_DB_PATH
+from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
 from config_mqtt import DEFAULT_MQTT_HOST, DEFAULT_MQTT_PORT, DEFAULT_MQTT_CLIENT_USER, DEFAULT_MQTT_CLIENT_PASS, DEFAULT_MQTT_CLIENTID, DEFAULT_MQTT_TOPIC
 from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
@@ -17,7 +18,7 @@ from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
 from messengers import MQTTMessenger, build_detection_message
 from storages.sqlite import SqliteStore, SqliteMessageStore
-
+from saving_managers import Directories, SaveRecording, SaveDetection
 
 # Setup the main logger
 logging.basicConfig(filename='acoupi.log',filemode='w', 
@@ -66,6 +67,13 @@ def main():
     mqtt_messenger = MQTTMessenger(host=DEFAULT_MQTT_HOST, username=DEFAULT_MQTT_CLIENT_USER, password=DEFAULT_MQTT_CLIENT_PASS, 
                                    port=DEFAULT_MQTT_PORT, client_id=DEFAULT_MQTT_CLIENTID, topic=DEFAULT_MQTT_TOPIC)
 
+    # Specify Directories to save recordings and detections. 
+    save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
+    save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
+
+    # Create the recording and detection SavingManager object
+    recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
+    detection_savingmanager = SaveDetection(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_detection)
 
 
     def process():
@@ -105,11 +113,10 @@ def main():
         # Detection and Recording Filter
         keep_detections_bool = detection_filter.should_store_detection(detections) 
         clean_detections = detection_filter.get_clean_detections(detections, keep_detections_bool)
-        print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
-        logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
-        
-        #keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
-        #logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
+        #print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
+        logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}") 
+        keep_recording_bool = recording_filter.should_keep_recording(recording, detections)
+        logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
         
         # SqliteDB Store Recroding, Detections
         sqlitedb.store_recording(recording)
@@ -121,13 +128,16 @@ def main():
         response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
         print(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
 
-        # Store  Detection Message to SqliteDB
+        # Store Detection Message to SqliteDB
         transmission_messagedb.store_detection_message(clean_detections, response)
         print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
         print(f"[Thread {thread_id}] Response Status: {response[0].status}")
 
-        # SqliteDB Message Store
-        #logging.info("")
+        # Recording and Detection Saving Manager
+        save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
+        save_det = detection_savingmanager.save_detections(recording, clean_detections, keep_detections_bool)
+        logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
+        logging.info("")
 
     # Start processing
     process()
