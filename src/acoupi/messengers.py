@@ -62,7 +62,7 @@ class MQTTMessenger(types.Messenger):
         username: str,
         topic: str,
         password: Optional[str] = None,
-        port: int = 1883,
+        port: int = 1884,
         timeout: int = 5,
     ) -> None:
         """Initialize the MQTT messenger."""

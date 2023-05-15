@@ -9,6 +9,7 @@ import logging
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
 from config import DFAULT_DB_PATH
+from config_mqtt import DEFAULT_MQTT_HOST, DEFAULT_MQTT_PORT, DEFAULT_MQTT_CLIENT_USER, DEFAULT_MQTT_CLIENT_PASS, DEFAULT_MQTT_CLIENTID, DEFAULT_MQTT_TOPIC
 #from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
 from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
@@ -16,7 +17,7 @@ from recording_conditions import IsInIntervals, Interval
 from model import BatDetect2
 from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
-from messengers import MQTTMessenger
+from messengers import MQTTMessenger, build_detection_message
 #from saving_managers import Directories, SaveRecording, SaveDetection
 from storages.sqlite import SqliteStore, SqliteMessageStore
 
@@ -62,6 +63,8 @@ def main():
     sqlitedb = SqliteStore(DFAULT_DB_PATH)
 
     # Sending Detection to MQTT
+    mqtt_messenger = MQTTMessenger(host=DEFAULT_MQTT_HOST, username=DEFAULT_MQTT_CLIENT_USER, password=DEFAULT_MQTT_CLIENT_PASS, 
+                                   client_id=DEFAULT_MQTT_CLIENTID, topic=DEFAULT_MQTT_TOPIC)
 
     # Specify sqlite message to keep track of records sent
     #transmission_message = SqliteMessageStore(DFAULT_DB_PATH, sqlitedb)
@@ -113,6 +116,11 @@ def main():
         sqlitedb.store_recording(recording)
         sqlitedb.store_detections(recording, clean_detections)
         print(f"[Thread {thread_id}] Recording and Detections saved in db.")
+
+        # Send Message via MQTT
+        mqtt_detections_message = build_detection_message(clean_detections)
+        mqtt_messenger.send_message(mqtt_detections_message)
+        print(f"[Thread {thread_id}] Detections Message sent via MQTT.")
 
         # SqliteDB Message Store
         #logging.info("")
