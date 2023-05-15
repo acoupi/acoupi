@@ -99,8 +99,8 @@ class SqliteMessageStore(types.MessageStore):
             )
 
             self.models.DetectionMessage(
-                detection_id=detection_ids,
-                message_status=message_status,
+                detection_id=detection.id,
+                message_status=status,
             )
 
         orm.commit()
