@@ -124,7 +124,7 @@ def main():
         #mqtt_messenger.send_message(mqtt_detections_messages)
         response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
         print(f"[Thread {thread_id}] Detections Message sent via MQTT.")
-        print(f"[Thread {thread_id} Response Status: {response.status}]"
+        print(f"[Thread {thread_id} Response Status: {response.status}")
 
         # SqliteDB Message Store
         #logging.info("")
