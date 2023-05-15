@@ -60,8 +60,8 @@ def main():
     sqlitedb = SqliteStore(DFAULT_DB_PATH)
 
     # Sending Detection to MQTT
-    mqtt_messenger = MQTTMessenger(host=DEFAULT_MQTT_HOST, username=DEFAULT_MQTT_CLIENT_USER, password=DEFAULT_MQTT_CLIENT_PASS, 
-                                   client_id=DEFAULT_MQTT_CLIENTID, topic=DEFAULT_MQTT_TOPIC)
+    #mqtt_messenger = MQTTMessenger(host=DEFAULT_MQTT_HOST, username=DEFAULT_MQTT_CLIENT_USER, password=DEFAULT_MQTT_CLIENT_PASS, 
+    #                               client_id=DEFAULT_MQTT_CLIENTID, topic=DEFAULT_MQTT_TOPIC)
 
     # Specify sqlite message to keep track of records sent
     #transmission_message = SqliteMessageStore(DFAULT_DB_PATH, sqlitedb)
@@ -115,6 +115,10 @@ def main():
         print(f"[Thread {thread_id}] Recording and Detections saved in db.")
 
         # Send Message via MQTT
+        # Sending Detection to MQTT
+        mqtt_messenger = MQTTMessenger(host=DEFAULT_MQTT_HOST, username=DEFAULT_MQTT_CLIENT_USER, password=DEFAULT_MQTT_CLIENT_PASS, 
+                                       client_id=DEFAULT_MQTT_CLIENTID, topic=DEFAULT_MQTT_TOPIC)
+
         mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections]
         response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
         print(f"[Thread {thread_id}] Detections Message sent via MQTT.")
