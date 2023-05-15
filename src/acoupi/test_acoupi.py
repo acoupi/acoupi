@@ -4,13 +4,11 @@ from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import logging
-#import multiprocessing 
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
 from config import DFAULT_DB_PATH
 from config_mqtt import DEFAULT_MQTT_HOST, DEFAULT_MQTT_PORT, DEFAULT_MQTT_CLIENT_USER, DEFAULT_MQTT_CLIENT_PASS, DEFAULT_MQTT_CLIENTID, DEFAULT_MQTT_TOPIC
-#from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
 from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
@@ -18,7 +16,6 @@ from model import BatDetect2
 from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
 from messengers import MQTTMessenger, build_detection_message
-#from saving_managers import Directories, SaveRecording, SaveDetection
 from storages.sqlite import SqliteStore, SqliteMessageStore
 
 # Setup the main logger
@@ -119,12 +116,12 @@ def main():
 
         # Send Message via MQTT
         mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections]
-        print("")
-        print(mqtt_detections_messages)
-        #mqtt_messenger.send_message(mqtt_detections_messages)
         response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
         print(f"[Thread {thread_id}] Detections Message sent via MQTT.")
-        print(f"[Thread {thread_id} Response Status: {response.status}")
+        print("")
+        print(mqtt_detections_messages)
+        print("")
+        print(f"[Thread {thread_id} Response Status: {response[0].status}")
 
         # SqliteDB Message Store
         #logging.info("")
