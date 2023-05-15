@@ -206,7 +206,14 @@ class DetectionFilter(ABC):
         """Determine if the detection should be stored locally."""
     
     @abstractmethod
-    def get_clean_detections(
+    def get_clean_detections_obj(
+        self, 
+        detections: List[Detection],
+    ) -> List[Detection]:
+        """Return the clean detections according to detection filter configuration."""
+    
+    @abstractmethod
+    def get_clean_detections_list(
         self, 
         detections: List[Detection],
     ) -> List[Detection]:
