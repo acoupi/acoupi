@@ -199,7 +199,7 @@ class DetectionFilter(ABC):
     """
 
     @abstractmethod
-    def should_store_detections(
+    def should_store_detection(
         self, 
         detections: List[Detection]
     ) -> bool:
