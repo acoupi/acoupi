@@ -91,8 +91,6 @@ class SqliteMessageStore(types.MessageStore):
         responses: List[types.Response],
     ) -> None:
         """Register a detection message with the store."""
-        message_status = []
-        detection_ids = []
         for detection, response in zip(detections, responses):
             status = self.models.MessageStatus(
                 response_ok=response.status == types.ResponseStatus.SUCCESS,
@@ -100,13 +98,10 @@ class SqliteMessageStore(types.MessageStore):
                 sent_on=response.message.sent_on,
             )
 
-            message_status.append(status)
-            detection_ids.append(detection.id)
-
-        self.models.DetectionMessage(
-            detection_id=detection_ids,
-            message_status=message_status,
-        )
+            self.models.DetectionMessage(
+                detection_id=detection_ids,
+                message_status=message_status,
+            )
 
         orm.commit()
 
