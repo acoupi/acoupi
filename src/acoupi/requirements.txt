@@ -10,5 +10,5 @@ librosa
 sounddevice
 batdetect2
 pony
-#paho-mqtt
+paho-mqtt
 #ffmpeg-python
