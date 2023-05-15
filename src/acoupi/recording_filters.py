@@ -93,9 +93,8 @@ class ThresholdRecordingFilter(RecordingFilter):
         Returns:
             bool
         """
-        return any(
-            detection.probability >= self.threshold for detection in detections
-        )
+        #return any(detection.probability >= self.threshold for detection in detections)
+        return any(annotation for annotation in detections if annotation['det_prob'] >= self.threshold)
 
 
 class FocusSpeciesRecordingFilter(RecordingFilter):

@@ -199,8 +199,19 @@ class DetectionFilter(ABC):
     """
 
     @abstractmethod
-    def should_store_detection(self, detection: Detection) -> bool:
+    def should_keep_detections(
+        self, 
+        detections: List[Detection]
+    ) -> bool:
         """Determine if the detection should be stored locally."""
+    
+    @abstractmethod
+    def get_clean_detections(
+        self, 
+        detections: List[Detection],
+    ) -> List[Detection]:
+        """Return the clean detections according to detection filter configuration."""
+
 
 
 class RecordingSavingManager(ABC):
