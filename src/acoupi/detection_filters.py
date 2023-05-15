@@ -31,7 +31,16 @@ class ThresholdDetectionFilter(DetectionFilter):
         return any(annotation for annotation in detections if annotation['det_prob'] >= self.threshold)
     
 
-    def get_clean_detections(self, detections: List[Detection], bool: bool) -> List[Detection]:
+    def get_clean_detection_list(self, detections: List[Detection], bool: bool) -> List[Detection]:
+        """Get detection and clean them before saving."""
+        if bool == True:
+            get_cleandetections = [annotation for annotation in detections if annotation['det_prob'] >= self.threshold]
+        else:
+            get_cleandetections = []
+        return get_cleandetections
+
+
+    def get_clean_detections_obj(self, detections: List[Detection], bool: bool) -> List[Detection]:
         """Get detection and clean them before saving."""
         if bool == True:
             get_cleandetections = [annotation for annotation in detections if annotation['det_prob'] >= self.threshold]
@@ -42,8 +51,6 @@ class ThresholdDetectionFilter(DetectionFilter):
                                 #oundevent_start_time = detection['start_time'],
                                 #soundevent_end_time = detection['end_time'],
                                 ) for detection in get_cleandetections] 
-
-            #cleandetection_obj = [Detection(**detection) for detection in cleandetection_obj]
         else:
             get_cleandetections = []
         return cleandetection_obj
