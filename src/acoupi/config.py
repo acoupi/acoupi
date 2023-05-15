@@ -8,7 +8,7 @@ LONGITUDE = -0.0099
 DEFAULT_TIMEZONE = 'Europe/London'
 
 """Default database file name"""
-DFAULT_DB_PATH = 'acoupi.db'
+DEFAULT_DB_PATH = 'acoupi.db'
 
 """Default audio recording parameters."""
 DEFAULT_SAMPLE_RATE = 192000

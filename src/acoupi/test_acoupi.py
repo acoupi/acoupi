@@ -7,7 +7,7 @@ import logging
 
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
-from config import DFAULT_DB_PATH
+from config import DEFAULT_DB_PATH
 from config_mqtt import DEFAULT_MQTT_HOST, DEFAULT_MQTT_PORT, DEFAULT_MQTT_CLIENT_USER, DEFAULT_MQTT_CLIENT_PASS, DEFAULT_MQTT_CLIENTID, DEFAULT_MQTT_TOPIC
 from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
@@ -17,6 +17,7 @@ from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
 from messengers import MQTTMessenger, build_detection_message
 from storages.sqlite import SqliteStore, SqliteMessageStore
+
 
 # Setup the main logger
 logging.basicConfig(filename='acoupi.log',filemode='w', 
@@ -56,15 +57,15 @@ def main():
     detection_filter = ThresholdDetectionFilter(threshold=DEFAULT_THRESHOLD)
     recording_filter = ThresholdRecordingFilter(threshold=DEFAULT_THRESHOLD)
 
-    # Specify sqlite database to store detection
-    sqlitedb = SqliteStore(DFAULT_DB_PATH)
+    # Specify sqlite database to store recording and detection
+    sqlitedb = SqliteStore(DEFAULT_DB_PATH)
 
     # Sending Detection to MQTT
     mqtt_messenger = MQTTMessenger(host=DEFAULT_MQTT_HOST, username=DEFAULT_MQTT_CLIENT_USER, password=DEFAULT_MQTT_CLIENT_PASS, 
                                    port=DEFAULT_MQTT_PORT, client_id=DEFAULT_MQTT_CLIENTID, topic=DEFAULT_MQTT_TOPIC)
 
     # Specify sqlite message to keep track of records sent
-    #transmission_message = SqliteMessageStore(DFAULT_DB_PATH, sqlitedb)
+    transmission_messagedb = SqliteMessageStore(DEFAULT_DB_PATH, sqlitedb)
    
     def process():
 
