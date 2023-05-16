@@ -135,7 +135,6 @@ def main():
 
         # Recording and Detection Saving Manager
         save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
-        print(clean_detections_list)
         save_det = detection_savingmanager.save_detections(recording, clean_detections_obj, keep_detections_bool)
         #logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
         #logging.info("")
