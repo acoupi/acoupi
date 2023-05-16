@@ -80,6 +80,12 @@ class Detection(core.EntityMeta):
     soundevent_probability: float
     """Probability of the sound event (species call) detection"""
 
+    soundevent_start_time: Optional[datetime.time]
+    """The start_time of the sound event in the recording file"""
+
+    soundevent_end_time: Optional[datetime.time]
+    """The end_time of the sound event in the recording file"""
+
     species_name: str
     """Name of the species that was detected"""
 
