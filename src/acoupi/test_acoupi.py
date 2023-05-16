@@ -112,7 +112,6 @@ def main():
 
         # Detection and Recording Filter
         keep_detections_bool = detection_filter.should_store_detection(detections) 
-        clean_detections_list = detection_filter.get_clean_detections_list(detections, keep_detections_bool)
         clean_detections_obj = detection_filter.get_clean_detections_obj(detections, keep_detections_bool)
         keep_recording_bool = recording_filter.should_store_recording(recording, detections)
         print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
@@ -137,7 +136,7 @@ def main():
         # Recording and Detection Saving Manager
         save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
         print(clean_detections_list)
-        save_det = detection_savingmanager.save_detections(recording, clean_detections_list, keep_detections_bool)
+        save_det = detection_savingmanager.save_detections(recording, clean_detections_obj, keep_detections_bool)
         #logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
         #logging.info("")
 
