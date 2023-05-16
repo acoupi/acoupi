@@ -74,10 +74,16 @@ class Detection(core.EntityMeta):
     id: UUID
     """Unique ID of the detection"""
 
+    species_name: str
+    """Name of the species that was detected"""
+
     class_probability: float
     """Probability of the class (species name) detection"""
 
-    soundevent_probability: float
+    recording: Recording
+    """Recording that the detection belongs to"""
+
+    soundevent_probability: Optional[float]
     """Probability of the sound event (species call) detection"""
 
     soundevent_start_time: Optional[datetime.time]
@@ -85,12 +91,6 @@ class Detection(core.EntityMeta):
 
     soundevent_end_time: Optional[datetime.time]
     """The end_time of the sound event in the recording file"""
-
-    species_name: str
-    """Name of the species that was detected"""
-
-    recording: Recording
-    """Recording that the detection belongs to"""
 
 
 class MessageStatus(core.EntityMeta):

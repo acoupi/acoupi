@@ -69,8 +69,17 @@ class Detection:
     class_probability: float
     """The probability of the class (species_name) prediction"""
 
-    soundevent_probability: float
+    soundevent_probability: Optional[float]
     """The probability of the sound event (call detection) prediction"""
+
+    soundevent_probability: Optional[float]
+    """The probability of the sound event (species call) prediction"""
+
+    soundevent_start_time: Optional[datetime.time]
+    """The start_time of the sound event in the recording file"""
+
+    soundevent_end_time: Optional[datetime.time]
+    """The end_time of the sound event in the recording file"""
 
     recording: Optional[Recording] = None
     """The recording that the detection was made on"""

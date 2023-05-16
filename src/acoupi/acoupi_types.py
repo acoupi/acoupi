@@ -69,7 +69,7 @@ class Detection:
     class_probability: float
     """The probability of the class (species_name) prediction"""
 
-    soundevent_probability: float
+    soundevent_probability: Optional[float]
     """The probability of the sound event (species call) prediction"""
 
     soundevent_start_time: Optional[datetime.time]
@@ -83,6 +83,7 @@ class Detection:
 
     id: UUID = field(default_factory=uuid4)
     """The unique ID of the detection"""
+
 
 
 class RecordingScheduler(ABC):
