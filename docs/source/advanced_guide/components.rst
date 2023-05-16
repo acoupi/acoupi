@@ -8,6 +8,8 @@ component is designed to perform a specific task, such as recording audio,
 processing recordings, or sending messages to a remote server. They have a
 single responsibility and are designed to be reusable and modular pieces.
 
+.. _advanced-guide-component-types:
+
 Component Types
 ---------------
 
@@ -76,6 +78,17 @@ Acoupi.
 Recording Conditions
 ~~~~~~~~~~~~~~~~~~~~
 
+Recording conditions can be used to determine if a recording should be made
+or not. These will usually run at the beggining of the recording process and
+make sure the process ends early if the recording conditions are not met. You
+can use as many as you need.
+
+.. autoclass:: acoupi.recording_conditions.IsInInterval
+   :noindex:
+
+.. autoclass:: acoupi.recording_conditions.IsInIntervals
+   :noindex:
+
 .. _audio_recorders:
 
 Audio Recorders
@@ -126,3 +139,25 @@ Message Stores
 
 Custom Components
 -----------------
+
+To create a custom component that will play nicely with Acoupi it is best
+to follow the following guidelines:
+
+1. If the component you wish to implement can be categorized as one of the
+   categories described in :ref:`Component
+   Types<advanced-guide-component-types>`, then it should inherit from the
+   corresponding base class and try to stick with the suggested interface. For
+   example, if you are implementing a component that will be in charge of
+   recording audio, then it should inherit from the :class:`AudioRecorder`
+   class.
+
+2. If the component you wish to implement does not fit into any of the
+   the mentioned categories, then it should try to have a simple
+   interface that uses the dataclasses defined in :mod:`acoupi.dataclasses`.
+   This will allow the component to be easily combined with other components
+   defined in Acoupi.
+
+3. If you wish to share your component with the Acoupi community, then 
+   make sure you checkout the :ref:`acoupi-contributing` section!
+
+
