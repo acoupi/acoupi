@@ -1,2 +1,4 @@
+.. _acoupi-contributing:
+
 Contributing
 ============

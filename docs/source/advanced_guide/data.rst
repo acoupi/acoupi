@@ -4,14 +4,14 @@ Data
 ====
 
 The **Acoupi** data layer is the most basic layer of the framework and is
-responsible for handling all the information about the functionality of the
-device and the data it collects. We define data objects by using `dataclasses
-<https://docs.python.org/3/library/dataclasses.html>`_ since they are simple,
-lightweight, and easy to use. These data objects are used by the other layers
-of the framework to perform their tasks, and they are designed to be easily
-manipulated. By providing these data objects, we can ensure that the data
-handled by the other layers of the framework is consistent and that the
-flow of information between the layers is easy to understand.
+responsible for defining the relevants bits of information about the
+functionality of the device and the data it collects. We define data objects by
+using `dataclasses <https://docs.python.org/3/library/dataclasses.html>`_ since
+they are simple, lightweight, and easy to use. These data objects are used by
+the other layers of the framework to perform their tasks. By providing these
+data objects, we can ensure that the data handled by the other layers of the
+framework is consistent and that the flow of information between the layers is
+easy to understand.
 
 .. _advanced-guide-deployments:
 
@@ -26,6 +26,7 @@ created by instantiating a Deployment dataclass.
 .. autoclass:: acoupi.types.Deployment
    :members:
    :undoc-members:
+   :noindex:
 
 .. _advanced-guide-recordings:
 
@@ -40,6 +41,7 @@ recording. A recording can be created by instantiating a Recording dataclass.
 .. autoclass:: acoupi.types.Recording
    :members:
    :undoc-members:
+   :noindex:
 
 .. _advanced-guide-detections:
 
@@ -54,6 +56,7 @@ detection. A detection can be created by instantiating a Detection dataclass.
 .. autoclass:: acoupi.types.Detection
    :members:
    :undoc-members:
+   :noindex:
 
 .. _advanced-guide-messages:
 
@@ -68,6 +71,7 @@ be created by instantiating a Message dataclass.
 .. autoclass:: acoupi.types.Message
    :members:
    :undoc-members:
+   :noindex:
 
 Response
 --------
@@ -80,3 +84,4 @@ response. A response can be created by instantiating a Response dataclass.
 .. autoclass:: acoupi.types.Response
    :members:
    :undoc-members:
+   :noindex:
