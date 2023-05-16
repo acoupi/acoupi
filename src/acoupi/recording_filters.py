@@ -20,7 +20,7 @@ from acoupi_types import Detection, Recording, RecordingFilter
 class NegativeRecordingFilter(RecordingFilter):
     """A RecordingFilter that always returns false."""
 
-    def should_keep_recording(
+    def should_store_recording(
         self,
         recording: Recording,
         detections: List[Detection],
@@ -42,7 +42,7 @@ class NegativeRecordingFilter(RecordingFilter):
 class PositiveRecordingFilter(RecordingFilter):
     """A RecordingFilter that always returns true."""
 
-    def should_keep_recording(
+    def should_store_recording(
         self,
         recording: Recording,
         detections: List[Detection],
@@ -79,7 +79,7 @@ class ThresholdRecordingFilter(RecordingFilter):
         """
         self.threshold = threshold
 
-    def should_keep_recording(
+    def should_store_recording(
         self,
         recording: Recording,
         detections: List[Detection],
@@ -93,9 +93,8 @@ class ThresholdRecordingFilter(RecordingFilter):
         Returns:
             bool
         """
-        return any(
-            detection.probability >= self.threshold for detection in detections
-        )
+        #return any(detection.probability >= self.threshold for detection in detections)
+        return any(annotation for annotation in detections if annotation['det_prob'] >= self.threshold)
 
 
 class FocusSpeciesRecordingFilter(RecordingFilter):
@@ -120,7 +119,7 @@ class FocusSpeciesRecordingFilter(RecordingFilter):
         self.species = species
         self.threshold = threshold
 
-    def should_keep_recording(
+    def should_store_recording(
         self,
         recording: Recording,
         detections: List[Detection],

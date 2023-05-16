@@ -6,7 +6,8 @@ from typing import Optional
 
 import paho.mqtt.client as mqtt
 
-from acoupi import types
+import acoupi_types as types 
+#from acoupi import types
 
 __all__ = [
     "MQTTMessenger",
@@ -36,8 +37,11 @@ def build_recording_message(recording: types.Recording) -> types.Message:
 
 def build_detection_message(detection: types.Detection) -> types.Message:
     """Build a detection message."""
+    detection_dict = asdict(detection)
+    detection_dict.pop('id', None) #remove id UUID 
+
     return types.Message(
-        message=json.dumps(asdict(detection)),
+        message=json.dumps(detection_dict),
         sent_on=datetime.datetime.now(),
         device_id="device",  # TODO: get device id from detection
     )
@@ -62,7 +66,7 @@ class MQTTMessenger(types.Messenger):
         username: str,
         topic: str,
         password: Optional[str] = None,
-        port: int = 1883,
+        port: int = 1884,
         timeout: int = 5,
     ) -> None:
         """Initialize the MQTT messenger."""

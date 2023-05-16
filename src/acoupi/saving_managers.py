@@ -91,9 +91,9 @@ class SaveDetection(DetectionSavingManager):
         # Create a file to save the detections
         with open(sdet_filename+'.csv','w', newline='') as csvfile:
             # Create a CSV writer to write the header row and data rows
-            writer = csv.DictWriter(csvfile, fieldnames=clean_detections[0].keys()) if clean_detections else None
+            writer = csv.DictWriter(csvfile, fieldnames=clean_detections[0].__dict__.keys()) if clean_detections else None
             writer.writeheader()
-            writer.writerows([detection for detection in clean_detections])
+            writer.writerows({**detection.__dict__} for detection in clean_detections)
 
         # Move the detection file to the path it should be saved
         os.rename(sdet_filename+'.csv', ''.join(sdir+'/'+sdet_filename+'.csv'))

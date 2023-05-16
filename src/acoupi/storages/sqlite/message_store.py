@@ -87,20 +87,21 @@ class SqliteMessageStore(types.MessageStore):
     @orm.db_session
     def store_detection_message(
         self,
-        detection: types.Detection,
-        response: types.Response,
+        detections: List[types.Detection],
+        responses: List[types.Response],
     ) -> None:
         """Register a detection message with the store."""
-        status = self.models.MessageStatus(
-            response_ok=response.status == types.ResponseStatus.SUCCESS,
-            response_code=response.status.value,
-            sent_on=response.message.sent_on,
-        )
+        for detection, response in zip(detections, responses):
+            status = self.models.MessageStatus(
+                response_ok=response.status == types.ResponseStatus.SUCCESS,
+                response_code=response.status.value,
+                sent_on=response.message.sent_on,
+            )
 
-        self.models.DetectionMessage(
-            detection_id=detection.id,
-            message_status=status,
-        )
+            self.models.DetectionMessage(
+                detection_id=detection.id,
+                message_status=status,
+            )
 
         orm.commit()
 

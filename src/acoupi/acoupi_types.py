@@ -72,10 +72,10 @@ class Detection:
     soundevent_probability: float
     """The probability of the sound event (species call) prediction"""
 
-    #soundevent_start_time: Optional[datetime.time]
+    soundevent_start_time: Optional[datetime.time]
     """The start_time of the sound event in the recording file"""
 
-    #soundevent_end_time: Optional[datetime.time]
+    soundevent_end_time: Optional[datetime.time]
     """The end_time of the sound event in the recording file"""
 
     recording: Optional[Recording] = None
@@ -174,6 +174,23 @@ class Model(ABC):
         """
 
 
+class RecordingFilter(ABC):
+    """Determine if a recording should be kept.
+
+    The RecordingFilter is responsible for determining if a recording
+    should be kept or deleted. It can use the detections, the recording
+    itself, and internal state to determine if the recording should be kept.
+    """
+
+    @abstractmethod
+    def should_store_recording(
+        self,
+        recording: Recording,
+        detections: List[Detection],
+    ) -> bool:
+        """Determine if the recording should be kept."""
+
+
 class DetectionFilter(ABC):
     """Determine if a detection should be saved.
 
@@ -182,8 +199,43 @@ class DetectionFilter(ABC):
     """
 
     @abstractmethod
-    def should_store_detection(self, detection: Detection) -> bool:
+    def should_store_detection(
+        self, 
+        detections: List[Detection]
+    ) -> bool:
         """Determine if the detection should be stored locally."""
+    
+    @abstractmethod
+    def get_clean_detections_obj(
+        self, 
+        detections: List[Detection],
+    ) -> List[Detection]:
+        """Return the clean detections according to detection filter configuration."""
+
+
+class RecordingSavingManager(ABC):
+    """The Recording SavingManager is responsible for saving the recordings locally. 
+    """
+
+    @abstractmethod
+    def save_recording(
+        self, 
+        recording: Recording,
+        bool: RecordingFilter
+    ) -> None:
+        """Save the recording locally."""
+
+
+class DetectionSavingManager(ABC):
+    """The Detection SavingManager is responsible for saving the detections locally. 
+    """
+  
+    @abstractmethod
+    def save_detections(
+        self, 
+        clean_detections: List[Detection],
+    ) -> None:
+        """Save the detection locally"""
 
 
 class Store(ABC):
@@ -277,23 +329,6 @@ class Store(ABC):
         Returns:
             A list of deployments.
         """
-
-
-class RecordingFilter(ABC):
-    """Determine if a recording should be kept.
-
-    The RecordingFilter is responsible for determining if a recording
-    should be kept or deleted. It can use the detections, the recording
-    itself, and internal state to determine if the recording should be kept.
-    """
-
-    @abstractmethod
-    def should_keep_recording(
-        self,
-        recording: Recording,
-        detections: List[Detection],
-    ) -> bool:
-        """Determine if the recording should be kept."""
 
 
 class FileManager(ABC):
