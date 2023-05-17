@@ -69,8 +69,8 @@ class TimeInterval(RecordingSavingFilter):
     def should_save_recording(self, recording: Recording) -> bool:
         """Determine if a recording should be saved."""
         print(self.interval.start)
-        print(recording.datetime)
-        return self.interval.start <= recording.datetime <= self.interval.end
+        print(recording.datetime.time())
+        return self.interval.start <= recording.datetime.time() <= self.interval.end
 
 
 class FrequencySchedule(RecordingSavingFilter): 
@@ -92,7 +92,7 @@ class FrequencySchedule(RecordingSavingFilter):
         """Determine if a recording should be saved."""
 
         time = recording.datetime  
-        saving_interval = datetime.timedelta(minutes=self.frequency) - self.duration
+        saving_interval = datetime.timedelta(minutes=self.frequency) - datetime.timedelta(minutes=self.duration)
         elapsed_time = (time.minute % self.frequency) + (time.second/60)
         
         return elapsed_time < self.duration
@@ -120,7 +120,7 @@ class DawnDuskTimeInterval(RecordingSavingFilter):
             3. Check if the current time falls within the dawn time interval or dusktime interval.
         """
 
-        recording_time = recording.datetime
+        recording_time = recording.datetime.astimezone(self.timezone)
         #current_time = datetime.datetime.now(self.timezone)
 
         sun_info = sun(LocationInfo(self.timezone).observer, date=recording_time, tzinfo=self.timezone)
