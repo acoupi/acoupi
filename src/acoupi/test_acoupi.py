@@ -75,7 +75,7 @@ def main():
     saving_recording_start = datetime.strptime(START_SAVING_RECORDING,"%H:%M:%S").time()
     saving_recording_end = datetime.strptime(END_SAVING_RECORDING,"%H:%M:%S").time()
 
-    save_recording_timeinterval = TimeInterval(Interval(start=saving_recording_start, end=saving_recording_end))
+    save_recording_timeinterval = TimeInterval(Interval(start=saving_recording_start, end=saving_recording_end), timezone=ZoneInfo(DEFAULT_TIMEZONE))
     save_recordering_frequencyschedule = FrequencySchedule(duration=SAVE_RECORDING_DURATION, frequency=SAVE_RECORDING_FREQUENCY)
     save_recording_dawnduskinterval = DawnDuskTimeInterval(duration=SAVE_DAWNDUSK_DURATION, timezone=ZoneInfo(DEFAULT_TIMEZONE))
 
