@@ -219,7 +219,7 @@ class RecordingSavingManager(ABC):
     be saved. 
     """
     @abstractmethod
-    def should_save_recordings(
+    def should_save_recording(
         self, 
         recording: Recording) -> bool:
         #recording: Recording,
