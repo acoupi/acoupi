@@ -6,7 +6,7 @@ export HOME=$HOME
 
 # Install git and other packages
 echo "Installing dependencies"
-sudo apt install git alsa-utils libasound2-dev wget cmake sqlite3 #pulseaudio 
+sudo apt install git alsa-utils libasound2-dev libsndfile1 wget cmake sqlite3 #pulseaudio 
 # Install python3 and python3 libs
 sudo apt install python3-dev python3-pip python3-venv python3-pyaudio
 
