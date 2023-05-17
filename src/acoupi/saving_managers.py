@@ -68,7 +68,7 @@ class TimeInterval(RecordingSavingFilter):
     #def should_save_recording(self, recording: Recording, time: datetime.datetime) -> bool: 
     def should_save_recording(self, recording: Recording) -> bool:
         """Determine if a recording should be saved."""
-        return self.interval.start <= time.time() <= self.interval.end
+        return self.interval.start <= recording.datetime <= self.interval.end
 
 
 class FrequencySchedule(RecordingSavingFilter): 
