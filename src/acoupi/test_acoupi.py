@@ -76,7 +76,7 @@ def main():
     saving_recording_end = datetime.strptime(END_SAVING_RECORDING,"%H:%M:%S").time()
 
     save_recording_timeinterval = TimeInterval(Interval(start=saving_recording_start, end=saving_recording_end), timezone=ZoneInfo(DEFAULT_TIMEZONE))
-    save_recordering_frequencyschedule = FrequencySchedule(duration=SAVE_RECORDING_DURATION, frequency=SAVE_RECORDING_FREQUENCY)
+    save_recording_freqschedule = FrequencySchedule(duration=SAVE_RECORDING_DURATION, frequency=SAVE_RECORDING_FREQUENCY)
     save_recording_dawnduskinterval = DawnDuskTimeInterval(duration=SAVE_DAWNDUSK_DURATION, timezone=ZoneInfo(DEFAULT_TIMEZONE))
 
     # Create the recording and detection SavingManager object
@@ -141,9 +141,9 @@ def main():
         print(f"[Thread {thread_id}] Response Status: {response[0].status}")
 
         # Check if recording should be saved 
-        save_rec_timeint_bool = should_save_recording(recording)
-        save_rec_frequency_bool = should_save_recording(recording)
-        save_rec_dawndusk_bool = should_save_recording(recording)
+        save_rec_timeint_bool = save_recording_timeinterval.should_save_recording(recording)
+        save_rec_freq_bool = save_recording_freqschedule.should_save_recording(recording)
+        save_rec_dawndusk_bool = save_recording_dawnduskinterval.should_save_recording(recording)
         print("")
         print(f"[Thread {thread_id}] Time Interval - Saving Recording Decision: {save_rec_timeint_bool}")
         print(f"[Thread {thread_id}] Frequency Schedule - Saving Recording Decision: {save_rec_frequency_bool}")
@@ -152,9 +152,10 @@ def main():
 
         # Recording and Detection Saving Manager
         save_rec = recording_savingmanager.save_recording(recording, save_rec_timeint_bool)    
-        save_rec = recording_savingmanager.save_recording(recording, save_rec_frequency_bool)    
+        save_rec = recording_savingmanager.save_recording(recording, save_rec_freq_bool)    
         save_rec = recording_savingmanager.save_recording(recording, save_rec_dawndusk_bool)    
         save_det = detection_savingmanager.save_detections(recording, clean_detections_obj, keep_detections_bool)
+        print(f"[Thread {thread_id}] END THREAD: {time.asctime()}")
         #logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
         #logging.info("")
 
