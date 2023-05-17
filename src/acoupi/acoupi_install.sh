@@ -33,39 +33,39 @@ echo "Installing libraries package"
 pip3 install . 
 
 # Setup Configuration
-echo "Set config parameters to run acoupi"
-echo "STEP 1: Please enter the device timezone as Continent/City (e.g. Europe/London)"
-read DEFAULT_TIMEZONE
-
-echo "STEP 2: Please enter your microphone sampling rate (e.g. 192000)"
-read DEFAULT_SAMPLE_RATE
-
-echo "STEP 3: Please enter the daily START time for recordings."
-echo "Note that if start time is after end time - recordings will run overnight."
-echo "Enter in format hh:mm:ss (e.g 19:00:00)"
-read START_RECORDING
-
-echo "STEP 4: Please enter the daily END time for recordings."
-echo "Enter in format hh:mm:ss (e.g 08:00:00)"
-read END_RECORDING
-
-echo "STEP 5: Please enter the detection probability threshold for species detection."
-echo "Note that robustness of the probability of detection varied from species to species."
-echo "Threshold between 0 and 1. Threshold of 0.7 is recommended. Set lower/higher"
-read DEFAULT_THRESHOLD
-
-echo "STEP 6: MQTT Server Parameters. Please ignore if MQTT Server not use"
+# echo "Set config parameters to run acoupi"
+# echo "STEP 1: Please enter the device timezone as Continent/City (e.g. Europe/London)"
+# read DEFAULT_TIMEZONE
+# 
+# echo "STEP 2: Please enter your microphone sampling rate (e.g. 192000)"
+# read DEFAULT_SAMPLE_RATE
+# 
+# echo "STEP 3: Please enter the daily START time for recordings."
+# echo "Note that if start time is after end time - recordings will run overnight."
+# echo "Enter in format hh:mm:ss (e.g 19:00:00)"
+# read START_RECORDING
+# 
+# echo "STEP 4: Please enter the daily END time for recordings."
+# echo "Enter in format hh:mm:ss (e.g 08:00:00)"
+# read END_RECORDING
+# 
+# echo "STEP 5: Please enter the detection probability threshold for species detection."
+# echo "Note that robustness of the probability of detection varied from species to species."
+# echo "Threshold between 0 and 1. Threshold of 0.7 is recommended. Set lower/higher"
+# read DEFAULT_THRESHOLD
+# 
+# echo "STEP 6: MQTT Server Parameters. Please ignore if MQTT Server not use"
 
 # Store the configuration variables in a config file
-file="$HOME/acoupi/src/acoupi/acoupi.config"
-echo 'DEFAULT_TIMEZONE' >> $file
-echo DEFAULT_SAMPLE_RATE >> $file
-echo 'START_RECORDING' >> $file
-echo 'END_RECORDING' >> $file
-echo DEFAULT_THRESHOLD >> $file
-
-echo "Thanks! config file created at $HOME/acoupi/src/acoupi/acoupi.config"
-echo ""
+# file="$HOME/acoupi/src/acoupi/acoupi.config"
+# echo 'DEFAULT_TIMEZONE' >> $file
+# echo DEFAULT_SAMPLE_RATE >> $file
+# echo 'START_RECORDING' >> $file
+# echo 'END_RECORDING' >> $file
+# echo DEFAULT_THRESHOLD >> $file
+# 
+# echo "Thanks! config file created at $HOME/acoupi/src/acoupi/acoupi.config"
+# echo ""
 
 # Move the .service files to lib/systemd/system - Enable and Start it
 echo "Installing Acoupi Services"
