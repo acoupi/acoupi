@@ -219,7 +219,11 @@ class RecordingSavingManager(ABC):
     be saved. 
     """
     @abstractmethod
-    def should_save_recordings(self, time: datetime.datetime) -> bool:
+    def should_save_recordings(
+        self, 
+        recording: Recording) -> bool:
+        #recording: Recording,
+        #time: datetime.datetime) -> bool:
         "Determine if a recording should be saved."
 
     @abstractmethod

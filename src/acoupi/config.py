@@ -34,16 +34,15 @@ DEFAULT_TIMEFORMAT = '%Y%m%d_%H%M%S' #Year-Month-Day Hour-Minute-Second
 
 """Default saving recordings"""
 # Based on time intervals such as between 9pm and 10pm
-DEFAULT_RECORDING_SAVE_START_TIME = ''
-DEFAULT_RECORDING_SAVE_END_TIME = ''
+START_SAVING_RECORDING = '15:00:00'
+END_SAVING_RECORDING = '14:10:00'
 
-DEFAULT_RECORDING_SAVE_DAWN_TIME = ''
-DEFAULT_RECORDING_SAVE_DUSK_TIME = ''
+# Based on duration after dawn and dusk time (duratino in minutes)
+SAVE_DAWNDUSK_DURATION = 30
 
-# Based on duration e.g. for 5, 10 minutes every 30 minutes, 1 hour ...
-DEFAULT_RECORDING_SAVE_DURATION = ''
-DEFAULT_RECORDING_SAVE_INTERVAL = ''
-
+# Based on duration (in minutes) and time frequeny (in minutes)
+SAVE_RECORDING_DURATION = 1
+SAVE_RECORDING_FREQUENCY = 30
 
 """Default directories to save audio recordings and detections"""
 DIR_RECORDING_TRUE = 'storages/bats/recordings'

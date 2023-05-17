@@ -8,8 +8,10 @@ import logging
 from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
 from config import DEFAULT_DB_PATH
+from config import START_SAVING_RECORDING, END_SAVING_RECORDING, SAVE_RECORDING_DURATION, SAVE_RECORDING_FREQUENCY, SAVE_DAWNDUSK_DURATION
 from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
 from config_mqtt import DEFAULT_MQTT_HOST, DEFAULT_MQTT_PORT, DEFAULT_MQTT_CLIENT_USER, DEFAULT_MQTT_CLIENT_PASS, DEFAULT_MQTT_CLIENTID, DEFAULT_MQTT_TOPIC
+
 from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
@@ -18,15 +20,13 @@ from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
 from messengers import MQTTMessenger, build_detection_message
 from storages.sqlite import SqliteStore, SqliteMessageStore
-from saving_managers import Directories, SaveRecording, SaveDetection
+from saving_managers import Directories, SaveRecording, SaveDetection, TimeInterval, FrequencySchedule, DawnDuskTimeInterval
 
 # Setup the main logger
 logging.basicConfig(filename='acoupi.log',filemode='w', 
                     format='%(levelname)s - %(message)s',
                     level=logging.INFO)
 
-# Create scheduler manager
-scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) 
 
 def main():
 
@@ -71,10 +71,17 @@ def main():
     save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
     save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
 
+    # Create the saving recording objects - check if recordings should be saved or not. 
+    saving_recording_start = datetime.strptime(START_SAVING_RECORDING,"%H:%M:%S").time()
+    saving_recording_end = datetime.strptime(END_SAVING_RECORDING,"%H:%M:%S").time()
+
+    save_recording_timeinterval = TimeInterval(Interval(start=saving_recording_start, end=saving_recording_end))
+    save_recordering_frequencyschedule = FrequencySchedule(duration=SAVE_RECORDING_DURATION, frequency=SAVE_RECORDING_FREQUENCY)
+    save_recording_dawnduskinterval = DawnDuskTimeInterval(duration=SAVE_DAWNDUSK_DURATION, timezone=ZoneInfo(DEFAULT_TIMEZONE))
+
     # Create the recording and detection SavingManager object
     recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
     detection_savingmanager = SaveDetection(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_detection)
-
 
     def process():
 
@@ -133,8 +140,18 @@ def main():
         print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
         print(f"[Thread {thread_id}] Response Status: {response[0].status}")
 
+        # Check if recording should be saved 
+        save_rec_timeint_bool = should_save_recording(recording)
+        save_rec_frequency_bool = should_save_recording(recording)
+        save_rec_dawndusk_bool = should_save_recording(recording)
+        print("")
+        print(f"[Thread {thread_id}] Time Interval - Saving Recording Decision: {save_rec_timeint_bool}")
+        print(f"[Thread {thread_id}] Frequency Schedule - Saving Recording Decision: {save_rec_frequency_bool}")
+        print(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
+        print("")
+
         # Recording and Detection Saving Manager
-        save_rec = recording_savingmanager.save_recording(recording, keep_recording_bool)    
+        save_rec = recording_savingmanager.save_recording(recording, save_rec_timeint_bool)    
         save_det = detection_savingmanager.save_detections(recording, clean_detections_obj, keep_detections_bool)
         #logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
         #logging.info("")

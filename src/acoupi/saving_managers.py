@@ -41,11 +41,21 @@ class Directories:
     dirpath_false: str
     """Directory path to save recordings if audio recording contain no detections."""
 
+@dataclass
+class Interval:
+    """An interval of time between two times of day."""
+
+    start: datetime.time
+    """Start time of the interval."""
+
+    end: datetime.time
+    """End time of the interval."""
+
 
 class TimeInterval(RecordingSavingManager): 
     """A RecordingSavingManager that save recordings during specific interval of time."""
 
-    def __init__(self, interval:Interval, timezone: datetime.tzinfo):
+    def __init__(self, interval: Interval, timezone: datetime.tzinfo):
         """Initiatlise the Interval RecordingSavingManager
         
         Args:
@@ -55,7 +65,8 @@ class TimeInterval(RecordingSavingManager):
         self.interval = interval
         self.timezone = timezone
 
-    def should_save_recording(self, time: datetime.datetime) -> bool: 
+    #def should_save_recording(self, recording: Recording, time: datetime.datetime) -> bool: 
+    def should_save_recording(self, recording: Recording) -> bool:
         """Determine if a recording should be saved."""
         return self.interval.start <= time.time() <= self.interval.end
 
@@ -74,10 +85,11 @@ class FrequencySchedule(RecordingSavingManager):
         self.duration = duration
         self.frequency = frequency
 
-    def should_save_recording(self, time: datetime.datetime) -> bool: 
+    # def should_save_recording(self, recording: Recording, time: datetime.datetime) -> bool: 
+    def should_save_recording(self, recording: Recording) -> bool: 
         """Determine if a recording should be saved."""
 
-        time = time or datetime.datetime.now()     
+        time = recording.datetime  
         saving_interval = datetime.timedelta(minutes=self.frequency) - self.duration
         elapsed_time = (time.minute % self.frequency) + (time.second/60)
         
@@ -96,8 +108,9 @@ class DawnDuskTimeInterval(RecordingSavingManager):
          """
         self.duration = duration
         self.timezone = timezone
-
-    def should_save_recording(self, time: datetime.datetime) -> bool: 
+        
+    #def should_save_recording(self, time: datetime.datetime) -> bool: 
+    def should_save_recording(self, recording: Recording) -> bool:
         """Determine if a recording should be saved.
         
             1. Get the sun information for the specific location, datetime and timezone. 
@@ -105,16 +118,17 @@ class DawnDuskTimeInterval(RecordingSavingManager):
             3. Check if the current time falls within the dawn time interval or dusktime interval.
         """
 
-        current_time = time or datetime.datetime.now(self.timezone)
+        recording_time = recording.datetime
+        #current_time = datetime.datetime.now(self.timezone)
 
-        sun_info = sun(LocationInfo(self.timezone).observer, date=current_time, tzinfo=self.timezone)
+        sun_info = sun(LocationInfo(self.timezone).observer, date=recording_time, tzinfo=self.timezone)
         dawntime = sun_info['dawn']
         dusktime = sun_info['dusk']
 
         dawntime_interval = dawntime + datetime.timedelta(minutes=self.duration)
         dusktime_interval = dusktime + datetime.timedelta(minutes=self.duration)
 
-        return dawntime_interval <= current_time <= dawntime or dusktime_interval <= current_time <= dusktime
+        return dawntime_interval <= recording_time <= dawntime or dusktime_interval <= recording_time <= dusktime
 
 
 class SaveRecording(RecordingSavingManager):
