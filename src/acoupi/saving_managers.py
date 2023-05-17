@@ -23,7 +23,7 @@ import datetime
 from astral import LocationInfo
 from astral.sun import sun
 
-from acoupi_types import Recording, RecordingFilter, RecordingSavingManager
+from acoupi_types import Recording, RecordingSavingFilter, RecordingSavingManager
 from acoupi_types import Detection, DetectionFilter, DetectionSavingManager
 
 __all__ = [
@@ -52,7 +52,7 @@ class Interval:
     """End time of the interval."""
 
 
-class TimeInterval(RecordingSavingManager): 
+class TimeInterval(RecordingSavingFilter): 
     """A RecordingSavingManager that save recordings during specific interval of time."""
 
     def __init__(self, interval: Interval, timezone: datetime.tzinfo):
@@ -71,7 +71,7 @@ class TimeInterval(RecordingSavingManager):
         return self.interval.start <= time.time() <= self.interval.end
 
 
-class FrequencySchedule(RecordingSavingManager): 
+class FrequencySchedule(RecordingSavingFilter): 
     """A RecordingSavingManager that save recordings during specific interval of time."""
 
     def __init__(self, duration:float, frequency:float):
@@ -96,7 +96,7 @@ class FrequencySchedule(RecordingSavingManager):
         return elapsed_time < self.duration
 
 
-class DawnDuskTimeInterval(RecordingSavingManager):
+class DawnDuskTimeInterval(RecordingSavingFilter):
     """A Dawn Time RecordingSavingManager - Record duration after dawn"""
     
     def __init__(self, duration:float, timezone: datetime.tzinfo):
@@ -144,7 +144,7 @@ class SaveRecording(RecordingSavingManager):
         self.save_dir = save_dir
         self.timeformat = timeformat
 
-    def save_recording(self, recording: Recording, bool: RecordingFilter):
+    def save_recording(self, recording: Recording, bool: RecordingSavingFilter):
         """Determine where and how the recording should be saved.
         
         """

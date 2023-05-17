@@ -214,7 +214,7 @@ class DetectionFilter(ABC):
         """Return the clean detections according to detection filter configuration."""
 
 
-class RecordingSavingManager(ABC):
+class RecordingSavingFilter(ABC):
     """The Recording SavingManager is responsible for deciding if recoreding should 
     be saved. 
     """
@@ -226,11 +226,16 @@ class RecordingSavingManager(ABC):
         #time: datetime.datetime) -> bool:
         "Determine if a recording should be saved."
 
+
+class RecordingSavingManager(ABC):
+    """The Recording SavingManager is responsible for saving recordings. 
+    """
+
     @abstractmethod
     def save_recording(
         self, 
         recording: Recording,
-        bool: RecordingFilter
+        bool: RecordingSavingFilter
     ) -> None:
         """Save the recording locally."""
 
