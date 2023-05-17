@@ -1,5 +1,6 @@
 PyYAML
 tzlocal
+astral
 #wheel 
 #setuptools
 numpy
