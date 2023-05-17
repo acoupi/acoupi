@@ -146,7 +146,7 @@ def main():
         save_rec_dawndusk_bool = save_recording_dawnduskinterval.should_save_recording(recording)
         print("")
         print(f"[Thread {thread_id}] Time Interval - Saving Recording Decision: {save_rec_timeint_bool}")
-        print(f"[Thread {thread_id}] Frequency Schedule - Saving Recording Decision: {save_rec_frequency_bool}")
+        print(f"[Thread {thread_id}] Frequency Schedule - Saving Recording Decision: {save_rec_freq_bool}")
         print(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
         print("")
 
