@@ -25,11 +25,11 @@ git clone -b $branch --depth=1 https://github.com/audevuilli/acoupi.git ${HOME}/
 
 # Install pyaudio using install_pyaudio.sh script
 echo "Installing pyaudio"
-bash $HOME/acoupi/src/acoupi/script/install_pyaudio.sh
+bash $HOME/acoupi/src/acoupi/scripts/install_pyaudio.sh
 
 # Install packages with pip
 echo "Installing libraries package"
-#pip3 install -U -r $HOME/src/acoupi/requirements.txt
+#clear
 pip3 install . 
 
 # Setup Configuration
