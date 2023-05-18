@@ -69,7 +69,7 @@ class SaveRecording(RecordingSavingManager):
             print(f'File will be saved.')
             sdir = self.save_dir.dirpath_true if detection_bool == True else self.save_dir.dirpath_false
             srec_filename = recording.datetime.strftime(self.timeformat)
-            new_path = os.path.join(recording_saving_path, srec_filename + ".wav")
+            new_path = os.path.join(sdir, srec_filename+ '.wav')
             print(f'New file Path: {new_path} {time.asctime()}')
             shutil.move(recording.path, new_path)
             print(f'File has been Path: {new_path} {time.asctime()}')

@@ -159,5 +159,4 @@ class PyAudioRecorder(AudioRecorder):
 
                 # Create a Recording object and return it
                 recording = Recording(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
-                print(f'End Time record audio file: {time.asctime()}')
                 return recording
