@@ -118,7 +118,10 @@ class RecordingCondition(ABC):
     """
 
     @abstractmethod
-    def should_record(self, time: datetime.datetime) -> bool:
+    def should_record(
+        self, 
+        time: datetime.datetime
+    ) -> bool:
         """Determine if a recording should be made."""
 
 
