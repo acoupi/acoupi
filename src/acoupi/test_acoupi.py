@@ -76,8 +76,8 @@ def main():
     saving_recording_start = datetime.strptime(START_SAVING_RECORDING,"%H:%M:%S").time()
     saving_recording_end = datetime.strptime(END_SAVING_RECORDING,"%H:%M:%S").time()
 
-    save_recording_timeinterval = TimeInterval(Interval(start=saving_recording_start, end=saving_recording_end), timezone=ZoneInfo(DEFAULT_TIMEZONE))
-    save_recording_freqschedule = FrequencySchedule(duration=SAVE_RECORDING_DURATION, frequency=SAVE_RECORDING_FREQUENCY)
+    #save_recording_timeinterval = TimeInterval(Interval(start=saving_recording_start, end=saving_recording_end), timezone=ZoneInfo(DEFAULT_TIMEZONE))
+    #save_recording_freqschedule = FrequencySchedule(duration=SAVE_RECORDING_DURATION, frequency=SAVE_RECORDING_FREQUENCY)
     save_recording_dawnduskinterval = DawnDuskTimeInterval(duration=SAVE_DAWNDUSK_DURATION, timezone=ZoneInfo(DEFAULT_TIMEZONE))
 
     # Create the recording and detection SavingManager object
@@ -103,62 +103,66 @@ def main():
             return
 
         # Record audio
-        #logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
-        print("")
-        print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
+        #print("")
+        #print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         recording = audio_recorder.record()
-        print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
-        #logging.info(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
+        #print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
 
         # Run model - Get detections
-        logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
-        print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
+        #logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
+        #print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
         detections = model.run(recording)
-        print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
-        print("")
-        #logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
+        #print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
+        #print("")
+        logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
+        logging.info("")
 
         # Detection and Recording Filter
         keep_detections_bool = detection_filter.should_store_detection(detections) 
         clean_detections_obj = detection_filter.get_clean_detections_obj(detections, keep_detections_bool)
-        keep_recording_bool = recording_filter.should_store_recording(recording, detections)
-        print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
-        #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}") 
+        #keep_recording_bool = recording_filter.should_store_recording(recording, detections)
+        #print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
+        logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}") 
         #logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
         
         # SqliteDB Store Recroding, Detections
         sqlitedb.store_recording(recording)
         sqlitedb.store_detections(recording, clean_detections_obj)
-        print(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
+        #print(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
 
         # Send Message via MQTT
         mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections_obj]
         response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
-        print(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
+        #print(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
 
         # Store Detection Message to SqliteDB
         transmission_messagedb.store_detection_message(clean_detections_obj, response)
-        print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
-        print(f"[Thread {thread_id}] Response Status: {response[0].status}")
+        #print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
+        #print(f"[Thread {thread_id}] Response Status: {response[0].status}")
 
         # Check if recording should be saved 
-        save_rec_timeint_bool = save_recording_timeinterval.should_save_recording(recording)
-        save_rec_freq_bool = save_recording_freqschedule.should_save_recording(recording)
+        #save_rec_timeint_bool = save_recording_timeinterval.should_save_recording(recording)
+        #save_rec_freq_bool = save_recording_freqschedule.should_save_recording(recording)
         save_rec_dawndusk_bool = save_recording_dawnduskinterval.should_save_recording(recording)
-        print("")
-        print(f"[Thread {thread_id}] Time Interval - Saving Recording Decision: {save_rec_timeint_bool}")
-        print(f"[Thread {thread_id}] Frequency Schedule - Saving Recording Decision: {save_rec_freq_bool}")
-        print(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
-        print("")
-
+        #print("")
+        #print(f"[Thread {thread_id}] Time Interval - Saving Recording Decision: {save_rec_timeint_bool}")
+        #print(f"[Thread {thread_id}] Frequency Schedule - Saving Recording Decision: {save_rec_freq_bool}")
+        #print(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
+        #print("")
+        logging.info(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
+        
         # Recording and Detection Saving Manager
-        save_rec = recording_savingmanager.save_recording(recording, save_rec_timeint_bool)    
+        #save_rec = recording_savingmanager.save_recording(recording, save_rec_timeint_bool)    
         #save_rec = recording_savingmanager.save_recording(recording, save_rec_freq_bool)    
-        #save_rec = recording_savingmanager.save_recording(recording, save_rec_dawndusk_bool)    
+        save_rec = recording_savingmanager.save_recording(recording, save_rec_dawndusk_bool)    
         save_det = detection_savingmanager.save_detections(recording, clean_detections_obj, keep_detections_bool)
-        print(f"[Thread {thread_id}] END THREAD: {time.asctime()}")
-        #logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
-        #logging.info("")
+        #print(f"[Thread {thread_id}] END THREAD: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
+        logging.info("")
 
     # Start processing
     process()
