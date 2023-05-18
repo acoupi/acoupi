@@ -18,8 +18,10 @@ it takes a clean list of detection to be saved.
 from dataclasses import dataclass
 from typing import List
 import os
+import shutil
 import csv
 import datetime
+import time
 from astral import LocationInfo
 from astral.sun import sun
 
@@ -55,16 +57,22 @@ class SaveRecording(RecordingSavingManager):
         self.save_dir = save_dir
         self.timeformat = timeformat
 
-    def save_recording(self, recording: Recording, bool: RecordingSavingFilter):
-        """Determine where and how the recording should be saved.
+    
+    def save_recording(self, recording: Recording, recording_bool: RecordingSavingFilter, detection_bool: DetectionFilter):    
+        """Determine where and how the recording should be saved based on boolean conditions."""
+        if not recording_bool == True:
+            print('Delete Audio File')
+            # Delete the recording of the file
+            os.remove(recording.path)
         
-        """
-        sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
-        print(recording.path)
-        recording_path = recording.path
-        srec_filename = recording.datetime.strftime(self.timeformat)
-        # Move recording to the path it should be saved
-        os.rename(recording_path, ''.join(sdir+'/'+srec_filename)+'.wav')
+        else:
+            print(f'File will be saved.')
+            sdir = self.save_dir.dirpath_true if detection_bool == True else self.save_dir.dirpath_false
+            srec_filename = recording.datetime.strftime(self.timeformat)
+            new_path = os.path.join(recording_saving_path, srec_filename + ".wav")
+            print(f'New file Path: {new_path} {time.asctime()}')
+            shutil.move(recording.path, new_path)
+            print(f'File has been Path: {new_path} {time.asctime()}')
         return 
 
 
