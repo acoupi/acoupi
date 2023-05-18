@@ -236,7 +236,8 @@ class RecordingSavingManager(ABC):
     def save_recording(
         self, 
         recording: Recording,
-        bool: RecordingSavingFilter
+        recording_bool: RecordingSavingFilter,
+        detection_bool: DetectionFilter
     ) -> None:
         """Save the recording locally."""
 

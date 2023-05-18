@@ -158,7 +158,7 @@ def main():
         # Recording and Detection Saving Manager
         #save_rec = recording_savingmanager.save_recording(recording, save_rec_timeint_bool)    
         #save_rec = recording_savingmanager.save_recording(recording, save_rec_freq_bool)    
-        save_rec = recording_savingmanager.save_recording(recording, save_rec_dawndusk_bool)    
+        save_rec = recording_savingmanager.save_recording(recording, save_rec_dawndusk_bool, keep_detections_bool)    
         save_det = detection_savingmanager.save_detections(recording, clean_detections_obj, keep_detections_bool)
         print(f"[Thread {thread_id}] END THREAD: {time.asctime()}")
         print("")
