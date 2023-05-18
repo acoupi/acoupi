@@ -76,9 +76,9 @@ def main():
     saving_recording_start = datetime.strptime(START_SAVING_RECORDING,"%H:%M:%S").time()
     saving_recording_end = datetime.strptime(END_SAVING_RECORDING,"%H:%M:%S").time()
 
-    #save_recording_timeinterval = TimeInterval(Interval(start=saving_recording_start, end=saving_recording_end), timezone=ZoneInfo(DEFAULT_TIMEZONE))
+    save_recording_timeinterval = TimeInterval(Interval(start=saving_recording_start, end=saving_recording_end), timezone=ZoneInfo(DEFAULT_TIMEZONE))
     #save_recording_freqschedule = FrequencySchedule(duration=SAVE_RECORDING_DURATION, frequency=SAVE_RECORDING_FREQUENCY)
-    save_recording_dawnduskinterval = DawnDuskTimeInterval(duration=SAVE_DAWNDUSK_DURATION, timezone=ZoneInfo(DEFAULT_TIMEZONE))
+    #save_recording_dawnduskinterval = DawnDuskTimeInterval(duration=SAVE_DAWNDUSK_DURATION, timezone=ZoneInfo(DEFAULT_TIMEZONE))
 
     # Create the recording and detection SavingManager object
     recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
@@ -145,20 +145,20 @@ def main():
         #print(f"[Thread {thread_id}] Response Status: {response[0].status}")
 
         # Check if recording should be saved 
-        #save_rec_timeint_bool = save_recording_timeinterval.should_save_recording(recording)
+        save_rec_timeint_bool = save_recording_timeinterval.should_save_recording(recording)
         #save_rec_freq_bool = save_recording_freqschedule.should_save_recording(recording)
-        save_rec_dawndusk_bool = save_recording_dawnduskinterval.should_save_recording(recording)
+        #save_rec_dawndusk_bool = save_recording_dawnduskinterval.should_save_recording(recording)
         #print("")
-        #print(f"[Thread {thread_id}] Time Interval - Saving Recording Decision: {save_rec_timeint_bool}")
+        print(f"[Thread {thread_id}] Time Interval - Saving Recording Decision: {save_rec_timeint_bool}")
         #print(f"[Thread {thread_id}] Frequency Schedule - Saving Recording Decision: {save_rec_freq_bool}")
-        print(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
+        #print(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
         #print("")
         #logging.info(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
         
         # Recording and Detection Saving Manager
-        #save_rec = recording_savingmanager.save_recording(recording, save_rec_timeint_bool)    
+        save_rec = recording_savingmanager.save_recording(recording, save_rec_timeint_bool, keep_detections_bool)    
         #save_rec = recording_savingmanager.save_recording(recording, save_rec_freq_bool)    
-        save_rec = recording_savingmanager.save_recording(recording, save_rec_dawndusk_bool, keep_detections_bool)    
+        #save_rec = recording_savingmanager.save_recording(recording, save_rec_dawndusk_bool, keep_detections_bool)    
         save_det = detection_savingmanager.save_detections(recording, clean_detections_obj, keep_detections_bool)
         print(f"[Thread {thread_id}] END THREAD: {time.asctime()}")
         print("")
