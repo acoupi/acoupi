@@ -146,16 +146,16 @@ class PyAudioRecorder(AudioRecorder):
             p.terminate()
 
             #Create a WAV file to write the audio data
-            temp_audio_file = wave.open(temp_audio_path, 'wb')
-            temp_audio_file.setnchannels(self.channels)
-            temp_audio_file.setsampwidth(p.get_sample_size(pyaudio.paInt16))
-            temp_audio_file.setframerate(self.sample_rate)
+            with wave.open(temp_audio_path, 'wb') as temp_audio_file:
+                temp_audio_file.setnchannels(self.channels)
+                temp_audio_file.setsampwidth(p.get_sample_size(pyaudio.paInt16))
+                temp_audio_file.setframerate(self.sample_rate)
 
-            # Write the audio data to the temporary file
-            temp_audio_file.writeframes(b''.join(frames))    
-            #temp_audio_file.close()
+                # Write the audio data to the temporary file
+                temp_audio_file.writeframes(b''.join(frames))    
+                temp_audio_file.close()
 
-            # Create a Recording object and return it
-            recording = Recording(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
-            print(f'End Time record audio file: {time.asctime()}')
-            return recording
+                # Create a Recording object and return it
+                recording = Recording(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
+                print(f'End Time record audio file: {time.asctime()}')
+                return recording
