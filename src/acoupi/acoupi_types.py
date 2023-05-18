@@ -215,15 +215,13 @@ class DetectionFilter(ABC):
 
 
 class RecordingSavingFilter(ABC):
-    """The Recording SavingManager is responsible for deciding if recoreding should 
+    """The Recording SavingFilter is responsible for deciding if recoreding should 
     be saved. 
     """
     @abstractmethod
     def should_save_recording(
         self, 
         recording: Recording) -> bool:
-        #recording: Recording,
-        #time: datetime.datetime) -> bool:
         "Determine if a recording should be saved."
 
 
