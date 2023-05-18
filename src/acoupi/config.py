@@ -19,12 +19,12 @@ DEFAULT_CHUNK_SIZE = 8192
 
 """Default start and end audio recording"""
 START_RECORDING = '10:00:00'
-END_RECORDING = '08:00:00'
+END_RECORDING = '19:00:00'
 
 """Default audio recording length in seconds."""
 DEFAULT_RECORDING_DURATION = 3
 """Default recording interval in seconds."""
-DEFAULT_RECORDING_INTERVAL = 6
+DEFAULT_RECORDING_INTERVAL = 8
 
 """Default detection probabilities threshold"""
 DEFAULT_THRESHOLD = 0.1
@@ -34,11 +34,11 @@ DEFAULT_TIMEFORMAT = '%Y%m%d_%H%M%S' #Year-Month-Day Hour-Minute-Second
 
 """Default saving recordings"""
 # Based on time intervals such as between 9pm and 10pm
-START_SAVING_RECORDING = '15:00:00'
-END_SAVING_RECORDING = '14:10:00'
+START_SAVING_RECORDING = '15:10:00'
+END_SAVING_RECORDING = '15:20:00'
 
 # Based on duration after dawn and dusk time (duratino in minutes)
-SAVE_DAWNDUSK_DURATION = 30
+SAVE_DAWNDUSK_DURATION = 10
 
 # Based on duration (in minutes) and time frequeny (in minutes)
 SAVE_RECORDING_DURATION = 1
