@@ -109,7 +109,6 @@ class PyAudioRecorder(AudioRecorder):
 
 
     def record(self) -> Recording:
-        print(f'Start Time to Record audio file: {time.asctime()}')
         """Record a 3 second temporary audio file. Return the temporary path of the file."""       
         
         #device_index = self.findAudioDevice()
@@ -120,9 +119,11 @@ class PyAudioRecorder(AudioRecorder):
         
         #Create a temporary file to record audio
         with open(temp_path, 'wb') as temp_audiof:
-
-            print(f'Temporary Audio File Path: {temp_audiof}')
+            
+            print(f'Temporary Audio File: {temp_audiof}')
             temp_audio_path = temp_audiof.name
+            print(f'Temporary Audio File Path: {temp_audio_path}')
+            print("")
 
             #Create an new instace of PyAudio
             p = pyaudio.PyAudio()
