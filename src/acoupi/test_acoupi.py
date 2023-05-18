@@ -103,35 +103,35 @@ def main():
             return
 
         # Record audio
-        logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
+        #logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         #print("")
-        #print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
+        print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         recording = audio_recorder.record()
-        #print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
-        logging.info(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
+        print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
+        #logging.info(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
 
         # Run model - Get detections
         #logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
-        #print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
+        print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
         detections = model.run(recording)
-        #print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
-        #print("")
-        logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
-        logging.info("")
+        print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
+        print("")
+        #logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
+        #logging.info("")
 
         # Detection and Recording Filter
         keep_detections_bool = detection_filter.should_store_detection(detections) 
         clean_detections_obj = detection_filter.get_clean_detections_obj(detections, keep_detections_bool)
         #keep_recording_bool = recording_filter.should_store_recording(recording, detections)
-        #print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
-        logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}") 
+        print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
+        #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}") 
         #logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
         
         # SqliteDB Store Recroding, Detections
         sqlitedb.store_recording(recording)
         sqlitedb.store_detections(recording, clean_detections_obj)
-        #print(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
-        logging.info(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
+        print(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
+        #logging.info(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
 
         # Send Message via MQTT
         mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections_obj]
