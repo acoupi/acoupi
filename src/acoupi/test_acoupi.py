@@ -136,8 +136,8 @@ def main():
         # Send Message via MQTT
         mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections_obj]
         response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
-        #print(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
-        logging.info(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
+        print(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
+        #logging.info(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
 
         # Store Detection Message to SqliteDB
         transmission_messagedb.store_detection_message(clean_detections_obj, response)
@@ -151,18 +151,19 @@ def main():
         #print("")
         #print(f"[Thread {thread_id}] Time Interval - Saving Recording Decision: {save_rec_timeint_bool}")
         #print(f"[Thread {thread_id}] Frequency Schedule - Saving Recording Decision: {save_rec_freq_bool}")
-        #print(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
+        print(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
         #print("")
-        logging.info(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
+        #logging.info(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
         
         # Recording and Detection Saving Manager
         #save_rec = recording_savingmanager.save_recording(recording, save_rec_timeint_bool)    
         #save_rec = recording_savingmanager.save_recording(recording, save_rec_freq_bool)    
         save_rec = recording_savingmanager.save_recording(recording, save_rec_dawndusk_bool)    
         save_det = detection_savingmanager.save_detections(recording, clean_detections_obj, keep_detections_bool)
-        #print(f"[Thread {thread_id}] END THREAD: {time.asctime()}")
-        logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
-        logging.info("")
+        print(f"[Thread {thread_id}] END THREAD: {time.asctime()}")
+        print("")
+        #logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
+        #logging.info("")
 
     # Start processing
     process()
