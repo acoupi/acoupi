@@ -60,7 +60,6 @@ class SaveRecording(RecordingSavingManager):
         
         """
         sdir = self.save_dir.dirpath_true if bool == True else self.save_dir.dirpath_false
-        print(recording)
         print(recording.path)
         recording_path = recording.path
         srec_filename = recording.datetime.strftime(self.timeformat)
