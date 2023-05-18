@@ -108,7 +108,7 @@ class PyAudioRecorder(AudioRecorder):
     ##        return recording
 
 
-def record(self) -> Recording:
+    def record(self) -> Recording:
         print(f'Start Time to Record audio file: {time.asctime()}')
         """Record a 3 second temporary audio file. Return the temporary path of the file."""       
         
