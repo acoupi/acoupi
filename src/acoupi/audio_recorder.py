@@ -116,7 +116,7 @@ class PyAudioRecorder(AudioRecorder):
         self.datetime = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
         # Specified the desired path for temporary file - Saved in RAM
-        temp_audio_path = "dev/shm/"+self.datetime+'.wav'
+        temp_audio_path = "/dev/shm/"+self.datetime+'.wav'
         print(f'Temporary Audio File: {temp_audio_path}')
         
         #Create a temporary file to record audio
