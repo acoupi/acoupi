@@ -43,7 +43,7 @@ class ThresholdDetectionFilter(DetectionFilter):
                                 soundevent_end_time = detection['end_time'],
                                 ) for detection in get_cleandetections] 
         else:
-            get_cleandetections = []
+            cleandetection_obj = []
         return cleandetection_obj
 
 
