@@ -177,7 +177,7 @@ def record(self) -> Recording:
                 temp_audio_file.writeframes(b''.join(frames))    
                 #temp_audio_file.close()
 
-            # Create a Recording object and return it
-            recording = Recording(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
-            print(f'End Time record audio file: {time.asctime()}')
-            return recording
+                # Create a Recording object and return it
+                recording = Recording(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
+                print(f'End Time record audio file: {time.asctime()}')
+                return recording
