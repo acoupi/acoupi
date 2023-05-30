@@ -32,7 +32,7 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue):
 
     while True:
         try:
-            # Get the audio recording from the queue
+            # Check if there is an audio recording in the queue
             recording = audio_recording_queue.get(timeout=10)
         except audio_recording_queue.Empty:
             continue
@@ -58,13 +58,19 @@ def audio_results_worker(audio_recording_queue, manage_detections_queue,
                          detection_filter, recording_filter, sqlitedb):
     
     while True:
+        try:
+            # Check if there is detections in the manage_detections_queue
+            recording = audio_recording_queue.get(timeout=10)
+            detections = manage_detections_queue.get(timeout=10)
+        except manage_detections_queue.Empty:
+            continue
         # Check if there is detections in the manage_detections_queue
         #if manage_detections_queue.empty():
         #    return
 
         # Get the recordings and detections from the queue. 
-        recording = audio_recording_queue.get()
-        detections = manage_detections_queue.get()
+        #recording = audio_recording_queue.get(timeout=10)
+        #detections = manage_detections_queue.get()
 
         # Check if detections and recordings should be saved.  
         keep_detections_bool = detection_filter.should_store_detection(detections)
@@ -87,12 +93,17 @@ def audio_results_worker(audio_recording_queue, manage_detections_queue,
 def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue):
     
     while True:
+        try:
+            # Check if there are detections to be sent in the clean_detections_queuee
+            clean_detections = clean_detections_queue.get(timeout=10)
+        except clean_detections_queue.Empty:
+            continue
         # Check if there are detections to be sent in the clean_detections_queue
         #if clean_detections_queue.empty():
         #    return
 
         # Get the clean detections from the queue.
-        clean_detections = clean_detections_queue.get()
+        #clean_detections = clean_detections_queue.get()
         
         # Prepare and send the detections messages via MQTT
         mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections]
