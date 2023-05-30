@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 import logging
+import threading
 
 from multiprocessing import Process, Queue, Value
 
@@ -36,8 +37,8 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue):
 
     while True:
         # Check if there is a recording in the audio_recording queue 
-        if audio_recording_queue.empty():
-            return
+        #if audio_recording_queue.empty():
+        #    return
         
         # Get the audio recording from the queue
         recording = audio_recording_queue.get()
@@ -58,8 +59,8 @@ def audio_results_worker(audio_recording_queue, manage_detections_queue,
     
     while True:
         # Check if there is detections in the manage_detections_queue
-        if manage_detections_queue.empty():
-            return
+        #if manage_detections_queue.empty():
+        #    return
 
         # Get the recordings and detections from the queue. 
         recording = audio_recording_queue.get()
@@ -87,8 +88,8 @@ def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue,
     
     while True:
         # Check if there are detections to be sent in the clean_detections_queue
-        if clean_detections_queue.empty():
-            return
+        #if clean_detections_queue.empty():
+        #    return
 
         # Get the clean detections from the queue.
         clean_detections = clean_detections_queue.get()
