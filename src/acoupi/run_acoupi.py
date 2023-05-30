@@ -88,10 +88,11 @@ def main():
 
         # Start processes as daemons
         for process in processes.values():
-            print(f'Process that is going to be started: {process}')
             process.daemon = True
             process.start()
-            print(f'Process have stared: {process}')
+
+        print('')
+        print(f'Queue Size: {audio_recording_queue.qsize()}')
         
         # Continue running the loop until recording conditions are not met
         while recording_condition.should_record(time_now):
@@ -104,7 +105,7 @@ def main():
             process.join()
     
     # Start running the processes
-    run()
+    #run()
 
 if __name__ == "__main__":
     main()
