@@ -16,7 +16,7 @@ from recording_filters import ThresholdRecordingFilter
 from messengers import MQTTMessenger, build_detection_message
 from storages.sqlite import SqliteStore, SqliteMessageStore
 
-from multiprocessing import Process, Queue, Value
+from multiprocessing import Process, Manager, Queue, Value
 from workers import audio_recorder_worker, run_model_worker, audio_results_worker, mqtt_worker
 
 
@@ -71,33 +71,34 @@ def main():
         print('Processes starting')
 
         # Create the queues and shared memory
-        audio_recording_queue = Queue()
-        manage_detections_queue = Queue()
-        clean_detections_queue = Queue()
-        mqtt_sendmessage_queue = Queue()
+        with Manager() as manager: 
+            audio_recording_queue = manager.Queue()
+            manage_detections_queue = manager.Queue()
+            clean_detections_queue = manager.Queue()
+            mqtt_sendmessage_queue = manager.Queue()
 
-        # Define the worker processes
-        processes = {
-            'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue)),
-            'run_model': Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue)),
-            'save_audio_results': Process(target=audio_results_worker, args=(audio_recording_queue,manage_detections_queue, detection_filter, recording_filter,sqlitedb)),
-            'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue)),
-        }
+            # Define the worker processes
+            processes = {
+                'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue)),
+                'run_model': Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue)),
+                'save_audio_results': Process(target=audio_results_worker, args=(audio_recording_queue,manage_detections_queue, detection_filter, recording_filter,sqlitedb)),
+                'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue)),
+            }
 
-        # Start processes as daemons
-        for process in processes.values():
-            process.daemon = True
-            process.start()
+            # Start processes as daemons
+            for process in processes.values():
+                #process.daemon = True
+                process.start()
 
-        # Continue running the loop until recording conditions are not met
-        while recording_condition.should_record(time_now):
-            pass
+            # Continue running the loop until recording conditions are not met
+            while recording_condition.should_record(time_now):
+                pass
 
-        # Stop the worker processes if outside recording conditions
-        #if not recording_condition.should_record(time_now):
-        for process in processes.values():
-            process.terminate()
-            process.join()
+            # Stop the worker processes if outside recording conditions
+            #if not recording_condition.should_record(time_now):
+            for process in processes.values():
+                process.terminate()
+                process.join()
 
     # Start running the processes
     run()
