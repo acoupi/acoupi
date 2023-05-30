@@ -32,10 +32,14 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue):
 def run_model_worker(model, audio_recording_queue, manage_detections_queue):
 
     while True:
-        #try:
-        # Get the audio recording from the queue
-        recording = audio_recording_queue.get(timeout=3)
+        try:
+            # Get the audio recording from the queue
+            recording = audio_recording_queue.get(timeout=3)
+        except audio_recording_queue.Empty:
+            continue
+        
         print(f'[Process id {getpid()}] Get Recording itme: {recording.path}')
+        manage_detections_queue.put(recording.path)
 
         # Run the model on the recording
         #print(f"[Process id {getpid()}] Start Running Model: {time.asctime()}")
