@@ -44,8 +44,9 @@ def main():
                                  sample_rate=DEFAULT_SAMPLE_RATE,
                                  channels=DEFAULT_AUDIO_CHANNELS,
                                  chunk=DEFAULT_CHUNK_SIZE,
-                                 device_index=DEVICE_INDEX)
-    
+                                 #device_index=DEVICE_INDEX)
+                                 )
+
     # Create the model object to analyse an audio recording
     model = BatDetect2()
     
