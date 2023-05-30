@@ -35,16 +35,12 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue):
 def run_model_worker(model, audio_recording_queue, manage_detections_queue):
 
     while True:
-        # Check if there is a recording in the audio_recording queue
-        try:
-            # Get the audio recording from the queue
-            recording = audio_recording_queue.get(timeout=1)
-            
-        except audio_recording_queue.empty():
-            continue
+        # Check if there is a recording in the audio_recording queue 
+        if audio_recording_queue.empty():
+            return
         
         # Get the audio recording from the queue
-        #recording = audio_recording_queue.get()
+        recording = audio_recording_queue.get()
 
         # Run the model on the recording
         #logger.info("Start running model inference")
