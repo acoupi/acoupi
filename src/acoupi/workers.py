@@ -18,7 +18,7 @@ thread_id = threading.get_ident()
 # Worker to record audio
 def audio_recorder_worker(audio_recorder, audio_recording_queue):
 
-    while True:
+    while not audio_recording_queue.empty():
         # Record Audio
         #logger.info("Recording audio")
         print(f"[Thread {thread_id}] Start recording audio: {time.asctime()}")
@@ -35,22 +35,21 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue):
 # Worker to run model on audio recording
 def run_model_worker(model, audio_recording_queue, manage_detections_queue):
 
-    while True:
-        # Check if there is a recording in the audio_recording queue 
-        #if audio_recording_queue.empty():
-        #    return
-        
-        # Get the audio recording from the queue
-        recording = audio_recording_queue.get(timeout=5)
+    # Check if there is a recording in the audio_recording queue 
+    #if audio_recording_queue.empty():
+    #    return
+    
+    # Get the audio recording from the queue
+    recording = audio_recording_queue.get()
 
-        # Run the model on the recording
-        #logger.info("Start running model inference")
-        print(f"[Thread {thread_id}] Start Running Model: {time.asctime()}")
-        detections = model.run(recording)
-        print(f"[Thread {thread_id}] End Running Model: {time.asctime()}")
-
-        # Put the recording into the queue for further process
-        manage_detections_queue.put(detections)
+    # Run the model on the recording
+    #logger.info("Start running model inference")
+    print(f"[Thread {thread_id}] Start Running Model: {time.asctime()}")
+    detections = model.run(recording)
+    print(f"[Thread {thread_id}] End Running Model: {time.asctime()}")
+    
+    # Put the recording into the queue for further process
+    manage_detections_queue.put(detections)
 
 
 # Worker to manage detections 

@@ -88,8 +88,6 @@ def main():
         for process in processes.values():
             process.daemon = True
             process.start()
-        print('')
-        print(f'Queue Size: {audio_recording_queue.qsize()}')
 
         # Continue running the loop until recording conditions are not met
         while recording_condition.should_record(time_now):
