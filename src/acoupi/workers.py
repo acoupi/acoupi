@@ -4,6 +4,7 @@ from pathlib import Path
 import logging
 
 from multiprocessing import Process, Queue, Value
+from Queue import Empty
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
             # Get the audio recording from the queue
             recording = audio_recording_queue.get(timeout=1)
             
-        except audio_recording_queue.empty():
+        except audio_recording_queue.Empty:
             continue
         
         # Get the audio recording from the queue
@@ -52,9 +53,9 @@ def audio_results_worker(audio_recording_queue, manage_detections_queue,
         try:
             # Get the recordings and detections from the queue. 
             detections = manage_detections_queue.get(timeout=1) 
-            recording = audio_recording_queue.get(timeout=)
+            recording = audio_recording_queue.get(timeout=1)
 
-        except manage_detections_queue.empty():
+        except manage_detections_queue.Empty:
             continue
 
         # Get the recordings and detections from the queue. 
@@ -85,7 +86,7 @@ def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue,
             # Get the clean detections from the queue.
             clean_detections = clean_detections_queue.get(timeout=1)
 
-        except clean_detections_queue.empty():
+        except clean_detections_queue.Empty:
             continue
 
         # Get the clean detections from the queue.
