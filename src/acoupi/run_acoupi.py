@@ -88,8 +88,10 @@ def main():
 
         # Start processes as daemons
         for process in processes.values():
+            print(f'Process that is going to be started: {process}')
             process.daemon = True
             process.start()
+            print(f'Process have stared: {process}')
         
         # Continue running the loop until recording conditions are not met
         while recording_condition.should_record(time_now):
