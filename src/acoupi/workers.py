@@ -40,12 +40,14 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue):
         print(f'[Process id {getpid()}] Get Recording item: {recording.path} - Time: {time.asctime()}')
 
         # Run the model on the recording
-        #print(f"[Process id {getpid()}] Start Running Model: {time.asctime()}")
-        #detections = model.run(recording)
-        #print(f"[Process id {getpid()}] End Running Model: {time.asctime()}")
+        print(f"[Process id {getpid()}] Start Running Model: {time.asctime()}")
+        detections = model.run(recording)
+        print(f"[Process id {getpid()}] End Running Model: {time.asctime()}")
         
         # Put the recording into the queue for further process
-        #manage_detections_queue.put(detections)
+        manage_detections_queue.put(detections)
+        print(f"[Process id {getpid()}] Detections saved to queue - Time: {time.asctime()}")
+    
         
         #except audio_recording_queue.Empty:
         #    continue
