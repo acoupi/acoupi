@@ -64,45 +64,45 @@ def main():
                                    port=DEFAULT_MQTT_PORT, client_id=DEFAULT_MQTT_CLIENTID, topic=DEFAULT_MQTT_TOPIC)
 
 
-    #def run():
+    def run():
         
-    # Get the time 
-    time_now = datetime.now()
-    print('Processes starting')
+        # Get the time 
+        time_now = datetime.now()
+        print('Processes starting')
 
-    # Create the queues and shared memory
-    audio_recording_queue = Queue()
-    manage_detections_queue = Queue()
-    clean_detections_queue = Queue()
-    mqtt_sendmessage_queue = Queue()
+        # Create the queues and shared memory
+        audio_recording_queue = Queue()
+        manage_detections_queue = Queue()
+        clean_detections_queue = Queue()
+        mqtt_sendmessage_queue = Queue()
 
-    # Define the worker processes
-    processes = {
-        'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue)),
-        'run_model': Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue)),
-        'save_audio_results': Process(target=audio_results_worker, args=(audio_recording_queue,manage_detections_queue, detection_filter, recording_filter,sqlitedb)),
-        'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue)),
-    }
+        # Define the worker processes
+        processes = {
+            'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue)),
+            'run_model': Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue)),
+            'save_audio_results': Process(target=audio_results_worker, args=(audio_recording_queue,manage_detections_queue, detection_filter, recording_filter,sqlitedb)),
+            'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue)),
+        }
 
-    # Start processes as daemons
-    for process in processes.values():
-        process.daemon = True
-        process.start()
-    print('')
-    print(f'Queue Size: {audio_recording_queue.qsize()}')
-    
-    # Continue running the loop until recording conditions are not met
-    while recording_condition.should_record(time_now):
-        pass
-        
-    # Stop the worker processes if outside recording conditions
-    #if not recording_condition.should_record(time_now):
-    for process in processes.values():
-        process.terminate()
-        process.join()
+        # Start processes as daemons
+        for process in processes.values():
+            process.daemon = True
+            process.start()
+        print('')
+        print(f'Queue Size: {audio_recording_queue.qsize()}')
+
+        # Continue running the loop until recording conditions are not met
+        while recording_condition.should_record(time_now):
+            pass
+
+        # Stop the worker processes if outside recording conditions
+        #if not recording_condition.should_record(time_now):
+        for process in processes.values():
+            process.terminate()
+            process.join()
 
     # Start running the processes
-    #run()
+    run()
 
 if __name__ == "__main__":
     main()

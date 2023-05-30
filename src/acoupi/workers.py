@@ -41,7 +41,7 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue):
         #    return
         
         # Get the audio recording from the queue
-        recording = audio_recording_queue.get()
+        recording = audio_recording_queue.get(timeout=5)
 
         # Run the model on the recording
         #logger.info("Start running model inference")
