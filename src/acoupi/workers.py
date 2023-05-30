@@ -4,12 +4,11 @@ from pathlib import Path
 import logging
 
 from multiprocessing import Process, Queue, Value
-from Queue import Empty
 
 logger = logging.getLogger(__name__)
 
 # Worker to record audio
-def audio_recorder_worker(audio_recorder, audio_recording_queue, go):
+def audio_recorder_worker(audio_recorder, audio_recording_queue):
 
     while True:
         # Record Audio
@@ -22,7 +21,7 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, go):
      
 
 # Worker to run model on audio recording
-def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
+def run_model_worker(model, audio_recording_queue, manage_detections_queue):
 
     while True:
         # Check if there is a recording in the audio_recording queue
@@ -30,7 +29,7 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
             # Get the audio recording from the queue
             recording = audio_recording_queue.get(timeout=1)
             
-        except audio_recording_queue.Empty:
+        except audio_recording_queue.empty():
             continue
         
         # Get the audio recording from the queue
@@ -55,7 +54,7 @@ def audio_results_worker(audio_recording_queue, manage_detections_queue,
             detections = manage_detections_queue.get(timeout=1) 
             recording = audio_recording_queue.get(timeout=1)
 
-        except manage_detections_queue.Empty:
+        except manage_detections_queue.empty():
             continue
 
         # Get the recordings and detections from the queue. 
@@ -86,7 +85,7 @@ def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue,
             # Get the clean detections from the queue.
             clean_detections = clean_detections_queue.get(timeout=1)
 
-        except clean_detections_queue.Empty:
+        except clean_detections_queue.empty():
             continue
 
         # Get the clean detections from the queue.
