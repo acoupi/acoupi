@@ -70,11 +70,6 @@ def main():
         time_now = datetime.now()
         print('Processes starting')
 
-        # Check if we should record
-        if not recording_condition.should_record(time_now):
-            logging.info(f"Outside Recording Interval - Current Time is {time.asctime()}")
-            logging.info(f"Recording Start at: {start_time} and End at: {end_time}")
-            return
 
         # Create the queues and shared memory
         audio_recording_queue = Queue()
@@ -95,12 +90,16 @@ def main():
         for process in processes.values():
             process.daemon = True
             process.start()
+        
+        # Continue running the loop until recording conditions are not met
+        while recording_condition.should_record(time_now):
+            pass
 
         # Stop the worker processes if outside recording conditions
-        if not recording_condition.should_record(time_now):
-            for process in processes.values():
-                process.terminate()
-                process.join()
+        #if not recording_condition.should_record(time_now):
+        for process in processes.values():
+            process.terminate()
+            process.join()
     
     # Start running the processes
     run()
