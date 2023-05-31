@@ -53,6 +53,7 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue):
         manage_detections_queue.put(detections)
         print(f"[Process id {getpid()}] Detections saved to queue - Time: {time.asctime()}")
 
+
 # Worker to manage detections 
 def audio_results_worker(audio_recording_queue, manage_detections_queue, 
                          detection_filter, recording_filter, sqlitedb):
