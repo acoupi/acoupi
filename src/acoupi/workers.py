@@ -40,7 +40,7 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
         if go.value == 0 and audio_recording_queue.empty():
             return
 
-        recording = audio_recording_queue.get(timeout=10) 
+        recording = audio_recording_queue.get() 
 
         print(f'[Process id {getpid()}] Get Recording item: {recording.path} - Time: {time.asctime()}')
         
