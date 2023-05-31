@@ -92,7 +92,7 @@ def main():
             'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recordings_list, go,)),
             'run_model': Process(target=run_model_worker,args=(model, audio_recordings_list, manage_detections_list, go)),
             'save_audio_results': Process(target=audio_results_worker, args=(audio_recordings_list, manage_detections_list, detection_filter, recording_filter, sqlitedb, go)),
-            'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, manage_detections_list, clean_detections_list, go,)),
+            #'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, manage_detections_list, clean_detections_list, go,)),
         }
         # Start processes as daemons
         for process in processes.values():
