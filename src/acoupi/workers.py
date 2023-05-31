@@ -15,7 +15,7 @@ logging.basicConfig(filename='acoupi.log',filemode='w',
 
 
 # Worker to record audio
-def audio_recorder_worker(audio_recorder, audio_recording_queue, go):
+def audio_recorder_worker(audio_recorder, audio_recording_queue):
     """
     This function enable continous audio recording of 3s length. 
     :param audio_recorder: PyAudioRecorder object
@@ -33,10 +33,10 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, go):
         
 
 # Worker to run model on audio recording
-def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
+def run_model_worker(model, audio_recording_queue, manage_detections_queue):
 
     while True:
-        if go.value == 0 and audio_recording_queue.empty():
+        if audio_recording_queue.empty():
             return
 
         #recording = audio_recording_queue.get(timeout=10)
@@ -57,7 +57,7 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
 
 # Worker to manage detections 
 def audio_results_worker(audio_recording_queue, manage_detections_queue, 
-                         detection_filter, recording_filter, sqlitedb, go):
+                         detection_filter, recording_filter, sqlitedb):
     
     while True:
         
@@ -69,7 +69,7 @@ def audio_results_worker(audio_recording_queue, manage_detections_queue,
         #    continue
         
         # Check if there is detections in the manage_detections_queue
-        if go.value == 0 and manage_detections_queue.empty():
+        if manage_detections_queue.empty():
             return
 
         # Get the recordings and detections from the queue. 
@@ -96,7 +96,7 @@ def audio_results_worker(audio_recording_queue, manage_detections_queue,
         clean_detections_queue.put(clean_detections_obj)
 
 # Worker to send detections via mqtt
-def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue, go):
+def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue):
     
     while True:
         #try:
@@ -106,7 +106,7 @@ def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue,
         #    continue
         
         # Check if there are detections to be sent in the clean_detections_queue
-        if go.value == 0 and clean_detections_queue.empty():
+        if clean_detections_queue.empty():
             return
 
         # Get the clean detections from the queue.

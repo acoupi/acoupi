@@ -74,10 +74,6 @@ def main():
         # Create a manager to share the data between the processes
         manager = Manager()
 
-        # Instatiate shared memory singals
-        #lock = Lock()
-        go = Value('i',1)
-
         # Create a managed list for the audio recordings. 
         #audio_recordings_list = manager.list()
         #manage_detections_list = manager.list()
@@ -90,8 +86,8 @@ def main():
         # mqtt_sendmessage_queue = Queue()
 
         # Define the worker processes
-        audio_recorder_process = Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,))
-        run_model_process = Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue, go))
+        audio_recorder_process = Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue))
+        run_model_process = Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue,))
         
         #processes = {
         #    'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,)),
