@@ -73,8 +73,7 @@ def main():
 
         # Create a manager to share the data between the processes
         manager = Manager()
-        manager.start() 
-
+        
         # Create the queues and shared memory
         audio_recording_queue = manager.Queue()
         manage_detections_queue = manager.Queue()
