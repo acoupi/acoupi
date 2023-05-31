@@ -76,7 +76,7 @@ def main():
 
         # Instatiate shared memory singals
         #lock = Lock()
-        #go = Value('i',1)
+        go = Value('i',1)
 
         # Create a managed list for the audio recordings. 
         #audio_recordings_list = manager.list()
