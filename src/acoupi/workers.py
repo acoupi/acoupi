@@ -22,17 +22,17 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, go):
     :param audio_recording_queue: Queue object to store audio_recording file path
     :param go: bool run signal to share data between processes 
     """
-    while True: 
-        # Record Audio
-        print(f"[Process id {getpid()}] Start recording audio: {time.asctime()}")
-        recording = audio_recorder.record()
-        print(f"[Process id {getpid()}] End Recording Audio: {time.asctime()}")
+    #while True: 
+    # Record Audio
+    print(f"[Process id {getpid()}] Start recording audio: {time.asctime()}")
+    recording = audio_recorder.record()
+    print(f"[Process id {getpid()}] End Recording Audio: {time.asctime()}")
 
-        # Put the recording into the queue for further process
-        audio_recording_queue.put(recording)
-        print(f"[Process id {getpid()}] Recording saved to queue: {recording.path} - Time: {time.asctime()}")
-        if go.value == 0:
-            return 
+    # Put the recording into the queue for further process
+    audio_recording_queue.put(recording)
+    print(f"[Process id {getpid()}] Recording saved to queue: {recording.path} - Time: {time.asctime()}")
+    if go.value == 0:
+        return 
 
 # Worker to run model on audio recording
 def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
