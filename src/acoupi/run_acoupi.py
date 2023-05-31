@@ -72,11 +72,11 @@ def main():
         print('Processes starting')
 
         # Create a manager to share the data between the processes
-        #manager = Manager()
+        manager = Manager()
 
         # Instatiate shared memory singals
-        lock = Lock()
-        go = Value('i',1)
+        #lock = Lock()
+        #go = Value('i',1)
 
         # Create a managed list for the audio recordings. 
         #audio_recordings_list = manager.list()
@@ -84,9 +84,9 @@ def main():
         #clean_detections_list = manager.list()
 
         # Create the queues and shared memory
-        audio_recording_queue = Queue()
-        manage_detections_queue = Queue()
-        clean_detections_queue = Queue()
+        audio_recording_queue = manager.Queue()
+        manage_detections_queue = manager.Queue()
+        clean_detections_queue = manager.Queue()
         # mqtt_sendmessage_queue = Queue()
 
         # Define the worker processes
@@ -113,8 +113,8 @@ def main():
             go.value = 0
             print('Out of time interval - Stop processes')
 
-            audio_recorder_process.join()
-            run_mrun_model_processodel.join()
+        audio_recorder_process.join()
+        run_mrun_model_processodel.join()
 
             # Stop the worker processes if outside recording conditions
             #for process in processes.values():
