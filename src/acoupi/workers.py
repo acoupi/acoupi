@@ -35,7 +35,7 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, go):
             return 
 
 # Worker to run model on audio recording
-def run_model_worker(model, audio_recording_queue, manage_detections_queue):
+def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
 
     while True:
         #try:
@@ -64,7 +64,7 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue):
 
 # Worker to manage detections 
 def audio_results_worker(audio_recording_queue, manage_detections_queue, 
-                         detection_filter, recording_filter, sqlitedb):
+                         detection_filter, recording_filter, sqlitedb, go):
     
     while True:
         
@@ -101,7 +101,7 @@ def audio_results_worker(audio_recording_queue, manage_detections_queue,
         clean_detections_queue.put(clean_detections_obj)
 
 # Worker to send detections via mqtt
-def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue):
+def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue, go):
     
     while True:
         #try:

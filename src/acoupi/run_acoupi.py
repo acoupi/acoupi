@@ -83,9 +83,9 @@ def main():
         # Define the worker processes
         processes = {
             'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,)),
-            'run_model': Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue)),
-            'save_audio_results': Process(target=audio_results_worker, args=(audio_recording_queue, manage_detections_queue, detection_filter, recording_filter,sqlitedb)),
-            'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue)),
+            'run_model': Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue, go)),
+            'save_audio_results': Process(target=audio_results_worker, args=(audio_recording_queue, manage_detections_queue, detection_filter, recording_filter, sqlitedb, go)),
+            'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue, go,)),
         }
         # Start processes as daemons
         for process in processes.values():
