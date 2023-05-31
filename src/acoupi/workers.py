@@ -25,6 +25,7 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, go, lock):
     while True: 
         # Record Audio
         with lock:
+            go.value += 1
             print(f"[Process id {getpid()}] Start recording audio: {time.asctime()}")
             recording = audio_recorder.record()
             print(f"[Process id {getpid()}] End Recording Audio: {time.asctime()}")
@@ -34,7 +35,6 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, go, lock):
             print(f"[Process id {getpid()}] Recording saved to queue: {recording.path} - Time: {time.asctime()}")
             if go.value == 0:
                 return 
-            go.value += 1
 
 # Worker to run model on audio recording
 def run_model_worker(model, audio_recording_queue, manage_detections_queue, go, lock):
@@ -44,6 +44,7 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue, go, 
             return
 
         with lock:
+            go.value -= 1
             #recording = audio_recording_queue.get(timeout=10)
             recording = audio_recording_queue.get() 
             #recording = audio_recordings_list.pop(0) 
@@ -59,7 +60,6 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue, go, 
             manage_detections_queue.put(detections)
             #manage_detections_list.append(detections)
             print(f"[Process id {getpid()}] Detections saved to queue - Time: {time.asctime()}")
-            go.value -= 1
 
 # Worker to manage detections 
 def audio_results_worker(audio_recording_queue, manage_detections_queue, 
