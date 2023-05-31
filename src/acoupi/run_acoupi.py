@@ -16,7 +16,7 @@ from recording_filters import ThresholdRecordingFilter
 from messengers import MQTTMessenger, build_detection_message
 from storages.sqlite import SqliteStore, SqliteMessageStore
 
-from multiprocessing import Process, Queue, Value
+from multiprocessing import Process, Queue, Value, Lock
 from multiprocessing import Pool, Manager
 from workers import audio_recorder_worker, run_model_worker, audio_results_worker, mqtt_worker
 
@@ -74,6 +74,10 @@ def main():
         # Create a manager to share the data between the processes
         #manager = Manager()
 
+        # Instatiate shared memory singals
+        lock = Lock()
+        go = Value('i',1)
+
         # Create a managed list for the audio recordings. 
         #audio_recordings_list = manager.list()
         #manage_detections_list = manager.list()
@@ -85,12 +89,9 @@ def main():
         clean_detections_queue = Queue()
         # mqtt_sendmessage_queue = Queue()
 
-        # Instatiate shared memory singals
-        go = Value('i',1)
-
         # Define the worker processes
-        audio_recorder_process = Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,))
-        run_model_process = Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue, go))
+        audio_recorder_process = Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go, lock))
+        run_model_process = Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue, go, lock,))
         
         #processes = {
         #    'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,)),
