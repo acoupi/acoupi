@@ -89,8 +89,8 @@ def main():
         go = Value('i',1)
 
         # Define the worker processes
-        audio_recorder = Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,))
-        run_model = Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue, go))
+        audio_recorder_process = Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,))
+        run_model_process = Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue, go))
         
         #processes = {
         #    'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,)),
@@ -100,8 +100,8 @@ def main():
         #}
         
         # Start processes as daemons
-        audio_recorder.start()
-        run_model.start()
+        audio_recorder_process.start()
+        run_model_process.start()
 
         #for process in processes.values():
         #    process.daemon = True
@@ -112,8 +112,8 @@ def main():
             go.value = 0
             print('Out of time interval - Stop processes')
 
-            audio_recorder.join()
-            run_model.join()
+            audio_recorder_process.join()
+            run_mrun_model_processodel.join()
 
             # Stop the worker processes if outside recording conditions
             #for process in processes.values():
