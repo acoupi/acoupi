@@ -110,7 +110,7 @@ def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_list, 
         #    continue
         
         # Check if there are detections to be sent in the clean_detections_queue
-        if go.value == 0 and len(clean_detections_list) = 0:
+        if go.value == 0 and len(clean_detections_list) == 0:
             return
 
         # Get the clean detections from the queue.
