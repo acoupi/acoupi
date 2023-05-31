@@ -35,7 +35,7 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, go):
             return 
 
 # Worker to run model on audio recording
-def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
+def run_model_worker(model, audio_recording_queue, manage_detections_queue, go, lock):
 
     while True:
         #try:
@@ -47,20 +47,21 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
         if go.value == 0 and audio_recording_queue.empty():
             return
 
-        #recording = audio_recording_queue.get(timeout=10) 
-        recording = audio_recording_queue.get(timeout=10) 
+        with lock:
+            #recording = audio_recording_queue.get(timeout=10) 
+            recording = audio_recording_queue.get() 
 
-        print(f'[Process id {getpid()}] Get Recording item: {recording.path} - Time: {time.asctime()}')
+            print(f'[Process id {getpid()}] Get Recording item: {recording.path} - Time: {time.asctime()}')
 
-        # Run the model on the recording
-        print(f"[Process id {getpid()}] Start Running Model: {time.asctime()}")
-        print(f"[Process id {getpid()}] Audio Recording Path: {recording.path}")
-        detections = model.run(recording)
-        print(f"[Process id {getpid()}] End Running Model: {time.asctime()}")
-        
-        # Put the recording into the queue for further process
-        manage_detections_queue.put(detections)
-        print(f"[Process id {getpid()}] Detections saved to queue - Time: {time.asctime()}")
+            # Run the model on the recording
+            print(f"[Process id {getpid()}] Start Running Model: {time.asctime()}")
+            print(f"[Process id {getpid()}] Audio Recording Path: {recording.path}")
+            detections = model.run(recording)
+            print(f"[Process id {getpid()}] End Running Model: {time.asctime()}")
+            
+            # Put the recording into the queue for further process
+            manage_detections_queue.put(detections)
+            print(f"[Process id {getpid()}] Detections saved to queue - Time: {time.asctime()}")
 
 
 # Worker to manage detections 
