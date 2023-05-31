@@ -15,28 +15,41 @@ logging.basicConfig(filename='acoupi.log',filemode='w',
 
 
 # Worker to record audio
-def audio_recorder_worker(audio_recorder, audio_recording_queue):
+def audio_recorder_worker(audio_recorder, audio_recording_queue, go):
+    """
+    This function enable continous audio recording of 3s length. 
+    :param audio_recorder: PyAudioRecorder object
+    :param audio_recording_queue: Queue object to store audio_recording file path
+    :param go: bool run signal to share data between processes 
+    """
+    while True: 
+        # Record Audio
+        print(f"[Process id {getpid()}] Start recording audio: {time.asctime()}")
+        recording = audio_recorder.record()
+        print(f"[Process id {getpid()}] End Recording Audio: {time.asctime()}")
 
-    # Record Audio
-    print(f"[Process id {getpid()}] Start recording audio: {time.asctime()}")
-    recording = audio_recorder.record()
-    print(f"[Process id {getpid()}] End Recording Audio: {time.asctime()}")
-
-    # Put the recording into the queue for further process
-    audio_recording_queue.put(recording)
-    print(f"[Process id {getpid()}] Recording saved to queue: {recording.path} - Time: {time.asctime()}")
-     
+        # Put the recording into the queue for further process
+        audio_recording_queue.put(recording)
+        print(f"[Process id {getpid()}] Recording saved to queue: {recording.path} - Time: {time.asctime()}")
+        if go.value == 0:
+            return 
 
 # Worker to run model on audio recording
 def run_model_worker(model, audio_recording_queue, manage_detections_queue):
 
     while True:
-        try:
-            # Check if there is an audio recording in the queue
-            recording = audio_recording_queue.get(timeout=10)
-        except audio_recording_queue.Empty:
-            continue
+        #try:
+        #    # Check if there is an audio recording in the queue
+        #    recording = audio_recording_queue.get(timeout=10)
+        #except audio_recording_queue.Empty:
+        #    continue
         
+        if go.value == 0 and audio_recording_queue.empty():
+            return
+
+        #recording = audio_recording_queue.get(timeout=10) 
+        recording = audio_recording_queue.get() 
+
         print(f'[Process id {getpid()}] Get Recording item: {recording.path} - Time: {time.asctime()}')
 
         # Run the model on the recording
@@ -47,10 +60,6 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue):
         # Put the recording into the queue for further process
         manage_detections_queue.put(detections)
         print(f"[Process id {getpid()}] Detections saved to queue - Time: {time.asctime()}")
-    
-        
-        #except audio_recording_queue.Empty:
-        #    continue
 
 
 # Worker to manage detections 
@@ -58,19 +67,21 @@ def audio_results_worker(audio_recording_queue, manage_detections_queue,
                          detection_filter, recording_filter, sqlitedb):
     
     while True:
-        try:
-            # Check if there is detections in the manage_detections_queue
-            recording = audio_recording_queue.get(timeout=30)
-            detections = manage_detections_queue.get(timeout=30)
-        except manage_detections_queue.Empty:
-            continue
+        
+        #try:
+        #    # Check if there is detections in the manage_detections_queue
+        #    recording = audio_recording_queue.get(timeout=30)
+        #    detections = manage_detections_queue.get(timeout=30)
+        #except manage_detections_queue.Empty:
+        #    continue
+        
         # Check if there is detections in the manage_detections_queue
-        #if manage_detections_queue.empty():
-        #    return
+        if go.value == 0 and manage_detections_queue.empty():
+            return
 
         # Get the recordings and detections from the queue. 
-        #recording = audio_recording_queue.get(timeout=10)
-        #detections = manage_detections_queue.get()
+        recording = audio_recording_queue.get()
+        detections = manage_detections_queue.get()
 
         # Check if detections and recordings should be saved.  
         keep_detections_bool = detection_filter.should_store_detection(detections)
@@ -93,17 +104,18 @@ def audio_results_worker(audio_recording_queue, manage_detections_queue,
 def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue):
     
     while True:
-        try:
-            # Check if there are detections to be sent in the clean_detections_queuee
-            clean_detections = clean_detections_queue.get(timeout=30)
-        except clean_detections_queue.Empty:
-            continue
+        #try:
+        #    # Check if there are detections to be sent in the clean_detections_queuee
+        #    clean_detections = clean_detections_queue.get(timeout=30)
+        #except clean_detections_queue.Empty:
+        #    continue
+        
         # Check if there are detections to be sent in the clean_detections_queue
-        #if clean_detections_queue.empty():
-        #    return
+        if go.value == 0 and clean_detections_queue.empty():
+            return
 
         # Get the clean detections from the queue.
-        #clean_detections = clean_detections_queue.get()
+        clean_detections = clean_detections_queue.get()
         
         # Prepare and send the detections messages via MQTT
         mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections]

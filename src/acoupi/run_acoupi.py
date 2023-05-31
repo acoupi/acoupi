@@ -71,31 +71,33 @@ def main():
         print('Processes starting')
 
         # Create the queues and shared memory
-        with Manager() as manager: 
-            audio_recording_queue = manager.Queue()
-            manage_detections_queue = manager.Queue()
-            clean_detections_queue = manager.Queue()
-            mqtt_sendmessage_queue = manager.Queue()
+        # with Manager() as manager: 
+        audio_recording_queue = manager.Queue()
+        manage_detections_queue = manager.Queue()
+        clean_detections_queue = manager.Queue()
+        mqtt_sendmessage_queue = manager.Queue()
 
-            # Define the worker processes
-            processes = {
-                'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue)),
-                'run_model': Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue)),
-                'save_audio_results': Process(target=audio_results_worker, args=(audio_recording_queue, manage_detections_queue, detection_filter, recording_filter,sqlitedb)),
-                'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue)),
-            }
+        # Instatiate shared memory singals
+        go = Value('i',1)
 
-            # Start processes as daemons
-            for process in processes.values():
-                #process.daemon = True
-                process.start()
-
-            # Continue running the loop until recording conditions are not met
-            while recording_condition.should_record(time_now):
-                pass
+        # Define the worker processes
+        processes = {
+            'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,)),
+            'run_model': Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue)),
+            'save_audio_results': Process(target=audio_results_worker, args=(audio_recording_queue, manage_detections_queue, detection_filter, recording_filter,sqlitedb)),
+            'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue)),
+        }
+        # Start processes as daemons
+        for process in processes.values():
+            #process.daemon = True
+            process.start()
+        
+        # Continue running the loop until recording conditions are not met
+        if not recording_condition.should_record(time_now):
+            go.value = 0
+            print('Out of time interval - Stop processes')
 
             # Stop the worker processes if outside recording conditions
-            #if not recording_condition.should_record(time_now):
             for process in processes.values():
                 process.terminate()
                 process.join()
