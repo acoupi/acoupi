@@ -97,10 +97,10 @@ def audio_results_worker(audio_recordings_list, manage_detections_list,
             print(f"[Process id {getpid()}] Detections Save in DB: {time.asctime()}")
 
         # Put clean detections into the queue for further processing
-        clean_detections_queue.put(clean_detections_obj)
+        clean_detections_list.append(clean_detections_obj)
 
 # Worker to send detections via mqtt
-def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue, clean_detections_queue, go):
+def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_list, clean_detections_list, go):
     
     while True:
         #try:
@@ -110,11 +110,11 @@ def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue,
         #    continue
         
         # Check if there are detections to be sent in the clean_detections_queue
-        if go.value == 0 and clean_detections_queue.empty():
+        if go.value == 0 and len(clean_detections_list) = 0:
             return
 
         # Get the clean detections from the queue.
-        clean_detections = clean_detections_queue.get()
+        clean_detections = clean_detections_list.pop(0)
         
         # Prepare and send the detections messages via MQTT
         mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections]
