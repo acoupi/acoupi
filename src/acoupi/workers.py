@@ -60,8 +60,8 @@ def audio_results_worker(audio_recording_queue, manage_detections_queue,
     while True:
         try:
             # Check if there is detections in the manage_detections_queue
-            recording = audio_recording_queue.get(timeout=10)
-            detections = manage_detections_queue.get(timeout=10)
+            recording = audio_recording_queue.get(timeout=30)
+            detections = manage_detections_queue.get(timeout=30)
         except manage_detections_queue.Empty:
             continue
         # Check if there is detections in the manage_detections_queue
@@ -95,7 +95,7 @@ def mqtt_worker(mqtt_messenger, transmission_messagedb, manage_detections_queue,
     while True:
         try:
             # Check if there are detections to be sent in the clean_detections_queuee
-            clean_detections = clean_detections_queue.get(timeout=10)
+            clean_detections = clean_detections_queue.get(timeout=30)
         except clean_detections_queue.Empty:
             continue
         # Check if there are detections to be sent in the clean_detections_queue
