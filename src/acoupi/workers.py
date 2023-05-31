@@ -15,7 +15,7 @@ logging.basicConfig(filename='acoupi.log',filemode='w',
 
 
 # Worker to record audio
-def audio_recorder_worker(audio_recorder, audio_recording_queue, go, lock):
+def audio_recorder_worker(audio_recorder, audio_recording_queue, go):
     """
     This function enable continous audio recording of 3s length. 
     :param audio_recorder: PyAudioRecorder object
@@ -33,29 +33,27 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, go, lock):
         
 
 # Worker to run model on audio recording
-def run_model_worker(model, audio_recording_queue, manage_detections_queue, go, lock):
+def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
 
     while True:
         if go.value == 0 and audio_recording_queue.empty():
             return
 
-        with lock:
-            go.value -= 1
-            #recording = audio_recording_queue.get(timeout=10)
-            recording = audio_recording_queue.get() 
-            #recording = audio_recordings_list.pop(0) 
-            print(f'[Process id {getpid()}] Get Recording item: {recording.path} - Time: {time.asctime()}')
-
-            # Run the model on the recording
-            print(f"[Process id {getpid()}] Start Running Model: {time.asctime()}")
-            print(f"[Process id {getpid()}] Audio Recording Path: {recording.path}")
-            detections = model.run(recording)
-            print(f"[Process id {getpid()}] End Running Model: {time.asctime()}")
-       
-            # Put the recording into the queue for further process
-            manage_detections_queue.put(detections)
-            #manage_detections_list.append(detections)
-            print(f"[Process id {getpid()}] Detections saved to queue - Time: {time.asctime()}")
+        #recording = audio_recording_queue.get(timeout=10)
+        recording = audio_recording_queue.get() 
+        #recording = audio_recordings_list.pop(0) 
+        print(f'[Process id {getpid()}] Get Recording item: {recording.path} - Time: {time.asctime()}')
+        
+        # Run the model on the recording
+        print(f"[Process id {getpid()}] Start Running Model: {time.asctime()}")
+        print(f"[Process id {getpid()}] Audio Recording Path: {recording.path}")
+        detections = model.run(recording)
+        print(f"[Process id {getpid()}] End Running Model: {time.asctime()}")
+    
+        # Put the recording into the queue for further process
+        manage_detections_queue.put(detections)
+        #manage_detections_list.append(detections)
+        print(f"[Process id {getpid()}] Detections saved to queue - Time: {time.asctime()}")
 
 # Worker to manage detections 
 def audio_results_worker(audio_recording_queue, manage_detections_queue, 

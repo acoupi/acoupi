@@ -90,8 +90,8 @@ def main():
         # mqtt_sendmessage_queue = Queue()
 
         # Define the worker processes
-        audio_recorder_process = Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go, lock))
-        run_model_process = Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue, go, lock,))
+        audio_recorder_process = Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,))
+        run_model_process = Process(target=run_model_worker,args=(model, audio_recording_queue, manage_detections_queue, go))
         
         #processes = {
         #    'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,)),
