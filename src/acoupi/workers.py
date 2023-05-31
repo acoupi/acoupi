@@ -54,6 +54,7 @@ def run_model_worker(model, audio_recording_queue, manage_detections_queue, go):
 
         # Run the model on the recording
         print(f"[Process id {getpid()}] Start Running Model: {time.asctime()}")
+        print(f"[Process id {getpid()}] Audio Recording Path: {recording.path}")
         detections = model.run(recording)
         print(f"[Process id {getpid()}] End Running Model: {time.asctime()}")
         
