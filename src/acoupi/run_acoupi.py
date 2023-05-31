@@ -16,7 +16,7 @@ from recording_filters import ThresholdRecordingFilter
 from messengers import MQTTMessenger, build_detection_message
 from storages.sqlite import SqliteStore, SqliteMessageStore
 
-from multiprocessing import Process, Manager, Queue, Value
+from multiprocessing import Process, Queue, Value
 from workers import audio_recorder_worker, run_model_worker, audio_results_worker, mqtt_worker
 
 
@@ -72,10 +72,10 @@ def main():
 
         # Create the queues and shared memory
         # with Manager() as manager: 
-        audio_recording_queue = manager.Queue()
-        manage_detections_queue = manager.Queue()
-        clean_detections_queue = manager.Queue()
-        mqtt_sendmessage_queue = manager.Queue()
+        audio_recording_queue = Queue()
+        manage_detections_queue = Queue()
+        clean_detections_queue = Queue()
+        mqtt_sendmessage_queue = Queue()
 
         # Instatiate shared memory singals
         go = Value('i',1)
