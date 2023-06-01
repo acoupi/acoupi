@@ -17,7 +17,7 @@ from messengers import MQTTMessenger, build_detection_message
 from storages.sqlite import SqliteStore, SqliteMessageStore
 
 from multiprocessing import Process, Queue, Value, Manager
-from workers import audio_recorder_worker, run_model_worker, audio_results_worker, mqtt_worker
+from workers import audio_recorder_worker, detections_worker, mqtt_worker
 
 
 # Setup the main logger
