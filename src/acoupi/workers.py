@@ -80,8 +80,8 @@ def mqtt_worker(mqtt_messenger, transmission_messagedb, message_detections_queue
     while True:
         try:
             # Check if there are detections to be sent in the clean_detections_queuee
-            clean_detections = clean_detections_queue.get(timeout=30)
-        except clean_detections_queue.Empty:
+            clean_detections = message_detections_queue.get(timeout=30)
+        except message_detections_queue.Empty:
             continue
         
         # Check if there are detections to be sent in the clean_detections_queue
