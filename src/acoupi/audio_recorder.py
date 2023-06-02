@@ -91,7 +91,7 @@ class PyAudioRecorder(AudioRecorder):
             print("flag2")
             #Initialise array to store audio frames
             frames = []
-            self.dump(stream)
+            self.dump(stream.stream)
             for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
                 print(stream)
                 data = stream.read(self.chunk)
