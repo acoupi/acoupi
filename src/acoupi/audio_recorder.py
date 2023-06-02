@@ -56,7 +56,7 @@ class PyAudioRecorder(AudioRecorder):
    #    device_info = p.get_default_input_device_info()
    #    device_index = device_info['index']
    #    return device_index
-    def dump(obj):
+    def dump(self, obj):
       for attr in dir(obj):
         print("obj.%s = %r" % (attr, getattr(obj, attr)))
 
