@@ -28,14 +28,13 @@ from acoupi_types import Recording, AudioRecorder
 
 
 class PyAudioRecorder(AudioRecorder):
-#class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
 
     def __init__(self, duration: float, 
                 sample_rate: float, 
                 channels: int, 
                 chunk: int, 
-                #device_index: int
+                device_index: int
                 ): 
                 #lat: float = cfg['location']['latitude'], 
                 #lon: float = cfg['location']['longitude']):
@@ -47,23 +46,23 @@ class PyAudioRecorder(AudioRecorder):
         self.sample_rate = sample_rate
         self.channels = channels
         self.chunk = chunk
-        #self.device_index = device_index
+        self.device_index = device_index
         
         # Device Location 
         #self.lat = lat
         #self.lon = lon
     
-    def findAudioDevice(self):
-        p = pyaudio.PyAudio()
-        device_info = p.get_default_input_device_info()
-        device_index = device_info['index']
-        return device_index
+   #def findAudioDevice(self):
+   #    p = pyaudio.PyAudio()
+   #    device_info = p.get_default_input_device_info()
+   #    device_index = device_info['index']
+   #    return device_index
 
 
     def record(self) -> Recording:
         """Record a 3 second temporary audio file. Return the temporary path of the file."""       
         
-        device_index = self.findAudioDevice()
+        #device_index = self.findAudioDevice()
         self.datetime = datetime.datetime.now()
 
         # Specified the desired path for temporary file - Saved in RAM
@@ -86,8 +85,8 @@ class PyAudioRecorder(AudioRecorder):
                             rate=self.sample_rate,
                             input=True,
                             frames_per_buffer=self.chunk,
-                            #input_device_index=self.device_index)
-                            input_device_index=device_index)
+                            input_device_index=self.device_index)
+                            #input_device_index=device_index)
 
             #Initialise array to store audio frames
             frames = []
