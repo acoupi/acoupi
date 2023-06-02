@@ -93,7 +93,7 @@ def main():
             process.start()
         
         # Continue running the loop until recording conditions are not met
-        if not recording_condition.should_record(time_now):
+        if False:#not recording_condition.should_record(time_now):
             go.value = 0
             print('Out of time interval - Stop processes')
 
