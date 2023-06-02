@@ -33,6 +33,7 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, gp):
         audio_recording_queue.put(recording)
         print(f"[Process id {getpid()}] Recording saved to queue: {recording.path} - Time: {time.asctime()}")
         if go.value == 0:
+            print("go why", go.value)
             return
 
 
