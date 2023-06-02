@@ -71,20 +71,20 @@ def main():
         print('Processes starting')
 
         # Create a manager to share the data between the processes
-        manager = Manager()
+        # manager = Manager()
 
         # Create the queues and shared memory
-        audio_recording_queue = manager.Queue()
-        message_detections_queue = manager.Queue()
+        audio_recording_queue = Queue()
+        message_detections_queue = Queue()
 
         # Instantiate shared memory signals
-        #go = Value('i', 1)
+        go = Value('i', 1)
 
         # Define the worker processes
         processes = {
-            'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue,)),
-            'generate_detections': Process(target=detections_worker,args=(model, audio_recording_queue, message_detections_queue, detection_filter, recording_filter, sqlitedb,)),
-            'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, message_detections_queue,)),
+            'audio_recorder': Process(target=audio_recorder_worker, args=(audio_recorder, audio_recording_queue, go,)),
+            'generate_detections': Process(target=detections_worker,args=(model, audio_recording_queue, message_detections_queue, detection_filter, recording_filter, sqlitedb, go,)),
+            'send_detections': Process(target=mqtt_worker, args=(mqtt_messenger, transmission_messagedb, message_detections_queue, go,)),
         }
         
         # Start processes as daemons
