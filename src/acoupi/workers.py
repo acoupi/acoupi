@@ -22,7 +22,9 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, gp):
     :param audio_recording_queue: Queue object to store audio_recording file path
     :param go: bool run signal to share data between processes 
     """
+    
     while True: 
+        print("audioworker")
         # Record Audio
         print(f"[Process id {getpid()}] Start recording audio: {time.asctime()}")
         recording = audio_recorder.record()
@@ -38,6 +40,7 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, gp):
 def detections_worker(model, audio_recording_queue, message_detections_queue, detection_filter, recording_filter, sqlitedb, go):
 
     while True:
+        print("detectionworker")
         # try:
         #     # Check if there are detections to be sent in the clean_detections_queuee
         #     recording = audio_recording_queue.get(timeout=30)
@@ -78,6 +81,7 @@ def detections_worker(model, audio_recording_queue, message_detections_queue, de
 def mqtt_worker(mqtt_messenger, transmission_messagedb, message_detections_queue, go):
     
     while True:
+        print("mqttworker")
         # try:
         #     # Check if there are detections to be sent in the clean_detections_queuee
         #     clean_detections = message_detections_queue.get(timeout=30)
