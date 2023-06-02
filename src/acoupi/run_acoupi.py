@@ -16,7 +16,7 @@ from recording_filters import ThresholdRecordingFilter
 from messengers import MQTTMessenger, build_detection_message
 from storages.sqlite import SqliteStore, SqliteMessageStore
 
-from multiprocessing import Process, Queue, Value, Manager
+from multiprocessing import Process, Queue, Value
 from workers import audio_recorder_worker, detections_worker, mqtt_worker
 
 
@@ -92,8 +92,8 @@ def main():
             process.start()
         
         # Continue running the loop until recording conditions are not met
-        if False:#not recording_condition.should_record(time_now):
-            go.value = 0
+        if not recording_condition.should_record(time_now):
+        #    go.value = 0
             print('Out of time interval - Stop processes')
 
             # Stop the worker processes if outside recording conditions
