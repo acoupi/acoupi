@@ -22,7 +22,7 @@ def audio_recorder_worker(audio_recorder, audio_recording_queue, gp):
     :param audio_recording_queue: Queue object to store audio_recording file path
     :param go: bool run signal to share data between processes 
     """
-    print(audio_recorder.duration, audio_recorder.sample_rate, audio_recorder.channels, audio_recorder.chunk, audio_recorder.device_index)
+    
     while True: 
         print("audioworker")
         # Record Audio
