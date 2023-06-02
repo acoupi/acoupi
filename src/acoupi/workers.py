@@ -48,10 +48,9 @@ def detections_worker(model, audio_recording_queue, message_detections_queue, de
         # except audio_recording_queue.Empty:
         #     continue
         if go.value == 0 and audio_recording_queue.empty():
-            print("go why", go.value)
             return
 
-        recording = audio_recording_queue.get(timeout=10) 
+        recording = audio_recording_queue.get() 
 
         print(f'[Process id {getpid()}] Get Recording item: {recording.path} - Time: {time.asctime()}')
         
