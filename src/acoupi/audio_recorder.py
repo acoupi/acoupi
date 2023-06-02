@@ -26,7 +26,6 @@ import time
 #from acoupi.types import Deployment, Recording, AudioRecorder
 from acoupi_types import Recording, AudioRecorder
 
-
 class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
 
@@ -57,7 +56,9 @@ class PyAudioRecorder(AudioRecorder):
    #    device_info = p.get_default_input_device_info()
    #    device_index = device_info['index']
    #    return device_index
-
+    def dump(obj):
+      for attr in dir(obj):
+        print("obj.%s = %r" % (attr, getattr(obj, attr)))
 
     def record(self) -> Recording:
         """Record a 3 second temporary audio file. Return the temporary path of the file."""       
@@ -90,6 +91,7 @@ class PyAudioRecorder(AudioRecorder):
             print("flag2")
             #Initialise array to store audio frames
             frames = []
+            self.dump(stream)
             for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
                 print(stream)
                 data = stream.read(self.chunk)
