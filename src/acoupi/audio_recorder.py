@@ -78,7 +78,7 @@ class PyAudioRecorder(AudioRecorder):
 
             #Create an new instace of PyAudio
             p = pyaudio.PyAudio()
-        
+            print("flag1")
             #Open new audio stream to start recording
             stream = p.open(format=pyaudio.paInt16,
                             channels=self.channels,
@@ -87,18 +87,18 @@ class PyAudioRecorder(AudioRecorder):
                             frames_per_buffer=self.chunk,
                             input_device_index=self.device_index)
                             #input_device_index=device_index)
-
+            print("flag2")
             #Initialise array to store audio frames
             frames = []
             for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
                 data = stream.read(self.chunk)
                 frames.append(data)
-
+            print("flag3")
             #Stop Recording and close the port interface
             stream.stop_stream()
             stream.close()
             p.terminate()
-
+            print("flag4")
             #Create a WAV file to write the audio data
             with wave.open(temp_audio_path, 'wb') as temp_audio_file:
                 temp_audio_file.setnchannels(self.channels)
@@ -112,3 +112,4 @@ class PyAudioRecorder(AudioRecorder):
                 # Create a Recording object and return it
                 recording = Recording(path=temp_audio_path, datetime=self.datetime, duration=self.duration, samplerate=self.sample_rate)
                 return recording
+            print("flagend")
