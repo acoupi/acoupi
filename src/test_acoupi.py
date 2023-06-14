@@ -1,88 +1,131 @@
+"""Test the acoupi package."""
 import threading
-import time
-from pathlib import Path
-from datetime import datetime
-from zoneinfo import ZoneInfo
 import logging
+import time
+import datetime
+from zoneinfo import ZoneInfo
 
-from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
-from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
-from config import DEFAULT_DB_PATH
-from config import START_SAVING_RECORDING, END_SAVING_RECORDING, SAVE_RECORDING_DURATION, SAVE_RECORDING_FREQUENCY, SAVE_DAWNDUSK_DURATION
-from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
-from config_mqtt import DEFAULT_MQTT_HOST, DEFAULT_MQTT_PORT, DEFAULT_MQTT_CLIENT_USER, DEFAULT_MQTT_CLIENT_PASS, DEFAULT_MQTT_CLIENTID, DEFAULT_MQTT_TOPIC
+import config
+import config_mqtt
+from acoupi import components, data
+#from acoupi import system
 
-from audio_recorder import PyAudioRecorder
-from recording_schedulers import IntervalScheduler
-from recording_conditions import IsInIntervals, Interval
-from model import BatDetect2
-from detection_filters import ThresholdDetectionFilter
-from recording_filters import ThresholdRecordingFilter
-from messengers import MQTTMessenger, build_detection_message
-from storages.sqlite import SqliteStore, SqliteMessageStore
-from saving_filters import TimeInterval, FrequencySchedule, DawnDuskTimeInterval
-from saving_managers import Directories, SaveRecording, SaveDetection
+#from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
+#from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
+#from config import DEFAULT_DB_PATH
+#from config import START_SAVING_RECORDING, END_SAVING_RECORDING, SAVE_RECORDING_DURATION, SAVE_RECORDING_FREQUENCY, SAVE_DAWNDUSK_DURATION
+#from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
+#from config_mqtt import DEFAULT_MQTT_HOST, DEFAULT_MQTT_PORT, DEFAULT_MQTT_CLIENT_USER, DEFAULT_MQTT_CLIENT_PASS, DEFAULT_MQTT_CLIENTID, DEFAULT_MQTT_TOPIC
+
+# from data import TimeInterval
+# 
+# from acoupi.components.audio_recorder import PyAudioRecorder
+# from acoupi.components.recording_schedulers import IntervalScheduler
+# from acoupi.components.models import BatDetect2
+# from acoupi.components.recording_conditions import IsInIntervals
+# from acoupi.components.output_cleaners import ThresholdDetectionFilter
+# from acoupi.components.stores.sqlite import SqliteStore
+# from acoupi.components.message_stores.sqlite import SqliteMessageStore
+# from acoupi.components.messengers import MQTTMessenger
+# from acoupi.components.message_factories import FullModelOutputMessageBuilder
+# from acoupi.components.saving_filters import SaveIfInInterval, FrequencySchedule, DawnDuskTimeInterval
+# from acoupi.components.saving_managers import SaveRecording, IDFileManager, DateFileManager 
+
 
 # Setup the main logger
-logging.basicConfig(filename='acoupi.log',filemode='w', 
-                    format='%(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    filename='acoupi.log',
+    filemode='w', 
+    format='%(levelname)s - %(message)s',
+    level=logging.INFO
+)
 
 
 def main():
+    """Main function to run the program."""
+    
+    # Get the current deployment
+    #deployment = system.get_current_deployment()
 
-    scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
+    scheduler = components.IntervalScheduler(config.DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
     # Create the model object to analyse an audio recording
-    model = BatDetect2()
+    model = components.BatDetect2()
 
     # Create audio_recorder object to initiate audio recording
-    audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
-                                 sample_rate=DEFAULT_SAMPLE_RATE,
-                                 channels=DEFAULT_AUDIO_CHANNELS,
-                                 chunk=DEFAULT_CHUNK_SIZE,
-                                 device_index=DEVICE_INDEX)
+    audio_recorder = components.PyAudioRecorder(
+        duration=DEFAULT_RECORDING_DURATION, 
+        sample_rate=DEFAULT_SAMPLE_RATE,
+        channels=DEFAULT_AUDIO_CHANNELS,
+        chunk=DEFAULT_CHUNK_SIZE,
+        device_index=DEVICE_INDEX
+    )
 
-    # Create Interval start_time, end_time object
+    # Create Recording TimeInterval start_time, end_time objects
     # Audio recording will only happen in the specific time interval 
-    start_time = datetime.strptime(START_RECORDING,"%H:%M:%S").time()
-    end_time = datetime.strptime(END_RECORDING,"%H:%M:%S").time()
-
-    # Create the recording_interval object
-    recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
-                           Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
+    recording_intervals = [
+        data.TimeInterval(
+            start=config.START_RECORDING, 
+            end=datetime.time(hour=23, minute=59, second=59),
+        ),
+        data.TimeInterval(
+            start=datetime.time(hour=0, minute=0, second=0), 
+            end=config.END_RECORDING,
+        ),
+    ]
 
     # Create the recording_condition object - check if it is time to record audio (time.now() IsInInterval)
-    recording_condition = IsInIntervals(recording_intervals, ZoneInfo(DEFAULT_TIMEZONE))
+    recording_condition = components.IsInIntervals(
+        recording_intervals,
+        ZoneInfo(config.DEFAULT_TIMEZONE)
+    )
 
     # Create recording_filter and detection_filter object
-    detection_filter = ThresholdDetectionFilter(threshold=DEFAULT_THRESHOLD)
-    recording_filter = ThresholdRecordingFilter(threshold=DEFAULT_THRESHOLD)
+    detection_filter = components.ThresholdDetectionFilter(
+        threshold=config.DEFAULT_THRESHOLD
+    )
 
     # Specify sqlite database to store recording and detection
-    sqlitedb = SqliteStore(DEFAULT_DB_PATH)
+    sqlitedb = components.SqliteStore(config.DEFAULT_DB_PATH)
+
     # Specify sqlite message to keep track of records sent
-    transmission_messagedb = SqliteMessageStore(DEFAULT_DB_PATH, sqlitedb)
+    transmission_messagedb = components.SqliteMessageStore(
+        config.DEFAULT_DB_PATH, sqlitedb
+    )
 
     # Sending Detection to MQTT
-    mqtt_messenger = MQTTMessenger(host=DEFAULT_MQTT_HOST, username=DEFAULT_MQTT_CLIENT_USER, password=DEFAULT_MQTT_CLIENT_PASS, 
-                                   port=DEFAULT_MQTT_PORT, client_id=DEFAULT_MQTT_CLIENTID, topic=DEFAULT_MQTT_TOPIC)
+    mqtt_messenger = components.MQTTMessenger(
+        host=config_mqtt.DEFAULT_MQTT_HOST, 
+        username=config_mqtt.DEFAULT_MQTT_CLIENT_USER, 
+        password=config_mqtt.DEFAULT_MQTT_CLIENT_PASS, 
+        port=config_mqtt.DEFAULT_MQTT_PORT, 
+        client_id=config_mqtt.DEFAULT_MQTT_CLIENTID, 
+        topic=config_mqtt.DEFAULT_MQTT_TOPIC
+    )
 
-    # Specify Directories to save recordings and detections. 
-    save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
-    save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
+    # Messages to send to MQTT
+    message_builder = components.FullModelOutputMessageBuilder()
 
-    # Create the saving recording objects - check if recordings should be saved or not. 
-    saving_recording_start = datetime.strptime(START_SAVING_RECORDING,"%H:%M:%S").time()
-    saving_recording_end = datetime.strptime(END_SAVING_RECORDING,"%H:%M:%S").time()
+    # Create the saving recording objects - decide when to save recordings.
+    save_recording_timeinterval = components.SaveIfInInterval(
+        data.TimeInterval(
+            start=config.START_SAVING_RECORDING,
+            end=config.END_SAVING_RECORDING,
+        ),
+        timezone=ZoneInfo(config.DEFAULT_TIMEZONE),
+    )
 
-    save_recording_timeinterval = TimeInterval(Interval(start=saving_recording_start, end=saving_recording_end), timezone=ZoneInfo(DEFAULT_TIMEZONE))
-    #save_recording_freqschedule = FrequencySchedule(duration=SAVE_RECORDING_DURATION, frequency=SAVE_RECORDING_FREQUENCY)
-    #save_recording_dawnduskinterval = DawnDuskTimeInterval(duration=SAVE_DAWNDUSK_DURATION, timezone=ZoneInfo(DEFAULT_TIMEZONE))
+    save_recording_dawndusk = components.DawnDuskTimeInterval(
+        duration=config.SAVE_DAWNDUSK_DURATION,
+        timezone=ZoneInfo(config.DEFAULT_TIMEZONE),
+    )
 
     # Create the recording and detection SavingManager object
-    recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
-    detection_savingmanager = SaveDetection(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_detection)
+    recording_savingmanager = components.SaveRecording(
+        timeformat=config.DEFAULT_TIMEFORMAT,
+        dirpath_true=config.DIR_DETECTION_TRUE,
+        dirpath_false=config.DIR_DETECTION_FALSE,
+    )
 
     def process():
 
@@ -99,7 +142,7 @@ def main():
         # Check if we should record
         if not recording_condition.should_record(datetime.now()):
             logging.info(f"Outside Recording Interval - Current Time is {time.asctime()}")
-            logging.info(f"Recording Start at: {start_time} and End at: {end_time}")
+            #logging.info(f"Recording Start at: {start_time} and End at: {end_time}")
             return
 
         # Record audio
@@ -113,36 +156,33 @@ def main():
         # Run model - Get detections
         #logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
         print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
-        detections = model.run(recording)
+        model_outputs = model.run(recording)
         print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
         print("")
         #logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
         #logging.info("")
 
         # Detection and Recording Filter
-        keep_detections_bool = detection_filter.should_store_detection(detections) 
-        clean_detections_obj = detection_filter.get_clean_detections_obj(detections, keep_detections_bool)
-        #keep_recording_bool = recording_filter.should_store_recording(recording, detections)
-        print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
+        model_outputs = detection_filter.clean(model_outputs)
+        print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {model_outputs}")
         #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}") 
         #logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
         
         # SqliteDB Store Recroding, Detections
         sqlitedb.store_recording(recording)
-        sqlitedb.store_detections(recording, clean_detections_obj)
+        sqlitedb.store_model_output(model_outputs)
         print(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
         #logging.info(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
 
         # Send Message via MQTT
-        mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections_obj]
-        response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
+        message = message_builder.build_message(model_outputs)
+        response = mqtt_messenger.send_message(message)
         print(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
         #logging.info(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
 
         # Store Detection Message to SqliteDB
-        transmission_messagedb.store_detection_message(clean_detections_obj, response)
-        #print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
-        #print(f"[Thread {thread_id}] Response Status: {response[0].status}")
+        transmission_messagedb = store_message(message)
+        transmission_messagedb = store_response(response)
 
         # Check if recording should be saved 
         save_rec_timeint_bool = save_recording_timeinterval.should_save_recording(recording)
@@ -156,14 +196,11 @@ def main():
         #logging.info(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
         
         # Recording and Detection Saving Manager
-        save_rec = recording_savingmanager.save_recording(recording, save_rec_timeint_bool, keep_detections_bool)    
+        recording_savingmanager.save_recording(recording, [model_outputs])    
         #save_rec = recording_savingmanager.save_recording(recording, save_rec_freq_bool)    
         #save_rec = recording_savingmanager.save_recording(recording, save_rec_dawndusk_bool, keep_detections_bool)    
-        save_det = detection_savingmanager.save_detections(recording, clean_detections_obj, keep_detections_bool)
         print(f"[Thread {thread_id}] END THREAD: {time.asctime()}")
         print("")
-        #logging.info(f"[Thread {thread_id}] Recording & Detection save - END: {time.asctime()}")
-        #logging.info("")
 
     # Start processing
     process()

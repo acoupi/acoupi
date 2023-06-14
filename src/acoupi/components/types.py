@@ -274,3 +274,4 @@ class MessageStore(ABC):
         response: Response,
     ) -> None:
         """Register a message response with the store."""
+f
