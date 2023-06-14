@@ -14,6 +14,7 @@ the Storage class for more details.
 """
 # TODO: Mention message stores as well.
 
-from acoupi.storages.sqlite import SqliteMessageStore, SqliteStore
+from storages.sqlite import SqliteMessageStore, SqliteStore
+#from acoupi.storages.sqlite import SqliteMessageStore, SqliteStore
 
 __all__ = ["SqliteStore", "SqliteMessageStore"]

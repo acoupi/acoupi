@@ -87,8 +87,7 @@ class PyAudioRecorder(AudioRecorder):
             #Initialise array to store audio frames
             frames = []
             for i in range(0, int(self.sample_rate/self.chunk*self.duration)):
-                data = stream.read(self.chunk)
-                print(data)
+                data = stream.read(self.chunk, exception_on_overflow = False)
                 frames.append(data)
 
             #Stop Recording and close the port interface
