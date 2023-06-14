@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .. _acoupi-quickstart:
 
 Quickstart
@@ -76,3 +77,7 @@ And if you need to stop your deployment, just type:
 
 And that's it! You're now ready to use **Acoupi** to deploy your very own
 bioacoustic monitoring system. Happy monitoring!
+=======
+Quickstart
+==========
+>>>>>>> 1d818a3e2db57e2de844b8f08fbc4a1b959cea6a

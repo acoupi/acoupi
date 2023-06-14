@@ -7,7 +7,10 @@ dev = [
     "sphinx>=5.3.0",
     "furo>=2023.3.27",
     "sphinx-copybutton>=0.5.1",
+<<<<<<< HEAD
     "sphinx-autobuild>=2021.3.14",
+=======
+>>>>>>> 1d818a3e2db57e2de844b8f08fbc4a1b959cea6a
 ]
 
 [project]
