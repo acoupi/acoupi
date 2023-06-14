@@ -1,0 +1,16 @@
+species_name,class_probability,soundevent_probability,soundevent_start_time,soundevent_end_time,recording,id
+Eptesicus serotinus,0.172,0.405,0.1705,0.1797,,2a9eeedc-c23a-4823-9db7-b51724981462
+Eptesicus serotinus,0.234,0.405,0.2985,0.3082,,11a9b9d5-121c-4d3b-8245-ad4ccb5c7844
+Eptesicus serotinus,0.278,0.463,0.4265,0.4357,,ba0b2a7a-9670-4150-abec-e28de8eea3ee
+Nyctalus leisleri,0.202,0.486,0.5545,0.5648,,7011c24b-ad79-4000-8c2c-b9ce128f8850
+Pipistrellus nathusii,0.098,0.28,0.6425,0.6567,,1091b710-a7ff-4e9f-8d03-103ca19418cf
+Eptesicus serotinus,0.158,0.23,1.2385,1.2488,,c2caa6d6-828b-4088-bffb-16f823c91332
+Eptesicus serotinus,0.112,0.238,1.3665,1.3808,,b6dbcd71-e1e7-4163-892b-d914931fff37
+Eptesicus serotinus,0.124,0.231,1.5785,1.5879,,61805dc3-33f0-4915-a0ac-147a3c252872
+Eptesicus serotinus,0.082,0.201,1.7055,1.7148,,c75e24b2-bc80-404b-800d-b2396a24af01
+Eptesicus serotinus,0.119,0.205,1.8345,1.8443,,1fa4749a-f530-45e8-92a6-26cd2b214177
+Nyctalus leisleri,0.116,0.23,1.9025,1.9233,,e1a9318a-954d-4857-ae94-b1b696cef070
+Eptesicus serotinus,0.083,0.204,1.9615,1.9717,,8be84954-835e-4c8d-b9d5-cb025f984745
+Eptesicus serotinus,0.13,0.207,2.1335,2.1444,,aed36def-fe67-44ad-8fdb-4b85ddd38180
+Eptesicus serotinus,0.213,0.331,2.2195,2.2283,,1bdbff27-bd2d-412f-935e-0f5871efaea2
+Eptesicus serotinus,0.087,0.204,2.9015,2.9132,,85ef6646-bf6b-419d-a0d5-42a05a799e12

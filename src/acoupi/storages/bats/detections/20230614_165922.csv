@@ -1,0 +1,25 @@
+species_name,class_probability,soundevent_probability,soundevent_start_time,soundevent_end_time,recording,id
+Eptesicus serotinus,0.167,0.276,0.1715,0.1797,,913a5692-de74-49b0-a156-b35e49553a53
+Eptesicus serotinus,0.138,0.219,0.2995,0.3093,,0bc8aa41-d724-4fda-a482-cd17f7c8678c
+Eptesicus serotinus,0.146,0.284,0.4265,0.4354,,7d7eb6f0-0856-4d54-afe9-d3de1fea04ad
+Pipistrellus nathusii,0.074,0.216,0.5285,0.5457,,efd4396f-313e-4be5-b6c7-34301ecfcbbe
+Eptesicus serotinus,0.167,0.249,0.5985,0.6061,,b6f2afd8-07af-4e50-9641-b4e4a4cf16d5
+Eptesicus serotinus,0.145,0.296,0.9805,0.9917,,4c8c52d6-642d-40b6-85b5-144e54f06414
+Eptesicus serotinus,0.102,0.213,1.1945,1.2073,,e5d419e9-15bc-4445-907d-4d8ce6dd35b8
+Eptesicus serotinus,0.112,0.249,1.3225,1.3357,,a2b208f3-9632-4dc7-8590-d7637738e163
+Eptesicus serotinus,0.206,0.411,1.4515,1.4614,,00068785-8e0e-4f4a-bc9e-7d3161eb2ad8
+Eptesicus serotinus,0.204,0.393,1.5785,1.5889,,d2b4e65a-779c-4668-972a-0eb92d921a96
+Eptesicus serotinus,0.093,0.207,1.6215,1.6324,,9e9d26bf-6391-4191-9fdb-a309aac689ab
+Eptesicus serotinus,0.113,0.206,1.7045,1.7154,,eddd95fc-fc2e-4cf0-9f8d-b823f087e95b
+Eptesicus serotinus,0.131,0.277,1.8345,1.8454,,ca369148-a460-4547-9a60-ab2cef8e4076
+Pipistrellus nathusii,0.172,0.356,1.9035,1.9171,,8837e4a4-921c-4301-b565-89704c4a4ecb
+Eptesicus serotinus,0.149,0.327,1.9625,1.9734,,24f532a7-10e8-4adf-b020-2d317a7b52e1
+Eptesicus serotinus,0.13,0.293,2.1335,2.1425,,35d608ef-4e40-4caf-b35b-284b86c962c9
+Pipistrellus nathusii,0.083,0.206,2.1565,2.1692,,27b850fc-837d-4f2d-a367-5622c6c94716
+Eptesicus serotinus,0.103,0.259,2.1935,2.2052,,c192b1ea-ccfd-4465-8a80-6d341919e4bf
+Eptesicus serotinus,0.106,0.244,2.2615,2.2701,,1d3d4e7a-bedf-4212-b953-afbf7aa1cf20
+Eptesicus serotinus,0.113,0.274,2.3895,2.4021,,2bb1f145-07eb-4715-ba57-62d75decbeb4
+Pipistrellus nathusii,0.105,0.242,2.4635,2.4802,,6a6ab0fc-51e4-4ede-97bb-03efb1c0d498
+Eptesicus serotinus,0.065,0.215,2.5165,2.5285,,9b5143a3-2c09-41f9-8327-df481c746eee
+Eptesicus serotinus,0.086,0.24,2.8595,2.8728,,dc9e1dc2-30e2-4211-874a-a601b95138cc
+Eptesicus serotinus,0.125,0.234,2.9005,2.9113,,64277ab7-e2a8-46b7-bbf0-a7eceb048035

@@ -1,0 +1,24 @@
+species_name,class_probability,soundevent_probability,soundevent_start_time,soundevent_end_time,recording,id
+Eptesicus serotinus,0.151,0.385,0.0855,0.0954,,f9e6d763-4aa6-4147-aea4-c106d48ad713
+Eptesicus serotinus,0.1,0.207,0.1705,0.1858,,64d16cc1-bd42-49bc-b51b-f94de576525d
+Eptesicus serotinus,0.169,0.268,0.2145,0.225,,e9936925-8f76-450e-a4d7-97154828ef54
+Eptesicus serotinus,0.106,0.206,0.2985,0.3134,,c6366b19-8524-4a45-8856-c9b4cdca8052
+Eptesicus serotinus,0.134,0.279,0.3415,0.3533,,8cd8bd88-b6b6-482a-b9f6-e4e9c678e8ff
+Eptesicus serotinus,0.117,0.26,0.4695,0.481,,87ff96f9-daaa-4b7d-9755-349a4227d80d
+Eptesicus serotinus,0.114,0.337,0.5545,0.5675,,5963baf5-9ac4-4b92-85da-016b90f34b93
+Eptesicus serotinus,0.105,0.207,0.6565,0.67,,e85bdc22-a282-4398-ba99-5ec016b4448e
+Nyctalus leisleri,0.131,0.4,0.8105,0.823,,45b8ba80-06bd-459d-9ea1-a69b03201e5a
+Eptesicus serotinus,0.13,0.329,1.0675,1.0786,,5a54dea1-7b48-40b2-b32d-c2c005b08244
+Eptesicus serotinus,0.103,0.255,1.1965,1.2066,,9829b091-ca7a-4577-8dd7-719eb3f9985e
+Eptesicus serotinus,0.141,0.282,1.2385,1.2483,,27dbbf87-c210-4fb1-b4d5-41b11b5db99f
+Pipistrellus nathusii,0.122,0.268,1.3675,1.3847,,99e5d359-fb0b-4ed1-ab34-429f898851a0
+Eptesicus serotinus,0.167,0.296,1.4555,1.4674,,347c85d9-5bfe-46e7-aca8-53b928ca668e
+Eptesicus serotinus,0.082,0.208,1.4925,1.5033,,00bee3c2-6c73-4f8e-8021-85034eb686da
+Pipistrellus nathusii,0.125,0.354,1.6195,1.631,,35620b04-46cf-4dec-b788-77034f2ef0a0
+Pipistrellus nathusii,0.101,0.252,1.6565,1.6729,,7b097791-1f5a-4297-aa29-45c81bb6a626
+Eptesicus serotinus,0.174,0.446,2.0905,2.0998,,feefe94f-be38-4025-89d7-5174593cca95
+Eptesicus serotinus,0.12,0.221,2.2185,2.2287,,b9630207-eb8a-4233-9de0-a672124b969c
+Eptesicus serotinus,0.192,0.393,2.3465,2.357,,1ad0d1bc-97c6-4a53-ab65-537199c73c70
+Eptesicus serotinus,0.147,0.27,2.3885,2.3992,,bca98f60-5d0c-48d6-bf54-e6887f450066
+Eptesicus serotinus,0.103,0.231,2.6445,2.6558,,cc6bea94-e276-49ab-abba-2d2541c74865
+Eptesicus serotinus,0.162,0.322,2.7735,2.7841,,bdfc58be-6568-4540-91ec-b6a33fc72e14

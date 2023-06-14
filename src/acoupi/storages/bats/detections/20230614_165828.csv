@@ -1,0 +1,24 @@
+species_name,class_probability,soundevent_probability,soundevent_start_time,soundevent_end_time,recording,id
+Eptesicus serotinus,0.082,0.231,0.0415,0.0555,,45e9a019-69d0-4863-90df-011d19de7732
+Eptesicus serotinus,0.104,0.207,0.0845,0.097,,8274ff98-e4ec-471f-bff1-67a68cc9e03d
+Eptesicus serotinus,0.094,0.219,0.1695,0.1837,,2b96ea44-0a6b-4c28-a7c6-483ac01a3887
+Eptesicus serotinus,0.103,0.253,0.3245,0.3365,,b31bdd24-8ae6-43ae-a605-9a19aff5a564
+Eptesicus serotinus,0.106,0.216,0.5535,0.5666,,37332e5b-4738-4145-958e-fbd278949f92
+Pipistrellus nathusii,0.086,0.257,0.6815,0.6951,,ce2839d5-2fdb-40b2-9657-f3344605b26b
+Eptesicus serotinus,0.102,0.291,0.8085,0.8217,,63eccb79-4050-4fda-8a6d-afadb81ece94
+Eptesicus serotinus,0.132,0.316,0.9375,0.9494,,a6c4adbd-c137-441f-a09f-e5a1684e87ab
+Eptesicus serotinus,0.255,0.554,1.0665,1.0768,,203abfd0-3f75-449d-87cf-c1df793200fc
+Eptesicus serotinus,0.178,0.292,1.1945,1.2044,,4c2c93db-c2d2-4d33-bd2a-b2703571f3a0
+Eptesicus serotinus,0.192,0.333,1.3225,1.3332,,af3a1eaa-79b4-4cf8-b44a-ce3ea97172a4
+Eptesicus serotinus,0.149,0.284,1.4505,1.4613,,1cb7febe-b6b0-4641-99e9-52443cb83368
+Nyctalus leisleri,0.156,0.27,1.5095,1.5282,,e965a5c0-6835-41de-b8b9-628d23b47ef8
+Eptesicus serotinus,0.131,0.254,1.9595,1.9711,,d0eaf443-f395-445d-96bd-ab89b48ac436
+Eptesicus serotinus,0.093,0.227,2.0905,2.1027,,c6c8f767-f071-473e-a600-b9ba3a3602ad
+Pipistrellus nathusii,0.101,0.21,2.2755,2.2915,,c51146c1-80d4-4513-ac56-2968647090e2
+Eptesicus serotinus,0.12,0.31,2.3255,2.3376,,74697484-220a-4221-9f66-857ce0add605
+Eptesicus serotinus,0.183,0.371,2.3465,2.3571,,34bd94c8-d6a0-40f3-94ad-a966a1fd86fa
+Eptesicus serotinus,0.193,0.396,2.4755,2.4871,,3794cebb-73e2-477b-8054-87cb8d609163
+Nyctalus leisleri,0.183,0.475,2.6035,2.6146,,c277b7fc-fb5a-4565-85d7-9ee0af594b34
+Eptesicus serotinus,0.116,0.221,2.7305,2.7412,,237a90ee-16f7-4468-a49b-d27e26483020
+Eptesicus serotinus,0.095,0.252,2.8585,2.8714,,f2e1ed24-c683-4169-b4c1-6a0e611d7cde
+Eptesicus serotinus,0.133,0.215,2.9755,2.9902,,8174c84d-cafc-4feb-abb8-eae331765fc9

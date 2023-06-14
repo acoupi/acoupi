@@ -1,0 +1,21 @@
+species_name,class_probability,soundevent_probability,soundevent_start_time,soundevent_end_time,recording,id
+Eptesicus serotinus,0.199,0.405,0.3405,0.3497,,d43f47ee-c650-4f7e-920d-1bb33ef54662
+Eptesicus serotinus,0.184,0.406,0.4685,0.4773,,b2f3b8f4-d3b6-4715-95f3-3d60660140a9
+Eptesicus serotinus,0.093,0.208,0.5545,0.5662,,9881fb25-f900-48f0-a479-4e0c4d7b28c3
+Eptesicus serotinus,0.125,0.231,0.8105,0.8226,,f0940a83-5b75-4833-85c2-d165243b77a6
+Eptesicus serotinus,0.133,0.23,0.9385,0.948,,7faad681-47d0-48c5-90ad-23f9d32cc9f5
+Eptesicus serotinus,0.142,0.255,0.9815,0.9917,,c5bad89c-76e9-4605-806d-7a5cb6210ef1
+Eptesicus serotinus,0.227,0.577,1.0665,1.077,,450527fe-3e56-4a2a-b4a7-516d3057575b
+Eptesicus serotinus,0.238,0.454,1.1945,1.2041,,4ece38df-cc1b-403d-b366-50ec36ae187e
+Eptesicus serotinus,0.149,0.222,1.2365,1.2478,,29fafcba-22f4-4b7f-b1da-a25b8b70716e
+Eptesicus serotinus,0.15,0.205,1.4055,1.4209,,f48d1e01-a533-4f42-a1c9-23fce876277e
+Eptesicus serotinus,0.104,0.255,1.4925,1.5021,,9d071e33-c0de-4cb0-a531-01c83cbe6670
+Eptesicus serotinus,0.092,0.218,2.0045,2.016,,451d80f4-7c0f-4cec-9e09-979e036d8698
+Eptesicus serotinus,0.121,0.231,2.0925,2.1015,,867dccf7-59c9-460f-afbf-30829e57f527
+Barbastellus barbastellus,0.063,0.2,2.2175,2.2268,,a3a63e8a-e7ad-459d-928c-7a00af74117d
+Eptesicus serotinus,0.238,0.392,2.3475,2.3568,,3d66e93e-259c-4e95-8438-9bf25eaa10c4
+Eptesicus serotinus,0.101,0.268,2.4375,2.4533,,e18d39bb-1bee-4d0a-85b2-475d7098ccd6
+Eptesicus serotinus,0.274,0.401,2.4745,2.4842,,c0dc6576-919f-44c5-84b6-1da96f8442bc
+Eptesicus serotinus,0.188,0.353,2.6025,2.6112,,527399c5-499e-475b-b95e-e1750f4d5643
+Eptesicus serotinus,0.277,0.507,2.7305,2.7401,,2cc0b87c-da1a-4f19-bf78-b480d375e1f3
+Eptesicus serotinus,0.126,0.2,2.8575,2.8683,,4844fcf3-2b0f-402f-98de-99bb28d74918

@@ -1,0 +1,24 @@
+species_name,class_probability,soundevent_probability,soundevent_start_time,soundevent_end_time,recording,id
+Eptesicus serotinus,0.126,0.251,0.0855,0.095,,4d5c2913-5634-474d-aed5-3b2aade98912
+Eptesicus serotinus,0.12,0.238,0.1705,0.1825,,372efe47-b5c7-454e-a6e6-77c9d5df51a5
+Eptesicus serotinus,0.174,0.546,0.4265,0.436,,5c4071c1-386f-49a6-a25f-914ba13d4c73
+Pipistrellus nathusii,0.117,0.3,0.5275,0.546,,b7d29c2f-93dd-4e41-9d00-5eba2debeab4
+Eptesicus serotinus,0.229,0.517,0.5555,0.5655,,e7424db1-ae80-4cc1-a454-ef4b66a67fd7
+Nyctalus leisleri,0.096,0.24,0.6365,0.6551,,2cb8ff4c-4093-43eb-bdc9-d801ca46f842
+Eptesicus serotinus,0.182,0.284,0.6825,0.6925,,ad765343-6c67-4be5-8fea-8969ea1ec33b
+Eptesicus serotinus,0.16,0.398,0.8105,0.8222,,31c278d9-fc8f-46b4-b0f7-6284595adcd2
+Eptesicus serotinus,0.178,0.407,0.9385,0.9484,,e8f60a8a-f1b2-4d29-ba4a-9f492a78ecc6
+Eptesicus serotinus,0.107,0.259,1.1775,1.1901,,3b04c70f-522e-4404-9af2-e001bd91ab55
+Eptesicus serotinus,0.117,0.241,1.3215,1.3341,,0a8e930d-2168-46d1-b3f3-ab57a2fea17a
+Eptesicus serotinus,0.11,0.252,1.4495,1.4625,,6e02846c-0baa-4bff-ab65-773284ffa6ac
+Eptesicus serotinus,0.2,0.39,1.6205,1.6298,,957efbbf-5c5c-4fce-919b-6f7c65561ac2
+Eptesicus serotinus,0.127,0.206,1.7065,1.7184,,bab67433-fbab-448f-bc94-c4d5e8a42101
+Eptesicus serotinus,0.15,0.342,1.7495,1.7595,,39c8b701-d3fc-4898-867b-02d900fdb299
+Eptesicus serotinus,0.189,0.298,1.8775,1.8862,,3386264d-bfbe-40df-8a07-8e701d764c3d
+Eptesicus serotinus,0.264,0.399,2.2185,2.2288,,0a4c4c7e-9e6f-4081-8eff-f0827bada614
+Eptesicus serotinus,0.195,0.365,2.2625,2.2744,,884d7564-af3e-409b-b76e-7349ce1c9772
+Eptesicus serotinus,0.128,0.212,2.3475,2.3599,,42fcc76f-9702-4b6a-9d81-c66534dc4899
+Pipistrellus nathusii,0.133,0.356,2.4175,2.4319,,ac5c03c5-ee6e-40b1-bd20-1d52f5a7f09b
+Eptesicus serotinus,0.196,0.339,2.6025,2.6149,,7116f829-d9ee-4938-91b9-9592668a588f
+Eptesicus serotinus,0.225,0.319,2.7315,2.7413,,4fbbf1c1-5b9d-4962-a5e6-a99ff0450872
+Eptesicus serotinus,0.215,0.32,2.8595,2.8691,,22fc2794-dd9c-4df5-bd3d-073a4a63c87b

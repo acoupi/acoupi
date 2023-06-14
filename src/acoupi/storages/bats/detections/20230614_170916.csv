@@ -1,0 +1,4 @@
+species_name,class_probability,soundevent_probability,soundevent_start_time,soundevent_end_time,recording,id
+Pipistrellus nathusii,0.22,0.266,0.0015,0.0127,,3e80a8e1-c1b3-4afd-96fe-b3f3065c6922
+Pipistrellus nathusii,0.127,0.242,0.4425,0.4598,,e3fab90e-9238-4534-930b-ae88ba05daba
+Pipistrellus nathusii,0.15,0.207,0.8275,0.8481,,fb350f2c-9554-4a43-99b5-7c9e7e212963
