@@ -15,6 +15,7 @@ return a temporary .wav file.
 import datetime
 import tempfile
 from tempfile import TemporaryFile, NamedTemporaryFile
+from pathlib import Path
 import pyaudio
 import wave 
 import sounddevice
@@ -22,9 +23,10 @@ from typing import Optional, List
 from dataclasses import dataclass
 import time
 
-
 #from acoupi.types import Deployment, Recording, AudioRecorder
 from acoupi_types import Recording, AudioRecorder
+
+TMP_PATH = Path("/run/shm/")
 
 class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
@@ -63,7 +65,7 @@ class PyAudioRecorder(AudioRecorder):
         self.datetime = datetime.datetime.now()
 
         # Specified the desired path for temporary file - Saved in RAM
-        temp_path = "/run/shm/"+self.datetime.strftime('%Y%m%d_%H%M%S')+'.wav'
+        temp_path = TMP_PATH / f'{self.datetime.strftime("%Y%m%d_%H%M%S")}.wav'
         
         #Create a temporary file to record audio
         with open(temp_path, 'wb') as temp_audiof:
