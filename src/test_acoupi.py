@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 import config
 import config_mqtt
 #from acoupi import components, data
-#from acoupi import system
+from acoupi import system
 
 #from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 #from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
@@ -159,7 +159,7 @@ def main():
 
         # Detection and Recording Filter
         model_outputs = detection_filter.clean(model_outputs)
-        print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {model_outputs}")
+        #print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {model_outputs}")
         #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}") 
         #logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
         
@@ -176,8 +176,8 @@ def main():
         #logging.info(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
 
         # Store Detection Message to SqliteDB
-        transmission_messagedb = store_message(message)
-        transmission_messagedb = store_response(response)
+        transmission_messagedb.store_message(message)
+        transmission_messagedb.store_response(response)
 
         # Check if recording should be saved 
         save_rec_timeint_bool = save_recording_timeinterval.should_save_recording(recording)

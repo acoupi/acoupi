@@ -23,13 +23,10 @@ class BatDetect2(types.Model):
 
         # Load the audio file and compute spectrograms
         audio = api.load_audio(audio_file_path)
-        print(f"Audio Loaded in Model: {audio}")
-
         spec = api.generate_spectrogram(audio)
 
         # Process the audio or the spectrogram with the model
         raw_detections, _ = api.process_spectrogram(spec)
-        print(f"Detections Return from Model: {raw_detections}")
 
         # Convert the raw detections to a list of detections
         detections = [
