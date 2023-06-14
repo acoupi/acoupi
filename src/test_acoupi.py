@@ -65,10 +65,10 @@ def main():
     recording_intervals = [
         TimeInterval(
             start=config.START_RECORDING, 
-            end=datetime.time(hour=23, minute=59, second=59),
+            end=end=datetime.strptime("23:59:59","%H:%M:%S").time(),
         ),
         TimeInterval(
-            start=datetime.time(hour=0, minute=0, second=0), 
+            start=datetime.strptime("00:00:00","%H:%M:%S").time(), 
             end=config.END_RECORDING,
         ),
     ]
@@ -80,17 +80,13 @@ def main():
     )
 
     # Create recording_filter and detection_filter object
-    detection_filter = ThresholdDetectionFilter(
-        threshold=config.DEFAULT_THRESHOLD
-    )
+    detection_filter = ThresholdDetectionFilter(threshold=config.DEFAULT_THRESHOLD)
 
     # Specify sqlite database to store recording and detection
     sqlitedb = SqliteStore(config.DEFAULT_DB_PATH)
 
     # Specify sqlite message to keep track of records sent
-    transmission_messagedb = SqliteMessageStore(
-        config.DEFAULT_DB_PATH
-    )
+    transmission_messagedb = SqliteMessageStore(config.DEFAULT_DB_PATH)
 
     # Sending Detection to MQTT
     mqtt_messenger = MQTTMessenger(
