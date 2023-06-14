@@ -2,7 +2,7 @@
 from typing import List
 
 from acoupi.components.types import ModelOutputCleaner
-from acoupi.data import Detection, ModelOutput, PredictedTagcle
+from acoupi.data import Detection, ModelOutput, PredictedTag
 
 class ThresholdDetectionFilter(ModelOutputCleaner):
     """Keeps predictions with a probability above a threshold.

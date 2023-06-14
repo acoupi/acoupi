@@ -1,4 +1,5 @@
 """Acoupi detection and classification Models."""
+from typing import List
 
 from batdetect2 import api
 
