@@ -44,7 +44,7 @@ def main():
     """Main function to run the program."""
     
     # Get the current deployment
-    #deployment = system.get_current_deployment()
+    deployment = system.get_current_deployment()
 
     scheduler = IntervalScheduler(config.DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
@@ -144,7 +144,7 @@ def main():
         #logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         #print("")
         print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
-        recording = audio_recorder.record()
+        recording = audio_recorder.record(deployment)
         print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
         #logging.info(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
 
