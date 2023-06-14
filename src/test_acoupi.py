@@ -65,7 +65,7 @@ def main():
     recording_intervals = [
         TimeInterval(
             start=config.START_RECORDING, 
-            end=end=datetime.strptime("23:59:59","%H:%M:%S").time(),
+            end=datetime.strptime("23:59:59","%H:%M:%S").time(),
         ),
         TimeInterval(
             start=datetime.strptime("00:00:00","%H:%M:%S").time(), 

@@ -20,8 +20,8 @@ DEFAULT_CHUNK_SIZE = 8192
 # DEFAULT_CHUNK_SIZE = 2^x
 
 """Default start and end audio recording"""
-START_RECORDING = datetime.time(hour=18, minute=0, second=0)
-END_RECORDING = datetime.time(hour=10, minute=0, second=0)
+START_RECORDING = datetime.time(hour=12, minute=0, second=0)
+END_RECORDING = datetime.time(hour=21, minute=0, second=0)
 
 """Default audio recording length in seconds."""
 DEFAULT_RECORDING_DURATION = 3
