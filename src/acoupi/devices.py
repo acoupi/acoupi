@@ -1,4 +1,4 @@
-"""General utility functions for the project."""
+"""Module for detecting and identifying devices."""
 
 import socket
 

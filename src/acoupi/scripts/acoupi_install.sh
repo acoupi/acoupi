@@ -44,17 +44,4 @@ pip3 install .
 #sudo -u ${USER} mkdir -p src/acoupi/storage/bats
 #sudo -u ${USER} mkdir -p src/acoupi/storage/no_bats
 
-# Move the .service files to lib/systemd/system - Enable and Start it
-services = ("acoupi_audiorec.service" 
-            "acoupi_runmodel.service"
-            "acoupi_saveresults.service"
-            "acoupi_senddata.service")
 
-for service in "${services[@]}"
-do 
-    sudo ln -sf $HOME/acoupi/services/$service /usr/lib/systemd/system
-    sudo systemctl enable $service
-    sudo systemctl start $service
-
-    systemctl is-active --quiet $service && echo acoupi services are running || echo acoupi services are not running
-done
