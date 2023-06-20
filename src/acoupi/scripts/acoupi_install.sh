@@ -26,7 +26,7 @@ sudo apt install python3-dev python3-pip python3-venv python3-pyaudio
 
 # Install pyaudio using install_pyaudio.sh script
 echo "Installing pyaudio"
-bash $HOME/src/acoupi/script/install_pyaudio.sh
+bash $HOME/src/acoupi/scripts/install_pyaudio.sh
 
 # Install packages with pip
 echo "Installing libraries package"

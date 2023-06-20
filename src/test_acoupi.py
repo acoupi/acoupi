@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 import config
 import config_mqtt
-#from acoupi import components, data
+from acoupi import components, data
 from acoupi import system
 
 #from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
@@ -18,18 +18,6 @@ from acoupi import system
 #from config_mqtt import DEFAULT_MQTT_HOST, DEFAULT_MQTT_PORT, DEFAULT_MQTT_CLIENT_USER, DEFAULT_MQTT_CLIENT_PASS, DEFAULT_MQTT_CLIENTID, DEFAULT_MQTT_TOPIC
 
 from acoupi.data import TimeInterval
-from acoupi.components.audio_recorder import PyAudioRecorder
-from acoupi.components.recording_schedulers import IntervalScheduler
-from acoupi.components.models import BatDetect2
-from acoupi.components.recording_conditions import IsInIntervals
-from acoupi.components.output_cleaners import ThresholdDetectionFilter
-from acoupi.components.stores.sqlite import SqliteStore
-from acoupi.components.message_stores.sqlite import SqliteMessageStore
-from acoupi.components.messengers import MQTTMessenger
-from acoupi.components.message_factories import FullModelOutputMessageBuilder
-from acoupi.components.saving_filters import SaveIfInInterval, FrequencySchedule, DawnDuskTimeInterval
-from acoupi.components.saving_managers import SaveRecording, IDFileManager, DateFileManager 
-
 
 # Setup the main logger
 logging.basicConfig(
