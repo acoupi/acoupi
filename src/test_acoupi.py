@@ -34,13 +34,13 @@ def main():
     # Get the current deployment
     deployment = system.get_current_deployment()
 
-    scheduler = IntervalScheduler(config.DEFAULT_RECORDING_INTERVAL) # every 10 seconds
+    scheduler = components.IntervalScheduler(config.DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
     # Create the model object to analyse an audio recording
-    model = BatDetect2()
+    model = components.BatDetect2()
 
     # Create audio_recorder object to initiate audio recording
-    audio_recorder = PyAudioRecorder(
+    audio_recorder = components.PyAudioRecorder(
         duration=config.DEFAULT_RECORDING_DURATION, 
         sample_rate=config.DEFAULT_SAMPLE_RATE,
         channels=config.DEFAULT_AUDIO_CHANNELS,
@@ -51,33 +51,33 @@ def main():
     # Create Recording TimeInterval start_time, end_time objects
     # Audio recording will only happen in the specific time interval 
     recording_intervals = [
-        TimeInterval(
+        data.TimeInterval(
             start=config.START_RECORDING, 
             end=datetime.strptime("23:59:59","%H:%M:%S").time(),
         ),
-        TimeInterval(
+        data.TimeInterval(
             start=datetime.strptime("00:00:00","%H:%M:%S").time(), 
             end=config.END_RECORDING,
         ),
     ]
 
     # Create the recording_condition object - check if it is time to record audio (time.now() IsInInterval)
-    recording_condition = IsInIntervals(
+    recording_condition = components.IsInIntervals(
         recording_intervals,
         ZoneInfo(config.DEFAULT_TIMEZONE)
     )
 
     # Create recording_filter and detection_filter object
-    detection_filter = ThresholdDetectionFilter(threshold=config.DEFAULT_THRESHOLD)
+    detection_filter = components.ThresholdDetectionFilter(threshold=config.DEFAULT_THRESHOLD)
 
     # Specify sqlite database to store recording and detection
-    sqlitedb = SqliteStore(config.DEFAULT_DB_PATH)
+    sqlitedb = components.SqliteStore(config.DEFAULT_DB_PATH)
 
     # Specify sqlite message to keep track of records sent
-    transmission_messagedb = SqliteMessageStore(config.DEFAULT_DB_PATH)
+    transmission_messagedb = components.SqliteMessageStore(config.DEFAULT_DB_PATH)
 
     # Sending Detection to MQTT
-    mqtt_messenger = MQTTMessenger(
+    mqtt_messenger = components.MQTTMessenger(
         host=config_mqtt.DEFAULT_MQTT_HOST, 
         username=config_mqtt.DEFAULT_MQTT_CLIENT_USER, 
         password=config_mqtt.DEFAULT_MQTT_CLIENT_PASS, 
@@ -87,24 +87,24 @@ def main():
     )
 
     # Messages to send to MQTT
-    message_builder = FullModelOutputMessageBuilder()
+    message_builder = components.FullModelOutputMessageBuilder()
 
     # Create the saving recording objects - decide when to save recordings.
-    save_recording_timeinterval = SaveIfInInterval(
-        TimeInterval(
+    save_recording_timeinterval = components.SaveIfInInterval(
+        data.TimeInterval(
             start=config.START_SAVING_RECORDING,
             end=config.END_SAVING_RECORDING,
         ),
         timezone=ZoneInfo(config.DEFAULT_TIMEZONE),
     )
 
-    save_recording_dawndusk = DawnDuskTimeInterval(
+    save_recording_dawndusk = components.DawnDuskTimeInterval(
         duration=config.SAVE_DAWNDUSK_DURATION,
         timezone=ZoneInfo(config.DEFAULT_TIMEZONE),
     )
 
     # Create the recording and detection SavingManager object
-    recording_savingmanager = SaveRecording(
+    recording_savingmanager = components.SaveRecording(
         timeformat=config.DEFAULT_TIMEFORMAT,
         dirpath_true=config.DIR_DETECTION_TRUE,
         dirpath_false=config.DIR_DETECTION_FALSE,
