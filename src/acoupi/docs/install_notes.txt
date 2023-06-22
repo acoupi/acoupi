@@ -33,10 +33,10 @@ Plug the USB microphone into the RPi.
 Could be Optional (bash $HOME/acoupi/src/acoupi/scripts/setup_microphone.sh)
 
 11. Create directories to store audio files
-sudo -u ${USER} mkdir -p acoupi/src/acoupi/storage/bats/recordings
-sudo -u ${USER} mkdir -p acoupi/src/acoupi/storage/bats/detections
-sudo -u ${USER} mkdir -p acoupi/src/acoupi/storage/no_bats/recordings
-sudo -u ${USER} mkdir -p acoupi/src/acoupi/storage/no_bats/detections
+sudo -u ${USER} mkdir -p acoupi/src/acoupi/storages/bats/recordings
+sudo -u ${USER} mkdir -p acoupi/src/acoupi/storages/bats/detections
+sudo -u ${USER} mkdir -p acoupi/src/acoupi/storages/no_bats/recordings
+sudo -u ${USER} mkdir -p acoupi/src/acoupi/storages/no_bats/detections
 
 9. Start service to run acoupi-batdetect2
 bash $HOME/acoupi/src/acoupi/scripts/setup_service.sh
