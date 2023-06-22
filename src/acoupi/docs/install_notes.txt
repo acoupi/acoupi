@@ -20,7 +20,7 @@ sudo apt install python3-dev python3-pip python3-venv python3-pyaudio
 
 7. Move to home directory if not and clone the Acoupi GitHug Repositiory - rpi branch 
 cd ~
-git clone -b batdetect2-rpi --depth=1 https://github.com/audevuilli/acoupi.git ${HOME}/acoupi
+git clone -b main --depth=1 https://github.com/audevuilli/acoupi.git ${HOME}/acoupi
 
 8. Install pyaudio using install_pyaudio.sh script (ignore warnings)
 bash $HOME/acoupi/src/acoupi/scripts/install_pyaudio.sh
