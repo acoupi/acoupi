@@ -1,6 +1,7 @@
 PyYAML
 tzlocal
 astral
+zoneinfo
 #wheel 
 #setuptools
 numpy
