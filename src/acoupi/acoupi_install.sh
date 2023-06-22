@@ -17,7 +17,7 @@ branch=main
 git clone -b $branch --depth=1 https://github.com/audevuilli/acoupi.git ${HOME}/acoupi
 
 # Move to git directory
-# cd ~/acoupi
+cd ~/acoupi
 # Create a virtual python environment
 #echo "Establishing a python virtual environment"
 #python3 -m venv acoupi

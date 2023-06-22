@@ -148,11 +148,9 @@ def main():
         save_rec_timeint_bool = save_recording_timeinterval.should_save_recording(recording)
         #save_rec_freq_bool = save_recording_freqschedule.should_save_recording(recording)
         #save_rec_dawndusk_bool = save_recording_dawnduskinterval.should_save_recording(recording)
-        #print("")
         print(f"[Thread {thread_id}] Time Interval - Saving Recording Decision: {save_rec_timeint_bool}")
         #print(f"[Thread {thread_id}] Frequency Schedule - Saving Recording Decision: {save_rec_freq_bool}")
-        #print(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
-        #print("")
+        #print(f"[Thread {thread_id}] Dawn Dusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
         #logging.info(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
         
         # Recording and Detection Saving Manager

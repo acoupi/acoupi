@@ -34,8 +34,8 @@ DEFAULT_TIMEFORMAT = '%Y%m%d_%H%M%S' #Year-Month-Day Hour-Minute-Second
 
 """Default saving recordings"""
 # Based on time intervals such as between 9pm and 10pm
-START_SAVING_RECORDING = '14:00:00'
-END_SAVING_RECORDING = '12:30:00'
+START_SAVING_RECORDING = '20:00:00'
+END_SAVING_RECORDING = '07:00:00'
 
 # Based on duration after dawn and dusk time (duratino in minutes)
 SAVE_DAWNDUSK_DURATION = 10
