@@ -10,7 +10,7 @@ from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_T
 from config import DEFAULT_DB_PATH
 from config import START_SAVING_RECORDING, END_SAVING_RECORDING, SAVE_RECORDING_DURATION, SAVE_RECORDING_FREQUENCY, SAVE_DAWNDUSK_DURATION
 from config import DIR_RECORDING_TRUE, DIR_RECORDING_FALSE, DIR_DETECTION_TRUE, DIR_DETECTION_FALSE
-from config_mqtt import DEFAULT_MQTT_HOST, DEFAULT_MQTT_PORT, DEFAULT_MQTT_CLIENT_USER, DEFAULT_MQTT_CLIENT_PASS, DEFAULT_MQTT_CLIENTID, DEFAULT_MQTT_TOPIC
+# from config_mqtt import DEFAULT_MQTT_HOST, DEFAULT_MQTT_PORT, DEFAULT_MQTT_CLIENT_USER, DEFAULT_MQTT_CLIENT_PASS, DEFAULT_MQTT_CLIENTID, DEFAULT_MQTT_TOPIC
 
 from audio_recorder import PyAudioRecorder
 from recording_schedulers import IntervalScheduler
@@ -18,7 +18,7 @@ from recording_conditions import IsInIntervals, Interval
 from model import BatDetect2
 from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
-from messengers import MQTTMessenger, build_detection_message
+# from messengers import MQTTMessenger, build_detection_message
 from storages.sqlite import SqliteStore, SqliteMessageStore
 from saving_filters import TimeInterval, FrequencySchedule, DawnDuskTimeInterval
 from saving_managers import Directories, SaveRecording, SaveDetection
@@ -65,8 +65,8 @@ def main():
     transmission_messagedb = SqliteMessageStore(DEFAULT_DB_PATH, sqlitedb)
 
     # Sending Detection to MQTT
-    mqtt_messenger = MQTTMessenger(host=DEFAULT_MQTT_HOST, username=DEFAULT_MQTT_CLIENT_USER, password=DEFAULT_MQTT_CLIENT_PASS, 
-                                   port=DEFAULT_MQTT_PORT, client_id=DEFAULT_MQTT_CLIENTID, topic=DEFAULT_MQTT_TOPIC)
+    #mqtt_messenger = MQTTMessenger(host=DEFAULT_MQTT_HOST, username=DEFAULT_MQTT_CLIENT_USER, password=DEFAULT_MQTT_CLIENT_PASS, 
+    #                               port=DEFAULT_MQTT_PORT, client_id=DEFAULT_MQTT_CLIENTID, topic=DEFAULT_MQTT_TOPIC)
 
     # Specify Directories to save recordings and detections. 
     save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
@@ -134,13 +134,13 @@ def main():
         #logging.info(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
 
         # Send Message via MQTT
-        mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections_obj]
-        response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
+        #mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections_obj]
+        #response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
         print(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
         #logging.info(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
 
         # Store Detection Message to SqliteDB
-        transmission_messagedb.store_detection_message(clean_detections_obj, response)
+        #transmission_messagedb.store_detection_message(clean_detections_obj, response)
         #print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
         #print(f"[Thread {thread_id}] Response Status: {response[0].status}")
 
