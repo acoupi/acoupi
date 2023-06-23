@@ -98,10 +98,16 @@ def main():
         timezone=ZoneInfo(config.DEFAULT_TIMEZONE),
     )
 
-    save_recording_dawndusk = components.DawnDuskTimeInterval(
-        duration=config.SAVE_DAWNDUSK_DURATION,
+    save_recording_beforedawndusk = components.Before_DawnDuskTimeInterval(
+        duration=config.BEFORE_DAWNDUSK_DURATION,
         timezone=ZoneInfo(config.DEFAULT_TIMEZONE),
     )
+
+    save_recording_afterdawndusk = components.After_DawnDuskTimeInterval(
+        duration=config.AFTER_DAWNDUSK_DURATION,
+        timezone=ZoneInfo(config.DEFAULT_TIMEZONE),
+    )
+
 
     # Create the recording and detection SavingManager object
     recording_savingmanager = components.SaveRecording(
@@ -170,18 +176,19 @@ def main():
         # Check if recording should be saved 
         save_rec_timeint_bool = save_recording_timeinterval.should_save_recording(recording)
         #save_rec_freq_bool = save_recording_freqschedule.should_save_recording(recording)
-        #save_rec_dawndusk_bool = save_recording_dawnduskinterval.should_save_recording(recording)
-        #print("")
+        #save_rec_before_dawndusk_bool = save_recording_beforedawndusk.should_save_recording(recording)
+        #save_rec_after_dawndusk_bool = save_recording_afterdawndusk.should_save_recording(recording)
         print(f"[Thread {thread_id}] Time Interval - Saving Recording Decision: {save_rec_timeint_bool}")
         #print(f"[Thread {thread_id}] Frequency Schedule - Saving Recording Decision: {save_rec_freq_bool}")
-        #print(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
+        #print(f"[Thread {thread_id}] Before DawnDusk Interval - Saving Recording Decision: {save_rec_before_dawndusk_bool}")
+        #print(f"[Thread {thread_id}] After DawnDusk Interval - Saving Recording Decision: {save_rec_after_dawndusk_bool}")
         #print("")
-        #logging.info(f"[Thread {thread_id}] DawnDusk Interval - Saving Recording Decision: {save_rec_dawndusk_bool}")
         
         # Recording and Detection Saving Manager
         recording_savingmanager.save_recording(recording, [model_outputs])    
-        #save_rec = recording_savingmanager.save_recording(recording, save_rec_freq_bool)    
-        #save_rec = recording_savingmanager.save_recording(recording, save_rec_dawndusk_bool, keep_detections_bool)    
+        #ecording_savingmanager.save_recording(recording, save_rec_freq_bool, keep_detections_bool)    
+        #recording_savingmanager.save_recording(recording, save_rec_before_dawndusk_bool, keep_detections_bool)  
+        #recording_savingmanager.save_recording(recording, save_rec_after_dawndusk_bool, keep_detections_bool)    
         print(f"[Thread {thread_id}] END THREAD: {time.asctime()}")
         print("")
 

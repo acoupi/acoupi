@@ -42,7 +42,6 @@ END_SAVING_RECORDING = datetime.time(hour=14, minute=0, second=0)
 BEFORE_DAWNDUSK_DURATION = 10
 AFTER_DAWNDUSK_DURATION = 10
 
-
 # Based on duration (in minutes) and time frequeny (in minutes)
 SAVE_RECORDING_DURATION = 1
 SAVE_RECORDING_FREQUENCY = 30

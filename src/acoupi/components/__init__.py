@@ -7,7 +7,7 @@ from acoupi.components.output_cleaners import ThresholdDetectionFilter
 from acoupi.components.message_factories import FullModelOutputMessageBuilder
 from acoupi.components.message_stores.sqlite import SqliteMessageStore
 from acoupi.components.messengers import MQTTMessenger
-from acoupi.components.saving_filters import SaveIfInInterval, FrequencySchedule, DawnDuskTimeInterval
+from acoupi.components.saving_filters import SaveIfInInterval, FrequencySchedule, Before_DawnDuskTimeInterval, After_DawnDuskTimeInterval
 from acoupi.components.saving_managers import SaveRecording, IDFileManager, DateFileManager 
 
 from acoupi.components.stores.sqlite import SqliteStore
@@ -22,6 +22,6 @@ __all__ = [
     "SqliteMessageStore",
     "SqliteStore",
     "MQTTMessenger",
-    "SaveIfInInterval", "FrequencySchedule", "DawnDuskTimeInterval",
+    "SaveIfInInterval", "FrequencySchedule", "Before_DawnDuskTimeInterval", "After_DawnDuskTimeInterval",
     "SaveRecording", "IDFileManager", "DateFileManager",
 ]

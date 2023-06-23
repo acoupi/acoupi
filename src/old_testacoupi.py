@@ -20,7 +20,7 @@ from detection_filters import ThresholdDetectionFilter
 from recording_filters import ThresholdRecordingFilter
 from messengers import MQTTMessenger, build_detection_message
 from storages.sqlite import SqliteStore, SqliteMessageStore
-from saving_filters import TimeInterval, FrequencySchedule, DawnDuskTimeInterval
+from saving_filters import TimeInterval, FrequencySchedule, Before_DawnDuskTimeInterval, After_DawnDuskTimeInterval
 from saving_managers import Directories, SaveRecording, SaveDetection
 
 # Setup the main logger
