@@ -109,7 +109,7 @@ def generate_detection_task(
     return detection_task
 
 
-def build_file_management_process(
+def generate_file_management_task(
     store: types.Store,
     file_manager: types.RecordingSavingManager,
     file_filters: Optional[List[types.RecordingSavingFilter]] = None,
@@ -125,7 +125,7 @@ def build_file_management_process(
     the disk, and remove recordings that are no longer needed.
     """
 
-    def file_management_process() -> None:
+    def file_management_task() -> None:
         """Manage files."""
         logger.info("Starting file management process")
 
@@ -156,7 +156,7 @@ def build_file_management_process(
     return file_management_process
 
 
-def build_send_data_process(
+def generate_send_data_task(
     message_store: types.MessageStore,
     messenger: types.Messenger,
 ) -> Callable[[], None]:
@@ -179,7 +179,7 @@ def build_send_data_process(
         A function that can be used to start the process.
     """
 
-    def send_data_process() -> None:
+    def send_data_task() -> None:
         """Process to sync data."""
         for message in message_store.get_unsent_messages():
             response = messenger.send_message(message)

@@ -12,10 +12,11 @@ from acoupi.programs.base import AcoupiProgram
 class AudioConfig(BaseModel):
     """Audio and microphone configuration parameters."""
 
-    samplerate: int = DEFAULT_SAMPLERATE
-    audio_                audio_channels: int = DEFAULT_AUDIO                AUDIO_CHANNELS
-    chunksize: int = DEFAULT_CHUNKSIZE
     duration: int = DEFAULT_DURATION
+    samplerate: int = DEFAULT_SAMPLERATE
+    audio_channels: int = DEFAULT_AUDIO_CHANNELS
+    chunksize: int = DEFAULT_CHUNKSIZE
+    device_index: int = DEVICE_INDEX
     recording_interval: int = DEFAULT_INTERVAL
 
 
@@ -94,7 +95,7 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
             default=DEFAULT_SAMPLERATE,
         )
         parser.add_arguments(
-            "--audio_                audio_channels",
+            "--audio_channels",
             type=int, 
             default=DEFAULT_AUDIO_CHANNELS
         )
@@ -102,6 +103,11 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
             "--chunksize", 
             type=int, 
             default=DEFAULT_CHUNKSIZE,
+        )
+        parser.add_arguments(
+            "--device_index", 
+            type=int, 
+            default=DEVICE_INDEX,
         )
         """ Audio Recordings Configuration Arguments"""
         parser.add_arguments(
@@ -194,10 +200,11 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
         """Create config from arguments"""
         return cls(
             audio_config=AudioConfig(
-                samplerate=args.samplerate,
-                audio_                audio_channels=args.audio_                audio_channels,
-                chunksize=args.chunksize,
                 duration=args.audio_duration,
+                samplerate=args.samplerate,
+                audio_channels=args.audio_channels,
+                chunksize=args.chunksize,
+                device_index=args.device_index,
                 interval=args.audio_interval,
             ),
             recording_schedule=RecordingSchedule(
@@ -220,7 +227,8 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
                 topic=args.topic,
                 clientid=args.clientid,
             ),
-            detection_threshold=args.threshold,
+            timezone=args.timezone,
+            threshold=args.threshold,
             dbpath=args.dbpath,
         )
 
@@ -241,13 +249,65 @@ class BatDetect2_Program(AcoupiProgram):
         dbpath = components.SqliteStore(config.dbpath)
         #TODO: Add File Manager
 
-        # Audio Recording Task
-        recording_task = templates.generate_recording_tasks(
+        # Step 1 - Audio Recordings Task
+        recording_task = templates.generate_recording_task(
             recorder=components.PyAudioRecorder(
-                duration=config.audio_config.duration,
+                duration=config.audio_config.audio_duration,
                 samplerate=config.audio_config.samplerate,
-                                audio_channels
-            )
+                audio_channels=config.audio_config.audio_channels, 
+                chunksize=config.audio_config.chunksize,
+                device_index=config.audio_config.device_index,
+            ),
             store=dpath,
+            #logger
+            recording_conditions=[
+                components.IsInIntervals(
+                    interval=[config.recording_schedule.start_time,
+                              config.recording_schedule.end_time],
+                    timezone=config.timezone,
+                )
+            ],
+        )
 
+        # Step 2 - Model Detections Task
+        detection_task = templates.generate_detection_task(
+            store=dbpath,
+            model=components.BatDetect2(),
+            message_store=components.SqliteMessageStore(
+                db_path=config.dbpath, 
+                database=store
+            ),
+            #logger
+            output_cleaners=[
+                components.ThresholdDetectionFilter(threshold=config.threshold)
+            ],
+            # TODO: processing_filters=[types.ProcessingFilter],
+            # TODO: message_factories=[types.ModelOutputMessageBuilder],
+        )
+
+        # Step 3 - Files Management Task
+        file_management_task = templates.generate_file_management_task(
+            store=dbpath,
+            file_manager=components.SaveRecording(
+                dirpath_true=config.audio_directories.audio_dir_true,
+                dirpath_false=config.audio_directories.audio_dir_false,
+                threshold=config.threshold,
+            )
+            # TODO: file_filters=Optional[List[types.RecordingSavingFilter]]
+        )
+
+        # Step 4 - Send Data Task
+        send_data_task = templates.generate_send_data_task(
+            message_store=compoments.SqliteMessageStore(
+                db_path=config.dbpath,
+                database=store,
+            ),
+            messenger=components.MQTTMessenger(
+                host=config.message_config.host,
+                port=config.message_config.port,
+                password=config.message_config.client_password,
+                username=config.message_config.client_username,
+                topic=config.message_config.topic,
+                clientid=config.message_config.clientid,
+            ),
         )

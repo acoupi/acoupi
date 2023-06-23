@@ -26,18 +26,18 @@ class MQTTMessenger(types.Messenger):
 
     def __init__(
         self,
-        client_id: str,
         host: str,
         username: str,
         topic: str,
-        password: Optional[str] = None,
+        clientid: str,
         port: int = 1884,
+        password: Optional[str] = None,
         timeout: int = 5,
     ) -> None:
         """Initialize the MQTT messenger."""
         self.topic = topic
         self.timeout = timeout
-        self.client = mqtt.Client(client_id=client_id)
+        self.client = mqtt.Client(clientid=clientid)
         self.client.username_pw_set(username, password)
         self.client.connect(host, port=port)
 

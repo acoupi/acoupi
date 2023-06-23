@@ -44,20 +44,20 @@ def main():
         duration=config.DEFAULT_DURATION, 
         samplerate=config.DEFAULT_SAMPLERATE,
         audio_channels=config.DEFAULT_AUDIO_CHANNELS,
-        chunk=config.DEFAULT_CHUNK_SIZE,
-        device_index=config.DEVICE_INDEX
+        chunksize=config.DEFAULT_CHUNK_SIZE,
+        device_index=config.DEVICE_INDEX,
     )
 
     # Create Recording TimeInterval start_time, end_time objects
     # Audio recording will only happen in the specific time interval 
     recording_intervals = [
         data.TimeInterval(
-            start=config.START_RECORDING, 
-            end=datetime.strptime("23:59:59","%H:%M:%S").time(),
+            start_time=config.START_RECORDING, 
+            end_time=datetime.strptime("23:59:59","%H:%M:%S").time(),
         ),
         data.TimeInterval(
-            start=datetime.strptime("00:00:00","%H:%M:%S").time(), 
-            end=config.END_RECORDING,
+            start_time=datetime.strptime("00:00:00","%H:%M:%S").time(), 
+            end_time=config.END_RECORDING,
         ),
     ]
 
@@ -82,7 +82,7 @@ def main():
         username=config_mqtt.DEFAULT_MQTT_CLIENT_USER, 
         password=config_mqtt.DEFAULT_MQTT_CLIENT_PASS, 
         port=config_mqtt.DEFAULT_MQTT_PORT, 
-        client_id=config_mqtt.DEFAULT_MQTT_CLIENTID, 
+        clientid=config_mqtt.DEFAULT_MQTT_CLIENTID, 
         topic=config_mqtt.DEFAULT_MQTT_TOPIC
     )
 

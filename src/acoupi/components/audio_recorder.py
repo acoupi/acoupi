@@ -13,8 +13,6 @@ device corresponds to the index of the USB port the device is connected to. The 
 return a temporary .wav file.
 """
 import datetime
-#import tempfile
-#from tempfile import TemporaryFile, NamedTemporaryFile
 import pyaudio
 import wave 
 import sounddevice
@@ -23,7 +21,6 @@ from pathlib import Path
 
 from acoupi.components.types import AudioRecorder
 from acoupi import data
-#from acoupi_types import Recording, AudioRecorder
 
 TMP_PATH = Path("/run/shm/")
 
@@ -34,8 +31,8 @@ class PyAudioRecorder(AudioRecorder):
                 self, 
                 duration: float, 
                 samplerate: float, 
-                                audio_channels: int, 
-                chunk: int, 
+                audio_channels: int, 
+                chunksize: int, 
                 device_index: int
     ):     
         # Audio Duration
@@ -43,8 +40,8 @@ class PyAudioRecorder(AudioRecorder):
        
         # Audio Microphone Parameters
         self.samplerate = samplerate
-        self.                audio_channels =                 audio_channels
-        self.chunk = chunk
+        self.audio_channels = audio_channels
+        self.chunksize = chunksize
         self.device_index = device_index
         
 
@@ -68,10 +65,10 @@ class PyAudioRecorder(AudioRecorder):
             # Create new audio stream
             stream = p.open(
                 format=pyaudio.paInt16,
-                                audio_channels=self.                audio_channels,
+                audio_channels=self.audio_channels,
                 rate=self.samplerate,
                 input=True,
-                frames_per_buffer=self.chunk,
+                frames_per_buffer=self.chunksize,
                 input_device_index=self.device_index,
             )
             
@@ -79,9 +76,9 @@ class PyAudioRecorder(AudioRecorder):
             frames = []
             # Record audio - read the audio stream
             for _ in range(
-                0, int(self.samplerate / self.chunk * self.duration)
+                0, int(self.samplerate / self.chunksize * self.duration)
             ):
-                audio_data = stream.read(self.chunk, exception_on_overflow = False)
+                audio_data = stream.read(self.chunksize, exception_on_overflow = False)
                 frames.append(audio_data)
             
             #Stop Recording and close the port interface
@@ -91,7 +88,7 @@ class PyAudioRecorder(AudioRecorder):
             
             #Create a WAV file to write the audio data
             with wave.open(temp_audio_path, "wb") as temp_audio_file:
-                temp_audio_file.setn                audio_channels(self.                audio_channels)
+                temp_audio_file.set_audio_channels(self.audio_channels)
                 temp_audio_file.setsampwidth(
                     p.get_sample_size(pyaudio.paInt16)
                 )

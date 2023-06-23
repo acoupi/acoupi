@@ -17,7 +17,6 @@ from recording_schedulers import IntervalScheduler
 from recording_conditions import IsInIntervals, Interval
 from model import BatDetect2
 from detection_filters import ThresholdDetectionFilter
-from recording_filters import ThresholdRecordingFilter
 from messengers import MQTTMessenger, build_detection_message
 from storages.sqlite import SqliteStore, SqliteMessageStore
 from saving_filters import TimeInterval, FrequencySchedule, Before_DawnDuskTimeInterval, After_DawnDuskTimeInterval
@@ -33,40 +32,12 @@ def main():
 
     scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
-    # Create the model object to analyse an audio recording
-    model = BatDetect2()
-
-    # Create audio_recorder object to initiate audio recording
-    audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
-                                     samplerate=DEFAULT_SAMPLERATE,
-                                     audio_channels=DEFAULT_AUDIO_CHANNELS,
-                                     chunk=DEFAULT_CHUNK_SIZE,
-                                     device_index=DEVICE_INDEX)
-
-    # Create Interval start_time, end_time object
-    # Audio recording will only happen in the specific time interval 
-    start_time = datetime.strptime(START_RECORDING,"%H:%M:%S").time()
-    end_time = datetime.strptime(END_RECORDING,"%H:%M:%S").time()
-
-    # Create the recording_interval object
-    recording_intervals = [Interval(start=start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
-                           Interval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=end_time)]
-
-    # Create the recording_condition object - check if it is time to record audio (time.now() IsInInterval)
-    recording_condition = IsInIntervals(recording_intervals, ZoneInfo(DEFAULT_TIMEZONE))
 
     # Create recording_filter and detection_filter object
     detection_filter = ThresholdDetectionFilter(threshold=DEFAULT_THRESHOLD)
-    recording_filter = ThresholdRecordingFilter(threshold=DEFAULT_THRESHOLD)
 
-    # Specify sqlite database to store recording and detection
-    sqlitedb = SqliteStore(DEFAULT_DB_PATH)
     # Specify sqlite message to keep track of records sent
     transmission_messagedb = SqliteMessageStore(DEFAULT_DB_PATH, sqlitedb)
-
-    # Sending Detection to MQTT
-    mqtt_messenger = MQTTMessenger(host=DEFAULT_MQTT_HOST, username=DEFAULT_MQTT_CLIENT_USER, password=DEFAULT_MQTT_CLIENT_PASS, 
-                                   port=DEFAULT_MQTT_PORT, client_id=DEFAULT_MQTT_CLIENTID, topic=DEFAULT_MQTT_TOPIC)
 
     # Specify Directories to save recordings and detections. 
     save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
@@ -103,13 +74,7 @@ def main():
             return
 
         # Record audio
-        #logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
-        #print("")
-        print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
-        recording = audio_recorder.record()
-        print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
-        #logging.info(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
-
+        
         # Run model - Get detections
         #logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
         print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
@@ -122,10 +87,8 @@ def main():
         # Detection and Recording Filter
         keep_detections_bool = detection_filter.should_store_detection(detections) 
         clean_detections_obj = detection_filter.get_clean_detections_obj(detections, keep_detections_bool)
-        #keep_recording_bool = recording_filter.should_store_recording(recording, detections)
         print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
         #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}") 
-        #logging.info(f"[Thread {thread_id}] Threshold Recording Filter Decision: {keep_recording_bool}")
         
         # SqliteDB Store Recroding, Detections
         sqlitedb.store_recording(recording)
