@@ -30,7 +30,7 @@ class SqliteStore(types.Store):
 
     - Recording: Contains the recording information. Each recording is
       associated with a deployment, and has a datetime, duration, samplerate
-      and number of channels.
+      and number of                 audio_channels.
 
     - PredictedTag: Contains the predicted tag information. Each predicted tag
       has a key, value and probability.
@@ -211,7 +211,7 @@ class SqliteStore(types.Store):
                 datetime=db_recording.datetime,
                 duration=db_recording.duration_s,
                 samplerate=db_recording.samplerate_hz,
-                channels=db_recording.channels,
+                                audio_channels=db_recording.                audio_channels,
                 path=db_recording.path,
             )
 
@@ -315,7 +315,7 @@ class SqliteStore(types.Store):
             path=str(recording.path),
             duration_s=recording.duration,
             samplerate_hz=recording.samplerate,
-            channels=recording.channels,
+                            audio_channels=recording.                audio_channels,
             datetime=recording.datetime,
             deployment=deployment_db,
         )

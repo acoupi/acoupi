@@ -8,7 +8,7 @@ a duration from type float, and samplerate from type float.
 
 The audio recorder takes arguments related to the audio device. It specifies the acoutics 
 parameters of recording an audio file. These are the samplerate, the duration, the number
-of audio channels, the chunk size, and the index of the audio device. The index of the audio 
+of audio                 audio_channels, the chunk size, and the index of the audio device. The index of the audio 
 device corresponds to the index of the USB port the device is connected to. The audio recorder 
 return a temporary .wav file.
 """
@@ -33,8 +33,8 @@ class PyAudioRecorder(AudioRecorder):
     def __init__(
                 self, 
                 duration: float, 
-                sample_rate: float, 
-                channels: int, 
+                samplerate: float, 
+                                audio_channels: int, 
                 chunk: int, 
                 device_index: int
     ):     
@@ -42,8 +42,8 @@ class PyAudioRecorder(AudioRecorder):
         self.duration = duration
        
         # Audio Microphone Parameters
-        self.sample_rate = sample_rate
-        self.channels = channels
+        self.samplerate = samplerate
+        self.                audio_channels =                 audio_channels
         self.chunk = chunk
         self.device_index = device_index
         
@@ -68,8 +68,8 @@ class PyAudioRecorder(AudioRecorder):
             # Create new audio stream
             stream = p.open(
                 format=pyaudio.paInt16,
-                channels=self.channels,
-                rate=self.sample_rate,
+                                audio_channels=self.                audio_channels,
+                rate=self.samplerate,
                 input=True,
                 frames_per_buffer=self.chunk,
                 input_device_index=self.device_index,
@@ -79,7 +79,7 @@ class PyAudioRecorder(AudioRecorder):
             frames = []
             # Record audio - read the audio stream
             for _ in range(
-                0, int(self.sample_rate / self.chunk * self.duration)
+                0, int(self.samplerate / self.chunk * self.duration)
             ):
                 audio_data = stream.read(self.chunk, exception_on_overflow = False)
                 frames.append(audio_data)
@@ -91,11 +91,11 @@ class PyAudioRecorder(AudioRecorder):
             
             #Create a WAV file to write the audio data
             with wave.open(temp_audio_path, "wb") as temp_audio_file:
-                temp_audio_file.setnchannels(self.channels)
+                temp_audio_file.setn                audio_channels(self.                audio_channels)
                 temp_audio_file.setsampwidth(
                     p.get_sample_size(pyaudio.paInt16)
                 )
-                temp_audio_file.setframerate(self.sample_rate)
+                temp_audio_file.setframerate(self.samplerate)
             
                 # Write the audio data to the temporary file
                 temp_audio_file.writeframes(b"".join(frames))    
@@ -106,6 +106,6 @@ class PyAudioRecorder(AudioRecorder):
                     path=temp_audio_path,
                     datetime=self.datetime,
                     duration=self.duration,
-                    samplerate=self.sample_rate,
+                    samplerate=self.samplerate,
                     deployment=deployment,
                 )

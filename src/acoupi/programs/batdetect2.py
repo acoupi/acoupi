@@ -2,6 +2,9 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from pathlib import Path
 
+import compoments
+import templates
+
 from acoupi.config_schemas import BaseConfigSchema
 from acoupi.programs.base import AcoupiProgram
 
@@ -10,7 +13,7 @@ class AudioConfig(BaseModel):
     """Audio and microphone configuration parameters."""
 
     samplerate: int = DEFAULT_SAMPLERATE
-    audio_channels: int = DEFAULT_AUDIOCHANNELS
+    audio_                audio_channels: int = DEFAULT_AUDIO                AUDIO_CHANNELS
     chunksize: int = DEFAULT_CHUNKSIZE
     duration: int = DEFAULT_DURATION
     recording_interval: int = DEFAULT_INTERVAL
@@ -56,6 +59,8 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
     name: str = "batdetect2"
 
     threshold: float = DEFAULT_THRESHOLD
+
+    dbpath: Path = DEFAULT_DB_PATH
     
     audio_config: AudioConfig = Field(default_factory=AudioConfig)
     recording_schedule: RecordingSchedule = Field(default_factory=RecordingSchedule)
@@ -89,9 +94,9 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
             default=DEFAULT_SAMPLERATE,
         )
         parser.add_arguments(
-            "--audio_channels",
+            "--audio_                audio_channels",
             type=int, 
-            default=DEFAULT_AUDIOCHANNELS
+            default=DEFAULT_AUDIO_CHANNELS
         )
         parser.add_arguments(
             "--chunksize", 
@@ -123,6 +128,11 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
             "--threshold", 
             type=float, 
             default=DEFAULT_THRESHOLD,
+        )
+        arser.add_arguments(
+            "--dbpath", 
+            type=float, 
+            default=DEFAULT_DB_PATH,
         )
         ## TODO: Add Saving Recording Agruments
         """Saving Recording Configuration Arguments"""
@@ -185,10 +195,10 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
         return cls(
             audio_config=AudioConfig(
                 samplerate=args.samplerate,
-                audio_channels=args.audio_channels,
+                audio_                audio_channels=args.audio_                audio_channels,
                 chunksize=args.chunksize,
-                audio_duration=args.audio_duration,
-                audio_interval=args.audio_interval,
+                duration=args.audio_duration,
+                interval=args.audio_interval,
             ),
             recording_schedule=RecordingSchedule(
                 start_time=args.starttime,
@@ -211,6 +221,7 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
                 clientid=args.clientid,
             ),
             detection_threshold=args.threshold,
+            dbpath=args.dbpath,
         )
 
 class BatDetect2_Program(AcoupiProgram):
@@ -219,5 +230,24 @@ class BatDetect2_Program(AcoupiProgram):
     config: BatDetect2_ConfigSchema
 
     def setup(sefl, config: BatDetect2_ConfigSchema):
-        """Setup"""
-        
+        """
+            Setup
+            1. Create Audio Recording Task
+            2. Create Detection Task
+            3. Create Saving Recording Management Task
+            4. Create Message Task
+
+        """
+        dbpath = components.SqliteStore(config.dbpath)
+        #TODO: Add File Manager
+
+        # Audio Recording Task
+        recording_task = templates.generate_recording_tasks(
+            recorder=components.PyAudioRecorder(
+                duration=config.audio_config.duration,
+                samplerate=config.audio_config.samplerate,
+                                audio_channels
+            )
+            store=dpath,
+
+        )

@@ -5,7 +5,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import logging
 
-from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLE_RATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
+from config import DEFAULT_RECORDING_DURATION, DEFAULT_SAMPLERATE, DEFAULT_AUDIO_CHANNELS, DEFAULT_CHUNK_SIZE, DEVICE_INDEX, DEFAULT_RECORDING_INTERVAL, DEFAULT_THRESHOLD
 from config import START_RECORDING, END_RECORDING, DEFAULT_TIMEFORMAT, DEFAULT_TIMEZONE
 from config import DEFAULT_DB_PATH
 from config import START_SAVING_RECORDING, END_SAVING_RECORDING, SAVE_RECORDING_DURATION, SAVE_RECORDING_FREQUENCY, SAVE_DAWNDUSK_DURATION
@@ -38,10 +38,10 @@ def main():
 
     # Create audio_recorder object to initiate audio recording
     audio_recorder = PyAudioRecorder(duration=DEFAULT_RECORDING_DURATION, 
-                                 sample_rate=DEFAULT_SAMPLE_RATE,
-                                 channels=DEFAULT_AUDIO_CHANNELS,
-                                 chunk=DEFAULT_CHUNK_SIZE,
-                                 device_index=DEVICE_INDEX)
+                                     samplerate=DEFAULT_SAMPLERATE,
+                                     audio_channels=DEFAULT_AUDIO_CHANNELS,
+                                     chunk=DEFAULT_CHUNK_SIZE,
+                                     device_index=DEVICE_INDEX)
 
     # Create Interval start_time, end_time object
     # Audio recording will only happen in the specific time interval 

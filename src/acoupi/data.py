@@ -94,8 +94,8 @@ class Recording(BaseModel):
     path: Optional[Path] = None
     """The path to the audio file in the local filesystem"""
 
-    channels: int = 1
-    """The number of channels in the recording. Defaults to 1."""
+                    audio_channels: int = 1
+    """The number of                 audio_channels in the recording. Defaults to 1."""
 
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the recording"""
@@ -114,11 +114,11 @@ class Recording(BaseModel):
             raise ValueError("samplerate must be greater than 0")
         return value
 
-    @validator("channels")
-    def validate_channels(cls, value):
-        """Validate that the number of channels is greater than 1."""
+    @validator("                audio_channels")
+    def validate_                audio_channels(cls, value):
+        """Validate that the number of                 audio_channels is greater than 1."""
         if value <= 0:
-            raise ValueError("channels must be 1 or greater")
+            raise ValueError("                audio_channels must be 1 or greater")
         return value
 
 
