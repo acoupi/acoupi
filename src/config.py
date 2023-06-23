@@ -13,20 +13,19 @@ DEFAULT_TIMEZONE = "Europe/London"
 DEFAULT_DB_PATH = Path("acoupi.db")
 
 """Default audio recording parameters."""
-DEFAULT_SAMPLE_RATE = 192000
-DEFAULT_AUDIO_CHANNELS = 1
+DEFAULT_SAMPLERATE = 192000
+DEFAULT_AUDIOCHANNELS = 1
 DEFAULT_CHUNK_SIZE = 8192
-# DEFAULT_CHUNK_SIZE = 4096
 # DEFAULT_CHUNK_SIZE = 2^x
 
 """Default start and end audio recording"""
-START_RECORDING = datetime.time(hour=12, minute=0, second=0)
-END_RECORDING = datetime.time(hour=21, minute=0, second=0)
+START_RECORDING_TIME = datetime.time(hour=12, minute=0, second=0)
+END_RECORDING_TIME = datetime.time(hour=21, minute=0, second=0)
 
 """Default audio recording length in seconds."""
-DEFAULT_RECORDING_DURATION = 3
+DEFAULT_DURATION = 3
 """Default recording interval in seconds."""
-DEFAULT_RECORDING_INTERVAL = 10
+DEFAULT_INTERVAL = 10
 
 """Default detection probabilities threshold"""
 DEFAULT_THRESHOLD = 0.2
@@ -39,8 +38,10 @@ DEFAULT_TIMEFORMAT = "%Y%m%d_%H%M%S"  # Year-Month-Day Hour-Minute-Second
 START_SAVING_RECORDING = datetime.time(hour=12, minute=30, second=0) 
 END_SAVING_RECORDING = datetime.time(hour=14, minute=0, second=0)
 
-# Based on duration after dawn and dusk time (duratino in minutes)
-SAVE_DAWNDUSK_DURATION = 10
+# Based on duration before or after dawn and dusk time (duration in minutes)
+BEFORE_DAWNDUSK_DURATION = 10
+AFTER_DAWNDUSK_DURATION = 10
+
 
 # Based on duration (in minutes) and time frequeny (in minutes)
 SAVE_RECORDING_DURATION = 1

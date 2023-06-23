@@ -11,7 +11,8 @@ from acoupi import data
 __all__ = [
     "SaveIfInInterval",
     "FrequencySchedule",
-    "DawnDuskTimeInterval",
+    "After_DawnDuskTimeInterval",
+    "Before_DawnDuskTimeInterval",
 ]
 
 class SaveIfInInterval(types.RecordingSavingFilter): 
@@ -69,14 +70,14 @@ class FrequencySchedule(types.RecordingSavingFilter):
         return elapsed_time < self.duration
 
 
-class DawnDuskTimeInterval(types.RecordingSavingFilter):
-    """A Dawn Time RecordingSavingManager - Record duration after dawn"""
+class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
+    """A Before Dawn Dusk Time RecordingSavingManager"""
     
     def __init__(self, duration:float, timezone: datetime.tzinfo):
-        """Initiatlise the DawnTime RecordingSavingManager
+        """Initiatlise the Before DawnDusk RecordingSavingManager
         
         Args:
-            duration: the duration after dawn to save recordings.
+            duration: the duration before dawn and dusk to save recordings.
             timezone: the timezone to use when determining dawntime.
          """
         self.duration = duration
@@ -91,13 +92,57 @@ class DawnDuskTimeInterval(types.RecordingSavingFilter):
         """Determine if a recording should be saved.
         
             1. Get the sun information for the specific location, datetime and timezone. 
+            2. Substract the duration of saving recording to the dawntime, dusktime. 
+            3. Check if the current time falls within the dawn time interval 
+                or dusktime interval.
+        """
+
+        recording_time = recording.datetime.astimezone(self.timezone)
+
+        sun_info = sun(
+            LocationInfo(str(self.timezone)).observer, 
+            date=recording_time, 
+            tzinfo=self.timezone
+        )
+        dawntime = sun_info['dawn']
+        dusktime = sun_info['dusk']
+
+        dawntime_interval = dawntime - datetime.timedelta(minutes=self.duration)
+        dusktime_interval = dusktime - datetime.timedelta(minutes=self.duration)
+
+        return (
+            dawntime_interval <= recording_time <= dawntime 
+            or dusktime_intervald <= recording_time <= dusktime
+        )
+
+
+class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
+    """After Dawn Duwk Time RecordingSavingManager"""
+    
+    def __init__(self, duration:float, timezone: datetime.tzinfo):
+        """Initiatlise the After DawnTime RecordingSavingManager
+        
+        Args:
+            duration: the duration after dawn and dusk to save recordings.
+            timezone: the timezone to use when determining dawntime.
+         """
+        self.duration = duration
+        self.timezone = timezone
+        
+    def should_save_recording(
+        self, 
+        recording: data.Recording,
+        _: Optional[List[data.ModelOutput]] = None,
+        ) -> bool:
+        """Determine if a recording should be saved.
+        
+            1. Get the sun information for the specific location, datetime and timezone. 
             2. Add the duration of saving recording to the dawntime, dusktime. 
             3. Check if the current time falls within the dawn time interval 
                 or dusktime interval.
         """
 
         recording_time = recording.datetime.astimezone(self.timezone)
-        #current_time = datetime.datetime.now(self.timezone)
 
         sun_info = sun(
             LocationInfo(str(self.timezone)).observer, 

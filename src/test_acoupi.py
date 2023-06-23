@@ -34,16 +34,16 @@ def main():
     # Get the current deployment
     deployment = system.get_current_deployment()
 
-    scheduler = components.IntervalScheduler(config.DEFAULT_RECORDING_INTERVAL) # every 10 seconds
+    scheduler = components.IntervalScheduler(config.DEFAULT_INTERVAL) # every 10 seconds
 
     # Create the model object to analyse an audio recording
     model = components.BatDetect2()
 
     # Create audio_recorder object to initiate audio recording
     audio_recorder = components.PyAudioRecorder(
-        duration=config.DEFAULT_RECORDING_DURATION, 
-        sample_rate=config.DEFAULT_SAMPLE_RATE,
-        channels=config.DEFAULT_AUDIO_CHANNELS,
+        duration=config.DEFAULT_DURATION, 
+        sample_rate=config.DEFAULT_SAMPLERATE,
+        channels=config.DEFAULT_AUDIOCHANNELS,
         chunk=config.DEFAULT_CHUNK_SIZE,
         device_index=config.DEVICE_INDEX
     )
