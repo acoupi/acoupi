@@ -11,86 +11,74 @@ from acoupi.programs.base import AcoupiProgram
 from acoupi.tasks import templates
 
 """Default paramaters for Batdetect2 Program"""
-DEFAULT_DURATION = 3
-DEFAULT_SAMPLERATE = 192000
-DEFAULT_AUDIO_CHANNELS = 1
-DEFAULT_CHUNKSIZE = 8192
-DEVICE_INDEX = 1
-DEFAULT_INTERVAL = 10
-
-DEFAULT_TIMEZONE = "Europe/London"
-
-START_RECORDING_TIME = datetime.time(hour=12, minute=0, second=0)
-END_RECORDING_TIME = datetime.time(hour=21, minute=0, second=0)
-
-START_SAVING_RECORDING = datetime.time(hour=21, minute=30, second=0)
-END_SAVING_RECORDING = datetime.time(hour=23, minute=30, second=0)
-BEFORE_DAWNDUSK_DURATION = 10
-AFTER_DAWNDUSK_DURATION = 10
-SAVE_FREQUENCY_DURATION = 5
-SAVE_FREQUENCY_INTERVAL = 30
-
-
-DIR_RECORDING_TRUE = Path.home() / "storages" / "bats" / "recordings"
-DIR_RECORDING_FALSE = Path.home() / "storages" / "no_bats" / "recordings"
-
-DEFAULT_MQTT_HOST = "local.host"
-DEFAULT_MQTT_PORT = 1884
-DEFAULT_MQTT_CLIENT_PASS = "pass"
-DEFAULT_MQTT_CLIENT_USER = "user"
-DEFAULT_MQTT_TOPIC = "mqtt-topici"
-DEFAULT_MQTT_CLIENTID = "mqtt-clientidi"
-
-DEFAULT_THRESHOLD = 0.2
-DEFAULT_DB_PATH = Path.home() / "storages" / "acoupi.db"
-DEFAULT_TIMEFORMAT = "%Y%m%d_%H%M%S"
 
 
 class AudioConfig(BaseModel):
     """Audio and microphone configuration parameters."""
 
-    audio_duration: int = DEFAULT_DURATION
-    samplerate: int = DEFAULT_SAMPLERATE
-    audio_channels: int = DEFAULT_AUDIO_CHANNELS
-    chunksize: int = DEFAULT_CHUNKSIZE
-    device_index: int = DEVICE_INDEX
-    recording_interval: int = DEFAULT_INTERVAL
+    audio_duration: int = 3
+
+    samplerate: int = 192_000
+
+    audio_channels: int = 1
+
+    chunksize: int = 8192
+
+    device_index: int = 0
+
+    recording_interval: int = 10
 
 
 class RecordingSchedule(BaseModel):
     """Recording schedule config."""
 
-    start_recording: datetime.time = START_RECORDING_TIME
-    end_recording: datetime.time = END_RECORDING_TIME
+    start_recording: datetime.time = datetime.time(hour=12, minute=0, second=0)
+
+    end_recording: datetime.time = datetime.time(hour=21, minute=0, second=0)
 
 
 class RecordingSaving(BaseModel):
     """Recording saving options configuration."""
 
-    starttime_saving_recording: datetime.time = START_SAVING_RECORDING
-    endtime_saving_recording: datetime.time = END_SAVING_RECORDING
-    before_dawndusk_duration: int = BEFORE_DAWNDUSK_DURATION
-    after_dawndusk_duration: int = AFTER_DAWNDUSK_DURATION
-    saving_frequency_duration: int = SAVE_FREQUENCY_DURATION
-    saving_frequency_interval: int = SAVE_FREQUENCY_INTERVAL
+    starttime_saving_recording: datetime.time = datetime.time(
+        hour=21, minute=30, second=0
+    )
+
+    endtime_saving_recording: datetime.time = datetime.time(
+        hour=23, minute=30, second=0
+    )
+
+    before_dawndusk_duration: int = 10
+
+    after_dawndusk_duration: int = 10
+
+    saving_frequency_duration: int = 5
+
+    saving_frequency_interval: int = 30
 
 
 class AudioDirectories(BaseModel):
     """Audio Recording Directories configuration."""
 
-    audio_dir_true: Path = DIR_RECORDING_TRUE
-    audio_dir_false: Path = DIR_RECORDING_FALSE
+    audio_dir_true: Path = Path.home() / "storages" / "bats" / "recordings"
+
+    audio_dir_false: Path = Path.home() / "storages" / "no_bats" / "recordings"
 
 
 class MessageConfig(BaseModel):
     """MQTT configuration to send messages."""
 
-    host: str = DEFAULT_MQTT_HOST
-    port: int = DEFAULT_MQTT_PORT
-    client_password: str = DEFAULT_MQTT_CLIENT_PASS
-    client_username: str = DEFAULT_MQTT_CLIENT_USER
-    topic: str = DEFAULT_MQTT_TOPIC
-    clientid: str = DEFAULT_MQTT_CLIENTID
+    host: str = "localhost"
+
+    port: int = 1884
+
+    client_password: str = "guest"
+
+    client_username: str = "guest"
+
+    topic: str = "mqtt-topic"
+
+    clientid: str = "mqtt-clientid"
 
 
 class BatDetect2_ConfigSchema(BaseConfigSchema):
@@ -98,22 +86,26 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
 
     name: str = "batdetect2"
 
-    threshold: float = DEFAULT_THRESHOLD
+    threshold: float = 0.2
 
-    dbpath: Path = DEFAULT_DB_PATH
+    dbpath: Path = Path.home() / "storages" / "acoupi.db"
 
-    timeformat: str = DEFAULT_TIMEFORMAT
+    timeformat: str = "%Y%m%d_%H%M%S"
 
-    timezone: str = DEFAULT_TIMEZONE
+    timezone: str = "Europe/London"
 
     audio_config: AudioConfig = Field(default_factory=AudioConfig)
+
     recording_schedule: RecordingSchedule = Field(
         default_factory=RecordingSchedule
     )
+
     recording_saving: RecordingSaving = Field(default_factory=RecordingSaving)
+
     audio_directories: AudioDirectories = Field(
         default_factory=AudioDirectories
     )
+
     message_config: MessageConfig = Field(default_factory=MessageConfig)
 
     @classmethod
