@@ -2,11 +2,44 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from pathlib import Path
 
-import compoments, data
-import templates
+import acoupi.compoments, acoupi.data
+import acoupi.templates
 
 from acoupi.config_schemas import BaseConfigSchema
 from acoupi.programs.base import AcoupiProgram
+
+
+"""Default paramaters for Batdetect2 Program"""
+DEFAULT_DURATION = 3
+DEFAULT_SAMPLERATE = 192000
+DEFAULT_AUDIO_CHANNELS = 1
+DEFAULT_CHUNKSIZE = 8192
+DEVICE_INDEX = 1
+DEFAULT_INTERVAL = 10
+
+START_RECORDING_TIME = datetime.time(hour=12, minute=0, second=0)
+END_RECORDING_TIME = datetime.time(hour=21, minute=0, second=0)
+
+START_SAVING_RECORDING = datetime.time(hour=21, minute=30, second=0) 
+END_SAVING_RECORDING = datetime.time(hour=23, minute=30, second=0) 
+BEFORE_DAWNDUSK_DURATION = 10
+AFTER_DAWNDUSK_DURATION = 10
+SAVE_FREQUENCY_DURATION = 5
+SAVE_FREQUENCY_INTERVAL = 30
+
+DIR_RECORDING_TRUE = Path("storages/bats/recordings")
+DIR_RECORDING_FALSE = Path("storages/no_bats/recordings")
+
+DEFAULT_MQTT_HOST = 'local-host'
+DEFAULT_MQTT_PORT = 0000
+DEFAULT_MQTT_CLIENT_PASS = 'client-pass'
+DEFAULT_MQTT_CLIENT_USER = 'client-user'
+DEFAULT_MQTT_TOPIC = 'client-id'
+DEFAULT_MQTT_CLIENTID = 'topic'
+
+DEFAULT_THRESHOLD = 0.2
+DEFAULT_DB_PATH = acoupi.db
+DEFAULT_TIMEFORMAT = "%Y%m%d_%H%M%S"
 
 
 class AudioConfig(BaseModel):
@@ -326,6 +359,8 @@ class BatDetect2_Program(AcoupiProgram):
             callbacks=[detctions_taks], 
             schedule=datetime.timedelta(seconds=10),
         )
+
+        # TODO: Add task send_data, file_management. 
 
         self.add_task(
             function=send_data_task,
