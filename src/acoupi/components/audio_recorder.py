@@ -16,6 +16,7 @@ file.
 
 """
 import datetime
+import json
 import wave
 from pathlib import Path
 
@@ -66,6 +67,21 @@ class PyAudioRecorder(AudioRecorder):
 
             # Create an new instace of PyAudio
             p = pyaudio.PyAudio()
+
+            print("Recording Audio...")
+            print(
+                json.dumps(
+                    dict(
+                        format=pyaudio.paInt16,
+                        channels=self.audio_channels,
+                        rate=self.samplerate,
+                        input=True,
+                        frames_per_buffer=self.chunksize,
+                        input_device_index=self.device_index,
+                    )
+                )
+            )
+
             # Create new audio stream
             stream = p.open(
                 format=pyaudio.paInt16,

@@ -25,6 +25,7 @@ from acoupi.components import types
 from acoupi.files import delete_recording, get_temp_file_id, get_temp_files
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 T = TypeVar("T", bound=types.RecordingCondition, covariant=True)
