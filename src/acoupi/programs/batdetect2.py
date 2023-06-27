@@ -254,8 +254,6 @@ class BatDetect2_Program(AcoupiProgram):
             4. Create Message Task
 
         """
-        dbpath = components.SqliteStore(config.dbpath)
-        #TODO: Add File Manager
 
         # Step 1 - Audio Recordings Task
         recording_task = templates.generate_recording_task(
@@ -321,4 +319,15 @@ class BatDetect2_Program(AcoupiProgram):
                 topic=config.message_config.topic,
                 clientid=config.message_config.clientid,
             ),
+        )
+
+        self.add_task(
+            function=recording_task,
+            callbacks=[detctions_taks], 
+            schedule=datetime.timedelta(seconds=10),
+        )
+
+        self.add_task(
+            function=send_data_task,
+            schedule=contrab(minute="*/1"),
         )

@@ -32,22 +32,6 @@ def main():
 
     scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
-    # Specify Directories to save recordings and detections. 
-    save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
-    save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
-
-    # Create the saving recording objects - check if recordings should be saved or not. 
-    saving_recording_start = datetime.strptime(START_SAVING_RECORDING,"%H:%M:%S").time()
-    saving_recording_end = datetime.strptime(END_SAVING_RECORDING,"%H:%M:%S").time()
-
-    save_recording_timeinterval = TimeInterval(Interval(start=saving_recording_start, end=saving_recording_end), timezone=ZoneInfo(DEFAULT_TIMEZONE))
-    #save_recording_freqschedule = FrequencySchedule(duration=SAVE_RECORDING_DURATION, frequency=SAVE_RECORDING_FREQUENCY)
-    #save_recording_dawnduskinterval = DawnDuskTimeInterval(duration=SAVE_DAWNDUSK_DURATION, timezone=ZoneInfo(DEFAULT_TIMEZONE))
-
-    # Create the recording and detection SavingManager object
-    recording_savingmanager = SaveRecording(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_recording)
-    detection_savingmanager = SaveDetection(timeformat=DEFAULT_TIMEFORMAT, save_dir=save_dir_detection)
-
     def process():
 
         #print('System Running - Please Wait.')
