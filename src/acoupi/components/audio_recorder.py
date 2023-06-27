@@ -65,7 +65,7 @@ class PyAudioRecorder(AudioRecorder):
             # Create new audio stream
             stream = p.open(
                 format=pyaudio.paInt16,
-                audio_channels=self.audio_channels,
+                channels=self.audio_channels,
                 rate=self.samplerate,
                 input=True,
                 frames_per_buffer=self.chunksize,
@@ -88,7 +88,7 @@ class PyAudioRecorder(AudioRecorder):
             
             #Create a WAV file to write the audio data
             with wave.open(temp_audio_path, "wb") as temp_audio_file:
-                temp_audio_file.set_audio_channels(self.audio_channels)
+                temp_audio_file.setnchannels(self.audio_channels)
                 temp_audio_file.setsampwidth(
                     p.get_sample_size(pyaudio.paInt16)
                 )

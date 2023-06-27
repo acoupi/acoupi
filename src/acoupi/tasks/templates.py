@@ -54,10 +54,10 @@ def generate_recording_task(
 
         # Record audio
         logger.info("Recording audio")
-        recording = recorder.record()
+        recording = recorder.record(deployment)
 
         # Store recording metadata
-        store.store_recording(recording, deployment)
+        store.store_recording(recording)
         logger.info("Recording metadata stored")
 
         return recording
@@ -153,7 +153,7 @@ def generate_file_management_task(
 
             store.update_recording_path(recording, path)
 
-    return file_management_process
+    return file_management_task
 
 
 def generate_send_data_task(
@@ -185,4 +185,4 @@ def generate_send_data_task(
             response = messenger.send_message(message)
             message_store.store_response(response)
 
-    return send_data_process
+    return send_data_task

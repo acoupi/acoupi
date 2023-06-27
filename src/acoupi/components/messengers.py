@@ -37,7 +37,7 @@ class MQTTMessenger(types.Messenger):
         """Initialize the MQTT messenger."""
         self.topic = topic
         self.timeout = timeout
-        self.client = mqtt.Client(clientid=clientid)
+        self.client = mqtt.Client(client_id=clientid)
         self.client.username_pw_set(username, password)
         self.client.connect(host, port=port)
 
