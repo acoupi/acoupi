@@ -7,10 +7,7 @@ dev = [
     "sphinx>=5.3.0",
     "furo>=2023.3.27",
     "sphinx-copybutton>=0.5.1",
-<<<<<<< HEAD
     "sphinx-autobuild>=2021.3.14",
-=======
->>>>>>> 1d818a3e2db57e2de844b8f08fbc4a1b959cea6a
 ]
 
 [project]
@@ -28,10 +25,17 @@ dependencies = [
     "sounddevice>=0.4.6",
     "pyyaml>=6.0",
     "paho-mqtt>=1.6.1",
+    "pydantic>=1.10.8",
+    "click>=8.1.3",
+    "astral>=3.2",
+    "celery>=5.2.7",
 ]
 requires-python = ">=3.7"
 readme = "README.md"
 license = {text = "GPL-3.0"}
+
+[project.scripts]
+acoupi = "acoupi.cli:acoupi"
 
 [build-system]
 requires = ["pdm-pep517>=1.0"]
