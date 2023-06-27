@@ -1,28 +1,28 @@
-""" Saving managers for the recordings and detections of acoupi. 
+"""Saving managers for the recordings and detections of acoupi.
 
-Saving managers are used to determine where and how the recordings 
-and detections of an audio file should be saved. This is helpful to 
-handle recordings files and detections outputs, such as recording 
-and detections outputs can be saved into a specific format 
-(i.e, .wav files, .csv files) and at a specific location 
-(i.e, rpi memory, external hardrive, folder XX/YY). 
+Saving managers are used to determine where and how the recordings and
+detections of an audio file should be saved. This is helpful to handle
+recordings files and detections outputs, such as recording and detections
+outputs can be saved into a specific format (i.e, .wav files, .csv files) and
+at a specific location (i.e, rpi memory, external hardrive, folder XX/YY). 
 
 Saving managers (SavingRecording and SavingDetection) are implemented as classes 
 that inherit from RecordingSavingManager and DetectionSavingManager. The classes 
 should implement the save_recording and save_detections methods. The save_recording 
 method takes the recording object, and the recording filter output. The save_detection
 methods also takes a recording object and the detection filter output. On top of these, 
-it takes a clean list of detection to be saved. 
+it takes a clean list of detection to be saved.
 """
 import os
 import shutil
-#import csv
+
+# import csv
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional
 
-from acoupi.components import types
 from acoupi import data
+from acoupi.components import types
 
 __all__ = [
     "SaveRecording",
@@ -32,6 +32,7 @@ __all__ = [
 
 DEFAULT_THRESHOLD = 0.5
 DEFAULT_TIMEFORMAT = "%Y-%m-%d_%H-%M-%S"
+
 
 class SaveRecording(types.RecordingSavingManager):
     """A Recording SavingManager that save audio recordings."""
@@ -49,14 +50,14 @@ class SaveRecording(types.RecordingSavingManager):
     """Threshold to use to determine if a recording contains detections."""
 
     def __init__(
-        self, 
-        dirpath_true: Path, 
-        dirpath_false: Path, 
+        self,
+        dirpath_true: Path,
+        dirpath_false: Path,
         timeformat: str = DEFAULT_TIMEFORMAT,
-        threshold: float = DEFAULT_THRESHOLD
+        threshold: float = DEFAULT_THRESHOLD,
     ):
         """Initiatilise the Recording SavingManager.
-        
+
         Args:
             dirpath_true: Directory path to save recordings if audio recording
                 contains confident detections.
@@ -71,51 +72,49 @@ class SaveRecording(types.RecordingSavingManager):
         self.threshold = threshold
 
     def has_confident_detections(
-        self, 
+        self,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-
         """Determine if hte model outputs contain confident detections."""
         if model_outputs is None:
             return False
-        
+
         for model_output in model_outputs:
             # Check if any tags or detectinos are confident
             if any(
                 tag.probability >= self.threshold for tag in model_output.tags
             ):
                 return True
-            
+
             if any(
                 detection.probability >= self.threshold
                 for detection in model_output.detections
             ):
                 return True
-            
+
         return False
 
     def save_recording(
-        self, 
-        recording: data.Recording, 
+        self,
+        recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
-        ) -> Path:
-
+    ) -> Path:
         """Determine where the recording should be saved."""
         if recording.path is None:
             raise ValueError("Recording has no path")
-        
+
         detection_bool = self.has_confident_detections(model_outputs)
-        sdir = self.dirpath_true if bool == True else self.dirpath_false
-        
+        sdir = self.dirpath_true if detection_bool else self.dirpath_false
+
         if not os.path.exists(sdir):
             os.makedirs(sdir)
-        
+
         srec_filename = recording.datetime.strftime(self.timeformat)
         # Move recording to the path it should be saved
         new_path = sdir / f"{srec_filename}.wav"
         print(f"New file Path: {new_path}")
         shutil.move(recording.path, new_path)
-        print(f"File has been move to path: {new_path}")       
+        print(f"File has been move to path: {new_path}")
         return new_path
 
 
@@ -247,5 +246,3 @@ class IDFileManager(BaseFileManager):
             Path of the file.
         """
         return Path(f"{recording.id}.wav")
-
-

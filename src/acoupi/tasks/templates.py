@@ -18,7 +18,7 @@ that they have created themselves.
 """
 import datetime
 import logging
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, TypeVar
 
 from acoupi import data
 from acoupi.components import types
@@ -27,11 +27,14 @@ from acoupi.files import delete_recording, get_temp_file_id, get_temp_files
 logger = logging.getLogger(__name__)
 
 
+T = TypeVar("T", bound=types.RecordingCondition, covariant=True)
+
+
 def generate_recording_task(
     recorder: types.AudioRecorder,
     store: types.Store,
     logger: logging.Logger = logger,
-    recording_conditions: Optional[List[types.RecordingCondition]] = None,
+    recording_conditions: Optional[List[T]] = None,
 ) -> Callable[[], Optional[data.Recording]]:
     """Generate a recording task."""
 
@@ -109,10 +112,12 @@ def generate_detection_task(
     return detection_task
 
 
+S = TypeVar("S", bound=types.RecordingSavingFilter, covariant=True)
+
 def generate_file_management_task(
     store: types.Store,
     file_manager: types.RecordingSavingManager,
-    file_filters: Optional[List[types.RecordingSavingFilter]] = None,
+    file_filters: Optional[List[S]] = None,
 ) -> Callable[[], None]:
     """Build a process to manage files.
 

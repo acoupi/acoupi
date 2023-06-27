@@ -1,16 +1,14 @@
 """Acoupi detection and classification Models."""
-from typing import List
-
 from batdetect2 import api
 
 from acoupi import data
 from acoupi.components import types
 
+
 class BatDetect2(types.Model):
-    "BatDetect2 Model to analyse the audio recording"
+    """BatDetect2 Model to analyse the audio recording."""
 
-    def run(self, recording: data.Recording) -> List[data.ModelOutput]:
-
+    def run(self, recording: data.Recording) -> data.ModelOutput:
         """Run the model on the recording."""
         # Get the audio path of the recorded file
         audio_file_path = recording.path
@@ -22,7 +20,7 @@ class BatDetect2(types.Model):
             )
 
         # Load the audio file and compute spectrograms
-        audio = api.load_audio(audio_file_path)
+        audio = api.load_audio(str(audio_file_path))
         spec = api.generate_spectrogram(audio)
 
         # Process the audio or the spectrogram with the model
