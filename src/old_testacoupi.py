@@ -32,13 +32,6 @@ def main():
 
     scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
-
-    # Create recording_filter and detection_filter object
-    detection_filter = ThresholdDetectionFilter(threshold=DEFAULT_THRESHOLD)
-
-    # Specify sqlite message to keep track of records sent
-    transmission_messagedb = SqliteMessageStore(DEFAULT_DB_PATH, sqlitedb)
-
     # Specify Directories to save recordings and detections. 
     save_dir_recording = Directories(dirpath_true=DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE)
     save_dir_detection = Directories(dirpath_true=DIR_DETECTION_TRUE, dirpath_false=DIR_DETECTION_FALSE)
@@ -74,27 +67,8 @@ def main():
             return
 
         # Record audio
-        
         # Run model - Get detections
-        #logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
-        print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
-        detections = model.run(recording)
-        print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
-        print("")
-        #logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
-        #logging.info("")
-
-        # Detection and Recording Filter
-        keep_detections_bool = detection_filter.should_store_detection(detections) 
-        clean_detections_obj = detection_filter.get_clean_detections_obj(detections, keep_detections_bool)
-        print(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}")
-        #logging.info(f"[Thread {thread_id}] Threshold Detection Filter Decision: {keep_detections_bool}") 
-        
-        # SqliteDB Store Recroding, Detections
-        sqlitedb.store_recording(recording)
-        sqlitedb.store_detections(recording, clean_detections_obj)
-        print(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
-        #logging.info(f"[Thread {thread_id}] Recording and Detections saved in db: {time.asctime()}")
+        # SqliteDB Store recordings, detections
 
         # Send Message via MQTT
         mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections_obj]

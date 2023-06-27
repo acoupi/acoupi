@@ -53,8 +53,8 @@ class Recording(core.EntityMeta):
     samplerate_hz: int
     """Samplerate of the recording in Hz"""
 
-                    audio_channels: int
-    """Number of                 audio_channels in the recording"""
+    audio_channels: int
+    """Number of audio_channels in the recording"""
 
     deployment: Deployment
     """Deployment that the recording belongs to"""

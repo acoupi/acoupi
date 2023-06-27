@@ -211,7 +211,7 @@ class SqliteStore(types.Store):
                 datetime=db_recording.datetime,
                 duration=db_recording.duration_s,
                 samplerate=db_recording.samplerate_hz,
-                                audio_channels=db_recording.                audio_channels,
+                audio_channels=db_recording.audio_channels,
                 path=db_recording.path,
             )
 
@@ -315,7 +315,7 @@ class SqliteStore(types.Store):
             path=str(recording.path),
             duration_s=recording.duration,
             samplerate_hz=recording.samplerate,
-                            audio_channels=recording.                audio_channels,
+            audio_channels=recording.audio_channels,
             datetime=recording.datetime,
             deployment=deployment_db,
         )

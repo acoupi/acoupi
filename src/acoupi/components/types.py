@@ -170,7 +170,7 @@ class Store(ABC):
     def store_recording(
         self,
         recording: Recording,
-        deployment: Deployment,
+        deployment: Optional[Deployment] = None,
     ) -> None:
         """Store the recording locally.
 

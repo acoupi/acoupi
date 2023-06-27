@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from pathlib import Path
 
-import compoments
+import compoments, data
 import templates
 
 from acoupi.config_schemas import BaseConfigSchema
@@ -62,6 +62,8 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
     threshold: float = DEFAULT_THRESHOLD
 
     dbpath: Path = DEFAULT_DB_PATH
+
+    timeformat: str = DEFAULT_TIMEFORMAT
     
     audio_config: AudioConfig = Field(default_factory=AudioConfig)
     recording_schedule: RecordingSchedule = Field(default_factory=RecordingSchedule)
@@ -162,6 +164,11 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
             type=Path, 
             default=DIR_RECORDING_FALSE
         )
+        parser.add_arguments(
+            "--timeformat",
+            type=Path, 
+            default=DEFAULT_TIMEFORMAT
+        )
         """ MQTT Configuration Arguments"""
         parser.add_arguments(
             "--host",
@@ -228,6 +235,7 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
                 clientid=args.clientid,
             ),
             timezone=args.timezone,
+            timeformat=args.timeformat,
             threshold=args.threshold,
             dbpath=args.dbpath,
         )
@@ -237,7 +245,7 @@ class BatDetect2_Program(AcoupiProgram):
 
     config: BatDetect2_ConfigSchema
 
-    def setup(sefl, config: BatDetect2_ConfigSchema):
+    def setup(self, config: BatDetect2_ConfigSchema):
         """
             Setup
             1. Create Audio Recording Task
@@ -258,12 +266,12 @@ class BatDetect2_Program(AcoupiProgram):
                 chunksize=config.audio_config.chunksize,
                 device_index=config.audio_config.device_index,
             ),
-            store=dpath,
+            store=components.SqliteStore(config.dbpath),
             #logger
             recording_conditions=[
                 components.IsInIntervals(
-                    interval=[config.recording_schedule.start_time,
-                              config.recording_schedule.end_time],
+                    interval=[data.TimeInterval(start=config.recording_schedule.start_time, end=datetime.strptime("23:59:59","%H:%M:%S").time()),
+                              data.TimeInterval(start=datetime.strptime("00:00:00","%H:%M:%S").time(), end=config.recording_schedule.end_time)], 
                     timezone=config.timezone,
                 )
             ],
@@ -271,37 +279,40 @@ class BatDetect2_Program(AcoupiProgram):
 
         # Step 2 - Model Detections Task
         detection_task = templates.generate_detection_task(
-            store=dbpath,
+            store=components.SqliteStore(config.dbpath),
             model=components.BatDetect2(),
-            message_store=components.SqliteMessageStore(
-                db_path=config.dbpath, 
-                database=store
-            ),
+            message_store=components.SqliteMessageStore(db_path=config.dbpath),
             #logger
             output_cleaners=[
                 components.ThresholdDetectionFilter(threshold=config.threshold)
             ],
-            # TODO: processing_filters=[types.ProcessingFilter],
-            # TODO: message_factories=[types.ModelOutputMessageBuilder],
+            message_factories=[
+                components.FullModelOutputMessageBuilder()
+            ],
         )
 
         # Step 3 - Files Management Task
         file_management_task = templates.generate_file_management_task(
-            store=dbpath,
+            store=components.SqliteStore(config.dbpath),
             file_manager=components.SaveRecording(
                 dirpath_true=config.audio_directories.audio_dir_true,
                 dirpath_false=config.audio_directories.audio_dir_false,
+                timeformat=config.timeformat,
                 threshold=config.threshold,
-            )
-            # TODO: file_filters=Optional[List[types.RecordingSavingFilter]]
+            ),
+            file_filters=[
+                components.Before_DawnDuskTimeInterval(
+                    duration=config.recording_saving.before_dawndusk_duration,
+                    timezone=config.timezone),
+                components.After_DawnDuskTimeInterval(
+                    duration=config.recording_saving.after_dawndusk_duration,
+                    timezone=config.timezone),
+            ],
         )
 
         # Step 4 - Send Data Task
         send_data_task = templates.generate_send_data_task(
-            message_store=compoments.SqliteMessageStore(
-                db_path=config.dbpath,
-                database=store,
-            ),
+            message_store=compoments.SqliteMessageStore(db_path=config.dbpath),
             messenger=components.MQTTMessenger(
                 host=config.message_config.host,
                 port=config.message_config.port,
