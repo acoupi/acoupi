@@ -2,8 +2,8 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from pathlib import Path
 
-import acoupi.compoments, acoupi.data
-import acoupi.templates
+import acoupi.components, acoupi.data
+import acoupi.tasks.templates
 
 from acoupi.config_schemas import BaseConfigSchema
 from acoupi.programs.base import AcoupiProgram
