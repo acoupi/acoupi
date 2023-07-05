@@ -13,7 +13,7 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
     """
     
     def __init__(self, threshold: float):
-        """ Initiatlise the filter.
+        """Initiatlise the filter.
         
         Args: 
             threshold: The probability threshold to be used.

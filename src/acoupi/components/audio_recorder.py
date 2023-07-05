@@ -19,6 +19,7 @@ import datetime
 import json
 import wave
 from pathlib import Path
+from typing import Optional
 
 import pyaudio
 
@@ -26,6 +27,8 @@ from acoupi import data
 from acoupi.components.types import AudioRecorder
 
 TMP_PATH = Path("/run/shm/")
+
+CHUNKSIZE = 1024
 
 
 class PyAudioRecorder(AudioRecorder):
@@ -36,8 +39,8 @@ class PyAudioRecorder(AudioRecorder):
         duration: float,
         samplerate: int,
         audio_channels: int,
-        chunksize: int,
-        device_index: int,
+        device_index: Optional[int] = None,
+        chunksize: int = CHUNKSIZE,
     ):
         """Initialise the AudioRecorder with the audio parameters."""
         # Audio Duration
@@ -47,7 +50,35 @@ class PyAudioRecorder(AudioRecorder):
         self.samplerate = samplerate
         self.audio_channels = audio_channels
         self.chunksize = chunksize
+
+        if device_index is None:
+            # Get the index of the audio device
+            self.device_index = self.get_device_index()
+
         self.device_index = device_index
+
+    def get_device_index(self) -> int:
+        """Get the index of the audio device."""
+        # Create an instance of PyAudio
+        p = pyaudio.PyAudio()
+
+        # Get the number of audio devices
+        num_devices = p.get_device_count()
+
+        # Loop through the audio devices
+        for i in range(num_devices):
+            # Get the audio device info
+            device_info = p.get_device_info_by_index(i)
+
+            # Check if the audio device is an input device
+            if int(device_info["maxInputChannels"]) <= 0:
+                continue
+
+            # Get the index of the USB audio device
+            device_index = int(device_info["index"])
+            return device_index
+
+        raise ValueError("No USB audio device found")
 
     def record(self, deployment: data.Deployment) -> data.Recording:
         """Record a 3 second temporary audio file at 192KHz.

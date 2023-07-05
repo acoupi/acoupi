@@ -3,8 +3,12 @@
 This file is automatically loaded by pytest when running tests.
 It contains fixtures that are can be used in multiple test files.
 """
-import pytest
 import datetime as dt
+from pathlib import Path
+
+import pytest
+
+from acoupi import data
 
 
 @pytest.fixture
@@ -23,7 +27,7 @@ def patched_rpi_serial_number(monkeypatch) -> str:
     """
     serial_number = "1234567890ABCDEF"
     monkeypatch.setattr(
-        "acoupi.utils.get_rpi_serial_number",
+        "acoupi.devices.get_rpi_serial_number",
         lambda: serial_number,
     )
     return serial_number
@@ -62,3 +66,21 @@ def patched_now(monkeypatch):
         return time
 
     return set_now
+
+
+@pytest.fixture
+def deployment():
+    """Fixture for a deployment object."""
+    return data.Deployment(name="test")
+
+
+@pytest.fixture
+def recording(deployment: data.Deployment):
+    """Fixture for a recording object."""
+    return data.Recording(
+        path=Path("tests"),
+        duration=1,
+        samplerate=16000,
+        datetime=dt.datetime.now(),
+        deployment=deployment,
+    )

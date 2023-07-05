@@ -2,21 +2,17 @@
 
 import datetime
 
-from acoupi.recording_conditions import (
-    Interval,
-    IsInInterval,
-    IsInIntervals,
-)
+from acoupi import components, data
 
 
 def test_interval_recording_manager_is_inclusive():
     """Test the interval recording manager."""
-    interval = Interval(
+    interval = data.TimeInterval(
         start=datetime.time(10, 0),
         end=datetime.time(11, 0),
     )
 
-    recording_manager = IsInInterval(
+    recording_manager = components.IsInInterval(
         interval,
         timezone=datetime.timezone.utc,
     )
@@ -51,17 +47,17 @@ def test_interval_recording_manager_is_inclusive():
 def test_multiple_interval_recording_manager():
     """Test the multiple interval recording manager."""
     intervals = [
-        Interval(
+        data.TimeInterval(
             start=datetime.time(10, 0),
             end=datetime.time(11, 0),
         ),
-        Interval(
+        data.TimeInterval(
             start=datetime.time(12, 0),
             end=datetime.time(13, 0),
         ),
     ]
 
-    recording_manager = IsInIntervals(
+    recording_manager = components.IsInIntervals(
         intervals,
         timezone=datetime.timezone.utc,
     )

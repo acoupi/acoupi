@@ -208,7 +208,7 @@ class ThresholdRecordingFilter(types.RecordingSavingFilter):
             for detection in model_output.detections
         )
 
-    def should_keep_recording(
+    def should_save_recording(
         self,
         _: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
@@ -269,7 +269,7 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
             bool
         """
         if any(
-            tag in self.tags and tag.probability >= self.threshold
+            tag.tag in self.tags and tag.probability >= self.threshold
             for tag in model_output.tags
         ):
             return True
@@ -278,8 +278,10 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
             if detection.probability < self.threshold:
                 continue
 
+            print(self.tags, detection.tags)
+
             for tag in detection.tags:
-                if tag not in self.tags:
+                if tag.tag not in self.tags:
                     continue
 
                 if tag.probability >= self.threshold:
@@ -287,7 +289,7 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
 
         return False
 
-    def should_keep_recording(
+    def should_save_recording(
         self,
         _: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
