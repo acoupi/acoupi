@@ -9,8 +9,7 @@ export USER=$USER
 export HOME=$HOME
 
 4. Check system update and upgrade
-sudo apt update 
-sudo apt upgrade
+sudo apt update && sudo apt upgrade
 
 5. Install dependencies - git and other packages
 sudo apt install git alsa-utils libsndfile1 libasound2-dev wget cmake #pulseaudio

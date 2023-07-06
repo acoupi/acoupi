@@ -1,4 +1,6 @@
 """Default paramaters for Batdetect2 Program"""
+import datetime
+from pathlib import Path
 
 """Default audio recording parameters."""
 DEFAULT_SAMPLE_RATE = 192000
@@ -31,7 +33,8 @@ SAVE_FREQUENCY_INTERVAL = 30
 DEFAULT_THRESHOLD = 0.2
 
 """Default database path"""
-DEFAULT_DB_PATH = Path.home()/"storages"/"acoupi.db"
+#DEFAULT_DB_PATH = Path.home()/"acoupi"/"storages"/"acoupi.db"
+DEFAULT_DB_PATH = Path("acoupi.db")
 
 """Default timeformat to name the audio recording files"""
 DEFAULT_TIMEFORMAT = '%Y%m%d_%H%M%S' #Year-Month-Day Hour-Minute-Second

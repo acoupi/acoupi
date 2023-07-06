@@ -1,23 +1,13 @@
 import datetime
+import time
 from pathlib import Path
 
 import threading
 import logging
 
+from acoupi import components, data
 from acoupi import config
 from acoupi import config_mqtt
-
-from acoupi import compoments, data
-
-
-from audio_recorder import PyAudioRecorder
-from recording_schedulers import IntervalScheduler
-from recording_conditions import IsInIntervals, Interval
-from model import BatDetect2
-from detection_filters import ThresholdDetectionFilter
-from recording_filters import ThresholdRecordingFilter
-from messengers import MQTTMessenger, build_detection_message
-from storages.sqlite import SqliteStore, SqliteMessageStore
 
 
 # Setup the main logger
@@ -28,7 +18,7 @@ logger.setLevel(logging.INFO)
 def main():
 
     """Audio recordings interval scheduler."""
-    scheduler = IntervalScheduler(DEFAULT_RECORDING_INTERVAL) # every 10 seconds
+    scheduler = components.IntervalScheduler(config.DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
     """Audio and microphone configuration parameters."""
     # Create audio_recorder object to initiate audio recording
@@ -51,32 +41,32 @@ def main():
     model = components.BatDetect2()
 
     """Sqlite DB configuration parameters."""
-    dbpath = compoments.SqliteStore(db_path=config.DEFAULT_DB_PATH)
-    dbpath_message = compoments.SqliteMessageStore(db_path=config.DEFAULT_DB_PATH)
+    dbpath = components.SqliteStore(db_path=config.DEFAULT_DB_PATH)
+    dbpath_message = components.SqliteMessageStore(db_path=config.DEFAULT_DB_PATH)
 
     """Model Outputs Cleaning configuration parameters."""
-    output_cleaners = components.ThresholdDetectionFilter(threshod=config.DEFAULT_THRESHOLD)
+    output_cleaners = components.ThresholdDetectionFilter(threshold=config.DEFAULT_THRESHOLD)
     
     """Message Factories configuration"""
-    message_factory = [compoments.FullModelOutputMessageBuilder(),]
+    message_factory = [components.FullModelOutputMessageBuilder(),]
 
     """MQTT configuration to send messages"""
-    mqtt_messenger = components.MQTTMessenger(host=config.DEFAULT_MQTT_HOST, 
-                                              port=DEFAULT_MQTT_PORT, 
-                                              username=DEFAULT_MQTT_CLIENT_USER, 
-                                              password=DEFAULT_MQTT_CLIENT_PASS, 
-                                              topic=DEFAULT_MQTT_TOPIC,
-                                              clientid=DEFAULT_MQTT_CLIENTID,
+    mqtt_messenger = components.MQTTMessenger(host=config_mqtt.DEFAULT_MQTT_HOST, 
+                                              port=config_mqtt.DEFAULT_MQTT_PORT, 
+                                              username=config_mqtt.DEFAULT_MQTT_CLIENT_USER, 
+                                              password=config_mqtt.DEFAULT_MQTT_CLIENT_PASS, 
+                                              topic=config_mqtt.DEFAULT_MQTT_TOPIC,
+                                              clientid=config_mqtt.DEFAULT_MQTT_CLIENTID,
     )
 
     """Recording saving options configuration."""
-    file_manager = compoments.SaveRecording(dirpath_true=config.DIR_RECORDING_TRUE, dirpath_false=DIR_RECORDING_FALSE, 
-                                            timeformat=DEFAULT_TIMEFORMAT, threshold=DEFAULT_THRESHOLD)
+    file_manager = components.SaveRecording(dirpath_true=config.DIR_RECORDING_TRUE, dirpath_false=config.DIR_RECORDING_FALSE, 
+                                            timeformat=config.DEFAULT_TIMEFORMAT, threshold=config.DEFAULT_THRESHOLD)
 
     dawndusk_saving = [components.Before_DawnDuskTimeInterval(duration=config.BEFORE_DAWNDUSK_DURATION, timezone=config.DEFAULT_TIMEZONE),
-                       compoments.After_DawnDuskTimeInterval(duration=config.AFTER_DAWNDUSK_DURATION, timezone=config.DEFAULT_TIMEZONE)]
+                       components.After_DawnDuskTimeInterval(duration=config.AFTER_DAWNDUSK_DURATION, timezone=config.DEFAULT_TIMEZONE)]
 
-    frequency_saving = components.FrequencySchedule(duration=config.SAVE_FREQUENCY_DURATION, frequency=SAVE_FREQUENCY_INTERVAL)
+    frequency_saving = components.FrequencySchedule(duration=config.SAVE_FREQUENCY_DURATION, frequency=config.SAVE_FREQUENCY_INTERVAL)
 
 
     def process():
@@ -97,7 +87,7 @@ def main():
             return
 
         # Get current deployment
-        deployment = store.get_current_deployment()
+        deployment = dbpath.get_current_deployment()
 
         # Record audio
         print("")
@@ -105,29 +95,25 @@ def main():
         recording = audio_recorder.record(deployment)
         print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
 
-        # Store recording metadata
-        print(f"[Thread {thread_id}] Store Recording Metadata in db.: {recording.path}")
-        dbpath.store_recording(recording)
-        #logger.info("Recording metadata stored")
-
         """Step 2 - Generate Detections.""" 
         # Run model - Get detections
         print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
-        model_output = model.run(recording)
+        model_outputs = model.run(recording)
         print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
         print("")
 
         # Clean model outputs 
         #for cleaner in output_cleaners or []:
         #    model_output = cleaner.clean(model_output)
-        model_output = output_cleaners.clean(model_output)
+        model_outputs = output_cleaners.clean(model_outputs)
          
-        # SqliteDB Store Detections
-        dbpath.store_model_output(model_output)
+        # SqliteDB Store Recording Metadata and Detections
+        dbpath.store_recording(recording)
+        dbpath.store_model_output(model_outputs)
         print(f"[Thread {thread_id}] Detections saved in db: {time.asctime()}")
 
         # Create Messages
-        messages = [message_factory.build_message(model_output)]
+        messages = message_factory.build_message(model_outputs)
         messages_store = dbpath_message.store_response(message)
 
         # Send Messages

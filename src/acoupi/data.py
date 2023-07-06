@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, model_validator, validator
 
 __all__ = [
     "TimeInterval",
@@ -30,7 +30,7 @@ class TimeInterval(BaseModel):
     end: datetime.time
     """End time of the interval."""
 
-    @root_validator
+    @model_validator
     def validate_interval(cls, values):
         """Validate that the start time is before the end time."""
         if values["start"] >= values["end"]:
@@ -61,7 +61,7 @@ class Deployment(BaseModel):
     )
     """The datetime when the device was deployed."""
 
-    @validator("latitude")
+    @field_validator("latitude")
     def validate_latitude(cls, value):
         """Validate that the latitude are within range."""
         if value is not None and (value < -90 or value > 90):
