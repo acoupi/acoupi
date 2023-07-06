@@ -14,7 +14,7 @@ recording should be processed by the model.
 Keep in mind that the should_process_recording method is called for every
 recording, so it should be as efficient as possible.
 """
-from acoupi.types import ProcessingFilter, Recording
+from acoupi.components.types import ProcessingFilter, Recording
 
 __all__ = [
     "TrivialProcessingFilter",
@@ -24,6 +24,6 @@ __all__ = [
 class TrivialProcessingFilter(ProcessingFilter):
     """A ProcessingFilter that always returns True."""
 
-    def should_process_recording(self, recording: Recording) -> bool:
+    def should_process_recording(self, _: Recording) -> bool:
         """Determine if the recording should be processed by the model."""
         return True

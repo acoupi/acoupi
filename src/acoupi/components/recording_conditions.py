@@ -11,11 +11,10 @@ which takes a datetime.datetime object and returns a boolean indicating if a
 recording should be made at that time.
 """
 import datetime
-from dataclasses import dataclass
 from typing import List
 
-from acoupi_types import RecordingCondition
-#from acoupi.types import RecordingCondition
+from acoupi.components.types import RecordingCondition
+from acoupi.data import TimeInterval
 
 __all__ = [
     "IsInInterval",
@@ -23,21 +22,10 @@ __all__ = [
 ]
 
 
-@dataclass
-class Interval:
-    """An interval of time between two times of day."""
-
-    start: datetime.time
-    """Start time of the interval."""
-
-    end: datetime.time
-    """End time of the interval."""
-
-
 class IsInInterval(RecordingCondition):
     """A RecordManager that records during a specific interval of time."""
 
-    def __init__(self, interval: Interval, timezone: datetime.tzinfo):
+    def __init__(self, interval: TimeInterval, timezone: datetime.tzinfo):
         """Initialize the IntervalRecordingManager.
 
         Args:
@@ -56,7 +44,7 @@ class IsInInterval(RecordingCondition):
 class IsInIntervals(RecordingCondition):
     """A RecordManager that records during multiple intervals of time."""
 
-    def __init__(self, intervals: List[Interval], timezone: datetime.tzinfo):
+    def __init__(self, intervals: List[TimeInterval], timezone: datetime.tzinfo):
         """Initialize the MultiIntervalRecordingManager.
 
         Args:
