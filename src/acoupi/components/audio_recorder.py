@@ -15,12 +15,11 @@ return a temporary .wav file.
 import datetime
 import pyaudio
 import wave 
-import json
+import sounddevice #necessary to handle alsa error messages
 from pathlib import Path 
 from typing import Optional, List
-from dataclasses import dataclass
 
-from acoupi import data 
+from acoupi.data import Deployment, Recording 
 from acoupi.components.types import AudioRecorder
 
 TMP_PATH = Path("/run/shm/")
@@ -74,7 +73,7 @@ class PyAudioRecorder(AudioRecorder):
         raise ValueError("No USB audio device found")
 
 
-    def record(self, deployment: data.Deployment) -> data.Recording:
+    def record(self, deployment: Deployment) -> Recording:
 
         """Record a 3 second temporary audio file. Return the temporary path of the file."""       
         
@@ -126,10 +125,10 @@ class PyAudioRecorder(AudioRecorder):
                 temp_audio_file.close()
 
                 # Create a Recording object and return it
-                return data.Recording(
+                return Recording(
                     path=Path(temp_audio_path), 
                     datetime=self.datetime, 
                     duration=self.duration, 
                     samplerate=self.samplerate,
-                    deployment=deployment,)
+                    deployment=deployment)
                 
