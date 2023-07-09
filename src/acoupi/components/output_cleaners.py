@@ -24,7 +24,7 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
         """Removes tags with low probability."""
         return [
             tag for tag in tags 
-            if tag.probability >= self.threshold
+            if tag.tag.key == 'species'
         ]
 
     def get_clean_detections(self, detections: List[Detection]) -> List[Detection]:

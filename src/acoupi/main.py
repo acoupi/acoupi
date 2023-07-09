@@ -41,14 +41,14 @@ def main():
     model = components.BatDetect2()
 
     """Sqlite DB configuration parameters."""
-    dbpath = components.SqliteStore(db_path=config.DEFAULT_DB_PATH)
-    dbpath_message = components.SqliteMessageStore(db_path=config.DEFAULT_DB_PATH)
+    dbstore = components.SqliteStore(db_path=config.DEFAULT_DB_PATH)
+    dbstore_message = components.SqliteMessageStore(db_path=config.DEFAULT_DB_PATH)
 
     """Model Outputs Cleaning configuration parameters."""
     output_cleaners = components.ThresholdDetectionFilter(threshold=config.DEFAULT_THRESHOLD)
     
     """Message Factories configuration"""
-    message_factory = [components.FullModelOutputMessageBuilder(),]
+    message_factories = [components.FullModelOutputMessageBuilder()]
 
     """MQTT configuration to send messages"""
     mqtt_messenger = components.MQTTMessenger(host=config_mqtt.DEFAULT_MQTT_HOST, 
@@ -87,7 +87,7 @@ def main():
             return
 
         # Get current deployment
-        deployment = dbpath.get_current_deployment()
+        deployment = dbstore.get_current_deployment()
 
         # Record audio
         print("")
@@ -108,13 +108,16 @@ def main():
         model_outputs = output_cleaners.clean(model_outputs)
          
         # SqliteDB Store Recording Metadata and Detections
-        dbpath.store_recording(recording)
-        dbpath.store_model_output(model_outputs)
+        dbstore.store_recording(recording)
+        dbstore.store_model_output(model_outputs)
         print(f"[Thread {thread_id}] Detections saved in db: {time.asctime()}")
 
         # Create Messages
-        messages = message_factory.build_message(model_outputs)
-        messages_store = dbpath_message.store_response(message)
+        message = [message_factory.build_message(model_output) for message_factory in message_factories]
+        print("")
+        print(message)
+        print("")
+        messages_store = dbstore_message.store_response(message)
 
         # Send Messages
         mqtt_message = [mqtt_messenger.send_message(message) for message in messages_store.get_unsent_messages()]
