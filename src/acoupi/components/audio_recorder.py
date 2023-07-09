@@ -86,7 +86,6 @@ class PyAudioRecorder(AudioRecorder):
         #Create a temporary file to record audio
         with open(temp_path, 'wb') as temp_audiof:
             
-            print(f'Temporary Audio File: {temp_audiof}')
             temp_audio_path = temp_audiof.name
             print(f'Temporary Audio File Path: {temp_audio_path}')
             print("")
