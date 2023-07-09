@@ -103,36 +103,29 @@ def main():
         print("")
 
         # Clean model outputs 
-        #for cleaner in output_cleaners or []:
-        #    model_output = cleaner.clean(model_output)
-        model_outputs = output_cleaners.clean(model_outputs)
+        clean_model_outputs = output_cleaners.clean(model_outputs)
          
         # SqliteDB Store Recording Metadata and Detections
         dbstore.store_recording(recording)
-        dbstore.store_model_output(model_outputs)
+        dbstore.store_model_output(clean_model_outputs)
         print(f"[Thread {thread_id}] Detections saved in db: {time.asctime()}")
 
-        # Create Messages
-        message = [message_factory.build_message(model_output) for message_factory in message_factories]
-        print("")
-        print(message)
-        print("")
-        messages_store = dbstore_message.store_response(message)
+        """Optional (Step 3 - Save Audio Recordings)."""
+        ## TODO
 
-        # Send Messages
-        mqtt_message = [mqtt_messenger.send_message(message) for message in messages_store.get_unsent_messages()]
-        response_store = messages_store.store_response(mqtt_message)
+        """Step 4 - Create and Send Messages."""
+        # Create Messages
+        messages = [message_factory.build_message(model_output) for message_factory in message_factories]
+        #message_store = [dbstore_message.store_message(message) for message in messages]
+        [dbstore_message.store_message(message) for message in messages]
+
+        # Send Messages via MQTT
+        mqtt_messages = [mqtt_messenger.send_message(message) for message in dbstore_message.get_unsent_messages()]
+        response_store = [dbstore_message.store_response(mqtt_message) for mqtt_message in mqtt_messages]
         print(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
         print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
-        
-        # Send Message via MQTT
-        #mqtt_detections_messages = [build_detection_message(detection) for detection in clean_detections_obj]
-        #response = [mqtt_messenger.send_message(message) for message in mqtt_detections_messages]
-
-        # Store Detection Message to SqliteDB
-        transmission_messagedb.store_detection_message(clean_detections_obj, response)
-        #print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
-        #print(f"[Thread {thread_id}] Response Status: {response[0].status}")
+        print(f"[Thread {thread_id}] -- END")
+        print("")
 
     # Start processing
     process()
