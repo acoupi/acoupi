@@ -167,7 +167,7 @@ def main():
         """Step 4 - Create and Send Messages."""
         # Create Messages
         messages = [
-            message_factory.build_message(clean_model_outputs)
+            message_factory.build_message(clean_tags)
             for message_factory in message_factories
         ]
         # message_store = [dbstore_message.store_message(message) for message in messages]
