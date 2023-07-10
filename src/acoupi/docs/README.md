@@ -40,7 +40,7 @@ pip install batdetect2
 9. Install run_acoupi.service
 ```
 cd ~/acoupi/
-bash src/acoupi/scripts/setup_service.sh
+bash src/acoupi/scripts/batdetect2_setup_service.sh
 ```
 
 10. Setup cronjob for routine system cleaning.
