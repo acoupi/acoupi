@@ -81,7 +81,8 @@ class HTTPMessenger(types.Messenger):
     timeout: int
     """Timeout for sending messages in seconds."""
 
-    #base_params: dict
+    base_params: dict
+    # base_params: str
     """Base parameters to send with each request."""
 
     headers: dict
@@ -123,6 +124,10 @@ class HTTPMessenger(types.Messenger):
         if self.headers.get("Content-Type") is None:
             self.headers["Content-Type"] = content_type
 
+        # Set accepted content type if not already set
+        if self.headers.get("Accept") is None:
+            self.headers["Accept"] = content_type
+
         self.content_type = self.headers["Content-Type"]
 
     def send_message(self, message: data.Message) -> data.Response:
@@ -131,17 +136,26 @@ class HTTPMessenger(types.Messenger):
         response_content = None
 
         message_content = message.content
-        if self.content_type == "application/json":
-            message_content = json.loads(message_content)
 
         try:
-            response = requests.post(
-                self.base_url,
-                data=message_content,
-                params=self.base_params,
-                headers=self.headers,
-                timeout=self.timeout,
-            )
+            if self.content_type == "application/json":
+                response = requests.post(
+                    self.base_url,
+                    json=json.loads(message_content),
+                    params=self.base_params,
+                    headers=self.headers,
+                    timeout=self.timeout,
+                )
+
+            else:
+                response = requests.post(
+                    self.base_url,
+                    data=message_content,
+                    params=self.base_params,
+                    headers=self.headers,
+                    timeout=self.timeout,
+                )
+
             response_content = response.text
 
             if not response.ok:

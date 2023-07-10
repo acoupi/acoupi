@@ -19,8 +19,7 @@ class FullModelOutputMessageBuilder(types.ModelOutputMessageBuilder):
 
     def build_message(self, model_output: data.ModelOutput) -> data.Message:
         """Build a message from a recording and model outputs."""
-        print
-        return data.Message(content=model_output.json())
+        return data.Message(content=model_output.model_dump_json())
 
 
 class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
