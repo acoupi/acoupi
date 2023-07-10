@@ -78,6 +78,13 @@ def main():
         clientid=config_mqtt.DEFAULT_MQTT_CLIENTID,
     )
 
+    """HTTP Request configuration"""
+    http_request = components.HTTPMessenger( 
+        base_url=config_mqtt.DEFAULT_BASEURL
+        base_params=config_mqtt.DEFAULT_TOPIC + config_mqtt.DEFAULT_DEVICE_ID + '?client-id=' + config_mqtt.DEFAULT_CLIENTID + '&password=' + config_mqtt.DEFAULT_PASS
+        headers=config_mqtt.DEFAULT_HEADERS
+    )
+
     """Recording saving options configuration."""
     file_manager = components.SaveRecording(
         dirpath_true=config.DIR_RECORDING_TRUE,
