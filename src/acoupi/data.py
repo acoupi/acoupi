@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, model_validator, field_validator
 
 __all__ = [
     "TimeInterval",
@@ -30,7 +30,7 @@ class TimeInterval(BaseModel):
     end: datetime.time
     """End time of the interval."""
 
-    @field_validator
+    @model_validator(mode='before')
     def validate_interval(cls, values):
         """Validate that the start time is before the end time."""
         if values["start"] >= values["end"]:
