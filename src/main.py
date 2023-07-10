@@ -12,8 +12,8 @@ from acoupi import config_mqtt
 
 # Setup the main logger
 logging.basicConfig(filename='acoupi.log',filemode='w', format='%(levelname)s - %(message)s', level=logging.INFO)
-logger.setLevel(logging.INFO)
-##logger = logging.getLogger(__name__)
+#logger.setLevel(logging.INFO)
+#logger = logging.getLogger(__name__)
 
 def main():
 
