@@ -45,6 +45,7 @@ bash src/acoupi/scripts/batdetect2_setup_service.sh
 
 10. Setup cronjob for routine system cleaning.
 ```
+crontab -e
 0 17 * * * /bin/bash /home/pi/acoupi/src/acoupi/clean_system/recordings_folder.sh
 
 0 0 * * 0 /bin/bash /home/pi/acoupi/src/acoupi/clean_system/clean_log.sh
