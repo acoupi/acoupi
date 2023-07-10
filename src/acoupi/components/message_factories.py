@@ -1,4 +1,6 @@
 """Message factories for acoupi."""
+from typing import List
+
 from acoupi import data
 from acoupi.components import types
 
