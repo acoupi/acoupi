@@ -60,7 +60,7 @@ def main():
     )
 
     """Model Outputs Cleaning configuration parameters."""
-    detection_cleaner = compoments.DetectionProbabilityCleaner(
+    detection_cleaner = components.DetectionProbabilityCleaner(
         threshold=config.DEFAULT_THRESHOLD, 
     )
     tags_cleaner = components.TagKeyCleaner(
@@ -150,7 +150,7 @@ def main():
 
         # Clean model outputs
         clean_detections = detection_cleaner.clean(model_outputs)
-        clean_tags = tags_cleaner.cleaner.clean(clean_detections)
+        clean_tags = tags_cleaner.clean(clean_detections)
         print(f"Clean Detections: {clean_detections}")
         print("")
         print(f"Clean Tags: {clean_tags}")
