@@ -8,6 +8,7 @@ dev = [
     "furo>=2023.3.27",
     "sphinx-copybutton>=0.5.1",
     "sphinx-autobuild>=2021.3.14",
+    "pytest-httpserver>=1.0.6",
 ]
 
 [project]
@@ -27,6 +28,7 @@ dependencies = [
     "paho-mqtt>=1.6.1",
     "pydantic>=1.10.8",
     "astral>=3.2",
+    "requests>=2.31.0",
 ]
 requires-python = ">=3.7"
 readme = "README.md"
