@@ -87,8 +87,6 @@ class PyAudioRecorder(AudioRecorder):
         with open(temp_path, 'wb') as temp_audiof:
             
             temp_audio_path = temp_audiof.name
-            print(f'Temporary Audio File Path: {temp_audio_path}')
-            print("")
 
             #Create an new instace of PyAudio
             p = pyaudio.PyAudio()
