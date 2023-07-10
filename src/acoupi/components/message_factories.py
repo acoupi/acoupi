@@ -24,15 +24,45 @@ class FullModelOutputMessageBuilder(types.ModelOutputMessageBuilder):
 
 class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
     """A ModelOutputMessageBuilder that builds message from model outputs.
-
-    This message builder builds a message from a model output. The created
-    message will contain the full model output as a JSON string. This
-    includes information about:
-        - the model used.
-        - the recording processed, including deployment info.
-        - the predicted tags at the recording level.
-        - predicted detections with their tags and confidence scores.
+    
+    Format Result for QEOP devices with the following arguments:
+        {
+            'ts': <timestamp>,
+            'id': <detection_id>
+            'ct': <start_time_detection - coordinate x0>,
+            'pb': <detection probability>,
+            'cl': [
+                {
+                    'c': <class name>,
+                    'p': <class name probability>
+                },
+                    ...
+            ]
+        }
     """
 
-    def build_message(self) -> data.Message:
-        return 
+    def build_message(self, model_output: data.ModelOutput) -> List[data.Message]:
+
+        json_model_output = model_output.model_dump_json()
+        
+        data = []
+        
+        # Get the detection in the clean_tags model_output
+        for detection in json_model_output['detections']:
+            row_data = {}
+            row_data['id'] = detection['id']
+            row_data['pb'] = detection['probability']
+            row_data['ct'] = detection['location']['coordinates'][0]
+
+            classifications = []
+            # Get the species associated with the detection
+            for tag in range(len(detection['tags'])):
+              nextClass = {}
+              nextClass['c'] = detection['tags'][tag]['tag']['value']
+              nextClass['p'] = detection['tags'][tag]['probability']
+              classifications.append(nextClass)
+
+            row_data["cl"] = classifications
+            data.append(row_data)
+
+        return data.message(content=data)
