@@ -41,6 +41,7 @@ pip install batdetect2
 ```
 cd ~/acoupi/
 bash src/acoupi/scripts/batdetect2_setup_service.sh
+bash src/acoupi/scripts/setup_heartbeat.sh
 ```
 
 10. Setup cronjob for routine system cleaning.
