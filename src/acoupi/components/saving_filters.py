@@ -13,8 +13,8 @@ __all__ = [
     "FrequencySchedule",
     "After_DawnDuskTimeInterval",
     "Before_DawnDuskTimeInterval",
-    "FocusSpeciesRecordingFilter",
 ]
+
 
 class SaveIfInInterval(types.RecordingSavingFilter):
     """Save recordings during specific interval of time."""

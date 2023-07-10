@@ -15,6 +15,7 @@ from typing import List
 
 from acoupi.components.types import RecordingCondition
 from acoupi.data import TimeInterval
+#from acoupi.types import RecordingCondition
 
 __all__ = [
     "IsInInterval",
@@ -59,7 +60,7 @@ class IsInIntervals(RecordingCondition):
 
     def should_record(self, time: datetime.datetime) -> bool:
         """Determine if a recording should be made."""
-        interval_results = [interval.start <= time.time() <= interval.end for interval in self.intervals]
-        return all(interval_results)
-
-
+        return any(
+            interval.start <= time.time() <= interval.end
+            for interval in self.intervals
+        )

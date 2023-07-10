@@ -24,10 +24,12 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
         """Removes tags with low probability."""
         return [
             tag for tag in tags 
-            if tag.tag.key == 'species'
+            if tag.probability >= self.threshold
         ]
 
-    def get_clean_detections(self, detections: List[Detection]) -> List[Detection]:
+    def get_clean_detections(
+        self, detections: List[Detection]
+    ) -> List[Detection]:
         """Removes detections with low probability."""
         return [
             self.clean_detection(detection)
@@ -62,3 +64,42 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
             tags=self.get_clean_tags(model_output.tags),
             detections=self.get_clean_detections(model_output.detections),
         )
+
+
+
+# TODO: Update this class to a ModelOutputCleaner and new ModelOutput and
+# Detection classes.
+
+# class HighestbySpecies_DetectionFilter(ModelOutputCleaner):
+#     def __init__(self, threshold: float):
+#         """Initiatlise the filter.
+#
+#         Args:
+#             threshold: Probability threshold to be used. Only keep detection
+#             annotations with a probability greater or equal to this
+#             threshold.
+#         """
+#         self.threshold = threshold
+#
+#     def should_store_detection(self, detections: List[Detection]) -> bool:
+#         # Create new dictionary to keep the detections
+#         keep_detections = []
+#
+#         # Loop through all the detections in the analysed file
+#         for ann in detections:
+#             bat_class = ann["class"]
+#             det_prob = ann["det_prob"]
+#
+#             # Check if the detection probability is above the threshold
+#             if det_prob > self.threshold:
+#                 # Check if bat_class is already in final result list
+#                 # keep_detection
+#                 if bat_class not in keep_detections:
+#                     keep_detections[bat_class] = ann
+#                 else:
+#                     # Check if det_prob is higher than the previous final
+#                     # result in list keep_detections
+#                     if det_prob > keep_detections[bat_class]["det_prob"]:
+#                         keep_detections[bat_class] = ann
+#
+#         return keep_detections

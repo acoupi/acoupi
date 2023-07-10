@@ -11,6 +11,7 @@ __all__ = [
     "MQTTMessenger",
 ]
 
+
 class MQTTMessenger(types.Messenger):
     """Messenger that sends messages via MQTT."""
 
@@ -23,9 +24,16 @@ class MQTTMessenger(types.Messenger):
     timeout: int
     """Timeout for sending messages."""
 
-    def __init__(self, host: str, username: str, topic: str, clientid: str, 
-                 port: int = 1884, password: Optional[str] = None, timeout: int = 5,) -> None:
-        
+    def __init__(
+        self,
+        host: str,
+        username: str,
+        topic: str,
+        clientid: str,
+        port: int = 1884,
+        password: Optional[str] = None,
+        timeout: int = 5,
+    ) -> None:
         """Initialize the MQTT messenger."""
         self.topic = topic
         self.timeout = timeout

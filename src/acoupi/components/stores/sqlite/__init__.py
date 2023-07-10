@@ -57,9 +57,7 @@ Example:
 """
 # TODO: Update sqlite store documentation
 from acoupi.components.stores.sqlite.store import SqliteStore
-from acoupi.components.stores.sqlite.clean import SqliteCleaner
 
 __all__ = [
     "SqliteStore",
-    "SqliteCleaner"
 ]
