@@ -4,6 +4,10 @@ from typing import List
 from acoupi import data
 from acoupi.components.types import ModelOutputCleaner
 
+__all__ = [
+    "DetectionProbabilityCleaner",
+    "TagKeyCleaner",
+]
 
 class DetectionProbabilityCleaner(ModelOutputCleaner):
     """Keeps predictions with a probability above a threshold.
