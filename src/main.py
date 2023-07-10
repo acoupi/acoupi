@@ -37,13 +37,11 @@ def main():
     recording_condition = components.IsInIntervals(
         intervals=[
             data.TimeInterval(
-                start=config.START_RECORDING_TIME,
+                start=config.START_RECORDING_TIME, 
                 end=datetime.datetime.strptime("23:59:59", "%H:%M:%S").time(),
-            ),
+                ),
             data.TimeInterval(
-                start=datetime.datetime.strptime(
-                    "00:00:00", "%H:%M:%S"
-                ).time(),
+                start=datetime.datetime.strptime("00:00:00", "%H:%M:%S").time(),
                 end=config.END_RECORDING_TIME,
             ),
         ],
@@ -68,7 +66,8 @@ def main():
     )
 
     """Message Factories configuration"""
-    message_factories = [components.FullModelOutputMessageBuilder()]
+    #message_factories = [components.FullModelOutputMessageBuilder()]
+    message_factories = [components.QEOP_MessageBuilder()]
 
     """MQTT configuration to send messages"""
     mqtt_messenger = components.MQTTMessenger(
@@ -86,7 +85,6 @@ def main():
         base_params={'client-id':config_mqtt.DEFAULT_CLIENTID, 'password':config_mqtt.DEFAULT_PASS},
         headers={'Accept':config_mqtt.DEFAULT_ACCEPT,'Authorization':config_mqtt.DEFAULT_APIKEY},
     )
-
 
     """Recording saving options configuration."""
     file_manager = components.SaveRecording(
@@ -151,9 +149,6 @@ def main():
         # Clean model outputs
         clean_detections = detection_cleaner.clean(model_outputs)
         clean_tags = tags_cleaner.clean(clean_detections)
-        print(f"Clean Detections: {clean_detections}")
-        print("")
-        print(f"Clean Tags: {clean_tags}")
 
         # SqliteDB Store Recording Metadata and Detections
         dbstore.store_recording(recording)
@@ -170,6 +165,7 @@ def main():
             message_factory.build_message(clean_tags)
             for message_factory in message_factories
         ]
+        print(messages)
         # message_store = [dbstore_message.store_message(message) for message in messages]
         [dbstore_message.store_message(message) for message in messages]
 
