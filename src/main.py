@@ -61,7 +61,8 @@ def main():
 
     """Model Outputs Cleaning configuration parameters."""
     output_cleaners = components.ThresholdDetectionFilter(
-        threshold=config.DEFAULT_THRESHOLD
+        threshold=config.DEFAULT_THRESHOLD, 
+        tag_keys=['species']
     )
 
     """Message Factories configuration"""
