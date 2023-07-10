@@ -60,8 +60,10 @@ def main():
     )
 
     """Model Outputs Cleaning configuration parameters."""
-    output_cleaners = components.ThresholdDetectionFilter(
+    detection_cleaner = compoments.DetectionProbabilityCleaner(
         threshold=config.DEFAULT_THRESHOLD, 
+    )
+    tags_cleaner = components.TagKeyCleaner(
         tag_keys=['species']
     )
 
@@ -80,10 +82,11 @@ def main():
 
     """HTTP Request configuration"""
     http_request = components.HTTPMessenger( 
-        base_url=config_mqtt.DEFAULT_BASEURL
-        base_params=config_mqtt.DEFAULT_TOPIC + config_mqtt.DEFAULT_DEVICE_ID + '?client-id=' + config_mqtt.DEFAULT_CLIENTID + '&password=' + config_mqtt.DEFAULT_PASS
-        headers=config_mqtt.DEFAULT_HEADERS
+        base_url=config_mqtt.DEFAULT_BASEURL,
+        base_params={'client-id':config_mqtt.DEFAULT_CLIENTID, 'password':config_mqtt.DEFAULT_PASS},
+        headers={'Accept':config_mqtt.DEFAULT_ACCEPT,'Authorization':config_mqtt.DEFAULT_APIKEY},
     )
+
 
     """Recording saving options configuration."""
     file_manager = components.SaveRecording(
@@ -131,42 +134,32 @@ def main():
 
         # Record audio
         logging.info("")
-        logging.info(
-            f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}"
-        )
+        logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         print("")
         print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         recording = audio_recorder.record(deployment)
         print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
-        logging.info(
-            f"[Thread {thread_id}] End Recording Audio: {time.asctime()}"
-        )
+        logging.info(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
 
         """Step 2 - Run Model & Generate Detections."""
-        logging.info(
-            f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}"
-        )
-        print(
-            f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}"
-        )
+        logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
+        print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
         model_outputs = model.run(recording)
-        print(
-            f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}"
-        )
-        logging.info(
-            f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}"
-        )
+        print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
 
         # Clean model outputs
-        clean_model_outputs = output_cleaners.clean(model_outputs)
+        clean_detections = detection_cleaner.clean(model_outputs)
+        clean_tags = tags_cleaner.cleaner.clean(clean_detections)
+        print(f"Clean Detections: {clean_detections}")
+        print("")
+        print(f"Clean Tags: {clean_tags}")
 
         # SqliteDB Store Recording Metadata and Detections
         dbstore.store_recording(recording)
-        dbstore.store_model_output(clean_model_outputs)
+        dbstore.store_model_output(clean_tags)
         print(f"[Thread {thread_id}] Detections saved in db: {time.asctime()}")
-        logging.info(
-            f"[Thread {thread_id}] Detections saved in db: {time.asctime()}"
-        )
+        logging.info(f"[Thread {thread_id}] Detections saved in db: {time.asctime()}")
 
         """Optional (Step 3 - Save Audio Recordings)."""
         ## TODO
@@ -185,6 +178,11 @@ def main():
             mqtt_messenger.send_message(message)
             for message in dbstore_message.get_unsent_messages()
         ]
+        http_post = [
+            http_request.send_message(message)
+            for message in dbstore_message.get_unsent_messages()
+        ]
+        print(http_post)
         response_store = [
             dbstore_message.store_response(mqtt_message)
             for mqtt_message in mqtt_messages

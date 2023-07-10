@@ -82,7 +82,6 @@ class HTTPMessenger(types.Messenger):
     """Timeout for sending messages in seconds."""
 
     #base_params: dict
-    base_params: str
     """Base parameters to send with each request."""
 
     headers: dict
@@ -91,8 +90,7 @@ class HTTPMessenger(types.Messenger):
     def __init__(
         self,
         base_url: str,
-        #base_params: Optional[dict] = None,
-        base_params: Optional[str] = None, 
+        base_params: Optional[dict] = None,
         headers: Optional[dict] = None,
         timeout: int = 5,
         content_type: str = "application/json",
