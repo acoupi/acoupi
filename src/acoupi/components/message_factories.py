@@ -2,7 +2,10 @@
 from acoupi import data
 from acoupi.components import types
 
-__all__ = ["FullModelOutputMessageBuilder"]
+__all__ = [
+    "FullModelOutputMessageBuilder", 
+    "QEOP_MessageBuilder",
+]
 
 
 class FullModelOutputMessageBuilder(types.ModelOutputMessageBuilder):
