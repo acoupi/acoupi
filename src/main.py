@@ -11,9 +11,9 @@ from acoupi import config_mqtt
 
 
 # Setup the main logger
-#logging.basicConfig(filename='acoupi.log',filemode='w', format='%(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
+logging.basicConfig(filename='acoupi.log',filemode='w', format='%(levelname)s - %(message)s', level=logging.INFO)
 logger.setLevel(logging.INFO)
+##logger = logging.getLogger(__name__)
 
 def main():
 
@@ -21,7 +21,6 @@ def main():
     scheduler = components.IntervalScheduler(config.DEFAULT_RECORDING_INTERVAL) # every 10 seconds
 
     """Audio and microphone configuration parameters."""
-    # Create audio_recorder object to initiate audio recording
     audio_recorder = components.PyAudioRecorder(duration=config.DEFAULT_RECORDING_DURATION, 
                                                 samplerate=config.DEFAULT_SAMPLE_RATE,
                                                 audio_channels=config.DEFAULT_AUDIO_CHANNELS,
@@ -76,7 +75,6 @@ def main():
         
         """Step 1 - Record audio.""" 
         now = datetime.datetime.now()
-        #logger.info("Starting recording process")
         
         # Schedule next recording - Use Scheduler to determine when next recording should happen.
         threading.Timer((scheduler.time_until_next_recording(now)), process).start()
@@ -90,17 +88,20 @@ def main():
         deployment = dbstore.get_current_deployment()
 
         # Record audio
+        logging.info("")
+        logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         print("")
         print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         recording = audio_recorder.record(deployment)
         print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
 
-        """Step 2 - Generate Detections.""" 
-        # Run model - Get detections
+        """Step 2 - Run Model & Generate Detections.""" 
+        logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
         print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
         model_outputs = model.run(recording)
         print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
-        print("")
+        logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
 
         # Clean model outputs 
         clean_model_outputs = output_cleaners.clean(model_outputs)
@@ -109,13 +110,14 @@ def main():
         dbstore.store_recording(recording)
         dbstore.store_model_output(clean_model_outputs)
         print(f"[Thread {thread_id}] Detections saved in db: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] Detections saved in db: {time.asctime()}")
 
         """Optional (Step 3 - Save Audio Recordings)."""
         ## TODO
 
         """Step 4 - Create and Send Messages."""
         # Create Messages
-        messages = [message_factory.build_message(model_output) for message_factory in message_factories]
+        messages = [message_factory.build_message(clean_model_outputs) for message_factory in message_factories]
         #message_store = [dbstore_message.store_message(message) for message in messages]
         [dbstore_message.store_message(message) for message in messages]
 
@@ -126,6 +128,10 @@ def main():
         print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
         print(f"[Thread {thread_id}] -- END")
         print("")
+        logging.info(f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] -- END")
+        logging.info("")
 
     # Start processing
     process()
