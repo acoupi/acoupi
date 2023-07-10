@@ -4,9 +4,8 @@ Description=Acoupi Device: Record, Analyse, Save and Send Results of Audio Recor
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/home/pi/acoupi/src/acoupi
-#ExecStart=/home/pi/acoupi/src/acoupi/.venv/bin/python3 main.py
-ExecStart=/usr/bin/python3 /home/pi/acoupi/src/acoupi/test_acoupi.py
+WorkingDirectory=/home/pi/acoupi/src
+ExecStart=/usr/bin/python3 /home/pi/acoupi/src/main.py
 Restart=always
 RestartSec=3
 TimeoutSec=30

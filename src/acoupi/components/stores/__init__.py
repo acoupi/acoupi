@@ -13,6 +13,9 @@ the Storage class for more details.
 
 """
 
-from acoupi.components.stores.sqlite import SqliteStore
+from acoupi.components.stores.sqlite import SqliteStore, SqliteCleaner
 
-__all__ = ["SqliteStore"]
+__all__ = [
+    "SqliteStore",
+    "SqliteCleaner"
+]
