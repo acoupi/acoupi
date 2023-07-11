@@ -73,10 +73,10 @@ def main():
     mqtt_messenger = components.MQTTMessenger(
         host=config_mqtt.DEFAULT_MQTT_HOST,
         port=config_mqtt.DEFAULT_MQTT_PORT,
-        username=config_mqtt.DEFAULT_MQTT_CLIENT_USER,
-        password=config_mqtt.DEFAULT_MQTT_CLIENT_PASS,
-        topic=config_mqtt.DEFAULT_MQTT_TOPIC,
-        clientid=config_mqtt.DEFAULT_MQTT_CLIENTID,
+        username=config_mqtt.DEFAULT_MQTTSTUDENT_USER,
+        password=config_mqtt.DEFAULT_MQTTSTUDENT_PASS,
+        topic=config_mqtt.DEFAULT_MQTTSTUDENT_CLIENTID,
+        clientid=config_mqtt.DEFAULT_MQTTSTUDENT_TOPIC,
     )
 
     """HTTP Request configuration"""
@@ -177,6 +177,11 @@ def main():
         message_store = [
             dbstore_message.store_message(message) 
             for message in http_messages]
+        
+        message_store = [
+            dbstore_message.store_message(message) 
+            for messages in http_messages for message in messages
+            ]
         print(" --- MESSAGES STORE --- ")
         print(message_store)
         print("")
