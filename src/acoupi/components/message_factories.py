@@ -33,7 +33,7 @@ class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
     
     Format Result for QEOP devices with the following arguments:
         {
-            'ts': <timestamp>,
+            'ts': <recording timestamp in unix ms>,
             'id': <detection_id>
             'ct': <start_time_detection - coordinate x0>,
             'pb': <detection probability>,
@@ -55,7 +55,13 @@ class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
         
         # Get the detection in the clean_tags model_output
         for detection in json_model_output['detections']:
+            
             row_data = {}
+
+            #get the timestamp from the recordings
+            timestamp = clean_tags['recording']['datetime']
+            unix_timestamp_ms = int((datetime.datetime.fromisoformat(timestamp)).timestamp() * 1000)
+            row_data['ts'] = unix_timestamp_ms
             row_data['id'] = detection['id']
             row_data['pb'] = detection['probability']
             row_data['ct'] = detection['location']['coordinates'][0]

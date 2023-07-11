@@ -136,9 +136,10 @@ class HTTPMessenger(types.Messenger):
         response_content = None
 
         message_content = message.content
+        post_json = {'data:' : message_content}
         print(" --- HTTP MESSAGE CONTENT --- ")
         print(message_content)
-        
+
         try:
             if self.content_type == "application/json":
                 response = requests.post(
