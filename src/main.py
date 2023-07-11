@@ -166,52 +166,26 @@ def main():
             message_factory.build_message(clean_tags)
             for message_factory in message_factories
         ]
-        print(" --- HTTP MESSAGES --- ")
-        print(http_messages)
-        print("")
-
         # Store Messages in DB
-        #sqlite_message_store = [dbstore_message.store_message(message) for message in sqlite_messages]
         message_store = [
             dbstore_message.store_message(message) 
             for messages in http_messages
             for message in messages
             ]
-        print(" --- MESSAGES STORE --- ")
-        print(message_store)
-        print("")
 
         # Send Messages via MQTT
-        mqtt_messages = [
-            mqtt_messenger.send_message(message)
-            for message in dbstore_message.get_unsent_messages()
+        #mqtt_messages = [mqtt_messenger.send_message(message) for message in dbstore_message.get_unsent_messages()]
+        http_post = [http_request.send_message(message) for message in dbstore_message.get_unsent_messages()]
+        response_store = [ 
+            dbstore_message.store_response(http_response)
+            for http_response in http_post
         ]
-
-        http_post = [
-            http_request.send_message(message)
-            for message in dbstore_message.get_unsent_messages()
-        ]
-        print(" --- HTTP POST ANSWER --- ")
-        print(http_post)
-        print("")
-        response_store = [
-            dbstore_message.store_response(mqtt_message)
-            for mqtt_message in mqtt_messages
-        ]
-        print(
-            f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}"
-        )
-        print(
-            f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}"
-        )
+        print(f"[Thread {thread_id}] Detections Message sent via HTTP: {time.asctime()}")
+        print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
         print(f"[Thread {thread_id}] -- END")
         print("")
-        logging.info(
-            f"[Thread {thread_id}] Detections Message sent via MQTT: {time.asctime()}"
-        )
-        logging.info(
-            f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}"
-        )
+        logging.info(f"[Thread {thread_id}] Detections Message sent via HTTP: {time.asctime()}")
+        logging.info(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
         logging.info(f"[Thread {thread_id}] -- END")
         logging.info("")
 
