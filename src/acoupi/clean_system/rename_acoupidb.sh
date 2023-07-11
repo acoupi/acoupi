@@ -1,5 +1,14 @@
 #!bin/bash
 
-#Clean the acoupi.log file
+# Get the current month and year"
+#month=$(date +%B | tr '[:upper:]' '[:lower:]')
+month=$(date +%m)
+year=$(date +%y)
+echo month
+echo year
+renamed_file="acoupi_${month}${year}.db"
+echo renamed_file
+
+# Move the acoupi.db
 cd ~/acoupi/src/
-cp acoupi.db acoupi_xx.db
+mv acoupi.db "$renamed_file"
