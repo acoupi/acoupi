@@ -162,10 +162,7 @@ def main():
 
         """Step 4 - Create and Send Messages."""
         # Create HTTP Messages
-        http_messages = [
-            message_factory.build_message(clean_tags)
-            for message_factory in message_factories
-        ]
+        http_messages = [message_factory.build_message(clean_tags) for message_factory in message_factories]
         # Store Messages in DB
         message_store = [
             dbstore_message.store_message(message) 
@@ -173,13 +170,10 @@ def main():
             for message in messages
             ]
 
-        # Send Messages via MQTT
+        # Send Messages
         #mqtt_messages = [mqtt_messenger.send_message(message) for message in dbstore_message.get_unsent_messages()]
         http_post = [http_request.send_message(message) for message in dbstore_message.get_unsent_messages()]
-        response_store = [ 
-            dbstore_message.store_response(http_response)
-            for http_response in http_post
-        ]
+        response_store = [dbstore_message.store_response(http_response) for http_response in http_post]
         print(f"[Thread {thread_id}] Detections Message sent via HTTP: {time.asctime()}")
         print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
         print(f"[Thread {thread_id}] -- END")
