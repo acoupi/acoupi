@@ -4,7 +4,7 @@
 #month=$(date +%B | tr '[:upper:]' '[:lower:]')
 time=$(date +%H%M%S)
 month=$(date +%m)
-year=$(date +%y)
+year=$(date +%Y)
 renamed_file="acoupi_${month}${year}_${time}.db"
 
 # Move the acoupi.db
