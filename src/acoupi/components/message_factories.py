@@ -63,7 +63,7 @@ class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
             timestamp = json_model_output['recording']['datetime']
             unix_timestamp_ms = int((datetime.datetime.fromisoformat(timestamp)).timestamp() * 1000)
             row_data['ts'] = unix_timestamp_ms
-            row_data['id'] = detection['id']
+            row_data['_id'] = {'$oid':detection['id']}
             row_data['pb'] = detection['probability']
             row_data['ct'] = detection['location']['coordinates'][0]
 
