@@ -48,8 +48,8 @@ bash src/acoupi/scripts/setup_heartbeat.sh
 ```
 crontab -e
 0 17 * * * /bin/bash /home/pi/acoupi/src/acoupi/clean_system/recordings_folder.sh
-
 0 0 * * 0 /bin/bash /home/pi/acoupi/src/acoupi/clean_system/clean_log.sh
+0 0 1 * * /bin/bash /home/pi/acoupi/src/acoupi/clean_system/rename_acoupidb.sh
 ```
 
 10. Test if batdetect2 main.py work. 
