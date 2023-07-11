@@ -81,6 +81,7 @@ class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
             print(content)
             print("")
             message = data.Message(content=content)
+            #message = data.Message(content=content.model_dump_json())
             messages.append(message)
             print("--- MESSAGE ---")
             print(message)

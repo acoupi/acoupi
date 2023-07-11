@@ -8,14 +8,11 @@ from acoupi import components, config, config_mqtt, data
 
 # Setup the main logger
 logging.basicConfig(
-    filename="acoupi.log",
+    filename="acoupi_main.log",
     filemode="w",
     format="%(levelname)s - %(message)s",
     level=logging.INFO,
 )
-# logger.setLevel(logging.INFO)
-# logger = logging.getLogger(__name__)
-
 
 def main():
     """Audio recordings interval scheduler."""
@@ -66,7 +63,7 @@ def main():
     )
 
     """Message Factories configuration"""
-    message_factories = [components.QEOP_MessageBuilder()]
+    message_factories = [components.FullModelOutputMessageBuilder()]
 
     """MQTT configuration to send messages"""
     mqtt_messenger = components.MQTTMessenger(
@@ -162,19 +159,19 @@ def main():
 
         """Step 4 - Create and Send Messages."""
         # Create HTTP Messages
-        http_messages = [
+        messages = [
             message_factory.build_message(clean_tags)
             for message_factory in message_factories
         ]
         print(" --- HTTP MESSAGES --- ")
-        print(http_messages)
+        print(messages)
         print("")
 
         # Store Messages in DB
+        #sqlite_messages = [sqlite_message_factory.build_message(clean_tags) for sqlite_message_factory in sqlite_message_factories]
         #sqlite_message_store = [dbstore_message.store_message(message) for message in sqlite_messages]
         message_store = [
             dbstore_message.store_message(message) 
-            for messages in http_messages
             for message in messages
             ]
         print(" --- MESSAGES STORE --- ")
@@ -186,7 +183,7 @@ def main():
             mqtt_messenger.send_message(message)
             for message in dbstore_message.get_unsent_messages()
         ]
-
+        
         http_post = [
             http_request.send_message(message)
             for message in dbstore_message.get_unsent_messages()
