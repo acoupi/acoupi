@@ -11,6 +11,6 @@ echo $renamed_file
 
 # Move the acoupi.db
 cd ~/acoupi/src/acoupi/components/message_stores/sqlite
-mv acoupi.db "old_acoupidb/$renamed_file"
+mv acoupi.db "$renamed_file"
 cd ~/acoupi/src/acoupi/components/stores/sqlite
-mv acoupi.db "old_acoupidb/$renamed_file"
+mv acoupi.db "$renamed_file"

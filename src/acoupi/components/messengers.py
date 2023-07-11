@@ -155,7 +155,8 @@ class HTTPMessenger(types.Messenger):
             else:
                 response = requests.post(
                     self.base_url,
-                    data=message_content,
+                    #data=message_content,
+                    data=post_json, 
                     params=self.base_params,
                     headers=self.headers,
                     timeout=self.timeout,
