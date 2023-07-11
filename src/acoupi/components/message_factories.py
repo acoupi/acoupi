@@ -59,7 +59,7 @@ class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
             row_data = {}
 
             #get the timestamp from the recordings
-            timestamp = clean_tags['recording']['datetime']
+            timestamp = json_model_output['recording']['datetime']
             unix_timestamp_ms = int((datetime.datetime.fromisoformat(timestamp)).timestamp() * 1000)
             row_data['ts'] = unix_timestamp_ms
             row_data['id'] = detection['id']
