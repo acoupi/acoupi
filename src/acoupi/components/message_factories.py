@@ -77,20 +77,11 @@ class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
 
             row_data["cl"] = classifications
             data_json.append(row_data)
-        
-        print("--- DATA ----")
-        print(data_json)
 
         messages = []
         for item in data_json:
             content = json.dumps(item)  # Convert dictionary to JSON string
-            print("--CONTENT--")
-            print(content)
-            print("")
             message = data.Message(content=content)
-            #message = data.Message(content=content.model_dump_json())
             messages.append(message)
-            print("--- MESSAGE ---")
-            print(message)
 
         return messages
