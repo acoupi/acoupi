@@ -51,7 +51,7 @@ class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
 
         json_model_output = json.loads(model_output.model_dump_json())  # Parse JSON string
         
-        data = []
+        data_json = []
         
         # Get the detection in the clean_tags model_output
         for detection in json_model_output['detections']:
@@ -69,7 +69,7 @@ class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
               classifications.append(nextClass)
 
             row_data["cl"] = classifications
-            data.append(row_data)
+            data_json.append(row_data)
         
         print("--- DATA ----")
         print(data_json)
