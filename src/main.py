@@ -13,9 +13,6 @@ logging.basicConfig(
     format="%(levelname)s - %(message)s",
     level=logging.INFO,
 )
-# logger.setLevel(logging.INFO)
-# logger = logging.getLogger(__name__)
-
 
 def main():
     """Audio recordings interval scheduler."""
@@ -129,22 +126,13 @@ def main():
 
         # Record audio
         logging.info("")
-        logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
-        print("")
-        print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
-        
+        logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")        
         recording = audio_recorder.record(deployment)
-        
-        print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
         logging.info(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
 
         """Step 2 - Run Model & Generate Detections."""
         logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
-        print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
-        
         model_outputs = model.run(recording)
-        
-        print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
         logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
 
         # Clean model outputs
@@ -154,7 +142,6 @@ def main():
         # SqliteDB Store Recording Metadata and Detections
         dbstore.store_recording(recording)
         dbstore.store_model_output(clean_tags)
-        print(f"[Thread {thread_id}] Detections saved in db: {time.asctime()}")
         logging.info(f"[Thread {thread_id}] Detections saved in db: {time.asctime()}")
 
         """Optional (Step 3 - Save Audio Recordings)."""
@@ -174,10 +161,6 @@ def main():
         #mqtt_messages = [mqtt_messenger.send_message(message) for message in dbstore_message.get_unsent_messages()]
         http_post = [http_request.send_message(message) for message in dbstore_message.get_unsent_messages()]
         response_store = [dbstore_message.store_response(http_response) for http_response in http_post]
-        print(f"[Thread {thread_id}] Detections Message sent via HTTP: {time.asctime()}")
-        print(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
-        print(f"[Thread {thread_id}] -- END")
-        print("")
         logging.info(f"[Thread {thread_id}] Detections Message sent via HTTP: {time.asctime()}")
         logging.info(f"[Thread {thread_id}] Response Status Store in DB: {time.asctime()}")
         logging.info(f"[Thread {thread_id}] -- END")
