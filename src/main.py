@@ -176,11 +176,8 @@ def main():
         #sqlite_message_store = [dbstore_message.store_message(message) for message in sqlite_messages]
         message_store = [
             dbstore_message.store_message(message) 
-            for message in http_messages]
-        
-        message_store = [
-            dbstore_message.store_message(message) 
-            for messages in http_messages for message in messages
+            for messages in http_messages
+            for message in messages
             ]
         print(" --- MESSAGES STORE --- ")
         print(message_store)
@@ -191,6 +188,7 @@ def main():
             mqtt_messenger.send_message(message)
             for message in dbstore_message.get_unsent_messages()
         ]
+        
         http_post = [
             http_request.send_message(message)
             for message in dbstore_message.get_unsent_messages()
