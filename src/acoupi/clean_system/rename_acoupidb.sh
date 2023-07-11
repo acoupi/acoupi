@@ -2,12 +2,10 @@
 
 # Get the current month and year"
 #month=$(date +%B | tr '[:upper:]' '[:lower:]')
+time=$(date +%H%M%S)
 month=$(date +%m)
 year=$(date +%y)
-echo $month
-echo $year
-renamed_file="acoupi_${month}${year}.db"
-echo $renamed_file
+renamed_file="acoupi_${month}${year}_${time}.db"
 
 # Move the acoupi.db
 cd ~/acoupi/src/acoupi/components/message_stores/sqlite
