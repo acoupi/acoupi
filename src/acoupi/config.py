@@ -18,8 +18,8 @@ DEFAULT_RECORDING_INTERVAL = 10
 DEFAULT_TIMEZONE = 'Europe/London'
 
 """Default start and end audio recording"""
-START_RECORDING_TIME = datetime.time(hour=12, minute=0, second=0)
-END_RECORDING_TIME = datetime.time(hour=21, minute=0, second=0)
+START_RECORDING_TIME = datetime.time(hour=8, minute=0, second=0)
+END_RECORDING_TIME = datetime.time(hour=6, minute=0, second=0)
 
 """Defaults options for saving recordings"""
 START_SAVING_RECORDING = datetime.time(hour=21, minute=30, second=0) 

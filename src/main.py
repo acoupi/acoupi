@@ -66,8 +66,8 @@ def main():
     )
 
     """Message Factories configuration"""
-    #message_factories = [components.FullModelOutputMessageBuilder()]
-    message_factories = [components.QEOP_MessageBuilder()]
+    sqlite_message_factories = [components.FullModelOutputMessageBuilder()]
+    http_message_factories = [components.QEOP_MessageBuilder()]
 
     """MQTT configuration to send messages"""
     mqtt_messenger = components.MQTTMessenger(
@@ -118,9 +118,7 @@ def main():
         now = datetime.datetime.now()
 
         # Schedule next recording - Use Scheduler to determine when next recording should happen.
-        threading.Timer(
-            (scheduler.time_until_next_recording(now)), process
-        ).start()
+        threading.Timer((scheduler.time_until_next_recording(now)), process).start()
 
         # Check if recording conditions are met
         if not recording_condition.should_record(now):
@@ -135,14 +133,18 @@ def main():
         logging.info(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
         print("")
         print(f"[Thread {thread_id}] Start Recording Audio: {time.asctime()}")
+        
         recording = audio_recorder.record(deployment)
+        
         print(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
         logging.info(f"[Thread {thread_id}] End Recording Audio: {time.asctime()}")
 
         """Step 2 - Run Model & Generate Detections."""
         logging.info(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
         print(f"[Thread {thread_id}] Start Running Model BatDetect2: {time.asctime()}")
+        
         model_outputs = model.run(recording)
+        
         print(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
         logging.info(f"[Thread {thread_id}] End Running Model BatDetect2: {time.asctime()}")
 
@@ -160,14 +162,24 @@ def main():
         ## TODO
 
         """Step 4 - Create and Send Messages."""
-        # Create Messages
-        messages = [
+        # Create HTTP Messages
+        http_messages = [
             message_factory.build_message(clean_tags)
-            for message_factory in message_factories
+            for message_factory in http_message_factories
         ]
-        print(messages)
-        # message_store = [dbstore_message.store_message(message) for message in messages]
-        [dbstore_message.store_message(message) for message in messages]
+        print(" --- HTTP MESSAGES --- ")
+        print(http_messages)
+        print("")
+
+        # Store Messages in DB
+        #sqlite_messages = [sqlite_message_factory.build_message(clean_tags) for sqlite_message_factory in sqlite_message_factories]
+        #sqlite_message_store = [dbstore_message.store_message(message) for message in sqlite_messages]
+        message_store = [
+            dbstore_message.store_message(message) 
+            for message in http_messages]
+        print(" --- MESSAGES STORE --- ")
+        print(message_store)
+        print("")
 
         # Send Messages via MQTT
         mqtt_messages = [
@@ -178,7 +190,9 @@ def main():
             http_request.send_message(message)
             for message in dbstore_message.get_unsent_messages()
         ]
+        print(" --- HTTP POST ANSWER --- ")
         print(http_post)
+        print("")
         response_store = [
             dbstore_message.store_response(mqtt_message)
             for mqtt_message in mqtt_messages

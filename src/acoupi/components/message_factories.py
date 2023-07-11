@@ -1,5 +1,6 @@
 """Message factories for acoupi."""
 from typing import List
+import json
 
 from acoupi import data
 from acoupi.components import types
@@ -48,7 +49,7 @@ class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
 
     def build_message(self, model_output: data.ModelOutput) -> List[data.Message]:
 
-        json_model_output = model_output.model_dump_json()
+        json_model_output = json.loads(model_output.model_dump_json())  # Parse JSON string
         
         data = []
         
@@ -70,4 +71,4 @@ class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
             row_data["cl"] = classifications
             data.append(row_data)
 
-        return data.message(content=data)
+        return data.Message(content=data)
