@@ -10,8 +10,7 @@ DEFAULT_MQTTSTUDENT_TOPIC = 'your-topic'
 
 """HTTP POST Request"""
 DEFAULT_DEVICEID = 'your-deviceid'
-DEFAULT_BASEURL = 'your-base-url'
-DEFAULT_TOPIC = f'your-topic/{DEFAULT_DEVICEID}'
+DEFAULT_BASEURL = f'your-base-url/your-topic/{DEFAULT_DEVICEID}'
 DEFAULT_CLIENTID = 'your-clientid'
 DEFAULT_PASS = 'your-password'
 DEFAULT_ACCEPT = 'application/json'
