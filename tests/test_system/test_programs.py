@@ -12,7 +12,7 @@ def test_write_program_file_creates_a_file(tmp_path: Path):
     """Test write_program_file creates a file."""
     program_file = tmp_path / "program.py"
     program_name = "test_program"
-    programs.write_program_file(program_name, program_file=program_file)
+    programs.write_program_file(program_name, path=program_file)
     assert program_file.exists()
 
 
@@ -20,7 +20,7 @@ def test_write_program_file_has_correct_program_name(tmp_path: Path):
     """Test write_program_file has correct program name."""
     program_file = tmp_path / "program.py"
     program_name = "test_program"
-    programs.write_program_file(program_name, program_file=program_file)
+    programs.write_program_file(program_name, path=program_file)
 
     line = f'program_name="{program_name}"'
     with open(program_file) as file:
@@ -33,7 +33,7 @@ def test_write_program_file_points_to_correct_config_file(tmp_path: Path):
     program_name = "test_program"
     config_file = tmp_path / "config.json"
     programs.write_program_file(
-        program_name, program_file=program_file, config_file=config_file
+        program_name, path=program_file, config_file=config_file
     )
 
     line = f'config_file="{config_file}"'
