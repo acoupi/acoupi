@@ -2,10 +2,10 @@
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
+from typing import List
 
 from pydantic import BaseModel
 from typing_extensions import Self
-
 
 __all__ = [
     "BaseConfigSchema",
@@ -19,10 +19,10 @@ class CeleryConfig(BaseModel):
     timezone: str = "UTC"
     broker_url: str = "pyamqp://guest@localhost//"
     result_backend: str = "rpc://"
-    result_persistent = False
-    task_serializer = "pickle"
-    result_serializer = "pickle"
-    accept_content = ["pickle"]
+    result_persistent: bool = False
+    task_serializer: str = "pickle"
+    result_serializer: str = "pickle"
+    accept_content: List[str] = ["pickle"]
 
 
 class BaseConfigSchema(BaseModel, ABC):
