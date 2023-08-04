@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, model_validator, field_validator
 
 __all__ = [
     "TimeInterval",
@@ -30,7 +30,7 @@ class TimeInterval(BaseModel):
     end: datetime.time
     """End time of the interval."""
 
-    @root_validator
+    @model_validator(mode="before")
     def validate_interval(cls, values):
         """Validate that the start time is before the end time."""
         if values["start"] >= values["end"]:
@@ -61,14 +61,14 @@ class Deployment(BaseModel):
     )
     """The datetime when the device was deployed."""
 
-    @validator("latitude")
+    @field_validator("latitude")
     def validate_latitude(cls, value):
         """Validate that the latitude are within range."""
         if value is not None and (value < -90 or value > 90):
             raise ValueError("latitude must be between -90 and 90")
         return value
 
-    @validator("longitude")
+    @field_validator("longitude")
     def validate_longitude(cls, value):
         """Validate that the longitude are within range."""
         if value is not None and (value < -180 or value > 180):
@@ -100,21 +100,21 @@ class Recording(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the recording"""
 
-    @validator("duration")
+    @field_validator("duration")
     def validate_duration(cls, value):
         """Validate that the duration is greater than 0."""
         if value <= 0:
             raise ValueError("duration must be greater than 0")
         return value
 
-    @validator("samplerate")
+    @field_validator("samplerate")
     def validate_samplerate(cls, value):
         """Validate that the samplerate is greater than 0."""
         if value <= 0:
             raise ValueError("samplerate must be greater than 0")
         return value
 
-    @validator("audio_channels")
+    @field_validator("audio_channels")
     def validate_audio_channels(cls, value):
         """Validate that the number of audio_channels is greater than 1."""
         if value <= 0:
@@ -131,14 +131,14 @@ class Tag(BaseModel):
     value: str
     """The value of the tag."""
 
-    @validator("key")
+    @field_validator("key")
     def validate_key(cls, value):
         """Validate that the key is not empty."""
         if not value:
             raise ValueError("key cannot be empty")
         return value
 
-    @validator("value")
+    @field_validator("value")
     def validate_value(cls, value):
         """Validate that the value is not empty."""
         if not value:
@@ -158,7 +158,7 @@ class PredictedTag(BaseModel):
     probability: float = 1
     """The probability of the tag prediction."""
 
-    @validator("probability")
+    @field_validator("probability")
     def validate_probability(cls, value):
         """Validate that the probability is between 0 and 1."""
         if value < 0 or value > 1:
@@ -189,7 +189,7 @@ class BoundingBox(BaseModel):
             coordinates=(start_time, low_freq, end_time, high_freq),
         )
 
-    @validator("coordinates")
+    @field_validator("coordinates")
     def validate_coordinates(cls, value):
         """Validate that the coordinates are within range."""
         start_time, low_freq, end_time, high_freq = value
@@ -220,14 +220,14 @@ class Detection(BaseModel):
     tags: List[PredictedTag] = Field(default_factory=list)
     """The tags predicted by the model for the detection."""
 
-    @validator("probability")
+    @field_validator("probability")
     def validate_probability(cls, value):
         """Validate that the probability is between 0 and 1."""
         if value < 0 or value > 1:
             raise ValueError("probability must be between 0 and 1")
         return value
 
-    @validator("tags")
+    @field_validator("tags")
     def sort_tags(cls, value):
         """Sort tags."""
         return sorted(
@@ -260,7 +260,7 @@ class ModelOutput(BaseModel):
     )
     """The datetime when the model output was created."""
 
-    @validator("tags")
+    @field_validator("tags")
     def sort_tags(cls, value):
         """Sort tags."""
         return sorted(
@@ -269,7 +269,7 @@ class ModelOutput(BaseModel):
             reverse=True,
         )
 
-    @validator("detections")
+    @field_validator("detections")
     def sort_detections(cls, value):
         """Sort detections by ID."""
         return sorted(

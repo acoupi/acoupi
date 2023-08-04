@@ -52,10 +52,10 @@ class BaseConfigSchema(BaseModel, ABC):
     def write(self, path: Path):
         """Write config to file in json format."""
         with open(path, "w") as file:
-            file.write(self.json())
+            file.write(self.model_dump_json())
 
     @classmethod
     def from_file(cls, path: Path) -> Self:
         """Create config from file."""
         with open(path) as file:
-            return cls.parse_raw(file.read())
+            return cls.model_validate_json(file.read())
