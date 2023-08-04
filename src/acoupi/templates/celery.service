@@ -1,0 +1,17 @@
+[Unit]
+Description=Celery Service
+After=network.target
+
+[Service]
+Type=forking
+User=celery
+Group=celery
+EnvironmentFile=/etc/conf.d/celery
+WorkingDirectory={{ working_directory }}
+ExecStart={{ start_script }}
+ExecStop={{ stop_script }}
+ExecReload={{ reload_script }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
