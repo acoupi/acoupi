@@ -1,0 +1,15 @@
+[Unit]
+Description=Acoupi Scheduler Service
+After=network.target
+
+[Service]
+Type=simple
+User=celery
+Group=celery
+EnvironmentFile={{ environment_file }}
+WorkingDirectory={{ working_directory }}
+ExecStart={{ celerybeat_script }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

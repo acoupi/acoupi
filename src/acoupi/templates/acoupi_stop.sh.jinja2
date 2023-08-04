@@ -1,0 +1,9 @@
+#!/bin/bash
+
+${CELERY_BIN} \
+    -A ${CELERY_APP} \
+	multi stopwait \
+    {% for worker in config.workers %}{{ worker.name }} {% endfor %} \
+	--pidfile=${CELERYD_PID_FILE} \
+    --logfile=${CELERYD_LOG_FILE} \
+	--loglevel="${CELERYD_LOG_LEVEL}"

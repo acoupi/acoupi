@@ -1,12 +1,12 @@
 [Unit]
-Description=Celery Service
+Description=Acoupi Service
 After=network.target
 
 [Service]
 Type=forking
 User=celery
 Group=celery
-EnvironmentFile=/etc/conf.d/celery
+EnvironmentFile={{ environment_file }}
 WorkingDirectory={{ working_directory }}
 ExecStart={{ start_script }}
 ExecStop={{ stop_script }}

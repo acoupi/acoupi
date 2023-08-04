@@ -1,0 +1,8 @@
+#!/bin/bash
+
+${CELERY_BIN} \
+    -A ${CELERY_APP} \
+	beat \
+	--pidfile=${CELERYBEAT_PID_FILE} \
+    --logfile=${CELERYBEAT_LOG_FILE} \
+	--loglevel="${CELERYBEAT_LOG_LEVEL}"

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+${CELERY_BIN} \
+    -A ${CELERY_APP} \
+    multi \
+    start \
+{%- for worker in config.workers %}
+    {{ worker.name }} \
+{%- if worker.queues %}
+    -Q:{{ worker.name }} {{ worker.queues|join(",") }} \
+{%- endif %}
+{%- if worker.concurrency %}
+    -c:{{ worker.name }} {{ worker.concurrency }} \
+{%- endif %}
+{%- endfor %}
+    --loglevel=${CELERYD_LOG_LEVEL} \
+    --pidfile=${CELERYD_PID_FILE} \
+    --logfile=${CELERYD_LOG_FILE}
+
