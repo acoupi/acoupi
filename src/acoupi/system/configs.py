@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Type, TypeVar
 
 from acoupi.programs.configs import BaseConfigSchema
-from acoupi.system.constants import CONFIG_PATH, PROGRAM_PATH
+from acoupi.system.constants import PROGRAM_CONFIG_FILE, PROGRAM_PATH
 
 __all__ = [
     "write_config",
@@ -17,13 +17,13 @@ S = TypeVar("S", bound=BaseConfigSchema)
 
 def write_config(
     config: BaseConfigSchema,
-    config_file: Path = CONFIG_PATH,
+    path: Path = PROGRAM_CONFIG_FILE,
 ) -> None:
     """Write config to file."""
-    if not config_file.parent.exists():
-        config_file.parent.mkdir(parents=True)
+    if not path.parent.exists():
+        path.parent.mkdir(parents=True)
 
-    config.write(config_file)
+    config.write(path)
 
 
 def load_config(
@@ -35,7 +35,7 @@ def load_config(
 
 
 def is_configured(
-    config_file: Path = CONFIG_PATH,
+    config_file: Path = PROGRAM_CONFIG_FILE,
     program_file: Path = PROGRAM_PATH,
 ) -> bool:
     """Check if acoupi is configured."""

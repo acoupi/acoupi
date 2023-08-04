@@ -23,16 +23,11 @@ def acoupi():
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
 def setup(program: str, args: list[str]):
     """Setup acoupi."""
-    program_class = system.load_program(program)
+    try:
+        system.setup_program(program, args)
 
-    if program_class is None:
+    except ValueError:
         click.echo("program not found")
-        return
-
-    config_schema = program_class.get_config_schema()
-    config = config_schema.from_args(args)
-    system.write_config(config)
-    system.write_program_file(program)
 
 
 @acoupi.command()
@@ -43,16 +38,16 @@ def start():
         return
 
     commands = [
-            "celery",
-            "--app",
-            "app",
-            "--workdir",
-            str(system.PROGRAM_PATH.parent),
-            "worker",
-            "--pidfile=worker.pid",
-            "--logfile=worker.log",
-            "--detach",
-        ]
+        "celery",
+        "--app",
+        "app",
+        "--workdir",
+        str(system.PROGRAM_PATH.parent),
+        "worker",
+        "--pidfile=worker.pid",
+        "--logfile=worker.log",
+        "--detach",
+    ]
 
     subprocess.run(
         commands,
