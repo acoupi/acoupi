@@ -4,12 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=celery
-Group=celery
 EnvironmentFile={{ environment_file }}
 WorkingDirectory={{ working_directory }}
-ExecStart={{ celerybeat_script }}
+ExecStart={{ beat_script }}
 Restart=always
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

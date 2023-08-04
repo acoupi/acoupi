@@ -5,8 +5,9 @@ from pathlib import Path
 from typing import List, Optional, Type
 
 from acoupi import programs
+from acoupi.system.services import install_services
 from acoupi.system import constants
-from acoupi.system.celery import write_celery_config
+from acoupi.system.celery import write_beat_script, write_celery_config
 from acoupi.system.configs import write_config
 from acoupi.system.constants import PROGRAM_CONFIG_FILE, PROGRAM_PATH
 from acoupi.system.templates import render_template
@@ -59,6 +60,7 @@ def setup_program(
     start_script: Path = constants.START_SCRIPT_PATH,
     stop_script: Path = constants.STOP_SCRIPT_PATH,
     restart_script: Path = constants.RESTART_SCRIPT_PATH,
+    beat_script: Path = constants.BEAT_SCRIPT_PATH,
     run_dir: Path = constants.RUN_DIR,
     log_dir: Path = constants.LOG_DIR,
     log_level: str = constants.LOG_LEVEL,
@@ -95,6 +97,16 @@ def setup_program(
         run_dir=run_dir,
         log_dir=log_dir,
     )
+    write_beat_script(path=beat_script)
 
     run_dir.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
+
+    install_services(
+        environment_file=celery_config_file,
+        working_directory=program_file.parent,
+        start_script=start_script,
+        stop_script=stop_script,
+        restart_script=restart_script,
+        beat_script=beat_script,
+    )

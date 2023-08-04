@@ -48,7 +48,7 @@ def write_workers_stop_script(
 
     path.write_text(
         render_template(
-            "workers_stop.sh.jinja2",
+            "acoupi_stop.sh.jinja2",
             config=config,
         )
     )

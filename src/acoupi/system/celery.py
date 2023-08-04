@@ -3,12 +3,19 @@ from pathlib import Path
 
 from acoupi.system.constants import (
     APP_NAME,
+    BEAT_SCRIPT_PATH,
     CELERY_CONFIG_PATH,
     LOG_DIR,
     LOG_LEVEL,
     RUN_DIR,
 )
 from acoupi.system.templates import render_template
+from acoupi.system.workers import give_executable_permissions
+
+__all__ = [
+    "write_celery_config",
+    "write_beat_script",
+]
 
 
 def write_celery_config(
@@ -34,3 +41,16 @@ def write_celery_config(
             log_dir=log_dir,
         )
     )
+
+
+def write_beat_script(path: Path = BEAT_SCRIPT_PATH):
+    """Write the beat script."""
+    if not path.parent.exists():
+        path.parent.mkdir(parents=True)
+
+    path.write_text(
+        render_template(
+            "acoupi_beat.sh.jinja2",
+        )
+    )
+    give_executable_permissions(path)

@@ -1,8 +1,4 @@
 """CLI for acoupi."""
-import os
-import signal
-import subprocess
-
 import click
 
 from acoupi import system
@@ -37,65 +33,15 @@ def start():
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
-    commands = [
-        "celery",
-        "--app",
-        "app",
-        "--workdir",
-        str(system.PROGRAM_PATH.parent),
-        "worker",
-        "--pidfile=worker.pid",
-        "--logfile=worker.log",
-        "--detach",
-    ]
-
-    subprocess.run(
-        commands,
-        start_new_session=True,
-    )
-
-    subprocess.Popen(
-        [
-            "celery",
-            "-A",
-            "app",
-            "--workdir",
-            str(system.PROGRAM_PATH.parent),
-            "beat",
-            "--pidfile=beat.pid",
-            "--logfile=beat.log",
-            "--loglevel=INFO",
-        ],
-        start_new_session=True,
-    )
+    system.enable_services()
+    system.start_services()
 
 
 @acoupi.command()
 def stop():
     """Stop acoupi."""
-    subprocess.run(
-        [
-            "celery",
-            "-A",
-            "app",
-            "--workdir",
-            str(system.PROGRAM_PATH.parent),
-            "multi",
-            "stop",
-            "w1",
-            "w2",
-            "--pidfile=%n.pid",
-            "--logfile=%n%I.log",
-            "--loglevel=INFO",
-            "--detach",
-        ],
-        start_new_session=True,
-    )
-
-    beat_pid_file = system.ACOUPI_HOME / "beat.pid"
-    beat_pid = (beat_pid_file).read_text()
-    os.kill(int(beat_pid), signal.SIGTERM)
-    beat_pid_file.unlink()
+    system.stop_services()
+    system.disable_services()
 
 
 if __name__ == "__main__":
