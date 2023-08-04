@@ -13,6 +13,10 @@ B = TypeVar("B")
 A = TypeVar("A", bound=BaseConfigSchema)
 
 
+class InvalidAcoupiConfiguration(ValueError):
+    """Raised when a configuration is invalid."""
+
+
 class AcoupiProgram(Generic[A], ABC):
     """A program is a collection of tasks."""
 
@@ -33,6 +37,19 @@ class AcoupiProgram(Generic[A], ABC):
     def setup(self, config: A):
         """Setup."""
         raise NotImplementedError
+
+    def test(self, config: A) -> None:
+        """Test the configurations.
+
+        This method should raise an exception if the configurations are invalid.
+        The exception should be an instance of InvalidAcoupiConfiguration.
+
+        User defined programs should override this method if they want to
+        validate their configurations. The default implementation does nothing.
+
+        Ideally this method should be called before a deployment is made.
+        """
+        pass
 
     @classmethod
     def get_config_schema(cls) -> Type[A]:
