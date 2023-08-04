@@ -1,24 +1,17 @@
+"""System functions for managing Acoupi programs."""
 import inspect
 from importlib import import_module
 from pathlib import Path
 from typing import Type
 
 from acoupi import programs
+from acoupi.system.templates import render_template
 from acoupi.system.constants import CONFIG_PATH, PROGRAM_PATH
 
 __all__ = [
     "load_program",
     "write_program_file",
 ]
-
-PROGRAM_TEMPLATE = """
-from acoupi.system import get_celery_app
-
-app = get_celery_app(
-    program_name="{program_name}",
-    config_file="{config_file}",
-)
-"""
 
 
 def load_program(program: str) -> Type[programs.AcoupiProgram]:
@@ -46,7 +39,8 @@ def write_program_file(
 
     with open(program_file, "w") as file:
         file.write(
-            PROGRAM_TEMPLATE.format(
+            render_template(
+                "app.py.jinja2",
                 program_name=program_name,
                 config_file=config_file,
             )

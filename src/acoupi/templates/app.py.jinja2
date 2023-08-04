@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""Celery application for acoupi program {{program_name}}.
+
+This file was generated automatically by acoupi, do not edit it manually!
+"""
+from acoupi.system import get_celery_app
+
+app = get_celery_app(
+    program_name="{{program_name}}",
+    config_file="{{config_file}}",
+)
