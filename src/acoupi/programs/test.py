@@ -8,6 +8,16 @@ class TestConfigSchema(BaseConfigSchema):
 
     name: str = "test_program"
 
+    @classmethod
+    def add_arguments(cls, parser):
+        """Add arguments to the parser."""
+        parser.add_argument(
+            "--name",
+            type=str,
+            default="test_program",
+            help="Name of the test program",
+        )
+
 
 class TestProgram(AcoupiProgram):
     """Test Program."""
