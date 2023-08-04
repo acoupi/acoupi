@@ -1,12 +1,18 @@
+"""System functions from managing program config files.""" ""
 from pathlib import Path
+from typing import Type, TypeVar
 
 from acoupi import config_schemas
 from acoupi.system.constants import CONFIG_PATH, PROGRAM_PATH
 
 __all__ = [
     "write_config",
+    "load_config",
     "is_configured",
 ]
+
+
+S = TypeVar("S", bound=config_schemas.BaseConfigSchema)
 
 
 def write_config(
@@ -18,6 +24,14 @@ def write_config(
         config_file.parent.mkdir(parents=True)
 
     config.write(config_file)
+
+
+def load_config(
+    path: Path,
+    schema: Type[S],
+) -> S:
+    """Load config from file."""
+    return schema.from_file(path)
 
 
 def is_configured(
