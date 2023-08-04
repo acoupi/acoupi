@@ -2,7 +2,7 @@
 from pathlib import Path
 from typing import Type, TypeVar
 
-from acoupi import config_schemas
+from acoupi.programs.configs import BaseConfigSchema
 from acoupi.system.constants import CONFIG_PATH, PROGRAM_PATH
 
 __all__ = [
@@ -12,11 +12,11 @@ __all__ = [
 ]
 
 
-S = TypeVar("S", bound=config_schemas.BaseConfigSchema)
+S = TypeVar("S", bound=BaseConfigSchema)
 
 
 def write_config(
-    config: config_schemas.BaseConfigSchema,
+    config: BaseConfigSchema,
     config_file: Path = CONFIG_PATH,
 ) -> None:
     """Write config to file."""

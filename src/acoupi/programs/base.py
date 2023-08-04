@@ -7,7 +7,7 @@ from typing import Callable, Generic, Optional, Type, TypeVar, Union
 from celery import Celery, group
 from celery.schedules import crontab
 
-from acoupi.config_schemas import BaseConfigSchema
+from acoupi.programs.configs import BaseConfigSchema
 from acoupi.programs.workers import AcoupiWorker, WorkerConfig
 
 B = TypeVar("B")

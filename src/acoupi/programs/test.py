@@ -1,5 +1,5 @@
 """Test Acoupi Program."""
-from acoupi.config_schemas import BaseConfigSchema
+from acoupi.programs.configs import BaseConfigSchema
 from acoupi.programs.base import AcoupiProgram
 
 
