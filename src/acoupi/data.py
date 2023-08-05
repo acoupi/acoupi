@@ -243,7 +243,7 @@ class ModelOutput(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the model output."""
 
-    model_name: str
+    name_model: str
     """The name of the model that produced the output."""
 
     recording: Recording

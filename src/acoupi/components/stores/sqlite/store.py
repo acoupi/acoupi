@@ -133,7 +133,7 @@ class SqliteStore(types.Store):
 
         db_model_output = self.models.ModelOutput(
             id=model_output.id,
-            model_name=model_output.model_name,
+            model_name=model_output.name_model,
             recording=db_recording,
             created_on=model_output.created_on,
         )
@@ -221,7 +221,7 @@ class SqliteStore(types.Store):
                 [
                     data.ModelOutput(
                         id=db_model_output.id,
-                        model_name=db_model_output.model_name,
+                        name_model=db_model_output.model_name,
                         recording=recording,
                         created_on=db_model_output.created_on,
                         tags=[

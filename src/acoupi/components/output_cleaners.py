@@ -59,7 +59,7 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
             The cleaned model output.
         """
         return ModelOutput(
-            model_name=model_output.model_name,
+            name_model=model_output.name_model,
             recording=model_output.recording,
             tags=self.get_clean_tags(model_output.tags),
             detections=self.get_clean_detections(model_output.detections),
