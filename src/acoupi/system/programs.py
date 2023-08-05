@@ -12,6 +12,7 @@ from acoupi.system.configs import write_config
 from acoupi.system.constants import PROGRAM_CONFIG_FILE, PROGRAM_PATH
 from acoupi.system.templates import render_template
 from acoupi.system.workers import write_workers_scripts
+from acoupi.system.parsers import parse_config_from_args
 
 __all__ = [
     "load_program",
@@ -65,6 +66,7 @@ def setup_program(
     log_dir: Path = constants.LOG_DIR,
     log_level: str = constants.LOG_LEVEL,
     app_name: str = constants.APP_NAME,
+    prompt: bool = False,
 ) -> None:
     """Setup an Acoupi Program."""
     if args is None:
@@ -72,7 +74,7 @@ def setup_program(
 
     program_class = load_program(program_name)
     config_schema = program_class.get_config_schema()
-    config = config_schema.from_args(args)
+    config = parse_config_from_args(config_schema, args, prompt=prompt)
     worker_config = program_class.get_worker_config()
 
     write_config(

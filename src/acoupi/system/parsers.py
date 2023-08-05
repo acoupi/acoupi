@@ -4,8 +4,9 @@ import argparse
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 import click
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from pydantic.fields import FieldInfo
+from pydantic_core import PydanticUndefined
 from typing_extensions import Protocol, get_args, get_origin
 
 from acoupi.programs.configs import BaseConfigSchema, NoUserPrompt
@@ -68,7 +69,13 @@ def parse_config_from_args(
             prompt=prompt,
         )
         values[field_name] = instance
-    return schema(**values)
+    try:
+        return schema(**values)
+    except ValidationError as error:
+        raise argparse.ArgumentError(
+            None,
+            f"Invalid configuration: {error}.",
+        ) from error
 
 
 def should_prompt(field: FieldInfo, prompt: bool = True) -> bool:
@@ -76,8 +83,8 @@ def should_prompt(field: FieldInfo, prompt: bool = True) -> bool:
     if not prompt:
         return False
 
-    if hasattr(field.annotation, "__metadata__"):
-        return NoUserPrompt not in field.annotation.__metadata__  # type: ignore
+    if hasattr(field, "metadata"):
+        return NoUserPrompt not in field.metadata
 
     return True
 
@@ -257,18 +264,23 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
     ):
         parser = argparse.ArgumentParser()
         name = f"{parent}.{field_name}" if parent else f"{field_name}"
+
+        default = (
+            field.default if field.default is not PydanticUndefined else None
+        )
+
         action = parser.add_argument(
             f"--{name}",
             dest="value",
             type=dtype,
-            default=field.default,
+            default=default,
             help=field.description,
         )
         parsed_args, _ = parser.parse_known_args(args)
         value = parsed_args.value
 
         if not prompt:
-            if value is None and field.default is None:
+            if value is None and default is None:
                 raise argparse.ArgumentError(
                     action, f"Missing value for {field_name}."
                 )
