@@ -1,8 +1,9 @@
 """System functions from managing program config files.""" ""
 from pathlib import Path
-from typing import Type, TypeVar
+from typing import List, Type, TypeVar
 
-from acoupi.programs.configs import BaseConfigSchema
+from pydantic import BaseModel, Field
+
 from acoupi.system.constants import PROGRAM_CONFIG_FILE, PROGRAM_PATH
 
 __all__ = [
@@ -12,18 +13,35 @@ __all__ = [
 ]
 
 
-S = TypeVar("S", bound=BaseConfigSchema)
+class CeleryConfig(BaseModel):
+    """Celery config."""
+
+    enable_utc: bool = True
+    timezone: str = "UTC"
+    broker_url: str = "pyamqp://guest@localhost//"
+    result_backend: str = "rpc://"
+    result_persistent: bool = False
+    task_serializer: str = "pickle"
+    result_serializer: str = "pickle"
+    accept_content: List[str] = Field(default_factory=lambda: ["pickle"])
+
+
+S = TypeVar("S", bound=BaseModel)
 
 
 def write_config(
-    config: BaseConfigSchema,
+    config: BaseModel,
     path: Path = PROGRAM_CONFIG_FILE,
 ) -> None:
     """Write config to file."""
+    if config is None:
+        return
+
     if not path.parent.exists():
         path.parent.mkdir(parents=True)
 
-    config.write(path)
+    with open(path, "w") as file:
+        file.write(config.model_dump_json())
 
 
 def load_config(
@@ -31,7 +49,8 @@ def load_config(
     schema: Type[S],
 ) -> S:
     """Load config from file."""
-    return schema.from_file(path)
+    with open(path) as file:
+        return schema.model_validate_json(file.read())
 
 
 def is_configured(

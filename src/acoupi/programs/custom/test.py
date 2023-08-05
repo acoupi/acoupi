@@ -1,22 +1,13 @@
 """Test Acoupi Program."""
-from acoupi.programs.configs import BaseConfigSchema
+from pydantic import BaseModel
+
 from acoupi.programs.base import AcoupiProgram
 
 
-class TestConfigSchema(BaseConfigSchema):
+class TestConfigSchema(BaseModel):
     """Configuration Schema for Test Program."""
 
     name: str = "test_program"
-
-    @classmethod
-    def add_arguments(cls, parser):
-        """Add arguments to the parser."""
-        parser.add_argument(
-            "--name",
-            type=str,
-            default="test_program",
-            help="Name of the test program",
-        )
 
 
 class TestProgram(AcoupiProgram):

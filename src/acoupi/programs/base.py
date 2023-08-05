@@ -2,46 +2,65 @@
 import datetime
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Callable, Generic, Optional, Type, TypeVar, Union
+from typing import Callable, Optional, Type, TypeVar, Union
 
 from celery import Celery, group
 from celery.schedules import crontab
+from pydantic import BaseModel
 
-from acoupi.programs.configs import BaseConfigSchema
 from acoupi.programs.workers import AcoupiWorker, WorkerConfig
 
+__all__ = [
+    "NoUserPrompt",
+    "AcoupiProgram",
+    "ProgramConfig",
+]
+
+
+class NoUserPrompt:
+    """No user prompt annotation.
+
+    Use this class to annotate fields that should not be prompted to the user.
+    """
+
+
+ProgramConfig = Optional[BaseModel]
+
 B = TypeVar("B")
-A = TypeVar("A", bound=BaseConfigSchema)
 
 
 class InvalidAcoupiConfiguration(ValueError):
     """Raised when a configuration is invalid."""
 
 
-class AcoupiProgram(Generic[A], ABC):
+class AcoupiProgram(ABC):
     """A program is a collection of tasks."""
 
-    config: A
+    config: ProgramConfig
 
     worker_config: Optional[WorkerConfig] = None
 
     app: Celery
 
-    def __init__(self, config: A):
+    def __init__(
+        self,
+        program_config: ProgramConfig,
+        celery_config: BaseModel,
+    ):
         """Initialize."""
-        self.config = config
+        self.config = program_config
         self.app = Celery()
         self.tasks = {}
 
-        self.app.config_from_object(config.celery)
-        self.setup(config)
+        self.app.config_from_object(celery_config)
+        self.setup(program_config)
 
     @abstractmethod
-    def setup(self, config: A):
+    def setup(self, config: ProgramConfig):
         """Setup."""
         raise NotImplementedError
 
-    def test(self, config: A) -> None:
+    def test(self, config: ProgramConfig) -> None:
         """Test the configurations.
 
         This method should raise an exception if the configurations are invalid.
@@ -55,7 +74,7 @@ class AcoupiProgram(Generic[A], ABC):
         pass
 
     @classmethod
-    def get_config_schema(cls) -> Type[A]:
+    def get_config_schema(cls) -> Optional[Type[BaseModel]]:
         """Get the config class."""
         return cls.__annotations__["config"]
 

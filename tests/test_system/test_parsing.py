@@ -229,7 +229,7 @@ def test_parse_simple_field_prompts_user_if_missing(monkeypatch):
         """Test field."""
 
     mock = Mock(return_value="true")
-    monkeypatch.setattr(click, "prompt", lambda *args, **kwargs: mock())
+    monkeypatch.setattr(click, "prompt", mock)
 
     parsed_config = parse_config_from_args(Schema, [])
 

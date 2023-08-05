@@ -6,7 +6,6 @@ from celery.schedules import crontab
 from pydantic import BaseModel, Field
 
 from acoupi import components, data
-from acoupi.config_schemas import BaseConfigSchema
 from acoupi.programs.base import AcoupiProgram
 from acoupi.tasks import templates
 
@@ -81,7 +80,7 @@ class MessageConfig(BaseModel):
     clientid: str = "mqtt-clientid"
 
 
-class BatDetect2_ConfigSchema(BaseConfigSchema):
+class BatDetect2_ConfigSchema(BaseModel):
     """BatDetect2 Configuration Schematic."""
 
     name: str = "batdetect2"
@@ -107,177 +106,6 @@ class BatDetect2_ConfigSchema(BaseConfigSchema):
     )
 
     message_config: MessageConfig = Field(default_factory=MessageConfig)
-
-    @classmethod
-    def add_arguments(cls, parser):
-        pass
-
-    #    """Define arugments."""
-    #    parser.add_arguments(
-    #        "--latitude",
-    #        type=float,
-    #        default=LATITUDE,
-    #    )
-    #    parser.add_arguments(
-    #        "--longitude",
-    #        type=float,
-    #        default=LONGITUDE,
-    #    )
-    #    parser.add_arguments(
-    #        "--timezone",
-    #        type=str,
-    #        default=DEFAULT_TIMEZONE,
-    #    )
-    #    """ Microphone Configuration Arguments"""
-    #    parser.add_arguments(
-    #        "--samplerate",
-    #        type=int,
-    #        default=DEFAULT_SAMPLERATE,
-    #    )
-    #    parser.add_arguments(
-    #        "--audio_channels",
-    #        type=int,
-    #        default=DEFAULT_AUDIO_CHANNELS
-    #    )
-    #    parser.add_arguments(
-    #        "--chunksize",
-    #        type=int,
-    #        default=DEFAULT_CHUNKSIZE,
-    #    )
-    #    parser.add_arguments(
-    #        "--device_index",
-    #        type=int,
-    #        default=DEVICE_INDEX,
-    #    )
-    #    """ Audio Recordings Configuration Arguments"""
-    #    parser.add_arguments(
-    #        "--audio_duration",
-    #        type=int,
-    #        default=DEFAULT_DURATION
-    #    )
-    #    parser.add_arguments(
-    #        "--audio_interval",
-    #        type=int,
-    #        default=DEFAULT_INTERVAL
-    #    )
-    #    parser.add_arguments(
-    #        "--starttime",
-    #        type=datetime.time.fromisoformat,
-    #        default=START_RECORDING_TIME
-    #    )
-    #    parser.add_arguments(
-    #        "--endtime",
-    #        type=datetime.time.fromisoformat,
-    #        default=END_RECORDING_TIME
-    #   )
-    #    parser.add_arguments(
-    #        "--threshold",
-    #        type=float,
-    #        default=DEFAULT_THRESHOLD,
-    #    )
-    #    arser.add_arguments(
-    #        "--dbpath",
-    #        type=float,
-    #        default=DEFAULT_DB_PATH,
-    #    )
-    #    ## TODO: Add Saving Recording Agruments
-    #    """Saving Recording Configuration Arguments"""
-    #    parser.add_arguments(
-    #        "--before_dawndusk",
-    #        type=str,
-    #        default=BEFORE_DAWNDUSK_DURATION
-    #    )
-    #    parser.add_arguments(
-    #        "--after_dawndusk",
-    #        type=str,
-    #        default=AFTER_DAWNDUSK_DURATION
-    #    )
-    #    parser.add_arguments(
-    #        "--audiodir_true",
-    #        type=Path,
-    #        default=DIR_RECORDING_TRUE
-    #    )
-    #    parser.add_arguments(
-    #        "--audiodir_false",
-    #        type=Path,
-    #        default=DIR_RECORDING_FALSE
-    #    )
-    #    parser.add_arguments(
-    #        "--timeformat",
-    #        type=Path,
-    #        default=DEFAULT_TIMEFORMAT
-    #    )
-    #    """ MQTT Configuration Arguments"""
-    #    parser.add_arguments(
-    #        "--host",
-    #        type=str,
-    #        default=DEFAULT_MQTT_HOST
-    #    )
-    #    parser.add_arguments(
-    #        "--port",
-    #        type=int,
-    #        default=DEFAULT_MQTT_PORT
-    #    )
-    #    parser.add_arguments(
-    #        "--client_password",
-    #        type=str,
-    #        default=DEFAULT_MQTT_CLIENT_PASS
-    #    )
-    #    parser.add_arguments(
-    #        "--client_username",
-    #        type=int,
-    #        default=DEFAULT_MQTT_CLIENT_USER
-    #    )
-    #    parser.add_arguments(
-    #        "--topic",
-    #        type=str,
-    #        default=DEFAULT_MQTT_TOPIC
-    #    )
-    #    parser.add_arguments(
-    #        "--clientid",
-    #        type=int,
-    #        default=DEFAULT_MQTT_CLIENTID
-    #    )
-
-    @classmethod
-    def from_parsed_args(cls, args):
-        """Create config from arguments."""
-        return cls()
-
-    #    return cls(
-    #        audio_config=AudioConfig(
-    #            duration=args.audio_duration,
-    #            samplerate=args.samplerate,
-    #            audio_channels=args.audio_channels,
-    #            chunksize=args.chunksize,
-    #            device_index=args.device_index,
-    #            interval=args.audio_interval,
-    #        ),
-    #        recording_schedule=RecordingSchedule(
-    #            start_time=args.starttime,
-    #            end_time=args.endtime,
-    #        ),
-    #        recording_saving=RecordingSaving(
-    #            before_dawndusk_duration=args.before_dawndusk,
-    #            eafter_dawndusk_duration=args.after_dawndusk,
-    #        ),
-    #        audio_directories=AudioDirectories(
-    #            audiodir_true=args.audiodir_true,
-    #            audiodir_false=args.audiodir_false,
-    #        ),
-    #        message_config=MessageConfig(
-    #            host=args.host,
-    #            port=args.port,
-    #            client_password=args.client_password,
-    #            client_username=args.client_username,
-    #            topic=args.topic,
-    #            clientid=args.clientid,
-    #        ),
-    #        timezone=args.timezone,
-    #        timeformat=args.timeformat,
-    #        threshold=args.threshold,
-    #        dbpath=args.dbpath,
-    #    )
 
 
 class BatDetect2_Program(AcoupiProgram):

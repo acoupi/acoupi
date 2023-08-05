@@ -5,14 +5,13 @@ from pathlib import Path
 from typing import List, Optional, Type
 
 from acoupi import programs
-from acoupi.system.services import install_services
 from acoupi.system import constants
-from acoupi.system.celery import write_beat_script, write_celery_config
-from acoupi.system.configs import write_config
+from acoupi.system.configs import CeleryConfig, write_config
 from acoupi.system.constants import PROGRAM_CONFIG_FILE, PROGRAM_PATH
-from acoupi.system.templates import render_template
-from acoupi.system.workers import write_workers_scripts
 from acoupi.system.parsers import parse_config_from_args
+from acoupi.system.scripts import write_scripts
+from acoupi.system.services import install_services
+from acoupi.system.templates import render_template
 
 __all__ = [
     "load_program",
@@ -72,38 +71,53 @@ def setup_program(
     if args is None:
         args = []
 
+    # Load acoupi program class from specified module
     program_class = load_program(program_name)
-    config_schema = program_class.get_config_schema()
-    config = parse_config_from_args(config_schema, args, prompt=prompt)
-    worker_config = program_class.get_worker_config()
 
-    write_config(
-        config,
-        path=program_config_file,
-    )
+    # Write the celery app program file
     write_program_file(
         program_name,
         config_file=program_config_file,
         path=program_file,
     )
-    write_workers_scripts(
+
+    # Get program config schema
+    config_schema = program_class.get_config_schema()
+    if config_schema is not None:
+        # Generate program configuration from arguments
+        config = parse_config_from_args(config_schema, args, prompt=prompt)
+
+        # Write program configuration to file
+        write_config(
+            config,
+            path=program_config_file,
+        )
+
+    # Generate scripts for starting, stopping, and restarting the program
+    worker_config = program_class.get_worker_config()
+    write_scripts(
         worker_config,
         start_path=start_script,
         stop_path=stop_script,
         restart_path=restart_script,
-    )
-    write_celery_config(
-        path=celery_config_file,
-        celery_app=app_name,
+        app_name=app_name,
         log_level=log_level,
-        run_dir=run_dir,
         log_dir=log_dir,
+        run_dir=run_dir,
     )
-    write_beat_script(path=beat_script)
 
+    # Generate celery configuration from arguments and write to file
+    celery_config = parse_config_from_args(CeleryConfig, args, prompt=False)
+    write_config(
+        path=celery_config_file,
+        config=celery_config,
+    )
+
+    # Make sure run and log directories exist
     run_dir.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
 
+    # Install systemd services for acoupi
     install_services(
         environment_file=celery_config_file,
         working_directory=program_file.parent,

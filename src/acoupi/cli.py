@@ -20,7 +20,7 @@ def acoupi():
 def setup(program: str, args: list[str]):
     """Setup acoupi."""
     try:
-        system.setup_program(program, args)
+        system.setup_program(program, args, prompt=True)
 
     except ValueError:
         click.echo("program not found")

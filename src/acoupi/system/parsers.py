@@ -9,14 +9,14 @@ from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefined
 from typing_extensions import Protocol, get_args, get_origin
 
-from acoupi.programs.configs import BaseConfigSchema, NoUserPrompt
+from acoupi.programs.base import NoUserPrompt
 
 __all__ = [
     "parse_config_from_args",
 ]
 
 
-A = TypeVar("A", bound=BaseConfigSchema)
+A = TypeVar("A", bound=BaseModel)
 
 
 ArgumentParserProtocol = Union[
@@ -183,14 +183,15 @@ def parse_list_field_from_args(
             help=field.description,
         )
     parsed_args, _ = parser.parse_known_args(args)
+
     value = [
         getattr(parsed_args, f"item_{num_item}")
         for num_item in range(max_items)
         if getattr(parsed_args, f"item_{num_item}") is not None
     ]
 
-    if not prompt:
-        return value
+    if not value and field.default_factory:
+        return field.default_factory()
 
     return value
 
