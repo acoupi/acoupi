@@ -4,5 +4,9 @@ Reference
 .. toctree::
    :maxdepth: 2
 
-   types
-   storages
+   data
+   components
+   tasks
+   programs
+   system
+   cli

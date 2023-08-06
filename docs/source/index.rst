@@ -3,21 +3,6 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-<<<<<<< HEAD
-.. note::
-
-   This documentation is still under development. If you have any questions,
-   please contact us.
-
-Welcome to acoupi's documentation!
-==================================
-
-Read the :ref:`introduction<acoupi-introduction>` to learn more about acoupi.
-Or start deploying smart bioacoustic devices with the
-:ref:`quickstart<acoupi-quickstart>` guide.
-
-Please use the navigation or search bar on the left to browse the documentation.
-=======
 Welcome to acoupi's documentation!
 ==================================
 
@@ -30,35 +15,18 @@ for a variety of applications.
 .. note::
 
    This documentation is still under development. If you have any questions,
-   please contact us.
->>>>>>> 1d818a3e2db57e2de844b8f08fbc4a1b959cea6a
+   please don't hesitate to contact us.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-<<<<<<< HEAD
-   introduction
-
-   quickstart
-   programs
-
-   advanced_guide/index
-   development/index
-
-   reference/index
-   indices
-
-=======
    installation
    quickstart
-   design
-   components
    examples
 
+   advanced_guide/index
    reference/index
-
-   development
+   development/index
 
    indices
->>>>>>> 1d818a3e2db57e2de844b8f08fbc4a1b959cea6a

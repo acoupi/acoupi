@@ -1,7 +1,8 @@
-Types
-=====
+acoupi.data
+===========
 
-.. automodule:: acoupi.types
+
+.. automodule:: acoupi.data
    :members:
    :undoc-members:
    :show-inheritance:

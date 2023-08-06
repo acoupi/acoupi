@@ -1,12 +1,6 @@
 # acoupi
-<<<<<<< HEAD
-Classifier for bioacoustics devices. 
 
-## Diagram
-
-![diagram](acoupi.svg)
-=======
-Audio Classifier for single-board computer.  
+Framework for smart bioacoustic sensors.
 
 ## Diagram
 
@@ -30,8 +24,6 @@ The implementation of BatDetect2 is based on components defined in Acoupi. To te
 It is important to note that the argument names should not be changed, as doing so will require modifications to the [`main.py`](src/acoupi/main.py) file. 
 
 To modify an argument, simply locate the relevant argument `config.py`and change the value to the new desired value. For example, to adjust the threshold of the detection filters, you can change the value of `DEFAULT_THRESHOLD` to a higher or lower value. By modifying the arguments, you can fine-tune the behaviour of Acoupi-BatDetect2 to better suit your specific needs and requirements. 
-
->>>>>>> 1d818a3e2db57e2de844b8f08fbc4a1b959cea6a
 
 ## Development
 
