@@ -3,10 +3,23 @@ import click
 
 from acoupi import system
 
+__all__ = [
+    "acoupi",
+    "setup",
+    "start",
+    "stop",
+]
+
 
 @click.group()
 def acoupi():
-    """Acoupi CLI."""
+    """Welcome to acoupi.
+
+    This is the main command line interface for acoupi
+    and allows you to setup and run acoupi programs.
+
+    To get started run `acoupi setup` to setup your first program.
+    """
 
 
 @acoupi.command(

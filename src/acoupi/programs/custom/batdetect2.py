@@ -5,9 +5,8 @@ from pathlib import Path
 from celery.schedules import crontab
 from pydantic import BaseModel, Field
 
-from acoupi import components, data
+from acoupi import components, data, tasks
 from acoupi.programs.base import AcoupiProgram
-from acoupi.tasks import templates
 
 """Default paramaters for Batdetect2 Program"""
 
@@ -126,7 +125,7 @@ class BatDetect2_Program(AcoupiProgram):
         dbpath_message = components.SqliteMessageStore(db_path=config.dbpath)
 
         # Step 1 - Audio Recordings Task
-        recording_task = templates.generate_recording_task(
+        recording_task = tasks.generate_recording_task(
             recorder=components.PyAudioRecorder(
                 duration=config.audio_config.audio_duration,
                 samplerate=config.audio_config.samplerate,
@@ -158,7 +157,7 @@ class BatDetect2_Program(AcoupiProgram):
         )
 
         # Step 2 - Model Detections Task
-        detection_task = templates.generate_detection_task(
+        detection_task = tasks.generate_detection_task(
             store=dbpath,
             model=components.BatDetect2(),
             message_store=dbpath_message,
@@ -170,7 +169,7 @@ class BatDetect2_Program(AcoupiProgram):
         )
 
         # Step 3 - Files Management Task
-        file_management_task = templates.generate_file_management_task(
+        file_management_task = tasks.generate_file_management_task(
             store=dbpath,
             file_manager=components.SaveRecording(
                 dirpath_true=config.audio_directories.audio_dir_true,
@@ -191,7 +190,7 @@ class BatDetect2_Program(AcoupiProgram):
         )
 
         # Step 4 - Send Data Task
-        send_data_task = templates.generate_send_data_task(
+        send_data_task = tasks.generate_send_data_task(
             message_store=dbpath_message,
             messenger=components.MQTTMessenger(
                 host=config.message_config.host,

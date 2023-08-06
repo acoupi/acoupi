@@ -16,6 +16,7 @@ from acoupi.system.templates import render_template
 __all__ = [
     "load_program",
     "write_program_file",
+    "setup_program",
 ]
 
 

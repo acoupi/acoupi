@@ -41,14 +41,9 @@ def get_user_unit_dir() -> Path:
         If `pkg-config` returns a non-zero exit code.
 
     """
+    # NOTE: Might need to revisit this in case systemd
+    # user unit directory changes in other platforms.
     return Path.home() / ".config" / "systemd" / "user"
-    #
-    # return Path(
-    #     subprocess.check_output(
-    #         ["pkg-config", "--variable=systemdsystemunitdir", "systemd"],
-    #         universal_newlines=True,
-    #     ).strip()
-    # )
 
 
 def install_services(
