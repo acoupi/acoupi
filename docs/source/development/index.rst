@@ -8,3 +8,4 @@ Development
 
    contributing
    environment
+   how_it_works

@@ -21,9 +21,10 @@ for a variety of applications.
    :maxdepth: 2
    :caption: Contents:
 
+   introduction
    installation
    quickstart
-   examples
+   programs
 
    advanced_guide/index
    reference/index

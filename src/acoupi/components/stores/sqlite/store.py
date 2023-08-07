@@ -45,14 +45,6 @@ class SqliteStore(types.Store):
     The store is thread-safe, and can be used from multiple threads
     simultaneously.
 
-    Attributes:
-        db_path: Path to the database file. Can be set to :memory: to use an
-            in-memory database.
-
-        database: The Pony ORM database object.
-
-        models: The Pony ORM models.
-
     """
 
     db_path: Path

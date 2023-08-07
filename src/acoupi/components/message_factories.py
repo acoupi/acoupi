@@ -11,12 +11,13 @@ class FullModelOutputMessageBuilder(types.ModelOutputMessageBuilder):
     This message builder builds a message from a model output. The created
     message will contain the full model output as a JSON string. This
     includes information about:
-        - the model used.
-        - the recording processed, including deployment info.
-        - the predicted tags at the recording level.
-        - predicted detections with their tags and confidence scores.
+
+    - the model used.
+    - the recording processed, including deployment info.
+    - the predicted tags at the recording level.
+    - predicted detections with their tags and confidence scores.
     """
 
     def build_message(self, model_output: data.ModelOutput) -> data.Message:
         """Build a message from a recording and model outputs."""
-        return data.Message(content=model_output.json())
+        return data.Message(content=model_output.model_dump_json())

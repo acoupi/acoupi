@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List, Optional, TypeVar
+from typing import Callable, List, Optional
 
 from acoupi.components import types
 from acoupi.files import delete_recording, get_temp_file_id, get_temp_files
@@ -8,13 +8,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-S = TypeVar("S", bound=types.RecordingSavingFilter, covariant=True)
-
-
 def generate_file_management_task(
     store: types.Store,
     file_manager: types.RecordingSavingManager,
-    file_filters: Optional[List[S]] = None,
+    logger: logging.Logger = logger,
+    file_filters: Optional[List[types.RecordingSavingFilter]] = None,
 ) -> Callable[[], None]:
     """Build a process to manage files.
 

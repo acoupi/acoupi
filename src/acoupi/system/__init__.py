@@ -12,6 +12,7 @@ from acoupi.system.constants import (
     PROGRAM_PATH,
 )
 from acoupi.system.deployments import get_current_deployment
+from acoupi.system.parsers import parse_config_from_args
 from acoupi.system.programs import (
     load_program,
     setup_program,
@@ -34,6 +35,7 @@ __all__ = [
     "get_current_deployment",
     "is_configured",
     "load_program",
+    "parse_config_from_args",
     "setup_program",
     "start_services",
     "stop_services",
