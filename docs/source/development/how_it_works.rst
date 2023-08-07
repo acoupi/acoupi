@@ -8,16 +8,16 @@ development.
 
 The document delves into the technologies utilized to ensure the seamless
 operation of user-defined programs on edge devices, providing insights into the
-robust integration that drives Acoupi's functionality.
+integration that drives Acoupi's functionality.
 
 1. What is a Program?
 ---------------------
 
-In the context of Acoupi, a program signifies a structured collection of tasks
-orchestrated to establish a distinct configuration for acoustic monitoring.
-Acoupi offers users the flexibility to either develop custom programs or deploy
-existing ones, detailed instructions for which can be found in the program
-reference.
+In the context of Acoupi, a program consists of a structured collection of
+tasks orchestrated to establish a distinct configuration for acoustic
+monitoring. Acoupi offers users the flexibility to either develop custom
+programs or deploy existing ones, detailed instructions for which can be found
+in the program reference.
 
 Programs are represented as importable subclasses of
 :class:`acoupi.programs.AcoupiProgram`. Any module accessible via the Python
@@ -101,7 +101,7 @@ employed when specifying the AcoupiProgram as demonstrated below:
         worker_config = MyWorkerConfig
         ...
 
-This approach empowers precise control over task distribution and resource
+This approach allows precise control over task distribution and resource
 allocation within your Acoupi programs. If not specified, a single worker is
 created by default.
 
@@ -153,7 +153,6 @@ accurately. The code generation process is handled by the
 :func:`acoupi.system.setup_program` function.
 
 The structure of the ``ACOUPI_HOME`` directory is as follows:
-
 
 .. code-block:: bash
 
