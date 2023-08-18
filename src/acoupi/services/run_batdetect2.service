@@ -1,0 +1,14 @@
+[Unit]
+Description=Acoupi-Batdetect2 Device: Record, Analyse, Save and Send Results of Audio Recording. 
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/acoupi/src
+ExecStart=/usr/bin/python3 /home/pi/acoupi/src/main.py
+Restart=always
+RestartSec=3
+TimeoutSec=30
+
+[Install]
+WantedBy=multi-user.target
