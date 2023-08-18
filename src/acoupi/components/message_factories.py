@@ -18,10 +18,11 @@ class FullModelOutputMessageBuilder(types.ModelOutputMessageBuilder):
     This message builder builds a message from a model output. The created
     message will contain the full model output as a JSON string. This
     includes information about:
-        - the model used.
-        - the recording processed, including deployment info.
-        - the predicted tags at the recording level.
-        - predicted detections with their tags and confidence scores.
+
+    - the model used.
+    - the recording processed, including deployment info.
+    - the predicted tags at the recording level.
+    - predicted detections with their tags and confidence scores.
     """
 
     def build_message(self, model_output: data.ModelOutput) -> data.Message:
@@ -31,7 +32,7 @@ class FullModelOutputMessageBuilder(types.ModelOutputMessageBuilder):
 
 class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
     """A ModelOutputMessageBuilder that builds message from model outputs.
-    
+
     Format Result for QEOP devices with the following arguments:
         {
             'ts': <recording timestamp in unix ms>,
@@ -51,12 +52,12 @@ class QEOP_MessageBuilder(types.ModelOutputMessageBuilder):
     def build_message(self, model_output: data.ModelOutput) -> List[data.Message]:
 
         json_model_output = json.loads(model_output.model_dump_json())  # Parse JSON string
-        
+
         data_json = []
-        
+
         # Get the detection in the clean_tags model_output
         for detection in json_model_output['detections']:
-            
+
             row_data = {}
 
             #get the timestamp from the recordings

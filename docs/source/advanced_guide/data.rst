@@ -23,7 +23,7 @@ the Acoupi framework. This includes information about the device, the location
 where the device is deployed, and the starting date. A deployment can be
 created by instantiating a Deployment dataclass.
 
-.. autoclass:: acoupi.types.Deployment
+.. autoclass:: acoupi.data.Deployment
    :members:
    :undoc-members:
    :noindex:
@@ -38,7 +38,7 @@ contains information about the recording, such as the date and time when the
 recording was made, the path to the audio file, and the duration of the
 recording. A recording can be created by instantiating a Recording dataclass.
 
-.. autoclass:: acoupi.types.Recording
+.. autoclass:: acoupi.data.Recording
    :members:
    :undoc-members:
    :noindex:
@@ -53,7 +53,7 @@ contains information about in which recording the detection was made, what is
 the species of the animal that was detected, and the probability of the
 detection. A detection can be created by instantiating a Detection dataclass.
 
-.. autoclass:: acoupi.types.Detection
+.. autoclass:: acoupi.data.Detection
    :members:
    :undoc-members:
    :noindex:
@@ -68,7 +68,7 @@ information about the message, such as the date and time when the message was
 sent, the type of the message, and the content of the message. A message can
 be created by instantiating a Message dataclass.
 
-.. autoclass:: acoupi.types.Message
+.. autoclass:: acoupi.data.Message
    :members:
    :undoc-members:
    :noindex:
@@ -81,7 +81,7 @@ contains information about the response, such as the date and time when the
 response was received, the type of the response, and the content of the
 response. A response can be created by instantiating a Response dataclass.
 
-.. autoclass:: acoupi.types.Response
+.. autoclass:: acoupi.data.Response
    :members:
    :undoc-members:
    :noindex:

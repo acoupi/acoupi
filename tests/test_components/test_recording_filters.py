@@ -20,7 +20,7 @@ def test_threshold_recording_filter_rejects_low_confidence_recordings(
     """
     filter = components.ThresholdRecordingFilter(threshold=0.5)
     model_output = data.ModelOutput(
-        model_name="test",
+        name_model="test",
         recording=recording,
         detections=[
             data.Detection(
@@ -47,7 +47,7 @@ def test_threshold_recording_filter_keeps_high_confidence_recordings(
     """
     filter = components.ThresholdRecordingFilter(threshold=0.5)
     model_output = data.ModelOutput(
-        model_name="test",
+        name_model="test",
         recording=recording,
         detections=[
             data.Detection(
@@ -73,7 +73,7 @@ def test_threshold_recording_filter_with_multiple_detections(
     """
     filter = components.ThresholdRecordingFilter(threshold=0.5)
     model_output = data.ModelOutput(
-        model_name="test",
+        name_model="test",
         recording=recording,
         detections=[
             data.Detection(
@@ -120,7 +120,7 @@ def test_focus_species_filter_rejects_if_no_target_species_found(
         tags=[data.Tag(key="species", value="test")]
     )
     model_output = data.ModelOutput(
-        model_name="test",
+        name_model="test",
         recording=recording,
         detections=[
             data.Detection(
@@ -144,7 +144,7 @@ def test_focus_species_filter_rejects_low_confidence_detections(
         tags=[data.Tag(key="species", value="test")], threshold=0.5
     )
     model_output = data.ModelOutput(
-        model_name="test",
+        name_model="test",
         recording=recording,
         detections=[
             data.Detection(
@@ -169,7 +169,7 @@ def test_focus_species_filter_keeps_high_confidence_detections(
         threshold=0.5,
     )
     model_output = data.ModelOutput(
-        model_name="test",
+        name_model="test",
         recording=recording,
         detections=[
             data.Detection(
@@ -199,7 +199,7 @@ def test_focus_species_filter_rejects_even_with_confident_non_target(
         threshold=0.5,
     )
     model_output = data.ModelOutput(
-        model_name="test",
+        name_model="test",
         recording=recording,
         detections=[
             data.Detection(
@@ -236,7 +236,7 @@ def test_focus_species_filter_keeps_with_at_least_one_target_species(
         threshold=0.5,
     )
     model_output = data.ModelOutput(
-        model_name="test",
+        name_model="test",
         recording=recording,
         detections=[
             data.Detection(

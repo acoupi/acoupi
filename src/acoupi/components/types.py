@@ -223,7 +223,7 @@ class ModelOutputMessageBuilder(ABC):
     def build_message(
         self,
         model_output: ModelOutput,
-    ) -> List[Message]:
+    ) -> Message:
         """Build a message from the model output."""
 
 

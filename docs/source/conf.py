@@ -42,6 +42,7 @@ intersphinx_mapping = {
     "dask": ("https://docs.dask.org/en/latest/", None),
     "jax": ("https://jax.readthedocs.io/en/latest/", None),
     "pony": ("https://docs.ponyorm.org/", None),
+    "celery": ("https://docs.celeryq.dev/en/stable/", None),
 }
 
 templates_path = ["_templates"]
@@ -60,3 +61,7 @@ html_theme_options = {
     "source_branch": "main",
     "source_directory": "docs/",
 }
+
+# -- Options for autodoc -------------------------------------------------
+autodoc_typehints = "description"
+autodoc_preserve_defaults = True

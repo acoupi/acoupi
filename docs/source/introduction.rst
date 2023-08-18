@@ -34,7 +34,3 @@ understand that not everyone has a background in programming or signal
 processing, so we've taken care to make the toolkit as user-friendly as
 possible. So whether you're an expert or a beginner, you'll find that
 **Acoupi** is a breeze to work with.
-
-So there you have it! With **Acoupi**, you have everything you need to create
-your own custom bioacoustic monitoring system. So why wait? Give it a try today
-and see what you can create!

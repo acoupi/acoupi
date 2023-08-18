@@ -30,7 +30,7 @@ class TimeInterval(BaseModel):
     end: datetime.time
     """End time of the interval."""
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     def validate_interval(cls, values):
         """Validate that the start time is before the end time."""
         if values["start"] >= values["end"]:
@@ -155,7 +155,8 @@ class PredictedTag(BaseModel):
     tag: Tag
     """The tag predicted by the model."""
 
-    probability: float = 0
+    #probability: float = 0
+    probability: float = 1
     """The probability of the tag prediction."""
 
     @field_validator("probability")
@@ -243,7 +244,7 @@ class ModelOutput(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the model output."""
 
-    model_name: str
+    name_model: str
     """The name of the model that produced the output."""
 
     recording: Recording

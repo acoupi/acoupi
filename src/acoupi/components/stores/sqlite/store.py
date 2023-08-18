@@ -44,15 +44,6 @@ class SqliteStore(types.Store):
 
     The store is thread-safe, and can be used from multiple threads
     simultaneously.
-
-    Attributes:
-        db_path: Path to the database file. Can be set to :memory: to use an
-            in-memory database.
-
-        database: The Pony ORM database object.
-
-        models: The Pony ORM models.
-
     """
 
     db_path: Path
@@ -133,7 +124,7 @@ class SqliteStore(types.Store):
 
         db_model_output = self.models.ModelOutput(
             id=model_output.id,
-            model_name=model_output.model_name,
+            model_name=model_output.name_model,
             recording=db_recording,
             created_on=model_output.created_on,
         )
@@ -221,7 +212,7 @@ class SqliteStore(types.Store):
                 [
                     data.ModelOutput(
                         id=db_model_output.id,
-                        model_name=db_model_output.model_name,
+                        name_model=db_model_output.model_name,
                         recording=recording,
                         created_on=db_model_output.created_on,
                         tags=[

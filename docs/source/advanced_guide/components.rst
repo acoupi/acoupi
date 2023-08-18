@@ -83,10 +83,10 @@ or not. These will usually run at the beggining of the recording process and
 make sure the process ends early if the recording conditions are not met. You
 can use as many as you need.
 
-.. autoclass:: acoupi.recording_conditions.IsInInterval
+.. autoclass:: acoupi.components.IsInInterval
    :noindex:
 
-.. autoclass:: acoupi.recording_conditions.IsInIntervals
+.. autoclass:: acoupi.components.IsInIntervals
    :noindex:
 
 .. _audio_recorders:

@@ -15,7 +15,7 @@ class BatDetect2(types.Model):
 
         if not audio_file_path:
             return data.ModelOutput(
-                model_name="BatDetect2",
+                name_model="BatDetect2",
                 recording=recording,
             )
 
@@ -50,7 +50,7 @@ class BatDetect2(types.Model):
         ]
 
         return data.ModelOutput(
-            model_name="BatDetect2",
+            name_model="BatDetect2",
             recording=recording,
             detections=detections,
         )

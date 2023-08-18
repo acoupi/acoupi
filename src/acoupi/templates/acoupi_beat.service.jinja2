@@ -1,0 +1,13 @@
+[Unit]
+Description=Acoupi Scheduler Service
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile={{ environment_file }}
+WorkingDirectory={{ working_directory }}
+ExecStart={{ beat_script }}
+Restart=always
+
+[Install]
+WantedBy=default.target

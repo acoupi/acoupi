@@ -4,7 +4,8 @@ from acoupi.components.message_factories import FullModelOutputMessageBuilder, Q
 from acoupi.components.message_stores.sqlite import SqliteMessageStore
 from acoupi.components.messengers import MQTTMessenger, HTTPMessenger
 from acoupi.components.models import BatDetect2
-from acoupi.components.output_cleaners import DetectionProbabilityCleaner, TagKeyCleaner
+from acoupi.components.output_cleaners import ThresholdDetectionFilter
+#from acoupi.components.output_cleaners import DetectionProbabilityCleaner, TagKeyCleaner
 from acoupi.components.recording_conditions import IsInIntervals, IsInInterval
 from acoupi.components.recording_schedulers import IntervalScheduler
 from acoupi.components.saving_filters import (
@@ -42,6 +43,7 @@ __all__ = [
     "SaveRecording",
     "SqliteMessageStore",
     "SqliteStore",
-    "DetectionProbabilityCleaner",
+    #"DetectionProbabilityCleaner",
+    "ThresholdDetectionFilter",
     "ThresholdRecordingFilter",
 ]

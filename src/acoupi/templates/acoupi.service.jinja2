@@ -1,0 +1,15 @@
+[Unit]
+Description=Acoupi Service
+After=network.target
+
+[Service]
+Type=forking
+EnvironmentFile={{ environment_file }}
+WorkingDirectory={{ working_directory }}
+ExecStart={{ start_script }}
+ExecStop={{ stop_script }}
+ExecReload={{ restart_script }}
+Restart=always
+
+[Install]
+WantedBy=default.target
