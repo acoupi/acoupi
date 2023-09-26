@@ -4,7 +4,7 @@ Framework for smart bioacoustic sensors.
 
 ## Diagram
 
-![diagram](acoupi/docs/old_docs/acoupi-processdiagram.png)
+![diagram](docs/old_docs/acoupi-processdiagram.png)
 
 ## Running BatDetect2
 
