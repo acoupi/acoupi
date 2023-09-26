@@ -9,7 +9,7 @@ from werkzeug import Request, Response
 from acoupi import components, data
 
 TEST_MODEL_OUTPUT = data.ModelOutput(
-    model_name="test_model",
+    name_model="test_model",
     recording=data.Recording(
         path=Path("test_path.wav"),
         deployment=data.Deployment(
@@ -109,8 +109,8 @@ def test_full_model_output_message_can_be_sent_with_http_messenger(
         assert request.method == "POST"
         assert request.headers["Content-Type"] == "application/json"
         request_data = request.data.decode("utf-8")
-        expected_data = json.dumps(TEST_MODEL_OUTPUT.model_dump(mode="json"))
-        assert request_data == expected_data
+        request_data = data.ModelOutput.model_validate_json(request_data)
+        assert request_data == TEST_MODEL_OUTPUT
         return Response("OK", status=200)
 
     httpserver.expect_request("/endpoint").respond_with_handler(

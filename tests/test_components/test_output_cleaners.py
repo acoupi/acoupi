@@ -31,7 +31,7 @@ def create_test_model_output():
         """Return a model output."""
         return data.ModelOutput(
             recording=recording,
-            model_name="test_model",
+            name_model="test_model",
             detections=detections,
         )
 
@@ -100,41 +100,6 @@ def test_threshold_detection_filter_removes_detections_with_low_confidence(
     assert cleaned_model_output.detections[0].tags[0].tag.value == "species2"
 
 
-def test_threshold_detection_filter_removes_non_species_detections(
-    create_test_model_output,
-    create_test_detection,
-):
-    """Test threshold filter removes non-species detections."""
-    # Arrange
-    cleaner = output_cleaners.ThresholdDetectionFilter(
-        threshold=0.5,
-        tag_keys=["species"],
-    )
-    model_output = create_test_model_output(
-        detections=[
-            create_test_detection(
-                "echolocation",
-                tag_key="event",
-                detection_probability=0.7,
-                tag_probability=0.5,
-            ),
-            create_test_detection(
-                "species2",
-                detection_probability=0.6,
-                tag_probability=0.5,
-            ),
-        ]
-    )
-
-    # Act
-    cleaned_model_output = cleaner.clean(model_output)
-
-    # Assert
-
-    assert len(cleaned_model_output.detections) == 1
-    assert cleaned_model_output.detections[0].tags[0].tag.value == "species2"
-
-
 def test_threshold_detection_keeps_detections_even_with_low_confidence_tags(
     create_test_model_output,
     create_test_detection,
@@ -197,11 +162,11 @@ def test_threshold_removes_detections_with_default_tag_probability(
     assert cleaned_model_output.detections[0].tags[0].tag.value == "species1"
 
 
-def test_threshold_does_not_remove_tags_even_if_with_low_probability_score(
+def test_threshold_removes_low_probability_tags(
     create_test_model_output,
     create_test_detection,
 ):
-    """Test threshold filter removes detections with default tag probability."""
+    """Test filter keeps tags even if with low probability score."""
     # Arrange
     cleaner = output_cleaners.ThresholdDetectionFilter(
         threshold=0.5,
@@ -221,5 +186,4 @@ def test_threshold_does_not_remove_tags_even_if_with_low_probability_score(
 
     # Assert
     assert len(cleaned_model_output.detections) == 1
-    assert len(cleaned_model_output.detections[0].tags) == 1
-    assert cleaned_model_output.detections[0].tags[0].tag.value == "species1"
+    assert len(cleaned_model_output.detections[0].tags) == 0

@@ -20,7 +20,14 @@ __all__ = [
     "write_scripts",
 ]
 
-CELERY_BIN = shutil.which("celery")
+
+def get_celery_bin() -> Path:
+    """Return the path to the celery binary."""
+    path = shutil.which("celery")
+    if path is None:
+        raise RuntimeError("Could not find celery binary.")
+    return Path(path)
+
 
 def give_executable_permissions(path: Path) -> None:
     """Give executable permissions to a file."""
@@ -36,16 +43,20 @@ def write_workers_start_script(
     log_level: str = LOG_LEVEL,
     run_dir: Path = RUN_DIR,
     log_dir: Path = LOG_DIR,
+    celery_bin: Path | None = None,
 ) -> None:
     """Write the worker start script."""
     if not path.parent.exists():
         path.parent.mkdir(parents=True)
 
+    if celery_bin is None:
+        celery_bin = get_celery_bin()
+
     path.write_text(
         render_template(
             "acoupi_start.sh.jinja2",
             config=config,
-            celery_bin=CELERY_BIN,
+            celery_bin=celery_bin,
             app_name=app_name,
             log_level=log_level,
             run_dir=run_dir,
@@ -63,16 +74,20 @@ def write_workers_stop_script(
     log_level: str = LOG_LEVEL,
     run_dir: Path = RUN_DIR,
     log_dir: Path = LOG_DIR,
+    celery_bin: Path | None = None,
 ) -> None:
     """Write the worker stop script."""
     if not path.parent.exists():
         path.parent.mkdir(parents=True)
 
+    if celery_bin is None:
+        celery_bin = get_celery_bin()
+
     path.write_text(
         render_template(
             "acoupi_stop.sh.jinja2",
             config=config,
-            celery_bin=CELERY_BIN,
+            celery_bin=celery_bin,
             app_name=app_name,
             log_level=log_level,
             run_dir=run_dir,
@@ -90,16 +105,20 @@ def write_workers_restart_script(
     log_level: str = LOG_LEVEL,
     run_dir: Path = RUN_DIR,
     log_dir: Path = LOG_DIR,
+    celery_bin: Path | None = None,
 ) -> None:
     """Write the worker restart script."""
     if not path.parent.exists():
         path.parent.mkdir(parents=True)
 
+    if celery_bin is None:
+        celery_bin = get_celery_bin()
+
     path.write_text(
         render_template(
             "acoupi_restart.sh.jinja2",
             config=config,
-            celery_bin=CELERY_BIN,
+            celery_bin=celery_bin,
             app_name=app_name,
             log_level=log_level,
             run_dir=run_dir,
@@ -116,15 +135,19 @@ def write_beat_script(
     log_level: str = LOG_LEVEL,
     run_dir: Path = RUN_DIR,
     log_dir: Path = LOG_DIR,
+    celery_bin: Path | None = None,
 ):
     """Write the beat script."""
     if not path.parent.exists():
         path.parent.mkdir(parents=True)
 
+    if celery_bin is None:
+        celery_bin = get_celery_bin()
+
     path.write_text(
         render_template(
             "acoupi_beat.sh.jinja2",
-            celery_bin=CELERY_BIN,
+            celery_bin=celery_bin,
             app_name=app_name,
             log_level=log_level,
             run_dir=run_dir,
@@ -145,6 +168,7 @@ def write_scripts(
     log_level: str = LOG_LEVEL,
     run_dir: Path = RUN_DIR,
     log_dir: Path = LOG_DIR,
+    celery_bin: Path | None = None,
 ) -> None:
     """Write the worker scripts."""
     write_workers_start_script(
@@ -154,6 +178,7 @@ def write_scripts(
         log_level=log_level,
         run_dir=run_dir,
         log_dir=log_dir,
+        celery_bin=celery_bin,
     )
     write_workers_stop_script(
         config,
@@ -162,6 +187,7 @@ def write_scripts(
         log_level=log_level,
         run_dir=run_dir,
         log_dir=log_dir,
+        celery_bin=celery_bin,
     )
     write_workers_restart_script(
         config,
@@ -170,6 +196,7 @@ def write_scripts(
         log_level=log_level,
         run_dir=run_dir,
         log_dir=log_dir,
+        celery_bin=celery_bin,
     )
     write_beat_script(
         path=beat_path,
@@ -177,4 +204,5 @@ def write_scripts(
         log_level=log_level,
         run_dir=run_dir,
         log_dir=log_dir,
+        celery_bin=celery_bin,
     )

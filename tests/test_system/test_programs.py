@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from acoupi.programs.test import TestProgram
+from acoupi.programs.custom.test import TestProgram
 from acoupi.system import programs
 
 
@@ -43,7 +43,7 @@ def test_write_program_file_points_to_correct_config_file(tmp_path: Path):
 
 def test_can_load_the_test_program():
     """Test can load the test program."""
-    program_class = programs.load_program("acoupi.programs.test")
+    program_class = programs.load_program("acoupi.programs.custom.test")
     assert program_class == TestProgram
 
 

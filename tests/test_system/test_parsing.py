@@ -7,14 +7,13 @@ import click
 import pytest
 from pydantic import BaseModel, Field
 
-from acoupi.programs.configs import BaseConfigSchema
 from acoupi.system.parsers import parse_config_from_args
 
 
 def test_parse_config_with_empty_args_has_default_values():
     """Test that parsing an empty list of args returns default values."""
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         foo: str = "bar"
@@ -32,7 +31,7 @@ def test_parse_config_with_empty_args_has_default_values():
 def test_parse_config_overrides_default_values_with_args():
     """Test that parsing args overrides default values."""
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         foo: str = "bar"
@@ -50,7 +49,7 @@ def test_parse_config_overrides_default_values_with_args():
 def test_parse_config_with_boolean_field():
     """Test that parsing args overrides default values."""
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         foo: bool = True
@@ -66,7 +65,7 @@ def test_parse_config_with_boolean_field():
 def test_raise_error_when_field_is_required_but_not_provided():
     """Test that parsing args overrides default values."""
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         foo: bool
@@ -78,7 +77,7 @@ def test_raise_error_when_field_is_required_but_not_provided():
 def test_parse_config_with_list_field():
     """Test that parsing args overrides default values."""
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         foo: list = ["bar"]
@@ -96,7 +95,7 @@ def test_parse_config_with_list_field():
 def test_parse_config_with_tuple_field():
     """Test that parsing args overrides default values."""
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         foo: tuple = ("bar",)
@@ -114,7 +113,7 @@ def test_parse_config_with_tuple_field():
 def test_parse_config_with_int_field():
     """Test that parsing args overrides default values."""
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         foo: int = 3
@@ -132,7 +131,7 @@ def test_parse_config_with_int_field():
 def test_parse_config_with_float_field():
     """Test that parsing args overrides default values."""
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         foo: float = 3.0
@@ -150,7 +149,7 @@ def test_parse_config_with_float_field():
 def test_parse_config_with_str_field():
     """Test that parsing args overrides default values."""
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         foo: str = "bar"
@@ -173,7 +172,7 @@ def test_parse_nested_config_with_defaults():
 
         a: int = 3
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         b: bool = True
@@ -200,7 +199,7 @@ def test_parse_nested_config_with_args():
 
         a: int = 3
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         b: bool = True
@@ -222,7 +221,7 @@ def test_parse_nested_config_with_args():
 def test_parse_simple_field_prompts_user_if_missing(monkeypatch):
     """Test that user is prompted if field is missing."""
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         foo: bool
@@ -241,7 +240,7 @@ def test_parse_simple_field_prompts_user_if_missing(monkeypatch):
 def test_parse_simple_field_ask_for_confirmation_if_provided(monkeypatch):
     """Test that user is prompted if field is missing."""
 
-    class Schema(BaseConfigSchema):
+    class Schema(BaseModel):
         """Test schema."""
 
         foo: bool

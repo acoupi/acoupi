@@ -142,8 +142,7 @@ class HTTPMessenger(types.Messenger):
             if self.content_type == "application/json":
                 response = requests.post(
                     self.base_url,
-                    #json=json.loads(message_content).
-                    json={'data': json.loads(message_content)},
+                    json=content_json,
                     params=self.base_params,
                     headers=self.headers,
                     timeout=self.timeout,
@@ -152,8 +151,7 @@ class HTTPMessenger(types.Messenger):
             else:
                 response = requests.post(
                     self.base_url,
-                    #data=message_content,
-                    data={'data': json.loads(message_content)}, 
+                    data=content_json,
                     params=self.base_params,
                     headers=self.headers,
                     timeout=self.timeout,

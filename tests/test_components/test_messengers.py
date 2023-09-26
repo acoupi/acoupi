@@ -29,9 +29,12 @@ def test_http_messenger():
 
         mock_post.assert_called_once_with(
             "http://localhost:5000",
-            data="Hello, world!",
+            json="Hello, world!",
             params={},
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
             timeout=5,
         )
 
@@ -57,9 +60,12 @@ def test_http_messenger_with_params():
 
         mock_post.assert_called_once_with(
             "http://localhost:5000",
-            data="Hello, world!",
+            json="Hello, world!",
             params={"key": "value"},
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
             timeout=5,
         )
 
@@ -85,9 +91,13 @@ def test_http_messeger_with_custom_headers():
 
         mock_post.assert_called_once_with(
             "http://localhost:5000",
-            data="Hello, world!",
+            json="Hello, world!",
             params={},
-            headers={"Content-Type": "application/json", "X-Test": "value"},
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-Test": "value",
+            },
             timeout=5,
         )
 
@@ -104,7 +114,7 @@ def test_http_messenger_with_complex_message():
         )
 
         model_output = data.ModelOutput(
-            model_name="test_model",
+            name_model="test_model",
             recording=data.Recording(
                 path=Path("test_recording.wav"),
                 duration=1,
@@ -149,9 +159,12 @@ def test_http_messenger_with_complex_message():
 
         mock_post.assert_called_once_with(
             "http://localhost:5000",
-            data=model_output.model_dump(mode="json"),
+            json=model_output.model_dump(mode="json"),
             params={},
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
             timeout=5,
         )
 
