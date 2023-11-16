@@ -67,8 +67,8 @@ def main():
 
     """MQTT configuration to send messages"""
     mqtt_messenger = components.MQTTMessenger(
-        host=config_mqtt.DEFAULT_MQTT_HOST,
-        port=config_mqtt.DEFAULT_MQTT_PORT,
+        host=config_mqtt.DEFAULT_HOST,
+        port=config_mqtt.DEFAULT_PORT,
         username=config_mqtt.DEFAULT_MQTTSTUDENT_USER,
         password=config_mqtt.DEFAULT_MQTTSTUDENT_PASS,
         topic=config_mqtt.DEFAULT_MQTTSTUDENT_CLIENTID,
