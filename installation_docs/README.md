@@ -25,7 +25,7 @@ git clone -b main --depth=1 https://audevuilli@github.com/audevuilli/acoupi.git
 ```
 8. Move into acoupi folder and install pdm dependencies
 ```cd acoupi
-pdm install .
+pdm install
 ```
 
 
