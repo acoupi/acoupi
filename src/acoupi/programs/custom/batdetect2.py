@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from acoupi import components, data, tasks
 from acoupi.programs.base import AcoupiProgram
+from acoupi.system.constants import ACOUPI_HOME
 
 """Default paramaters for Batdetect2 Program"""
 
@@ -86,7 +87,7 @@ class BatDetect2_ConfigSchema(BaseModel):
 
     threshold: float = 0.2
 
-    dbpath: Path = Path.home() / "storages" / "acoupi.db"
+    dbpath: Path = ACOUPI_HOME / "storages" / "acoupi.db"
 
     timeformat: str = "%Y%m%d_%H%M%S"
 
