@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List, Optional, Type
 
 from acoupi import programs
+from acoupi.system import exceptions
 from acoupi.system import constants
 from acoupi.system.configs import CeleryConfig, write_config
 from acoupi.system.constants import PROGRAM_CONFIG_FILE, PROGRAM_PATH
@@ -22,7 +23,10 @@ __all__ = [
 
 def load_program(program: str) -> Type[programs.AcoupiProgram]:
     """Load acoupi program from path."""
-    program_module = import_module(program)
+    try:
+        program_module = import_module(program)
+    except ModuleNotFoundError:
+        raise exceptions.ProgramNotFoundError(program=program)
 
     for _, class_ in inspect.getmembers(program_module, inspect.isclass):
         if (
@@ -31,7 +35,7 @@ def load_program(program: str) -> Type[programs.AcoupiProgram]:
         ):
             return class_
 
-    raise ValueError(f"program {program} not found")
+    raise exceptions.InvalidProgramError(program=program)
 
 
 def write_program_file(

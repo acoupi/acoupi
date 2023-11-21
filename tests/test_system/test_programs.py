@@ -6,6 +6,7 @@ import pytest
 
 from acoupi.programs.custom.test import TestProgram
 from acoupi.system import programs
+from acoupi.system import exceptions
 
 
 def test_write_program_file_creates_a_file(tmp_path: Path):
@@ -49,11 +50,11 @@ def test_can_load_the_test_program():
 
 def test_load_program_fails_if_module_does_not_exist():
     """Test load_program fails if file does not exist."""
-    with pytest.raises(ModuleNotFoundError):
+    with pytest.raises(exceptions.ProgramNotFoundError):
         programs.load_program("does.not.exist")
 
 
 def test_load_program_fails_if_no_program_is_found_in_module():
     """Test load_program fails if no program is found in module."""
-    with pytest.raises(ValueError):
+    with pytest.raises(exceptions.InvalidProgramError):
         programs.load_program("math")
