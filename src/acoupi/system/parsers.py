@@ -2,6 +2,8 @@
 
 import argparse
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
+import datetime
+from pathlib import Path
 
 import click
 from pydantic import BaseModel, ValidationError
@@ -324,4 +326,8 @@ FIELD_PARSERS: Dict[type, FieldParser] = {
     float: build_simple_field_parser(float),
     list: parse_list_field_from_args,
     tuple: parse_tuple_field_from_args,
+    datetime.date: build_simple_field_parser(datetime.date),
+    datetime.time: build_simple_field_parser(datetime.time),
+    datetime.datetime: build_simple_field_parser(datetime.datetime),
+    Path: build_simple_field_parser(Path),
 }
