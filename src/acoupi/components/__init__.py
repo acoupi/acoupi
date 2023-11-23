@@ -11,15 +11,15 @@ from acoupi.components.recording_schedulers import IntervalScheduler
 from acoupi.components.saving_filters import (
     After_DawnDuskTimeInterval,
     Before_DawnDuskTimeInterval,
+    FocusSpeciesRecordingFilter,
     FrequencySchedule,
     SaveIfInInterval,
     ThresholdRecordingFilter,
-    FocusSpeciesRecordingFilter,
 )
 from acoupi.components.saving_managers import (
     DateFileManager,
     IDFileManager,
-    SaveRecording,
+    SaveRecordingManager,
 )
 from acoupi.components.stores.sqlite import SqliteStore
 
@@ -40,10 +40,9 @@ __all__ = [
     "HTTPMessenger",
     "PyAudioRecorder",
     "SaveIfInInterval",
-    "SaveRecording",
+    "SaveRecordingManager",
     "SqliteMessageStore",
     "SqliteStore",
-    #"DetectionProbabilityCleaner",
     "ThresholdDetectionFilter",
     "ThresholdRecordingFilter",
 ]

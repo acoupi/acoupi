@@ -25,7 +25,7 @@ from acoupi import data
 from acoupi.components import types
 
 __all__ = [
-    "SaveRecording",
+    "SaveRecordingManager",
     "IDFileManager",
     "DateFileManager",
 ]
@@ -34,7 +34,7 @@ DEFAULT_THRESHOLD = 0.5
 DEFAULT_TIMEFORMAT = "%Y-%m-%d_%H-%M-%S"
 
 
-class SaveRecording(types.RecordingSavingManager):
+class SaveRecordingManager(types.RecordingSavingManager):
     """A Recording SavingManager that save audio recordings."""
 
     dirpath_true: Path

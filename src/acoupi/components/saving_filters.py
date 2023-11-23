@@ -13,6 +13,8 @@ __all__ = [
     "FrequencySchedule",
     "After_DawnDuskTimeInterval",
     "Before_DawnDuskTimeInterval",
+    "FocusSpeciesRecordingFilter",
+    "ThresholdRecordingFilter",
 ]
 
 

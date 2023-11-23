@@ -36,14 +36,31 @@ class RecordingSchedule(BaseModel):
     end_recording: datetime.time = datetime.time(hour=21, minute=0, second=0)
 
 
-class RecordingSaving(BaseModel):
-    """Recording saving options configuration."""
+#class RecordingSaving(BaseModel):
+class SaveRecordingFilter(BaseModel):
+   """Recording saving options configuration.
+    
+    There are various options availble for saving recordings files. 
+    
+        1. Save recordings based on a specific time interval. Both parameters
+        starttime_saving_recording and endtime_saving_recording need to be configured. 
 
-    starttime_saving_recording: datetime.time = datetime.time(
+        2. Save recordings for x minutes before or after dawn and dusk time. Configure parameters
+        before_dawndusk_duration and/or after_dawndusk_duration. 
+
+        3. Save recordings for a specific duration (i.e., x minutes)
+        and with a repetitive frequency interval (i.e,  x minutes). 
+        Configure both parameters saving_frequency_duration and saving_frequency_interval. 
+    
+    Ignore all of these settings if no recordings should be saved.  
+
+    """
+    
+    starttime: datetime.time = datetime.time(
         hour=21, minute=30, second=0
     )
 
-    endtime_saving_recording: datetime.time = datetime.time(
+    endtime: datetime.time = datetime.time(
         hour=23, minute=30, second=0
     )
 
@@ -51,9 +68,11 @@ class RecordingSaving(BaseModel):
 
     after_dawndusk_duration: int = 10
 
-    saving_frequency_duration: int = 5
+    frequency_duration: int = 5
 
-    saving_frequency_interval: int = 30
+    frequency_interval: int = 30
+
+    threshold: float = 0.8
 
 
 class AudioDirectories(BaseModel):
@@ -64,7 +83,7 @@ class AudioDirectories(BaseModel):
     audio_dir_false: Path = Path.home() / "storages" / "no_bats" / "recordings"
 
 
-class MessageConfig(BaseModel):
+class MQTT_MessageConfig(BaseModel):
     """MQTT configuration to send messages."""
 
     host: str = "localhost"
@@ -78,6 +97,21 @@ class MessageConfig(BaseModel):
     topic: str = "mqtt-topic"
 
     clientid: str = "mqtt-clientid"
+
+class HTTP_MessageConfig(BaseModel):
+    """MQTT configuration to send messages."""
+
+    deviceid: str = "device-id"
+
+    baseurl: str = "base-url"
+
+    client_password: str = "guest"
+
+    client_id: str = "guest"
+
+    api_key: str = "guest"
+
+    content_type: str = "application-json"
 
 
 class BatDetect2_ConfigSchema(BaseModel):
@@ -99,13 +133,15 @@ class BatDetect2_ConfigSchema(BaseModel):
         default_factory=RecordingSchedule
     )
 
-    recording_saving: RecordingSaving = Field(default_factory=RecordingSaving)
+    recording_saving: SaveRecordingFilter = Field(default_factory=SaveRecordingFilter)
+    #recording_saving_manager: AudioDirectories = Field(default_factory=AudioDirectories)
 
     audio_directories: AudioDirectories = Field(
         default_factory=AudioDirectories
     )
 
-    message_config: MessageConfig = Field(default_factory=MessageConfig)
+    mqtt_message_config: MQTT_MessageConfig = Field(default_factory=MessageConfig)
+    http_message_config: HTTP_MessageConfig = Field(default_factory=MessageConfig)
 
 
 class BatDetect2_Program(AcoupiProgram):
@@ -118,7 +154,7 @@ class BatDetect2_Program(AcoupiProgram):
 
         1. Create Audio Recording Task
         2. Create Detection Task
-        3. Create Saving Recording Management Task
+        3. Create Saving Recording Filter and Management Task
         4. Create Message Task
 
         """
@@ -171,14 +207,25 @@ class BatDetect2_Program(AcoupiProgram):
 
         # Step 3 - Files Management Task
         file_management_task = tasks.generate_file_management_task(
-            store=dbpath,
-            file_manager=components.SaveRecording(
+            store=dbpath, 
+            file_manager=components.SaveRecordingManager(
                 dirpath_true=config.audio_directories.audio_dir_true,
                 dirpath_false=config.audio_directories.audio_dir_false,
                 timeformat=config.timeformat,
                 threshold=config.threshold,
             ),
             file_filters=[
+                components.SaveIfInInterval(
+                    interval=data.TimeInterval(
+                        start=config.recording_saving.starttime,
+                        end=config.recording_saving.endtime,
+                        ),
+                    timezone=config.timezone,
+                ),
+                components.FrequencySchedule(
+                    duration=config.recording_saving.frequency_duration,
+                    frequency=config.recording_saving.frequency_interval,
+                ),
                 components.Before_DawnDuskTimeInterval(
                     duration=config.recording_saving.before_dawndusk_duration,
                     timezone=config.timezone,
@@ -187,19 +234,38 @@ class BatDetect2_Program(AcoupiProgram):
                     duration=config.recording_saving.after_dawndusk_duration,
                     timezone=config.timezone,
                 ),
-            ],
-        )
+                components.ThresholdRecordingFilter(
+                    threshold=config.recording_saving.threshold,
+                ),
+             ],
+        ),
+
 
         # Step 4 - Send Data Task
         send_data_task = tasks.generate_send_data_task(
             message_store=dbpath_message,
+            messenger=components.HTTPMessenger(
+                base_url=config.http_message_config.baseurl,
+                base_params={
+                    'client-id':config.http_message_config.client_id, 
+                    'password':config.http_message_config.client_password
+                    },
+                headers={
+                    'Accept':config.http_message_config.content_type,
+                    'Authorization':config.http_message_config.api_key,
+                    },
+            ),
+        )
+
+        send_data_task = tasks.generate_send_data_task(
+            message_store=dbpath_message,
             messenger=components.MQTTMessenger(
-                host=config.message_config.host,
-                port=config.message_config.port,
-                password=config.message_config.client_password,
-                username=config.message_config.client_username,
-                topic=config.message_config.topic,
-                clientid=config.message_config.clientid,
+                host=config.mqtt_message_config.host,
+                port=config.mqtt_message_config.port,
+                password=config.mqtt_message_config.client_password,
+                username=config.mqtt_message_config.client_username,
+                topic=config.mqtt_message_config.topic,
+                clientid=config.mqtt_message_config.clientid,
             ),
         )
 
@@ -213,8 +279,6 @@ class BatDetect2_Program(AcoupiProgram):
             function=file_management_task,
             schedule=datetime.timedelta(minutes=10),
         )
-
-        # TODO: Add task send_data, file_management.
 
         self.add_task(
             function=send_data_task,
