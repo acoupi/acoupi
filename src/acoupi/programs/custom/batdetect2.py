@@ -123,8 +123,8 @@ class BatDetect2_ConfigSchema(BaseModel):
         default_factory=AudioDirectories
     )
 
-    mqtt_message_config: MQTT_MessageConfig = Field(default_factory=MessageConfig)
-    http_message_config: HTTP_MessageConfig = Field(default_factory=MessageConfig)
+    mqtt_message_config: MQTT_MessageConfig = Field(default_factory=MQTT_MessageConfig)
+    http_message_config: HTTP_MessageConfig = Field(default_factory=HTTP_MessageConfig)
 
 
 class BatDetect2_Program(AcoupiProgram):
