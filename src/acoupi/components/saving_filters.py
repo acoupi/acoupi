@@ -1,4 +1,18 @@
-"""Saving Filters."""
+""" Recording Saving Filters.
+    
+There are various options availble for saving recordings files. 
+    
+    1. Save recordings based on a specific time interval. Both parameters
+       starttime_saving_recording and endtime_saving_recording need to be configured.
+    2. Save recordings for x minutes before or after dawn and dusk time. Configure parameters
+       before_dawndusk_duration and/or after_dawndusk_duration.
+    3. Save recordings for a specific duration (i.e., x minutes)
+       and with a repetitive frequency interval (i.e,  x minutes). 
+       Configure both parameters saving_frequency_duration and saving_frequency_interval. 
+    
+Ignore all of these settings if no recordings should be saved.
+"""
+
 import datetime
 from typing import List, Optional
 
