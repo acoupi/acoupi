@@ -1,0 +1,29 @@
+name: Linting
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependenceies
+        run: pip install -U pip pip install -U ruff black pyright
+      - name: Check formatting
+        run: |
+          black --check src
+          black --check tests
+      - name: Check typing
+        run: pyright src
+      - name: Check for overall code issues
+        run: ruff src
