@@ -18,6 +18,7 @@ from acoupi.system.templates import render_template
 __all__ = [
     "install_services",
     "uninstall_services",
+    "services_are_installed"
     "start_services",
     "stop_services",
     "enable_services",
