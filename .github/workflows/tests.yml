@@ -13,6 +13,8 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v3
+      - name: Setup Libraries
+        run: bash scripts/setup.sh
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v3
         with:
