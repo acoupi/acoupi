@@ -79,11 +79,11 @@ def status():
 
     try:
         # Check if acoupi services are enabled.
-        if services.enable_services():
+        if system.enable_services():
             click.echo("Acoupi services are ON.")
 
         # Check if acoupi services are disabled.
-        elif services.disable_services():
+        elif system.disable_services():
             click.echo("Acoupi services are OFF.")
 
     except Exception as e:
