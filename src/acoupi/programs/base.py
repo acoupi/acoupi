@@ -2,7 +2,7 @@
 import datetime
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Callable, Optional, Type, TypeVar, Union
+from typing import Callable, Optional, Type, TypeVar, Union, List
 
 from celery import Celery, group
 from celery.schedules import crontab
@@ -87,7 +87,7 @@ class AcoupiProgram(ABC):
         return cls.worker_config
 
     @classmethod
-    def get_queue_names(cls) -> list[str]:
+    def get_queue_names(cls) -> List[str]:
         """Get the queue names."""
         return [
             q
@@ -98,7 +98,7 @@ class AcoupiProgram(ABC):
     def add_task(
         self,
         function: Callable[[], Optional[B]],
-        callbacks: Optional[list[Callable[[B], None]]] = None,
+        callbacks: Optional[List[Callable[[B], None]]] = None,
         schedule: Union[int, datetime.timedelta, crontab, None] = None,
         queue: Optional[str] = None,
     ):

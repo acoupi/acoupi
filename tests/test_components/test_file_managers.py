@@ -79,7 +79,8 @@ def test_date_file_manager_fails_if_recording_has_no_path(
 def test_date_file_manager_fails_if_recording_file_does_not_exist(
     tmp_path: Path, deployment: data.Deployment
 ):
-    """Test DateFileManager.save_recording fails if recording file does not exist."""
+    """Test DateFileManager.save_recording fails if recording file does not
+    exist."""
     # Arrange
     path = tmp_path / "test.wav"
     directory = tmp_path / "recordings"
@@ -100,7 +101,10 @@ def test_date_file_manager_fails_if_recording_file_does_not_exist(
     )
 
     # make sure the recording file does not exist
-    path.unlink(missing_ok=True)
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
 
     # create a file manager
     file_manager = components.DateFileManager(directory)
@@ -167,7 +171,8 @@ def test_id_file_manager_fails_if_recording_has_no_path(
 def test_id_file_manager_fails_if_recording_file_does_not_exist(
     tmp_path: Path, deployment: data.Deployment
 ):
-    """Test IDFileManager.save_recording fails if recording file does not exist."""
+    """Test IDFileManager.save_recording fails if recording file does not
+    exist."""
     # Arrange
     path = tmp_path / "test.wav"
     directory = tmp_path / "recordings"
@@ -182,7 +187,10 @@ def test_id_file_manager_fails_if_recording_file_does_not_exist(
     )
 
     # make sure the recording file does not exist
-    path.unlink(missing_ok=True)
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
 
     # create a file manager
     file_manager = components.IDFileManager(directory)

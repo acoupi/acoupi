@@ -63,7 +63,6 @@ class SqliteStore(types.Store):
         Args:
             db_path: Path to the database file. Can be set to :memory: to use
                 an in-memory database.
-
         """
         self.db_path = db_path
         self.database = orm.Database()
@@ -138,7 +137,9 @@ class SqliteStore(types.Store):
 
         for detection in model_output.detections:
             location = (
-                "" if detection.location is None else detection.location.json()
+                ""
+                if detection.location is None
+                else detection.location.model_dump_json()
             )
             db_detection = db_model_output.detections.create(
                 id=detection.id,

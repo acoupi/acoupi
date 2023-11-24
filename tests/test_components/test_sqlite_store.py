@@ -1,12 +1,11 @@
 """Test the SQLite store."""
-import datetime
 import sqlite3
 from pathlib import Path
 from typing import Generator
 
 import pytest
 
-from acoupi import components, data
+from acoupi import components
 
 
 @pytest.fixture(scope="function")

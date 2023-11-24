@@ -1,6 +1,5 @@
 """Test suite for message builder components."""
 import datetime
-import json
 from pathlib import Path
 
 import pytest_httpserver

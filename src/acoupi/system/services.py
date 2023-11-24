@@ -39,7 +39,6 @@ def get_user_unit_dir() -> Path:
     ------
     subprocess.CalledProcessError
         If `pkg-config` returns a non-zero exit code.
-
     """
     # NOTE: Might need to revisit this in case systemd
     # user unit directory changes in other platforms.
@@ -91,8 +90,16 @@ def uninstall_services(path: Optional[Path] = None):
 
     acoupi_service_file = path / ACOUPI_SERVICE_FILE
     acoupi_beat_service_file = path / ACOUPI_BEAT_SERVICE_FILE
-    acoupi_service_file.unlink(missing_ok=True)
-    acoupi_beat_service_file.unlink(missing_ok=True)
+
+    try:
+        acoupi_service_file.unlink()
+    except FileNotFoundError:
+        pass
+
+    try:
+        acoupi_beat_service_file.unlink()
+    except FileNotFoundError:
+        pass
 
 
 def services_are_installed(path: Optional[Path] = None) -> bool:

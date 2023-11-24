@@ -133,7 +133,7 @@ def parse_field_from_args(
 def parse_pydantic_model_field_from_args(
     field_name: str,
     field: FieldInfo,
-    args: list[str],
+    args: List[str],
     prompt: bool = True,
     parent: str = "",
 ) -> BaseModel:
@@ -244,7 +244,7 @@ class FieldParser(Protocol):
         self,
         field_name: str,
         field: FieldInfo,
-        args: list[str],
+        args: List[str],
         prompt: bool = True,
         parent: str = "",
     ) -> object:

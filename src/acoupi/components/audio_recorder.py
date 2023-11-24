@@ -16,7 +16,6 @@ file.
 
 """
 import datetime
-import json
 import wave
 import sounddevice #necessary to avoid alsa errors
 

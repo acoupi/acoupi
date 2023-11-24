@@ -38,6 +38,7 @@ venvPath = "."
 venv = ".venv"
 exclude = ["src/acoupi/templates/"]
 include = ["src/acoupi/**/*.py", "tests/**/*.py"]
+pythonVersion = "3.7"
 
 [tool.mypy]
 mypy_path = ".venv/lib/python3.10/site-packages"

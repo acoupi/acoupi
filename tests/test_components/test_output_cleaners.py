@@ -1,6 +1,7 @@
 """Test output cleaners."""
 
 import datetime
+from typing import List
 from pathlib import Path
 
 import pytest
@@ -26,7 +27,7 @@ def create_test_model_output():
     )
 
     def factory(
-        detections: list[data.Detection],
+        detections: List[data.Detection],
     ) -> data.ModelOutput:
         """Return a model output."""
         return data.ModelOutput(

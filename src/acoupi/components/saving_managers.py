@@ -113,7 +113,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
         # Move recording to the path it should be saved
         new_path = sdir / f"{srec_filename}.wav"
         print(f"New file Path: {new_path}")
-        shutil.move(recording.path, new_path)
+        shutil.move(str(recording.path), new_path)
         print(f"File has been move to path: {new_path}")
         return new_path
 
@@ -187,7 +187,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
             os.makedirs(directory)
 
         # Move the file to the new location
-        shutil.move(recording.path, full_path)
+        shutil.move(str(recording.path), full_path)
 
         return full_path
 

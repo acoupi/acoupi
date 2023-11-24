@@ -1,6 +1,7 @@
 import datetime
 import shutil
 import stat
+from typing import Optional
 from pathlib import Path
 
 from acoupi.programs.workers import WorkerConfig
@@ -43,7 +44,7 @@ def write_workers_start_script(
     log_level: str = LOG_LEVEL,
     run_dir: Path = RUN_DIR,
     log_dir: Path = LOG_DIR,
-    celery_bin: Path | None = None,
+    celery_bin: Optional[Path] = None,
 ) -> None:
     """Write the worker start script."""
     if not path.parent.exists():
@@ -74,7 +75,7 @@ def write_workers_stop_script(
     log_level: str = LOG_LEVEL,
     run_dir: Path = RUN_DIR,
     log_dir: Path = LOG_DIR,
-    celery_bin: Path | None = None,
+    celery_bin: Optional[Path] = None,
 ) -> None:
     """Write the worker stop script."""
     if not path.parent.exists():
@@ -105,7 +106,7 @@ def write_workers_restart_script(
     log_level: str = LOG_LEVEL,
     run_dir: Path = RUN_DIR,
     log_dir: Path = LOG_DIR,
-    celery_bin: Path | None = None,
+    celery_bin: Optional[Path] = None,
 ) -> None:
     """Write the worker restart script."""
     if not path.parent.exists():
@@ -135,7 +136,7 @@ def write_beat_script(
     log_level: str = LOG_LEVEL,
     run_dir: Path = RUN_DIR,
     log_dir: Path = LOG_DIR,
-    celery_bin: Path | None = None,
+    celery_bin: Optional[Path] = None,
 ):
     """Write the beat script."""
     if not path.parent.exists():
@@ -168,7 +169,7 @@ def write_scripts(
     log_level: str = LOG_LEVEL,
     run_dir: Path = RUN_DIR,
     log_dir: Path = LOG_DIR,
-    celery_bin: Path | None = None,
+    celery_bin: Optional[Path] = None,
 ) -> None:
     """Write the worker scripts."""
     write_workers_start_script(
