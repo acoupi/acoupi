@@ -13,17 +13,19 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+      - name: Setup Libraries
+        run: bash scripts/setup.sh
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v3
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependenceies
-        run: pip install -U pip pip install -U ruff black pyright
+      - name: Install dependencies
+        run: pdm install --dev
       - name: Check formatting
         run: |
-          black --check src
-          black --check tests
+          pdm run black --check src
+          pdm run black --check tests
       - name: Check typing
-        run: pyright src
+        run: pdm run pyright src
       - name: Check for overall code issues
-        run: ruff src
+        run: pdm run ruff src
