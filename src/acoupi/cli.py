@@ -29,7 +29,7 @@ def acoupi():
         ignore_unknown_options=True,
     )
 )
-@click.option("--program", type=str, default="sample_program")
+@click.option("--program", type=str, default="acoupi.programs.custom.test")
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
 def setup(program: str, args: list[str]):
     """Setup acoupi."""
@@ -39,12 +39,15 @@ def setup(program: str, args: list[str]):
     except exceptions.ProgramNotFoundError as err:
         # TODO: Improve this messages
         click.echo(f"program {err.program} not found")
+        raise click.Abort() from err
 
-    except exceptions.InvalidProgramError:
+    except exceptions.InvalidProgramError as err:
         click.echo("program is invalid")
+        raise click.Abort() from err
 
-    except ValueError:
+    except ValueError as err:
         click.echo("program not found")
+        raise click.Abort() from err
 
 
 @acoupi.command()
