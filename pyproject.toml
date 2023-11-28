@@ -7,7 +7,6 @@ authors = [
     {name = "Santiago Martinez Balvanera", email = "santiago.balvanera.20@ucl.uk.ac"},
 ]
 dependencies = [
-    "pyalsaaudio>=0.9.2",
     "pony>=0.7.16",
     "pyaudio>=0.2.13",
     "sounddevice>=0.4.6",

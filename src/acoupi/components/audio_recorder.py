@@ -17,7 +17,7 @@ file.
 """
 import datetime
 import wave
-import sounddevice #necessary to avoid alsa errors
+import sounddevice  # necessary to avoid alsa errors
 
 from pathlib import Path
 from typing import Optional
@@ -28,7 +28,6 @@ from acoupi import data
 from acoupi.components.types import AudioRecorder
 
 TMP_PATH = Path("/run/shm/")
-
 CHUNKSIZE = 1024
 
 
@@ -42,6 +41,7 @@ class PyAudioRecorder(AudioRecorder):
         audio_channels: int,
         device_index: Optional[int] = None,
         chunksize: int = CHUNKSIZE,
+        audio_dir: Path = TMP_PATH,
     ):
         """Initialise the AudioRecorder with the audio parameters."""
         # Audio Duration
@@ -51,6 +51,7 @@ class PyAudioRecorder(AudioRecorder):
         self.samplerate = samplerate
         self.audio_channels = audio_channels
         self.chunksize = chunksize
+        self.audio_dir = audio_dir
 
         if device_index is None:
             # Get the index of the audio device
@@ -89,7 +90,9 @@ class PyAudioRecorder(AudioRecorder):
         self.datetime = datetime.datetime.now()
 
         # Specified the desired path for temporary file - Saved in RAM
-        temp_path = TMP_PATH / f'{self.datetime.strftime("%Y%m%d_%H%M%S")}.wav'
+        temp_path = (
+            self.audio_dir / f'{self.datetime.strftime("%Y%m%d_%H%M%S")}.wav'
+        )
 
         # Create a temporary file to record audio
         with open(temp_path, "wb") as temp_audiof:

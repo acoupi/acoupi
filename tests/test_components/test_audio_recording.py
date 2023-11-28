@@ -1,14 +1,15 @@
 """Test the recording of an audio files."""
-
+from pathlib import Path
 from acoupi import components, data
 
 
-def test_audio_recording(deployment: data.Deployment):
+def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
     """Test the audio file recording."""
     recorder = components.PyAudioRecorder(
         duration=0.1,
         samplerate=8000,
         audio_channels=1,
+        audio_dir=tmp_path,
     )
 
     # record audio

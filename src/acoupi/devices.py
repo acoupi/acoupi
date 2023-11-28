@@ -40,5 +40,7 @@ def is_rpi() -> bool:
     try:
         get_rpi_serial_number()
         return True
+    except FileNotFoundError:
+        return False
     except RuntimeError:
         return False
