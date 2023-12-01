@@ -14,6 +14,6 @@ def test_model(deployment: data.Deployment):
         datetime=datetime.datetime.now(),
         deployment=deployment,
     )
-    model = components.BatDetect2()
+    model = components.models.TestModel()
     results = model.run(recording)
     assert isinstance(results, data.ModelOutput)
