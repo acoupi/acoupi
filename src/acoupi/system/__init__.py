@@ -31,6 +31,7 @@ from acoupi.system.services import (
     start_services,
     stop_services,
     services_are_installed,
+    status_services,
 )
 
 __all__ = [
@@ -51,6 +52,7 @@ __all__ = [
     "show_config",
     "start_services",
     "stop_services",
+    "status_services",
     "sub_config_value",
     "write_config",
     "write_program_file",
