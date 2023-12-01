@@ -80,7 +80,9 @@ def status():
     try:
         # Check if acoupi services are enabled.
         if not system.services_are_installed():
-            click.echo("Acoupi services are OFF. Run `acoupi start`to start them.")
+            click.echo(
+                "Acoupi services are OFF. Run `acoupi start`to start them."
+            )
 
         # Check if acoupi services are disabled.
         else:
@@ -106,72 +108,78 @@ def show():
         return
 
     try:
-        config = system.load_config(
-            system.PROGRAM_CONFIG_FILE, system.CeleryConfig
-        )
-        click.echo("Current acoupi Configuration:")
-        click.echo(config.json(inedent=2))
+        config = system.show_config(system.PROGRAM_CONFIG_FILE)
+        click.echo("Current acoupi configuration:")
+        click.echo(config)
 
     except Exception as e:
         click.echo(f"Error loading configuration: {e}")
 
 
 @config.command()
-@click.argument("config_param_name")
+@click.argument("config_param_name", required=False)
 def get(config_param_name: str):
     """Print a configuration value."""
     if not system.is_configured():
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
-    try:
-        config = system.load_config(
-            system.PROGRAM_CONFIG_FILE, system.CeleryConfig
-        )
+    # If config_paran_name is not provided, show all available configuration parameters names
+    if not config_param_name:
+        click.echo("Error: Missing argument 'CONFIG_PARAM_NAME'.\n")
+        click.echo("Available configuration parameters:")
+        config_keys = system.show_config(system.PROGRAM_CONFIG_FILE).keys()
+        click.echo("\n".join(config_keys))
+        return
 
-        # Check if the parameter exists in the configuration
-        if hasattr(config, config_param_name):
-            config_param_value = getattr(config, config_param_name)
-            click.echo(f"{config_param_name}: {config_param_value}")
-        else:
-            click.echo(
-                f"Configuration parameter '{config_param_name}' not found."
-            )
+    try:
+        config_value = system.get_config_value(
+            config_param_name,
+            system.PROGRAM_CONFIG_FILE,
+        )
+        click.echo(f"{config_param_name}: {config_value}")
+
+    except KeyError:
+        click.echo(
+            f"Configuration parameter '{config_param_name}' not found.\n"
+        )
+        click.echo("Available configuration parameters:")
+        config_keys = system.show_config(system.PROGRAM_CONFIG_FILE).keys()
+        click.echo("\n".join(config_keys))
 
     except Exception as e:
-        click.echo(f"Error loading configuration: {e}")
+        click.echo(f"Error finding configuration parameter: {e}")
 
 
 @config.command()
-@click.argument("config_param_name")
-@click.argument("config_param_value")
+@click.argument("config_param_name", required=True)
+@click.argument("config_param_value", required=True)
 def sub(config_param_name, config_param_value):
     """Substitute a configuration value."""
     if not system.is_configured():
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
+    # If config_paran_name or config_param_value is not provided, show current configuration
+    if not config_param_name or not config_param_value:
+        click.echo(
+            "Error: Missing argument 'CONFIG_PARAM_NAME' and/or 'CONFIG_PARAM_VALUE'.\n"
+        )
+        click.echo("Current configuration parameters are:")
+        return system.show_config(system.PROGRAM_CONFIG_FILE)
+
     try:
-        config = system.load_config(
-            system.PROGRAM_CONFIG_FILE, system.CeleryConfig
+        system.sub_config_value(
+            config_param_name=config_param_name,
+            new_config_value=config_param_value,
+            config_file_path=system.PROGRAM_CONFIG_FILE,
+        )
+        click.echo(
+            f"Configuration parameter '{config_param_name}' successfully set to '{config_param_value}'."
         )
 
-        # Check if the parameter exists in the configuration
-        if hasattr(config, config_param_name):
-            # Update the configuration with the new value
-            setattr(config, config_param_name, config_param_value)
-            # Write the updated configuration back to the config file
-            system.write_config(config, system.PROGRAM_CONFIG_FILE)
-            click.echo(
-                f"Configuration parameter '{config_param_name}' set to '{config_param_value}'."
-            )
-        else:
-            click.echo(
-                f"Configuration parameter '{config_param_name}' not found."
-            )
-
     except Exception as e:
-        click.echo(f"Error loading or updating configuration: {e}")
+        click.echo(f"Error updating configuration: {e}")
 
 
 if __name__ == "__main__":

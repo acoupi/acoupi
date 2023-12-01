@@ -6,6 +6,7 @@ from celery.schedules import crontab
 from pydantic import BaseModel, Field
 
 from acoupi import components, data, tasks
+from acoupi.components.models import BatDetect2
 from acoupi.programs.base import AcoupiProgram
 from acoupi.system.constants import ACOUPI_HOME
 
@@ -36,16 +37,13 @@ class RecordingSchedule(BaseModel):
     end_recording: datetime.time = datetime.time(hour=21, minute=0, second=0)
 
 
-#class RecordingSaving(BaseModel):
+# class RecordingSaving(BaseModel):
 class SaveRecordingFilter(BaseModel):
     """Recording saving options configuration."""
-    starttime: datetime.time = datetime.time(
-        hour=21, minute=30, second=0
-    )
 
-    endtime: datetime.time = datetime.time(
-        hour=23, minute=30, second=0
-    )
+    starttime: datetime.time = datetime.time(hour=21, minute=30, second=0)
+
+    endtime: datetime.time = datetime.time(hour=23, minute=30, second=0)
 
     before_dawndusk_duration: int = 10
 
@@ -80,6 +78,7 @@ class MQTT_MessageConfig(BaseModel):
     topic: str = "mqtt-topic"
 
     clientid: str = "mqtt-clientid"
+
 
 class HTTP_MessageConfig(BaseModel):
     """MQTT configuration to send messages."""
@@ -116,15 +115,20 @@ class BatDetect2_ConfigSchema(BaseModel):
         default_factory=RecordingSchedule
     )
 
-    recording_saving: SaveRecordingFilter = Field(default_factory=SaveRecordingFilter)
-    #recording_saving_manager: AudioDirectories = Field(default_factory=AudioDirectories)
+    recording_saving: SaveRecordingFilter = Field(
+        default_factory=SaveRecordingFilter
+    )
 
     audio_directories: AudioDirectories = Field(
         default_factory=AudioDirectories
     )
 
-    mqtt_message_config: MQTT_MessageConfig = Field(default_factory=MQTT_MessageConfig)
-    http_message_config: HTTP_MessageConfig = Field(default_factory=HTTP_MessageConfig)
+    mqtt_message_config: MQTT_MessageConfig = Field(
+        default_factory=MQTT_MessageConfig
+    )
+    http_message_config: HTTP_MessageConfig = Field(
+        default_factory=HTTP_MessageConfig
+    )
 
 
 class BatDetect2_Program(AcoupiProgram):
@@ -189,40 +193,65 @@ class BatDetect2_Program(AcoupiProgram):
         )
 
         # Step 3 - Files Management Task
-        file_management_task = tasks.generate_file_management_task(
-            store=dbpath, 
-            file_manager=components.SaveRecordingManager(
-                dirpath_true=config.audio_directories.audio_dir_true,
-                dirpath_false=config.audio_directories.audio_dir_false,
-                timeformat=config.timeformat,
-                threshold=config.threshold,
-            ),
-            file_filters=[
-                components.SaveIfInInterval(
-                    interval=data.TimeInterval(
-                        start=config.recording_saving.starttime,
-                        end=config.recording_saving.endtime,
-                        ),
-                    timezone=config.timezone,
-                ),
-                components.FrequencySchedule(
-                    duration=config.recording_saving.frequency_duration,
-                    frequency=config.recording_saving.frequency_interval,
-                ),
-                components.Before_DawnDuskTimeInterval(
-                    duration=config.recording_saving.before_dawndusk_duration,
-                    timezone=config.timezone,
-                ),
-                components.After_DawnDuskTimeInterval(
-                    duration=config.recording_saving.after_dawndusk_duration,
-                    timezone=config.timezone,
-                ),
-                components.ThresholdRecordingFilter(
-                    threshold=config.recording_saving.threshold,
-                ),
-             ],
-        ),
+        def create_file_filters():
+            saving_filters = []
 
+            if components.SaveIfInInterval is not None:
+                saving_filters.add(
+                    components.SaveIfInInterval(
+                        interval=data.TimeInterval(
+                            start=config.recording_saving.starttime,
+                            end=config.recording_saving.endtime,
+                        ),
+                        timezone=config.timezone,
+                    )
+                )
+            elif components.FrequencySchedule is not None:
+                saving_filters.add(
+                    components.FrequencySchedule(
+                        duration=config.recording_saving.frequency_duration,
+                        frequency=config.recording_saving.frequency_interval,
+                    )
+                )
+            elif components.Before_DawnDuskTimeInterval is not None:
+                saving_filters.add(
+                    components.Before_DawnDuskTimeInterval(
+                        duration=config.recording_saving.before_dawndusk_duration,
+                        timezone=config.timezone,
+                    )
+                )
+            elif components.After_DawnDuskTimeInterval is not None:
+                saving_filters.add(
+                    components.After_DawnDuskTimeInterval(
+                        duration=config.recording_saving.after_dawndusk_duration,
+                        timezone=config.timezone,
+                    )
+                )
+            elif components.ThresholdRecordingFilter is not None:
+                saving_filters.add(
+                    components.ThresholdRecordingFilter(
+                        threshold=config.recording_saving.threshold,
+                    )
+                )
+            else:
+                raise UserWarning(
+                    "No saving filters defined - no files will be saved."
+                )
+
+            return saving_filters
+
+        file_management_task = (
+            tasks.generate_file_management_task(
+                store=dbpath,
+                file_manager=components.SaveRecordingManager(
+                    dirpath_true=config.audio_directories.audio_dir_true,
+                    dirpath_false=config.audio_directories.audio_dir_false,
+                    timeformat=config.timeformat,
+                    threshold=config.threshold,
+                ),
+                file_filters=create_file_filters(),
+            ),
+        )
 
         # Step 4 - Send Data Task
         send_data_task = tasks.generate_send_data_task(
@@ -230,13 +259,13 @@ class BatDetect2_Program(AcoupiProgram):
             messenger=components.HTTPMessenger(
                 base_url=config.http_message_config.baseurl,
                 base_params={
-                    'client-id':config.http_message_config.client_id, 
-                    'password':config.http_message_config.client_password
-                    },
+                    "client-id": config.http_message_config.client_id,
+                    "password": config.http_message_config.client_password,
+                },
                 headers={
-                    'Accept':config.http_message_config.content_type,
-                    'Authorization':config.http_message_config.api_key,
-                    },
+                    "Accept": config.http_message_config.content_type,
+                    "Authorization": config.http_message_config.api_key,
+                },
             ),
         )
 

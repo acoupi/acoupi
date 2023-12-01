@@ -2,7 +2,6 @@
 from acoupi.components.audio_recorder import PyAudioRecorder
 from acoupi.components.message_factories import (
     FullModelOutputMessageBuilder,
-    QEOP_MessageBuilder,
 )
 from acoupi.components.message_stores.sqlite import SqliteMessageStore
 from acoupi.components.messengers import MQTTMessenger, HTTPMessenger
@@ -33,7 +32,6 @@ __all__ = [
     "FocusSpeciesRecordingFilter",
     "FrequencySchedule",
     "FullModelOutputMessageBuilder",
-    "QEOP_MessageBuilder",
     "IDFileManager",
     "IntervalScheduler",
     "IsInInterval",
