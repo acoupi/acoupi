@@ -22,24 +22,24 @@
 
 To install and use acoupi on your embedded device follow these steps: 
 
-Step 1: Install acoupi and its dependencies
+**Step 1:** Install acoupi and its dependencies
 ```
 wget -O- https://raw.githubusercontent.com/audevuilli/acoupi/master/install.sh | bash
 ```
 
-Step 2: Configure one of acoupi pre-built programs - replace `program-name` with `batdetect2` or `birdnet`. 
+**Step 2:** Configure one of acoupi pre-built programs - replace `program-name` with `batdetect2` or `birdnet`. 
 
 By running this command, you will be promted with a serie of question to configure the program. For more details about the configuration options, please refere to *[Acoupi Documentation: Configuration Options](TODO: Add Link to Configuration Options in Documentation)*
 
 ```
-    pdm run acoupi setup `program-name`
+pdm run acoupi setup `program-name`
 ```
-Step 3: To check if the installation was successful, run the following command:
+**Step 3:** To check if the installation was successful, run the following command:
 ```
 pdm run acoupi --help
 ```
 
-Step 4: To start acoupi run the command: 
+**Step 4:** To start acoupi run the command: 
 ```
 pdm run acoupi start
 ```
