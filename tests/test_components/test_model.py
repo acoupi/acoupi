@@ -3,7 +3,7 @@ import datetime
 from pathlib import Path
 
 from acoupi import data
-from acoupi.components.models.model_test import TestModel
+from acoupi.components.model_template import TestModel
 
 
 def test_model(deployment: data.Deployment):
