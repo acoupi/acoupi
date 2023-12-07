@@ -1,15 +1,15 @@
 """Argument Parsing for configs."""
 
 import argparse
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 import datetime
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 import click
 from pydantic import BaseModel, ValidationError
 from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefined
-from typing_extensions import Protocol, get_args, get_origin
+from typing_extensions import Annotated, Protocol, get_args, get_origin
 
 from acoupi.programs.base import NoUserPrompt
 
@@ -25,6 +25,14 @@ ArgumentParserProtocol = Union[
     argparse.ArgumentParser,
     argparse._ArgumentGroup,
 ]
+"""
+
+When configurations are nested, they can be parsed from the command
+line arguments using the following syntax:
+
+    --field.subfield=value
+
+"""
 
 
 def parse_config_from_args(
@@ -57,7 +65,6 @@ def parse_config_from_args(
     -------
     config
         The parsed configuration.
-
     """
     if args is None:
         args = []
@@ -98,9 +105,17 @@ def get_field_dtype(field: FieldInfo) -> type:
     if annotation is None:
         raise ValueError(f"Field {field} has no annotation.")
 
+    origin = get_origin(annotation)
+
     # Remove typing.Annotated if present
-    if hasattr(annotation, "__metadata__"):
+    if origin == Annotated:
         annotation = get_args(annotation)[0]
+
+    # Check for optional fields and remove the
+    # typing.Optional if present
+    if origin == Union:
+        nested = get_args(annotation)[0]
+        return nested
 
     origin = get_origin(annotation)
     if origin is None:
@@ -118,7 +133,8 @@ def parse_field_from_args(
 ) -> object:
     """Parse a field from the command line arguments."""
     for dtype, _parse_argument in FIELD_PARSERS.items():
-        if issubclass(get_field_dtype(field), dtype):
+        field_type = get_field_dtype(field)
+        if issubclass(field_type, dtype):
             return _parse_argument(
                 field_name,
                 field,
@@ -136,17 +152,38 @@ def parse_pydantic_model_field_from_args(
     args: List[str],
     prompt: bool = True,
     parent: str = "",
-) -> BaseModel:
+) -> Optional[BaseModel]:
     """Parse a pydantic model field from the command line arguments."""
-    model = field.annotation
+
+    parent = f"{parent}.{field_name}" if parent else field_name
+
+    if not field.is_required():
+        has_some_arg = any(arg.startswith(f"--{parent}") for arg in args)
+        if not has_some_arg:
+            default_value = field.get_default(call_default_factory=True)
+
+            if not prompt:
+                return default_value
+
+            if not click.confirm(
+                (
+                    "Would you like to set "
+                    f"{click.style(field_name, fg='blue', bold=True)}?"
+                ),
+                default=False,
+            ):
+                return default_value
+
+    if field.annotation is None:
+        raise ValueError(f"Field {field} has no annotation.")
+
+    model = get_field_dtype(field)
 
     if model is None:
         raise ValueError(f"Field {field} has no annotation.")
 
     if not issubclass(model, BaseModel):
         raise ValueError(f"Field {field} is not a pydantic model.")
-
-    parent = f"{parent}.{field_name}" if parent else field_name
 
     values = {}
     for field_name, field in model.model_fields.items():
@@ -268,9 +305,7 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
         parser = argparse.ArgumentParser()
         name = f"{parent}.{field_name}" if parent else f"{field_name}"
 
-        default = (
-            field.default if field.default is not PydanticUndefined else None
-        )
+        default = field.default if field.default is not PydanticUndefined else None
 
         action = parser.add_argument(
             f"--{name}",
@@ -284,9 +319,7 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
 
         if not prompt:
             if value is None and default is None:
-                raise argparse.ArgumentError(
-                    action, f"Missing value for {field_name}."
-                )
+                raise argparse.ArgumentError(action, f"Missing value for {field_name}.")
 
             return value
 
