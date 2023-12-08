@@ -155,7 +155,6 @@ class PredictedTag(BaseModel):
     tag: Tag
     """The tag predicted by the model."""
 
-    #probability: float = 0
     probability: float = 1
     """The probability of the tag prediction."""
 

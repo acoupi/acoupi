@@ -37,10 +37,13 @@ DEFAULT_TIMEFORMAT = "%Y-%m-%d_%H-%M-%S"
 class SaveRecordingManager(types.RecordingSavingManager):
     """A Recording SavingManager that save audio recordings."""
 
-    dirpath_true: Path
+    dirpath: Path
     """Directory path to save recordings if audio recording contains detections."""
 
-    dirpath_false: Path
+    dirpath_true: Optional(Path)
+    """Directory path to save recordings if audio recording contains detections."""
+
+    dirpath_false: Optional(Path)
     """Directory path to save recordings if audio recording contain no detections."""
 
     timeformat: str
@@ -51,8 +54,9 @@ class SaveRecordingManager(types.RecordingSavingManager):
 
     def __init__(
         self,
-        dirpath_true: Path,
-        dirpath_false: Path,
+        dirpath: Optional(Path) = None,
+        dirpath_true: Optional(Path) = None,
+        dirpath_false: Optional(Path) = None,
         timeformat: str = DEFAULT_TIMEFORMAT,
         threshold: float = DEFAULT_THRESHOLD,
     ):
@@ -66,6 +70,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
             timeformat: Datetime format to use to name the recording file path.
             threshold: Threshold to use to determine if a recording contains
         """
+        self.dirpath = dirpath
         self.dirpath_true = dirpath_true
         self.dirpath_false = dirpath_false
         self.timeformat = timeformat
@@ -75,7 +80,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
         self,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-        """Determine if hte model outputs contain confident detections."""
+        """Determine if the model outputs contain confident detections."""
         if model_outputs is None:
             return False
 
@@ -103,19 +108,20 @@ class SaveRecordingManager(types.RecordingSavingManager):
         if recording.path is None:
             raise ValueError("Recording has no path")
 
-        detection_bool = self.has_confident_detections(model_outputs)
-        sdir = self.dirpath_true if detection_bool else self.dirpath_false
+        if not model_outputs:
+            sdir = self.dirpath
+        else:
+            detection_bool = self.has_confident_detections(model_outputs)
+            sdir = self.dirpath_true if detection_bool else self.dirpath_false
 
-        if not os.path.exists(sdir):
-            os.makedirs(sdir)
+            if not os.path.exists(sdir):
+                os.makedirs(sdir)
 
-        srec_filename = recording.datetime.strftime(self.timeformat)
-        # Move recording to the path it should be saved
-        new_path = sdir / f"{srec_filename}.wav"
-        print(f"New file Path: {new_path}")
-        shutil.move(str(recording.path), new_path)
-        print(f"File has been move to path: {new_path}")
-        return new_path
+            srec_filename = recording.datetime.strftime(self.timeformat)
+            # Move recording to the path it should be saved
+            new_path = sdir / f"{srec_filename}.wav"
+            shutil.move(str(recording.path), new_path)
+            return new_path
 
 
 class BaseFileManager(types.RecordingSavingManager, ABC):

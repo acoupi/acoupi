@@ -53,13 +53,17 @@ class SaveRecordingFilter(BaseModel):
 
     frequency_duration: int = 5
 
-    frequency_interval: int = 30
+    frequency_interval: int = 5
 
 
 class AudioDirectories(BaseModel):
     """Audio Recording Directories configuration."""
 
-    audio_dir_true: Path = Path.home() / "storages" / "recordings"
+    audio_dir: Path = ACOUPI_HOME / "storages" / "recordings"
+
+    audio_dir_true: Path = None
+
+    audio_dir_false: Path = None
 
 
 class AcoupiTest_ConfigSchema(BaseModel):
@@ -104,7 +108,6 @@ class TestProgram(AcoupiProgram):
         4. Create Message Task
 
         """
-        dbpath = components.SqliteStore(config.dbpath)
 
         # Step 1 - Audio Recordings Task
         recording_task = tasks.generate_recording_task(
@@ -115,7 +118,7 @@ class TestProgram(AcoupiProgram):
                 chunksize=config.audio_config.chunksize,
                 device_index=config.audio_config.device_index,
             ),
-            store=dbpath,
+            store=components.SqliteStore(config.dbpath),
             # logger
             recording_conditions=[
                 components.IsInIntervals(
@@ -185,9 +188,9 @@ class TestProgram(AcoupiProgram):
 
         file_management_task = (
             tasks.generate_file_management_task(
-                store=dbpath,
+                store=components.SqliteStore(config.dbpath),
                 file_manager=components.SaveRecordingManager(
-                    dirpath_true=config.audio_directories.audio_dir_true,
+                    dirpath=config.audio_directories.audio_dir,
                     timeformat=config.timeformat,
                 ),
                 file_filters=create_file_filters(),
@@ -197,6 +200,7 @@ class TestProgram(AcoupiProgram):
         # Step 4 - Send Data Task
         """Send Data Task is ignored. No messenger is provided."""
 
+        # Final Step - Add Tasks to Program
         self.add_task(
             function=recording_task,
             schedule=datetime.timedelta(seconds=10),
