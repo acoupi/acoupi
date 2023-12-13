@@ -18,7 +18,7 @@ dependencies = [
     "celery>=5.2.7",
     "Jinja2>=3.1.2",
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.7,<3.12"
 readme = "README.md"
 license = {text = "GPL-3.0"}
 
@@ -41,11 +41,11 @@ venvPath = "."
 venv = ".venv"
 exclude = ["src/acoupi/templates/"]
 include = ["src/acoupi/**/*.py", "tests/**/*.py"]
-pythonVersion = "3.8"
+pythonVersion = "3.7"
 
 [tool.ruff]
 line-length = 79
-target-version = "py38"
+target-version = "py37"
 
 [tool.mypy]
 mypy_path = ".venv/lib/python3.10/site-packages"
