@@ -29,6 +29,74 @@ TMP_PATH = Path("/run/shm/")
 CHUNKSIZE = 1024
 
 
+def has_input_audio_device() -> bool:
+    """Check if there are any input audio devices available."""
+    # Create an instance of PyAudio
+    p = pyaudio.PyAudio()
+
+    try:
+        p.get_default_input_device_info()
+        return True
+    except IOError:
+        return False
+
+
+def get_audio_device_index(
+    samplerate: int,
+    channels: Optional[int] = None,
+) -> Optional[int]:
+    """Get the index of a compatible audio device.
+
+    The audio device must support the specified samplerate and number of
+    channels.
+
+    Parameters
+    ----------
+    samplerate : int
+        The desired samplerate.
+    channels : Optional[int], optional
+        The desired number of channels. If None, any number of channels is
+        accepted. The default is None.
+
+    Returns
+    -------
+    int
+        The index of the audio device.
+
+    Raises
+    ------
+    IOError
+        If no compatible audio device is found.
+    """
+    # Create an instance of PyAudio
+    p = pyaudio.PyAudio()
+
+    # Get the number of audio devices
+    num_devices = p.get_device_count()
+
+    # Loop through the audio devices
+    for index in range(num_devices):
+        try:
+            p.is_format_supported(
+                int(samplerate),
+                input_device=index,
+                input_channels=channels,
+                input_format=pyaudio.paInt16,
+            )
+            return index
+        except ValueError as err:
+            message = str(err)
+            if (
+                "Invalid sample rate" in message
+                or "Invalid number of channels" in message
+            ):
+                continue
+
+            raise err
+
+    raise IOError("No compatible audio device found.")
+
+
 class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
 
@@ -52,33 +120,14 @@ class PyAudioRecorder(AudioRecorder):
         self.audio_dir = audio_dir
 
         if device_index is None:
-            # Get the index of the audio device
-            self.device_index = self.get_device_index()
+            # If not specified, get the index of an audio device compatible
+            # with the specified samplerate and number of channels
+            device_index = get_audio_device_index(
+                samplerate=self.samplerate,
+                channels=self.audio_channels,
+            )
 
         self.device_index = device_index
-
-    def get_device_index(self) -> int:
-        """Get the index of the audio device."""
-        # Create an instance of PyAudio
-        p = pyaudio.PyAudio()
-
-        # Get the number of audio devices
-        num_devices = p.get_device_count()
-
-        # Loop through the audio devices
-        for i in range(num_devices):
-            # Get the audio device info
-            device_info = p.get_device_info_by_index(i)
-
-            # Check if the audio device is an input device
-            if int(device_info["maxInputChannels"]) <= 0:
-                continue
-
-            # Get the index of the USB audio device
-            device_index = int(device_info["index"])
-            return device_index
-
-        raise ValueError("No USB audio device found")
 
     def record(self, deployment: data.Deployment) -> data.Recording:
         """Record a 3 second temporary audio file at 192KHz.
