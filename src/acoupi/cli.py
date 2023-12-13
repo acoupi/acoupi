@@ -77,9 +77,17 @@ def status():
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
-    """Check the status of acoupi services."""
-    click.echo("Acoupi services status are:")
-    system.status_services()
+    try:
+        # Check if acoupi services are enabled.
+        if system.enable_services():
+            click.echo("Acoupi services are ON.")
+
+        # Check if acoupi services are disabled.
+        elif system.disable_services():
+            click.echo("Acoupi services are OFF.")
+
+    except Exception as e:
+        click.echo(f"Error checking acoupi status: {e}")
 
 
 @acoupi.group()
