@@ -1,0 +1,48 @@
+site_name: acoupi
+site_url: https://acoupi.github.io/acoupi/
+nav:
+  - Home: README.md
+  - User Guide:
+      - user_guide/index.md
+      - Installation: user_guide/installation.md
+      - Configuration: user_guide/configuration.md
+      - FAQ: user_guide/faq.md
+  - Developer Guide:
+      - developer_guide/index.md
+      - Quickstart: developer_guide/quickstart.md
+      - Architecture: developer_guide/architecture.md
+      - Data Schema: developer_guide/data_schema.md
+      - Components: developer_guide/components.md
+      - Tasks: developer_guide/tasks.md
+      - Programs: developer_guide/programs.md
+      - Command Line Interface: developer_guide/cli.md
+  - Images: img/ 
+  - About the Project:
+      - Authors: AUTHORS.md
+      - License: license.md
+  - Contributing: CONTRIBUTING.md
+  - Code of Conduct: CODE_OF_CONDUCT.md
+theme:
+  name: material
+  logo: assets/logo.svg
+  font:
+    text: Mulish
+  favicon: assets/favicon.svg
+  features:
+    - content.code.copy
+    - navigation.tracking
+    - navigation.indexes
+    - navigation.top
+    - toc.follow
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+watch:
+  - docs
+  - src
