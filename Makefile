@@ -36,7 +36,7 @@ lint/pyright:
 	pyright $(SRC_DIR)
 
 lint/ruff:
-	ruff$(SRC_DIR)
+	ruff $(SRC_DIR)
 
 lint/black:
 	black --check $(SRC_DIR)
