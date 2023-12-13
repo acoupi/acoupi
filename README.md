@@ -70,7 +70,8 @@ acoupi setup --program acoupi_birdnet.program.birdnet
 
 ## Acoupi Installation
 
->  [!IMPORTANT] To install one of the acoupi pre-built programs containing either the `BatDetect2` or the `BirdNET-Lite` bioacoustics classifiers, refer to the information in the above section:  [Pre-built AI bioacoustics classifiers](#pre-built-ai-bioacoustics-classifiers).
+> [!IMPORTANT]
+> To install one of the acoupi pre-built programs containing either the `BatDetect2` or the `BirdNET-Lite` bioacoustics classifiers, refer to the information in the above section:  [Pre-built AI bioacoustics classifiers](#pre-built-ai-bioacoustics-classifiers).
 
 
 To install and use the bare-bone framework of acoupi on your embedded device follow these steps: 
