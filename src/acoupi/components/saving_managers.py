@@ -2,16 +2,18 @@
 
 Saving managers are used to determine where and how the recordings and
 detections of an audio file should be saved. This is helpful to handle
-recordings files and detections outputs, such as recording and detections
-outputs can be saved into a specific format (i.e, .wav files, .csv files) and
-at a specific location (i.e, rpi memory, external hardrive, folder XX/YY). 
+recordings files and detections outputs, such as recording and
+detections outputs can be saved into a specific format (i.e, .wav files,
+.csv files) and at a specific location (i.e, rpi memory, external
+hardrive, folder XX/YY).
 
-Saving managers (SavingRecording and SavingDetection) are implemented as classes 
-that inherit from RecordingSavingManager and DetectionSavingManager. The classes 
-should implement the save_recording and save_detections methods. The save_recording 
-method takes the recording object, and the recording filter output. The save_detection
-methods also takes a recording object and the detection filter output. On top of these, 
-it takes a clean list of detection to be saved.
+Saving managers (SavingRecording and SavingDetection) are implemented as
+classes that inherit from RecordingSavingManager and
+DetectionSavingManager. The classes should implement the save_recording
+and save_detections methods. The save_recording method takes the
+recording object, and the recording filter output. The save_detection
+methods also takes a recording object and the detection filter output.
+On top of these, it takes a clean list of detection to be saved.
 """
 import os
 import shutil
@@ -37,11 +39,17 @@ DEFAULT_TIMEFORMAT = "%Y-%m-%d_%H-%M-%S"
 class SaveRecordingManager(types.RecordingSavingManager):
     """A Recording SavingManager that save audio recordings."""
 
-    dirpath_true: Path
-    """Directory path to save recordings if audio recording contains detections."""
+    dirpath: Path
+    """Directory path to save recordings if audio recording contains
+    detections."""
 
-    dirpath_false: Path
-    """Directory path to save recordings if audio recording contain no detections."""
+    dirpath_true: Optional[Path]
+    """Directory path to save recordings if audio recording contains
+    detections."""
+
+    dirpath_false: Optional[Path]
+    """Directory path to save recordings if audio recording contain no
+    detections."""
 
     timeformat: str
     """Datetime format to use to name the recording file path."""
@@ -51,8 +59,9 @@ class SaveRecordingManager(types.RecordingSavingManager):
 
     def __init__(
         self,
-        dirpath_true: Path,
-        dirpath_false: Path,
+        dirpath: Path,
+        dirpath_true: Optional[Path] = None,
+        dirpath_false: Optional[Path] = None,
         timeformat: str = DEFAULT_TIMEFORMAT,
         threshold: float = DEFAULT_THRESHOLD,
     ):
@@ -66,6 +75,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
             timeformat: Datetime format to use to name the recording file path.
             threshold: Threshold to use to determine if a recording contains
         """
+        self.dirpath = dirpath
         self.dirpath_true = dirpath_true
         self.dirpath_false = dirpath_false
         self.timeformat = timeformat
@@ -75,7 +85,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
         self,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-        """Determine if hte model outputs contain confident detections."""
+        """Determine if the model outputs contain confident detections."""
         if model_outputs is None:
             return False
 
@@ -103,6 +113,13 @@ class SaveRecordingManager(types.RecordingSavingManager):
         if recording.path is None:
             raise ValueError("Recording has no path")
 
+        if (
+            not model_outputs
+            or not self.dirpath_true
+            or not self.dirpath_false
+        ):
+            return self.dirpath
+
         detection_bool = self.has_confident_detections(model_outputs)
         sdir = self.dirpath_true if detection_bool else self.dirpath_false
 
@@ -110,11 +127,10 @@ class SaveRecordingManager(types.RecordingSavingManager):
             os.makedirs(sdir)
 
         srec_filename = recording.datetime.strftime(self.timeformat)
+
         # Move recording to the path it should be saved
         new_path = sdir / f"{srec_filename}.wav"
-        print(f"New file Path: {new_path}")
         shutil.move(str(recording.path), new_path)
-        print(f"File has been move to path: {new_path}")
         return new_path
 
 
@@ -122,8 +138,8 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
     """Base implementation for simple recording saving managers.
 
     This class can be used to implement simple recording saving managers
-    that do not use model outputs to determine where the recording should
-    be saved.
+    that do not use model outputs to determine where the recording
+    should be saved.
 
     All recordings are saved in a directory specified in the constructor
     and the relative path is determined by the get_file_path method.
@@ -158,7 +174,11 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         """
         raise NotImplementedError
 
-    def save_recording(self, recording: data.Recording) -> Path:
+    def save_recording(
+        self,
+        recording: data.Recording,
+        model_outputs: Optional[List[data.ModelOutput]] = None,
+    ) -> Path:
         """Save a recording to a file.
 
         Args:
@@ -197,16 +217,15 @@ class DateFileManager(BaseFileManager):
 
     The recordings are organized in directories of the form
 
-        YYYY/MM/DD/
+    YYYY/MM/DD/
 
-    where YYYY is the year, MM is the month and DD is the day.
-    The files are named using the time of the recording and
-    its ID. The format is
+    where YYYY is the year, MM is the month and DD is the day. The files
+    are named using the time of the recording and its ID. The format is
 
-        HHMMSS_ID.wav
+    HHMMSS_ID.wav
 
-    All the files are stored in a single directory that is
-    specified in the constructor.
+    All the files are stored in a single directory that is specified in
+    the constructor.
     """
 
     def get_file_path(self, recording: types.Recording) -> Path:
@@ -229,11 +248,11 @@ class DateFileManager(BaseFileManager):
 class IDFileManager(BaseFileManager):
     """FileManager that uses the ID of the recording to organize the files.
 
-    The recordings are saved in a single directory that is specified
-    in the constructor. The files are named using the ID of the
-    recording. The format is
+    The recordings are saved in a single directory that is specified in
+    the constructor. The files are named using the ID of the recording.
+    The format is
 
-        ID.wav
+    ID.wav
     """
 
     def get_file_path(self, recording: types.Recording) -> Path:

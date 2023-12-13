@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:dbbbef9fe6acb129149c5ad0b226062db02deecdd2a9c7e40960243cb1c821f9"
+content_hash = "sha256:4a7a026f79ecce6d4f773d24462823ff62898c90dec7f9a168f87cddc6fa84e5"
 
 [[package]]
 name = "alabaster"
@@ -621,6 +621,16 @@ files = [
 ]
 
 [[package]]
+name = "isort"
+version = "5.11.5"
+requires_python = ">=3.7.0"
+summary = "A Python utility / library to sort Python imports."
+files = [
+    {file = "isort-5.11.5-py3-none-any.whl", hash = "sha256:ba1d72fb2595a01c7895a5128f9585a5cc4b6d395f1c8d514989b9a7eb2a8746"},
+    {file = "isort-5.11.5.tar.gz", hash = "sha256:6be1f76a507cb2ecf16c7cf14a37e41609ca082330be4e3436a18ef74add55db"},
+]
+
+[[package]]
 name = "jinja2"
 version = "3.1.2"
 requires_python = ">=3.7"
@@ -827,14 +837,6 @@ dependencies = [
 files = [
     {file = "prompt_toolkit-3.0.38-py3-none-any.whl", hash = "sha256:45ea77a2f7c60418850331366c81cf6b5b9cf4c7fd34616f733c5427e6abbb1f"},
     {file = "prompt_toolkit-3.0.38.tar.gz", hash = "sha256:23ac5d50538a9a38c8bde05fecb47d0b403ecd0662857a86f886f798563d5b9b"},
-]
-
-[[package]]
-name = "pyalsaaudio"
-version = "0.10.0"
-summary = "ALSA bindings"
-files = [
-    {file = "pyalsaaudio-0.10.0.tar.gz", hash = "sha256:e21175500a2bd310ae3867e7991639defc1e2a5c92cf1b9f7083296b346738ab"},
 ]
 
 [[package]]

@@ -7,7 +7,6 @@ authors = [
     {name = "Santiago Martinez Balvanera", email = "santiago.balvanera.20@ucl.uk.ac"},
 ]
 dependencies = [
-    "pyalsaaudio>=0.9.2",
     "pony>=0.7.16",
     "pyaudio>=0.2.13",
     "sounddevice>=0.4.6",
@@ -19,7 +18,7 @@ dependencies = [
     "celery>=5.2.7",
     "Jinja2>=3.1.2",
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.7,<3.12"
 readme = "README.md"
 license = {text = "GPL-3.0"}
 
@@ -33,12 +32,20 @@ build-backend = "pdm.pep517.api"
 [tool.black]
 line-length = 79
 
+[tool.isort]
+profile = "black"
+line_length = 79
+
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
 exclude = ["src/acoupi/templates/"]
 include = ["src/acoupi/**/*.py", "tests/**/*.py"]
 pythonVersion = "3.7"
+
+[tool.ruff]
+line-length = 79
+target-version = "py37"
 
 [tool.mypy]
 mypy_path = ".venv/lib/python3.10/site-packages"
@@ -65,5 +72,6 @@ dev = [
     "black>=23.3.0",
     "pyright>=1.1.337",
     "ruff>=0.1.6",
+    "isort>=5.11.5",
 ]
 

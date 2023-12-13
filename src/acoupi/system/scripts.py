@@ -1,8 +1,8 @@
 import datetime
 import shutil
 import stat
-from typing import Optional
 from pathlib import Path
+from typing import Optional
 
 from acoupi.programs.workers import WorkerConfig
 from acoupi.system.constants import (

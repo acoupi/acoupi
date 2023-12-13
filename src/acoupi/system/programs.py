@@ -5,8 +5,7 @@ from pathlib import Path
 from typing import List, Optional, Type
 
 from acoupi import programs
-from acoupi.system import exceptions
-from acoupi.system import constants
+from acoupi.system import constants, exceptions
 from acoupi.system.configs import CeleryConfig, write_config
 from acoupi.system.constants import PROGRAM_CONFIG_FILE, PROGRAM_PATH
 from acoupi.system.parsers import parse_config_from_args

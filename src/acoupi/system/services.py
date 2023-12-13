@@ -18,10 +18,12 @@ from acoupi.system.templates import render_template
 __all__ = [
     "install_services",
     "uninstall_services",
+    "services_are_installed",
     "start_services",
     "stop_services",
     "enable_services",
     "disable_services",
+    "status_services",
 ]
 
 
@@ -161,4 +163,17 @@ def stop_services(path: Optional[Path] = None, **kwargs):
     )
     subprocess.run(
         ["systemctl", "--user", "stop", "acoupi-beat.service"], check=True
+    )
+
+
+def status_services(path: Optional[Path] = None, **kwargs):
+    """Stop acoupi services."""
+    if not services_are_installed(path):
+        install_services(path, **kwargs)
+
+    subprocess.run(
+        ["systemctl", "--user", "status", "acoupi.service"], text=True
+    )
+    subprocess.run(
+        ["systemctl", "--user", "status", "acoupi-beat.service"], text=True
     )

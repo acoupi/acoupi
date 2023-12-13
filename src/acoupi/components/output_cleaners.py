@@ -4,6 +4,7 @@ from typing import List
 from acoupi.components.types import ModelOutputCleaner
 from acoupi.data import Detection, ModelOutput, PredictedTag
 
+
 class ThresholdDetectionFilter(ModelOutputCleaner):
     """Keeps predictions with a probability above a threshold.
 
@@ -22,10 +23,7 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
 
     def get_clean_tags(self, tags: List[PredictedTag]) -> List[PredictedTag]:
         """Removes tags with low probability."""
-        return [
-            tag for tag in tags
-            if tag.probability >= self.threshold
-        ]
+        return [tag for tag in tags if tag.probability >= self.threshold]
 
     def get_clean_detections(
         self, detections: List[Detection]

@@ -2,7 +2,8 @@
 import datetime
 from pathlib import Path
 
-from acoupi import components, data
+from acoupi import data
+from acoupi.components.model_template import TestModel
 
 
 def test_model(deployment: data.Deployment):
@@ -14,6 +15,6 @@ def test_model(deployment: data.Deployment):
         datetime=datetime.datetime.now(),
         deployment=deployment,
     )
-    model = components.BatDetect2()
+    model = TestModel()
     results = model.run(recording)
     assert isinstance(results, data.ModelOutput)

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from celery import Celery
 
-from acoupi.system.configs import load_config, CeleryConfig
+from acoupi.system.configs import CeleryConfig, load_config
 from acoupi.system.constants import CELERY_CONFIG_PATH, PROGRAM_CONFIG_FILE
 from acoupi.system.programs import load_program
 

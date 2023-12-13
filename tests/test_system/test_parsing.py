@@ -1,6 +1,7 @@
 """Test suite for config parsing functions."""
 
 from argparse import ArgumentError
+from typing import Optional
 from unittest.mock import Mock
 
 import click
@@ -258,3 +259,109 @@ def test_parse_simple_field_ask_for_confirmation_if_provided(monkeypatch):
     mock.assert_called_once()
     assert isinstance(parsed_config, Schema)
     assert parsed_config.foo is True
+
+
+def test_parse_optional_pydantic_field_is_none_without_prompting():
+    class NestedConfig(BaseModel):
+        """Nested configuration."""
+
+        a: int = 3
+
+    class Schema(BaseModel):
+        """Test schema."""
+
+        b: bool
+
+        c: Optional[NestedConfig] = None
+
+    parsed_config = parse_config_from_args(
+        Schema,
+        ["--b", "false"],
+        prompt=False,
+    )
+
+    assert isinstance(parsed_config, Schema)
+    assert parsed_config.c is None
+    assert parsed_config.b is False
+
+
+def test_parse_optional_pydantic_field_with_some_args():
+    """Test that parsing args overrides default values."""
+
+    class NestedConfig(BaseModel):
+        """Nested configuration."""
+
+        a: int = 3
+
+        d: float = 3.14
+
+    class Schema(BaseModel):
+        """Test schema."""
+
+        c: Optional[NestedConfig] = None
+
+    parsed_config = parse_config_from_args(
+        Schema,
+        ["--c.d", "2.71"],
+        prompt=False,
+    )
+
+    assert isinstance(parsed_config, Schema)
+    assert parsed_config.c is not None
+    assert parsed_config.c.a == 3
+    assert parsed_config.c.d == 2.71
+
+
+def test_parse_optional_pydantic_field_user_objection(monkeypatch):
+    class NestedConfig(BaseModel):
+        """Nested configuration."""
+
+        a: int = 3
+
+    class Schema(BaseModel):
+        """Test schema."""
+
+        c: Optional[NestedConfig] = None
+
+    mock = Mock(return_value=False)
+    monkeypatch.setattr(click, "confirm", mock)
+
+    parsed_config = parse_config_from_args(
+        Schema,
+        [],
+        prompt=True,
+    )
+
+    mock.assert_called_once()
+
+    assert isinstance(parsed_config, Schema)
+    assert parsed_config.c is None
+
+
+def test_parse_optional_pydantic_field_with_user_input(monkeypatch):
+    class NestedConfig(BaseModel):
+        """Nested configuration."""
+
+        a: bool = False
+        b: float = 3.14
+
+    class Schema(BaseModel):
+        """Test schema."""
+
+        c: Optional[NestedConfig] = None
+
+    mock = Mock(return_value=True)
+    monkeypatch.setattr(click, "confirm", mock)
+
+    parsed_config = parse_config_from_args(
+        Schema,
+        [],
+        prompt=True,
+    )
+
+    mock.assert_called()
+
+    assert isinstance(parsed_config, Schema)
+    assert parsed_config.c is not None
+    assert parsed_config.c.a is False
+    assert parsed_config.c.b == 3.14

@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, model_validator, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 __all__ = [
     "TimeInterval",
@@ -155,7 +155,6 @@ class PredictedTag(BaseModel):
     tag: Tag
     """The tag predicted by the model."""
 
-    #probability: float = 0
     probability: float = 1
     """The probability of the tag prediction."""
 

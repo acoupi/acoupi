@@ -1,4 +1,5 @@
 """System functions from managing program config files.""" ""
+import json
 from pathlib import Path
 from typing import List, Type, TypeVar
 
@@ -10,6 +11,9 @@ __all__ = [
     "write_config",
     "load_config",
     "is_configured",
+    "show_config",
+    "get_config_value",
+    "sub_config_value",
 ]
 
 
@@ -59,3 +63,34 @@ def is_configured(
 ) -> bool:
     """Check if acoupi is configured."""
     return config_file.exists() and program_file.exists()
+
+
+def show_config(
+    config_file_path: Path = PROGRAM_CONFIG_FILE,
+) -> dict:
+    """Show acoupi config file."""
+    with open(config_file_path) as file:
+        return json.load(file)
+
+
+def get_config_value(
+    config_value: str,
+    config_file_path: Path = PROGRAM_CONFIG_FILE,
+):
+    """Get a specific configuration value of acoupi."""
+    with open(config_file_path) as file:
+        return json.load(file)[config_value]
+
+
+def sub_config_value(
+    config_param_name: str,
+    new_config_value: Type[S],
+    config_file_path: Path = PROGRAM_CONFIG_FILE,
+):
+    """Substitute a specific configuration value of acoupi."""
+    with open(config_file_path) as file:
+        config_data = json.load(file)
+        config_data[config_param_name] = new_config_value
+
+    with open(config_file_path, "w") as file:
+        return json.dump(config_data, file)
