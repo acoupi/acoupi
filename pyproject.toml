@@ -41,11 +41,11 @@ venvPath = "."
 venv = ".venv"
 exclude = ["src/acoupi/templates/"]
 include = ["src/acoupi/**/*.py", "tests/**/*.py"]
-pythonVersion = "3.7"
+pythonVersion = "3.8"
 
 [tool.ruff]
 line-length = 79
-target-version = "py37"
+target-version = "py38"
 
 [tool.mypy]
 mypy_path = ".venv/lib/python3.10/site-packages"
