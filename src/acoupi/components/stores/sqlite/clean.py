@@ -1,6 +1,5 @@
-"""Module to Clean the Database"""
+"""Module to Clean the Database."""
 from pathlib import Path
-from acoupi.components.stores import sqlite
 
 from pony import orm
 
@@ -44,7 +43,7 @@ class SqliteCleaner:
         self.delete_db_tables()
 
 
-db_path = sqlite.SqliteCleaner()
+# db_path = sqlite.SqliteCleaner()
 # db_path = sqlite.SqliteCleaner(db_path=config.DEFAULT_DB_PATH)
 # db_path = (Path.home() / "acoupi" / "src" / "acoupi" / "components" / "stores" / "sqlite")
 
@@ -55,5 +54,5 @@ def delete_db_tables(db_path: str) -> None:
     cleaner.clean_db()
 
 
-if __name__ == "__main__":
-    delete_db_tables(db_path)
+# if __name__ == "__main__":
+#     delete_db_tables(db_path)

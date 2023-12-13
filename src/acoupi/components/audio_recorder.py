@@ -1,28 +1,26 @@
 """Implementation of AudioRecorder for acoupi.
 
-Audio recorder is used to record audio files. Audio recorder (PyAudioRecorder)
-is implemented as class that inherit from AudioRecorder. The class should
-implement the record() method which return a temporary audio file based on the
-dataclass Recording. The dataclass Recording takes a datetime.datetime object,
-a path from type str, a duration from type float, and samplerate from type
-float. 
+Audio recorder is used to record audio files. Audio recorder
+(PyAudioRecorder) is implemented as class that inherit from
+AudioRecorder. The class should implement the record() method which
+return a temporary audio file based on the dataclass Recording. The
+dataclass Recording takes a datetime.datetime object, a path from type
+str, a duration from type float, and samplerate from type float.
 
-The audio recorder takes arguments related to the audio device. It specifies
-the acoutics parameters of recording an audio file. These are the samplerate,
-the duration, the number of audio_channels, the chunk size, and the index of
-the audio device. The index of the audio device corresponds to the index of the
-USB port the device is connected to. The audio recorder return a temporary .wav
-file.
-
+The audio recorder takes arguments related to the audio device. It
+specifies the acoutics parameters of recording an audio file. These are
+the samplerate, the duration, the number of audio_channels, the chunk
+size, and the index of the audio device. The index of the audio device
+corresponds to the index of the USB port the device is connected to. The
+audio recorder return a temporary .wav file.
 """
 import datetime
 import wave
-import sounddevice  # necessary to avoid alsa errors
-
 from pathlib import Path
 from typing import Optional
 
 import pyaudio
+import sounddevice  # noqa: F401
 
 from acoupi import data
 from acoupi.components.types import AudioRecorder

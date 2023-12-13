@@ -1,15 +1,15 @@
-""" Recording Saving Filters.
-    
-There are various options availble for saving recordings files. 
-    
+"""Recording Saving Filters.
+
+There are various options availble for saving recordings files.
+
     1. Save recordings based on a specific time interval. Both parameters
        starttime_saving_recording and endtime_saving_recording need to be configured.
     2. Save recordings for x minutes before or after dawn and dusk time. Configure parameters
        before_dawndusk_duration and/or after_dawndusk_duration.
     3. Save recordings for a specific duration (i.e., x minutes)
-       and with a repetitive frequency interval (i.e,  x minutes). 
-       Configure both parameters saving_frequency_duration and saving_frequency_interval. 
-    
+       and with a repetitive frequency interval (i.e,  x minutes).
+       Configure both parameters saving_frequency_duration and saving_frequency_interval.
+
 Ignore all of these settings if no recordings should be saved.
 """
 
@@ -48,7 +48,7 @@ class SaveIfInInterval(types.RecordingSavingFilter):
     def should_save_recording(
         self,
         recording: data.Recording,
-        _: Optional[List[data.ModelOutput]] = None,
+        model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be saved."""
         return (
@@ -74,7 +74,7 @@ class FrequencySchedule(types.RecordingSavingFilter):
     def should_save_recording(
         self,
         recording: data.Recording,
-        _: Optional[List[data.ModelOutput]] = None,
+        model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be saved."""
         time = recording.datetime
@@ -95,11 +95,10 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
         self.duration = duration
         self.timezone = timezone
 
-    # def should_save_recording(self, time: datetime.datetime) -> bool:
     def should_save_recording(
         self,
         recording: data.Recording,
-        _: Optional[List[data.ModelOutput]] = None,
+        model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be saved.
 
@@ -147,7 +146,7 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
     def should_save_recording(
         self,
         recording: data.Recording,
-        _: Optional[List[data.ModelOutput]] = None,
+        model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be saved.
 
@@ -226,7 +225,7 @@ class ThresholdRecordingFilter(types.RecordingSavingFilter):
 
     def should_save_recording(
         self,
-        _: data.Recording,
+        recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be kept.
@@ -250,8 +249,8 @@ class ThresholdRecordingFilter(types.RecordingSavingFilter):
 class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
     """A RecordingFilter that keeps recordings with selected tags.
 
-    This filter will keep recordings that contain confident tag predictions
-    that are in the tags list.
+    This filter will keep recordings that contain confident tag
+    predictions that are in the tags list.
     """
 
     tags: List[data.Tag]
@@ -307,7 +306,7 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
 
     def should_save_recording(
         self,
-        _: data.Recording,
+        recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be kept.

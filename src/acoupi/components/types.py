@@ -19,7 +19,7 @@ class RecordingScheduler(ABC):
     def time_until_next_recording(
         self,
         time: Optional[datetime.datetime] = None,
-    ) -> int:
+    ) -> float:
         """Return the number of seconds until the next recording.
 
         This should return 0 if a recording should be made immediately.

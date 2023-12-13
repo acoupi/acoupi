@@ -1,16 +1,17 @@
-""" Acoupi TestProgram Configuraiton Options.
-    
-    This is the most basic acoupi program. It only records audio files
-    and does not do any processing and messanging.
+"""Acoupi TestProgram Configuraiton Options.
 
-    """
+This is the most basic acoupi program. It only records audio files and
+does not do any processing and messanging.
+"""
 import datetime
 from pathlib import Path
 from typing import Optional
 
+import pytz
+from pydantic import BaseModel, Field
+
 from acoupi import components, data, tasks
 from acoupi.programs.base import AcoupiProgram
-from pydantic import BaseModel, Field
 from acoupi.system.constants import ACOUPI_HOME
 
 """Default paramaters for Acoupi TestProgram"""
@@ -61,9 +62,9 @@ class AudioDirectories(BaseModel):
 
     audio_dir: Path = ACOUPI_HOME / "storages" / "recordings"
 
-    audio_dir_true: Path = None
+    audio_dir_true: Optional[Path] = None
 
-    audio_dir_false: Path = None
+    audio_dir_false: Optional[Path] = None
 
 
 class AcoupiTest_ConfigSchema(BaseModel):
@@ -89,7 +90,7 @@ class AcoupiTest_ConfigSchema(BaseModel):
         default_factory=SaveRecordingFilter,
     )
 
-    audio_directories: Optional[AudioDirectories] = Field(
+    audio_directories: AudioDirectories = Field(
         default_factory=AudioDirectories,
     )
 
@@ -106,8 +107,9 @@ class TestProgram(AcoupiProgram):
         2. Create Detection Task
         3. Create Saving Recording Filter and Management Task
         4. Create Message Task
-
         """
+        # Get Timezone
+        timezone = pytz.timezone(config.timezone)
 
         # Step 1 - Audio Recordings Task
         recording_task = tasks.generate_recording_task(
@@ -136,65 +138,80 @@ class TestProgram(AcoupiProgram):
                             end=config.recording_schedule.end_recording,
                         ),
                     ],
-                    timezone=config.timezone,
+                    timezone=timezone,
                 )
             ],
         )
 
         # Step 2 - Model Detections Task
-        """Detection Task is ignored. No model is provided."""
+        # Detection Task is ignored. No model is provided.
 
         # Step 3 - Files Management Task
         def create_file_filters():
             saving_filters = []
 
-            if components.SaveIfInInterval is not None:
-                saving_filters.add(
-                    components.SaveIfInInterval(
-                        interval=data.TimeInterval(
-                            start=config.recording_saving.starttime,
-                            end=config.recording_saving.endtime,
-                        ),
-                        timezone=config.timezone,
-                    )
+            if not config.recording_saving:
+                # No saving filters defined
+                return []
+
+            recording_saving = config.recording_saving
+
+            # Main filter
+            # Will only save recordings if the recording time is in the
+            # interval defined by the start and end time.
+            saving_filters.append(
+                components.SaveIfInInterval(
+                    interval=data.TimeInterval(
+                        start=recording_saving.starttime,
+                        end=recording_saving.endtime,
+                    ),
+                    timezone=timezone,
                 )
-            elif components.FrequencySchedule is not None:
-                saving_filters.add(
+            )
+
+            # Additional filters
+            if (
+                recording_saving.frequency_duration is not None
+                and recording_saving.frequency_interval is not None
+            ):
+                # This filter will only save recordings at a frequency defined
+                # by the duration and interval.
+                saving_filters.append(
                     components.FrequencySchedule(
-                        duration=config.recording_saving.frequency_duration,
-                        frequency=config.recording_saving.frequency_interval,
+                        duration=recording_saving.frequency_duration,
+                        frequency=recording_saving.frequency_interval,
                     )
                 )
-            elif components.Before_DawnDuskTimeInterval is not None:
-                saving_filters.add(
+
+            if recording_saving.before_dawndusk_duration is not None:
+                # This filter will only save recordings if the recording time
+                # is before dawn or dusk.
+                saving_filters.append(
                     components.Before_DawnDuskTimeInterval(
-                        duration=config.recording_saving.before_dawndusk_duration,
-                        timezone=config.timezone,
+                        duration=recording_saving.before_dawndusk_duration,
+                        timezone=timezone,
                     )
                 )
-            elif components.After_DawnDuskTimeInterval is not None:
-                saving_filters.add(
+
+            if components.After_DawnDuskTimeInterval is not None:
+                # This filter will only save recordings if the recording time
+                # is after dawn or dusk.
+                saving_filters.append(
                     components.After_DawnDuskTimeInterval(
-                        duration=config.recording_saving.after_dawndusk_duration,
-                        timezone=config.timezone,
+                        duration=recording_saving.after_dawndusk_duration,
+                        timezone=timezone,
                     )
-                )
-            else:
-                raise UserWarning(
-                    "No saving filters defined - no files will be saved."
                 )
 
             return saving_filters
 
-        file_management_task = (
-            tasks.generate_file_management_task(
-                store=components.SqliteStore(config.dbpath),
-                file_manager=components.SaveRecordingManager(
-                    dirpath=config.audio_directories.audio_dir,
-                    timeformat=config.timeformat,
-                ),
-                file_filters=create_file_filters(),
+        file_management_task = tasks.generate_file_management_task(
+            store=components.SqliteStore(config.dbpath),
+            file_manager=components.SaveRecordingManager(
+                dirpath=config.audio_directories.audio_dir,
+                timeformat=config.timeformat,
             ),
+            file_filters=create_file_filters(),
         )
 
         # Step 4 - Send Data Task

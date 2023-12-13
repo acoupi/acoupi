@@ -2,7 +2,7 @@
 import datetime
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Callable, Optional, Type, TypeVar, Union, List
+from typing import Callable, Optional, Type, TypeVar, Union, List, Generic
 
 from celery import Celery, group
 from celery.schedules import crontab
@@ -24,7 +24,7 @@ class NoUserPrompt:
     """
 
 
-ProgramConfig = Optional[BaseModel]
+ProgramConfig = TypeVar("ProgramConfig", bound=BaseModel)
 
 B = TypeVar("B")
 
@@ -33,10 +33,10 @@ class InvalidAcoupiConfiguration(ValueError):
     """Raised when a configuration is invalid."""
 
 
-class AcoupiProgram(ABC):
+class AcoupiProgram(ABC, Generic[ProgramConfig]):
     """A program is a collection of tasks."""
 
-    config: ProgramConfig
+    config: Optional[ProgramConfig]
 
     worker_config: Optional[WorkerConfig] = None
 
@@ -111,7 +111,7 @@ class AcoupiProgram(ABC):
             if callback.__name__ not in self.tasks:
                 # register the callback as a task with the app
                 callback_task = self.app.task(callback, name=callback.__name__)
-                self.tasks[callback_task.name] = callback_task
+                self.tasks[callback_task.__name__] = callback_task
 
             # get the task from the list of tasks
             callback_task = self.tasks[callback.__name__]
@@ -140,7 +140,7 @@ class AcoupiProgram(ABC):
         task = self.app.task(decorated_function, name=function.__name__)
 
         # add the task to the list of tasks
-        self.tasks[task.name] = task
+        self.tasks[task.__name__] = task
 
         if queue:
             # make sure the queue has been declared in the worker config
@@ -150,7 +150,7 @@ class AcoupiProgram(ABC):
                 )
 
             # configure the app to route the task to the queue
-            self.app.conf.task_routes[task.name] = {"queue": queue}
+            self.app.conf.task_routes[task.__name__] = {"queue": queue}
 
         if schedule:
             # configure the app to schedule the task

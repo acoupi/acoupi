@@ -67,7 +67,7 @@ def is_configured(
 
 def show_config(
     config_file_path: Path = PROGRAM_CONFIG_FILE,
-) -> bool:
+) -> dict:
     """Show acoupi config file."""
     with open(config_file_path) as file:
         return json.load(file)

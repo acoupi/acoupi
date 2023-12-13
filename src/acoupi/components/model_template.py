@@ -17,12 +17,12 @@ class TestModel(types.Model):
 
         detections = [
             data.Detection(
-                probability="dectection_probability",
+                probability=0.9,
                 location=data.BoundingBox.from_coordinates(
-                    "start_time",
-                    "low_freq",
-                    "end_time",
-                    "high_freq",
+                    start_time=0,
+                    low_freq=4000,
+                    end_time=1,
+                    high_freq=8000,
                 ),
                 tags=[
                     data.PredictedTag(
@@ -30,7 +30,7 @@ class TestModel(types.Model):
                             key="species",
                             value="scientific_name",
                         ),
-                        probability="species_probabiliby",
+                        probability=0.9,
                     ),
                 ],
             )
@@ -39,5 +39,5 @@ class TestModel(types.Model):
         return data.ModelOutput(
             name_model="TestModel",
             recording=recording,
-            detection=detections,
+            detections=detections,
         )
