@@ -1,7 +1,7 @@
 """System functions from managing program config files.""" ""
+import json
 from pathlib import Path
 from typing import List, Type, TypeVar
-import json
 
 from pydantic import BaseModel, Field
 

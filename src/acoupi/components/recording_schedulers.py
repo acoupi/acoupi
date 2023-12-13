@@ -38,12 +38,12 @@ class IntervalScheduler(RecordingScheduler):
         self, time: Optional[datetime.datetime] = None
     ) -> float:
         """Return the number of second until the next recording.
-        Should return 0 if a recording should be made immediately. 
+        Should return 0 if a recording should be made immediately.
 
         Args:
-            time: The time to use for determining the next recording. 
+            time: The time to use for determining the next recording.
             Defaults to None.
-        
+
         """
         if not time:
             time = datetime.datetime.now()
@@ -51,4 +51,3 @@ class IntervalScheduler(RecordingScheduler):
             time + datetime.timedelta(seconds=self.timeinterval)
         ).replace(microsecond=0)
         return int((next_recording_time - time).total_seconds())
-        

@@ -1,6 +1,7 @@
 """Test Acoupi Program."""
-from acoupi.programs.base import AcoupiProgram
 from pydantic import BaseModel
+
+from acoupi.programs.base import AcoupiProgram
 
 
 class TestConfigSchema(BaseModel):

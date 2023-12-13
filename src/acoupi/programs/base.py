@@ -2,7 +2,7 @@
 import datetime
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Callable, Optional, Type, TypeVar, Union, List, Generic
+from typing import Callable, Generic, List, Optional, Type, TypeVar, Union
 
 from celery import Celery, group
 from celery.schedules import crontab

@@ -55,7 +55,9 @@ def test_parse_config_with_boolean_field():
 
         foo: bool = True
 
-    parsed_config = parse_config_from_args(Schema, ["--foo", "false"], prompt=False)
+    parsed_config = parse_config_from_args(
+        Schema, ["--foo", "false"], prompt=False
+    )
 
     assert isinstance(parsed_config, Schema)
     assert parsed_config.foo is False

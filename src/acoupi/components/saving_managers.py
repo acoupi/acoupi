@@ -17,6 +17,7 @@ On top of these, it takes a clean list of detection to be saved.
 """
 import os
 import shutil
+
 # import csv
 from abc import ABC, abstractmethod
 from pathlib import Path

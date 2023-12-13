@@ -305,7 +305,9 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
         parser = argparse.ArgumentParser()
         name = f"{parent}.{field_name}" if parent else f"{field_name}"
 
-        default = field.default if field.default is not PydanticUndefined else None
+        default = (
+            field.default if field.default is not PydanticUndefined else None
+        )
 
         action = parser.add_argument(
             f"--{name}",
@@ -319,7 +321,9 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
 
         if not prompt:
             if value is None and default is None:
-                raise argparse.ArgumentError(action, f"Missing value for {field_name}.")
+                raise argparse.ArgumentError(
+                    action, f"Missing value for {field_name}."
+                )
 
             return value
 

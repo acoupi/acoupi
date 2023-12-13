@@ -1,14 +1,12 @@
 """Acoupi components."""
 from acoupi.components.audio_recorder import PyAudioRecorder
-from acoupi.components.message_factories import (
-    FullModelOutputMessageBuilder,
-)
+from acoupi.components.message_factories import FullModelOutputMessageBuilder
 from acoupi.components.message_stores.sqlite import SqliteMessageStore
-from acoupi.components.messengers import MQTTMessenger, HTTPMessenger
+from acoupi.components.messengers import HTTPMessenger, MQTTMessenger
 from acoupi.components.output_cleaners import ThresholdDetectionFilter
 
 # from acoupi.components.output_cleaners import DetectionProbabilityCleaner, TagKeyCleaner
-from acoupi.components.recording_conditions import IsInIntervals, IsInInterval
+from acoupi.components.recording_conditions import IsInInterval, IsInIntervals
 from acoupi.components.recording_schedulers import IntervalScheduler
 from acoupi.components.saving_filters import (
     After_DawnDuskTimeInterval,

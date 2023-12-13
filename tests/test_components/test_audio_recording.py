@@ -1,5 +1,6 @@
 """Test the recording of an audio files."""
 from pathlib import Path
+
 from acoupi import components, data
 
 

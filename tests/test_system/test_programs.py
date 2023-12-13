@@ -5,8 +5,7 @@ from pathlib import Path
 import pytest
 
 from acoupi.programs.custom.acoupi import TestProgram
-from acoupi.system import programs
-from acoupi.system import exceptions
+from acoupi.system import exceptions, programs
 
 
 def test_write_program_file_creates_a_file(tmp_path: Path):

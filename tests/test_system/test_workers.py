@@ -54,7 +54,7 @@ def test_write_workers_start_script_with_one_worker(acoupi_home: Path):
     assert script_path.is_file()
     assert os.access(script_path, os.X_OK)
 
-    expected_line = fr"""
+    expected_line = rf"""
     {celery_bin} \
     -A app \
     multi \
@@ -96,7 +96,7 @@ def test_write_workers_start_script_for_worker_with_queues(
     assert script_path.is_file()
     assert os.access(script_path, os.X_OK)
 
-    expected_line = fr"""
+    expected_line = rf"""
     {celery_bin} \
     -A app \
     multi \
@@ -139,7 +139,7 @@ def test_write_workers_start_script_with_concurrency(
     assert script_path.is_file()
     assert os.access(script_path, os.X_OK)
 
-    expected_line = fr"""
+    expected_line = rf"""
     {celery_bin} \
     -A app \
     multi \
@@ -184,7 +184,7 @@ def test_write_start_script_with_multiple_workers(
     assert script_path.is_file()
     assert os.access(script_path, os.X_OK)
 
-    expected_line = fr"""
+    expected_line = rf"""
     {celery_bin} \
     -A app \
     multi \

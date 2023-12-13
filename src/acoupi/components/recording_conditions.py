@@ -15,6 +15,7 @@ from typing import List
 
 from acoupi.components.types import RecordingCondition
 from acoupi.data import TimeInterval
+
 # from acoupi.types import RecordingCondition
 
 __all__ = [
@@ -45,7 +46,9 @@ class IsInInterval(RecordingCondition):
 class IsInIntervals(RecordingCondition):
     """A RecordManager that records during multiple intervals of time."""
 
-    def __init__(self, intervals: List[TimeInterval], timezone: datetime.tzinfo):
+    def __init__(
+        self, intervals: List[TimeInterval], timezone: datetime.tzinfo
+    ):
         """Initialize the MultiIntervalRecordingManager.
 
         Args:
@@ -61,5 +64,6 @@ class IsInIntervals(RecordingCondition):
     def should_record(self, time: datetime.datetime) -> bool:
         """Determine if a recording should be made."""
         return any(
-            interval.start <= time.time() <= interval.end for interval in self.intervals
+            interval.start <= time.time() <= interval.end
+            for interval in self.intervals
         )
