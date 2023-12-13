@@ -35,16 +35,20 @@ coverage:
 lint/pyright:
 	pyright $(SRC_DIR)
 
-lint/pylint:
-	pylint $(SRC_DIR)
+lint/ruff:
+	ruff$(SRC_DIR)
 
 lint/black:
 	black --check $(SRC_DIR)
 
-lint: lint/pyright lint/pylint lint/black
+lint: lint/pyright lint/ruff lint/black
 
 test:
 	pytest --verbose --color=yes $(TEST_DIR)
+
+format:
+	black $(SRC_DIR) $(TEST_DIR)
+	isort $(SRC_DIR) $(TEST_DIR)
 
 clean-docs:
 	rm -rf $(DOCS_BUILD_DIR)
