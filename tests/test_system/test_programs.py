@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from acoupi.programs.custom.acoupi import TestProgram
+from acoupi.programs.custom.test import TestProgram
 from acoupi.system import exceptions, programs
 
 
