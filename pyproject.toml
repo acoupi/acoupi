@@ -73,5 +73,7 @@ dev = [
     "pyright>=1.1.337",
     "ruff>=0.1.6",
     "isort>=5.11.5",
+    "mkdocs>=1.5.3",
+    "mkdocs-material>=9.2.7",
 ]
 
