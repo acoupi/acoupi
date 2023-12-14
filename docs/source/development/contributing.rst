@@ -1,4 +1,0 @@
-.. _acoupi-contributing:
-
-Contributing
-============
