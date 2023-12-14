@@ -52,19 +52,13 @@ def parse_config_from_args(
     This function will raise an error if the user provided configuration
     is invalid.
 
-    Parameters
-    ----------
-    schema: Type[A]
-        The configuration schema to use.
-    args: Optional[list[str]]
-        The arguments to parse. If None, will use an empty list.
-    prompt: bool
-        Whether to prompt the user for missing configuration.
+    Args:
+        schema: The configuration schema to use.
+        args: The arguments to parse. If None, will use an empty list.
+        prompt: Whether to prompt the user for missing configuration.
 
-    Returns
-    -------
-    config
-        The parsed configuration.
+    Returns:
+        config: The parsed configuration.
     """
     if args is None:
         args = []

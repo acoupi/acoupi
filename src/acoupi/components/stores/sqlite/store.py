@@ -112,7 +112,6 @@ class SqliteStore(types.Store):
 
         Args:
             recording: The recording to store
-            deployment: The deployment associated with the recording
         """
         self._get_or_create_recording(recording)
 

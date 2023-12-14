@@ -265,8 +265,8 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
         Args:
             tags: The tags to focus on.
             threshold: The probability threshold to use. Will only
-            keep recordings with detections with a probability
-            greater than or equal to this threshold.
+                keep recordings with detections with a probability
+                greater than or equal to this threshold.
         """
         self.tags = tags
         self.threshold = threshold
@@ -293,8 +293,6 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
             if detection.probability < self.threshold:
                 continue
 
-            print(self.tags, detection.tags)
-
             for tag in detection.tags:
                 if tag.tag not in self.tags:
                     continue
@@ -313,7 +311,7 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
 
         Args:
             recording: The recording to check.
-            detections: The detections in the recording.
+            model_outputs: The model outputs for the recording.
 
         Returns:
             bool

@@ -33,7 +33,7 @@ class IsInInterval(RecordingCondition):
         Args:
             interval: The interval of time to record during.
             timezone: The timezone to use when determining if a recording should
-            be made.
+                be made.
         """
         self.interval = interval
         self.timezone = timezone
@@ -53,9 +53,9 @@ class IsInIntervals(RecordingCondition):
 
         Args:
             intervals: The intervals of time to record during. Should be a list
-            of Interval objects.
+                of Interval objects.
             timezone: The timezone to use when determining if a recording
-            should be made.
+                should be made.
 
         """
         self.intervals = intervals

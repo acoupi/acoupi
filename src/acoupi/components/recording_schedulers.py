@@ -30,7 +30,7 @@ class IntervalScheduler(RecordingScheduler):
         """Initialize the recording scheduler.
 
         Args:
-            interval: The interval between each recording. In seconds.
+            timeinterval: The interval between each recording. In seconds.
         """
         self.timeinterval = timeinterval
 
@@ -42,7 +42,7 @@ class IntervalScheduler(RecordingScheduler):
 
         Args:
             time: The time to use for determining the next recording.
-            Defaults to None.
+                Defaults to None.
 
         """
         if not time:
