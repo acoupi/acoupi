@@ -48,13 +48,13 @@ Creating a new data object with Pydantic involves defining a Python class that i
 
 1. Define a Class that inherit from `BaseModel`. 
 
-```
+```python
 class YourDataObject(BaseModel):
     # Attributes for the class
 ```
 2. Declare the attributes of the new data object as the class variables. Specify the attributes' data types using Python type hints. Optionally, set default values for the attributes. 
 
-```
+```python
 class YourDataObject(BaseModel):
     attribute1: float = 0.5
     attribute2: str 
@@ -62,7 +62,7 @@ class YourDataObject(BaseModel):
 ```
 3. **Optional**: Implement custom validaiton logic using [**Pydantic's validation methods**](https://docs.pydantic.dev/dev/concepts/validators/#annotated-validators) such as @field_validatior and @model_validator. 
 
-```
+```python
 class YourDataObject(BaseModel):
     attribute1: int = 0.5
     attribute2: str 
