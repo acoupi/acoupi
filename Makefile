@@ -1,7 +1,7 @@
 TEST_DIR := tests/
 SRC_DIR := src/
-DOCS_SOURCE_DIR := docs/source/
-DOCS_BUILD_DIR := docs/build/
+DOCS_SOURCE_DIR := docs/
+DOCS_BUILD_DIR := site/
 
 clean: clean-build clean-pyc clean-test clean-cache
 
@@ -54,10 +54,10 @@ clean-docs:
 	rm -rf $(DOCS_BUILD_DIR)
 
 docs: clean-docs
-	sphinx-build -b html $(DOCS_SOURCE_DIR) $(DOCS_BUILD_DIR)
+	mkdocs build --clean
 
 serve-coverage:
 	python -m http.server --directory htmlcov/ 8080
 
 serve-docs:
-	sphinx-autobuild -b html $(DOCS_SOURCE_DIR) $(DOCS_BUILD_DIR)
+	mkdocs serve
