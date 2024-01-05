@@ -35,6 +35,9 @@ def acoupi():
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
 def setup(program: str, args: List[str]):
     """Setup acoupi."""
+    click.echo(
+        "Collecting program files. It will take a minute or so, be patient..."
+    )
     try:
         system.setup_program(program, args, prompt=True)
 

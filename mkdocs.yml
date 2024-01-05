@@ -19,6 +19,8 @@ nav:
   - Reference:
       - Data: reference/data.md
       - Components: reference/components.md
+      - Programs: reference/programs.md
+      - System: reference/system.md
   - About the Project:
       - Authors: authors.md
       - License: license.md
