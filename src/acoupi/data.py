@@ -94,8 +94,11 @@ class Recording(BaseModel):
     path: Optional[Path] = None
     """The path to the audio file in the local filesystem"""
 
-    audio_channels: int = 1
-    """The number of audio_channels in the recording. Defaults to 1."""
+    audio_channels: Optional[int] = 1
+    """The number of audio_channels in the recording."""
+
+    chunksize: Optional[int] = 4096
+    """The chunksize of the audio file in bytes. Defaults to 4096."""
 
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the recording"""

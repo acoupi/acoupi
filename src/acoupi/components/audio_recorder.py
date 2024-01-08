@@ -26,7 +26,10 @@ from acoupi import data
 from acoupi.components.types import AudioRecorder
 
 TMP_PATH = Path("/run/shm/")
-CHUNKSIZE = 1024
+
+__all__ = [
+    "PyAudioRecorder",
+]
 
 
 def has_input_audio_device() -> bool:
@@ -41,96 +44,99 @@ def has_input_audio_device() -> bool:
         return False
 
 
-def get_audio_device_index(
-    samplerate: int,
-    channels: Optional[int] = None,
-) -> Optional[int]:
-    """Get the index of a compatible audio device.
-
-    The audio device must support the specified samplerate and number of
-    channels.
+def get_microphone_info() -> Optional[int]:
+    """Check if there are any input audio devices available.
+    And get the information of a compatible audio device.
 
     Parameters
     ----------
     samplerate : int
-        The desired samplerate.
-    channels : Optional[int], optional
-        The desired number of channels. If None, any number of channels is
-        accepted. The default is None.
+        The device default samplerate.
+    audio_channels : int
+        The default number of channels. The microphone should have at least
+        one audio channel.
+    device_index : int
+        The input index of the audio device. The input index is linked to
+        USB port the device is connected to.
 
     Returns
     -------
     int
-        The index of the audio device.
+        The samplerate, audio_channel, device_index of the audio device.
 
     Raises
     ------
     IOError
         If no compatible audio device is found.
     """
+
     # Create an instance of PyAudio
     p = pyaudio.PyAudio()
+    try:
+        p.get_default_input_device_info()
 
-    # Get the number of audio devices
-    num_devices = p.get_device_count()
+        # Get default input device info
+        default_input_device = p.get_default_input_device_info()
 
-    # Loop through the audio devices
-    for index in range(num_devices):
-        try:
-            p.is_format_supported(
-                int(samplerate),
-                input_device=index,
-                input_channels=channels,
-                input_format=pyaudio.paInt16,
-            )
-            return index
-        except ValueError as err:
-            message = str(err)
-            if (
-                "Invalid sample rate" in message
-                or "Invalid number of channels" in message
-            ):
-                continue
+        # Get the number of channels
+        channels = default_input_device["maxInputChannels"]
 
-            raise err
+        # Get the input device index
+        input_device_index = default_input_device["index"]
 
-    raise IOError("No compatible audio device found.")
+        # Get the sample rate
+        sample_rate = int(default_input_device["defaultSampleRate"])
+
+        p.terminate()
+        return channels, sample_rate, input_device_index
+
+    except IOError:
+        return "No compatible audio device found."
 
 
 class PyAudioRecorder(AudioRecorder):
     """An AudioRecorder that records a 3 second audio file."""
+
+    duration: float
+    """The duration of the audio file in seconds."""
+
+    samplerate: int
+    """The samplerate of the audio file in Hz."""
+
+    audio_channels: int
+    """The number of audio channels."""
+
+    device_index: int
+    """The input index of the audio device."""
+
+    chunksize: int
+    """The chunksize of the audio file in bytes."""
+
+    audio_dir: Path
+    """The path of the audio file in temporary memory."""
 
     def __init__(
         self,
         duration: float,
         samplerate: int,
         audio_channels: int,
-        device_index: Optional[int] = None,
-        chunksize: int = CHUNKSIZE,
+        device_index: int,
+        chunksize: int,
         audio_dir: Path = TMP_PATH,
-    ):
+    ) -> None:
         """Initialise the AudioRecorder with the audio parameters."""
         # Audio Duration
         self.duration = duration
-
         # Audio Microphone Parameters
         self.samplerate = samplerate
         self.audio_channels = audio_channels
+        self.device_index = device_index
+        # Audio Files Parameters
         self.chunksize = chunksize
         self.audio_dir = audio_dir
 
-        if device_index is None:
-            # If not specified, get the index of an audio device compatible
-            # with the specified samplerate and number of channels
-            device_index = get_audio_device_index(
-                samplerate=self.samplerate,
-                channels=self.audio_channels,
-            )
-
-        self.device_index = device_index
-
     def record(self, deployment: data.Deployment) -> data.Recording:
-        """Record a 3 second temporary audio file at 192KHz.
+        """Record a 3 second temporary audio file.
 
         Return the temporary path of the file.
         """
@@ -148,6 +154,12 @@ class PyAudioRecorder(AudioRecorder):
 
             # Create an new instace of PyAudio
             p = pyaudio.PyAudio()
+
+            (
+                self.audio_channels,
+                self.samplerate,
+                self.device_index,
+            ) = get_microphone_info()
 
             # Create new audio stream
             stream = p.open(
