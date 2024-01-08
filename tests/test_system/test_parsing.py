@@ -1,5 +1,6 @@
 """Test suite for config parsing functions."""
 
+import datetime
 from argparse import ArgumentError
 from typing import Optional
 from unittest.mock import Mock
@@ -8,6 +9,7 @@ import click
 import pytest
 from pydantic import BaseModel, Field
 
+from acoupi.system.exceptions import ParameterError
 from acoupi.system.parsers import parse_config_from_args
 
 
@@ -365,3 +367,85 @@ def test_parse_optional_pydantic_field_with_user_input(monkeypatch):
     assert parsed_config.c is not None
     assert parsed_config.c.a is False
     assert parsed_config.c.b == 3.14
+
+
+def test_can_parse_time_inputs():
+    class Schema(BaseModel):
+        """Test schema."""
+
+        c: datetime.time
+
+    parsed_config = parse_config_from_args(
+        Schema,
+        ["--c", "8"],
+        prompt=False,
+    )
+
+    assert isinstance(parsed_config, Schema)
+    assert parsed_config.c is not None
+    assert parsed_config.c == datetime.time(8, 0, 0)
+
+    parsed_config = parse_config_from_args(
+        Schema,
+        ["--c", "14:23"],
+        prompt=False,
+    )
+
+    assert isinstance(parsed_config, Schema)
+    assert parsed_config.c is not None
+    assert parsed_config.c == datetime.time(14, 23, 0)
+
+    parsed_config = parse_config_from_args(
+        Schema,
+        ["--c", "8:10:53"],
+        prompt=False,
+    )
+
+    assert isinstance(parsed_config, Schema)
+    assert parsed_config.c is not None
+    assert parsed_config.c == datetime.time(8, 10, 53)
+
+
+def test_failed_parse_time_input_message():
+    class Schema(BaseModel):
+        """Test schema."""
+
+        c: datetime.time
+
+    with pytest.raises(ParameterError):
+        parse_config_from_args(
+            Schema,
+            ["--c", "800"],
+            prompt=False,
+        )
+
+
+def test_can_parse_date_inputs():
+    class Schema(BaseModel):
+        """Test schema."""
+
+        c: datetime.date
+
+    parsed_config = parse_config_from_args(
+        Schema,
+        ["--c", "2021-01-01"],
+        prompt=False,
+    )
+
+    assert isinstance(parsed_config, Schema)
+    assert parsed_config.c is not None
+    assert parsed_config.c == datetime.date(2021, 1, 1)
+
+
+def test_failed_parse_date_input_message():
+    class Schema(BaseModel):
+        """Test schema."""
+
+        c: datetime.date
+
+    with pytest.raises(ParameterError):
+        parse_config_from_args(
+            Schema,
+            ["--c", "2021-01-32"],
+            prompt=False,
+        )

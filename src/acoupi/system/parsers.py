@@ -2,6 +2,7 @@
 
 import argparse
 import datetime
+import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
@@ -12,6 +13,7 @@ from pydantic_core import PydanticUndefined
 from typing_extensions import Annotated, Protocol, get_args, get_origin
 
 from acoupi.programs.base import NoUserPrompt
+from acoupi.system.exceptions import ParameterError
 
 __all__ = [
     "parse_config_from_args",
@@ -310,7 +312,13 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
             default=default,
             help=field.description,
         )
-        parsed_args, _ = parser.parse_known_args(args)
+        try:
+            parsed_args, _ = parser.parse_known_args(args)
+        except SystemExit:
+            raise argparse.ArgumentError(
+                action, f"Invalid value for {field_name}."
+            ) from None
+
         value = parsed_args.value
 
         if not prompt:
@@ -336,17 +344,84 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
             else ""
         )
 
-        return click.prompt(
-            (
-                "Please provide a value for "
-                f"{click.style(name, fg='blue', bold=True)}."
-                f"{help}"
-            ),
-            type=dtype,
-            default=field.default,
-        )
+        while True:
+            try:
+                return click.prompt(
+                    (
+                        "Please provide a value for "
+                        f"{click.style(name, fg='blue', bold=True)}."
+                        f"{help}"
+                    ),
+                    value_proc=dtype,
+                    default=field.default,
+                )
+            except ParameterError as error:
+                msg = (
+                    "Invalid value for "
+                    f"{click.style(name, fg='blue', bold=True)}: "
+                    f"{click.style(error.message, fg='red', bold=True)}"
+                )
+                if error.help is not None:
+                    msg += f" {error.help}"
+                click.echo(msg)
 
     return field_parser
+
+
+# Time format (HH:MM:SS), but minutes and seconds are optional
+TIME_FORMAT = re.compile(r"(\d{1,2}):?(\d{2})?:?(\d{2})?")
+
+
+def parse_time(value: str) -> datetime.time:
+    """Parse a time from a string."""
+    match = TIME_FORMAT.search(value)
+
+    if match is None:
+        raise ParameterError(
+            value=value,
+            message="Invalid time format.",
+            help="Please use the format HH:MM:SS.",
+        ) from None
+
+    hours = int(match.group(1))
+    minutes = int(match.group(2) or 0)
+    seconds = int(match.group(3) or 0)
+
+    if hours > 23:
+        raise ParameterError(
+            value=value,
+            message="Invalid time format.",
+            help="Hours must be between 0 and 23.",
+        ) from None
+
+    if minutes > 59:
+        raise ParameterError(
+            value=value,
+            message="Invalid time format.",
+            help="Minutes must be between 0 and 59.",
+        ) from None
+
+    if seconds > 59:
+        raise ParameterError(
+            value=value,
+            message="Invalid time format.",
+            help="Seconds must be between 0 and 59.",
+        ) from None
+
+    return datetime.time(hours, minutes, seconds)
+
+
+def parse_date(value: str) -> datetime.date:
+    """Parse a date from a string."""
+
+    try:
+        return datetime.datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError:
+        raise ParameterError(
+            value=value,
+            message="Invalid date format.",
+            help="Please use the format YYYY-MM-DD.",
+        ) from None
 
 
 FIELD_PARSERS: Dict[type, FieldParser] = {
@@ -357,8 +432,8 @@ FIELD_PARSERS: Dict[type, FieldParser] = {
     float: build_simple_field_parser(float),
     list: parse_list_field_from_args,
     tuple: parse_tuple_field_from_args,
-    datetime.date: build_simple_field_parser(datetime.date),
-    datetime.time: build_simple_field_parser(datetime.time),
+    datetime.date: build_simple_field_parser(parse_date),
+    datetime.time: build_simple_field_parser(parse_time),
     datetime.datetime: build_simple_field_parser(datetime.datetime),
     Path: build_simple_field_parser(Path),
 }
