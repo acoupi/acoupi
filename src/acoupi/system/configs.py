@@ -5,7 +5,7 @@ from typing import List, Type, TypeVar
 
 from pydantic import BaseModel, Field
 
-from acoupi.system.constants import PROGRAM_CONFIG_FILE, PROGRAM_PATH
+from acoupi.system.constants import Settings
 
 __all__ = [
     "write_config",
@@ -35,7 +35,7 @@ S = TypeVar("S", bound=BaseModel)
 
 def write_config(
     config: BaseModel,
-    path: Path = PROGRAM_CONFIG_FILE,
+    path: Path,
 ) -> None:
     """Write config to file."""
     if config is None:
@@ -57,37 +57,34 @@ def load_config(
         return schema.model_validate_json(file.read())
 
 
-def is_configured(
-    config_file: Path = PROGRAM_CONFIG_FILE,
-    program_file: Path = PROGRAM_PATH,
-) -> bool:
+def is_configured(settings: Settings) -> bool:
     """Check if acoupi is configured."""
-    return config_file.exists() and program_file.exists()
+    return (
+        settings.program_config_file.exists()
+        and settings.program_file.exists()
+        and settings.program_name_file.exists()
+    )
 
 
-def show_config(
-    config_file_path: Path = PROGRAM_CONFIG_FILE,
-) -> dict:
+def show_config(settings: Settings) -> dict:
     """Show acoupi config file."""
-    with open(config_file_path) as file:
+    with open(settings.program_config_file) as file:
         return json.load(file)
 
 
-def get_config_value(
-    config_value: str,
-    config_file_path: Path = PROGRAM_CONFIG_FILE,
-):
+def get_config_value(config_value: str, settings: Settings):
     """Get a specific configuration value of acoupi."""
-    with open(config_file_path) as file:
-        return json.load(file)[config_value]
+    config = show_config(settings)
+    return config[config_value]
 
 
 def sub_config_value(
     config_param_name: str,
     new_config_value: Type[S],
-    config_file_path: Path = PROGRAM_CONFIG_FILE,
+    settings: Settings,
 ):
     """Substitute a specific configuration value of acoupi."""
+    config_file_path = settings.program_config_file
     with open(config_file_path) as file:
         config_data = json.load(file)
         config_data[config_param_name] = new_config_value

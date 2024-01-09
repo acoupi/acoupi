@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from acoupi import data
+from acoupi.system import Settings
 
 
 @pytest.fixture
@@ -83,4 +84,29 @@ def recording(deployment: data.Deployment):
         samplerate=16000,
         datetime=dt.datetime.now(),
         deployment=deployment,
+    )
+
+
+@pytest.fixture
+def settings(tmp_path: Path) -> Settings:
+    """Fixture for a settings object."""
+    home = tmp_path / ".acoupi"
+    home.mkdir(exist_ok=True)
+    return Settings(
+        home=home,
+        app_name="app",
+        program_file=home / "app.py",
+        program_name_file=home / "config" / "name",
+        program_config_file=home / "config" / "program.json",
+        celery_config_file=home / "config" / "celery.json",
+        env_file=home / "config" / "env",
+        run_dir=home / "run",
+        log_dir=home / "log",
+        log_level="INFO",
+        start_script_path=home / "bin" / "acoupi-workers-start.sh",
+        stop_script_path=home / "bin" / "acoupi-workers-stop.sh",
+        restart_script_path=home / "bin" / "acoupi-workers-restart.sh",
+        beat_script_path=home / "bin" / "acoupi-beat.sh",
+        acoupi_service_file="acoupi.service",
+        acoupi_beat_service_file="acoupi-beat.service",
     )

@@ -7,8 +7,8 @@ from acoupi import components, data
 
 # from acoupi.components.audio_recorder import has_input_audio_device
 from acoupi.components.audio_recorder import (
-    has_input_audio_device,
     get_microphone_info,
+    has_input_audio_device,
 )
 
 

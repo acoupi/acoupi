@@ -42,7 +42,7 @@ class ParameterError(Exception):
         self.help = help
 
 
-class HealthError(Exception):
+class HealthCheckError(Exception):
     """Exception raised when a health check fails."""
 
     def __init__(self, message: str):

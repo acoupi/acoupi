@@ -12,8 +12,6 @@ from pydantic import BaseModel, Field
 
 from acoupi import components, data, tasks
 from acoupi.programs.base import AcoupiProgram
-from acoupi.programs.workers import WorkerConfig, AcoupiWorker
-from acoupi.system.constants import ACOUPI_HOME
 
 """Default paramaters for Acoupi TestProgram"""
 
@@ -61,7 +59,7 @@ class SaveRecordingFilter(BaseModel):
 class AudioDirectories(BaseModel):
     """Audio Recording Directories configuration."""
 
-    audio_dir: Path = ACOUPI_HOME / "storages" / "recordings"
+    audio_dir: Path = Path.home() / "storages" / "recordings"
 
     audio_dir_true: Optional[Path] = None
 
@@ -73,7 +71,7 @@ class AcoupiTest_ConfigSchema(BaseModel):
 
     name: str = "acoupi_testprogram"
 
-    dbpath: Path = ACOUPI_HOME / "storages" / "acoupi.db"
+    dbpath: Path = Path.home() / "storages" / "acoupi.db"
 
     timeformat: str = "%Y%m%d_%H%M%S"
 

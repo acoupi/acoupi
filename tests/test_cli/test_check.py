@@ -20,24 +20,28 @@ def mock_celery_bin(monkeypatch):
     )
 
 
-def test_can_run_without_arguments():
+def test_can_run_check(settings: Settings):
     """Test that the setup command can be run without arguments."""
     runner = CliRunner()
-    result = runner.invoke(acoupi, ["setup"])
+    runner.invoke(
+        acoupi,
+        [
+            "setup",
+            "--program",
+            "acoupi.programs.custom.test",
+        ],
+        obj={"settings": settings},
+    )
+
+    result = runner.invoke(acoupi, ["check"], obj={"settings": settings})
     assert result.exit_code == 0
+    assert "Health checks passed" in result.output
 
 
-def test_setup_fails_if_program_not_found():
-    """Test that the setup command fails if the program is not found."""
+def test_can_run_check_with_failed_checks(settings: Settings):
+    """Test that the setup command can be run without arguments."""
     runner = CliRunner()
-    result = runner.invoke(acoupi, ["setup", "--program", "notfound"])
-    assert result.exit_code == 1
-
-
-def test_can_setup_test_program(settings: Settings):
-    """Test that the setup command can setup the test program."""
-    runner = CliRunner()
-    result = runner.invoke(
+    runner.invoke(
         acoupi,
         [
             "setup",
@@ -49,7 +53,6 @@ def test_can_setup_test_program(settings: Settings):
         obj={"settings": settings},
     )
 
-    name_file = settings.program_name_file
-    assert result.exit_code == 0
-    assert name_file.exists()
-    assert name_file.read_text() == "acoupi.programs.custom.test"
+    result = runner.invoke(acoupi, ["check"], obj={"settings": settings})
+    assert result.exit_code == 1
+    assert "name is not test_program" in result.output

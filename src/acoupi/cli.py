@@ -4,7 +4,7 @@ from typing import List
 import click
 
 from acoupi import system
-from acoupi.system import exceptions
+from acoupi.system import Settings, exceptions
 
 __all__ = [
     "acoupi",
@@ -15,7 +15,8 @@ __all__ = [
 
 
 @click.group()
-def acoupi():
+@click.pass_context
+def acoupi(ctx):
     """Welcome to acoupi.
 
     This is the main command line interface for acoupi and allows you to
@@ -23,6 +24,10 @@ def acoupi():
 
     To get started run `acoupi setup` to setup your first program.
     """
+    ctx.ensure_object(dict)
+
+    if "settings" not in ctx.obj:
+        ctx.obj["settings"] = Settings()
 
 
 @acoupi.command(
@@ -33,13 +38,17 @@ def acoupi():
 )
 @click.option("--program", type=str, default="acoupi.programs.custom.test")
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
-def setup(program: str, args: List[str]):
+@click.pass_context
+def setup(ctx, program: str, args: List[str]):
     """Setup acoupi."""
     click.echo(
         "Collecting program files. It will take a minute or so, be patient..."
     )
+
+    settings = ctx.obj["settings"]
+
     try:
-        system.setup_program(program, args, prompt=True)
+        system.setup_program(settings, program, args=args, prompt=True)
 
     except exceptions.ProgramNotFoundError as err:
         # TODO: Improve this messages
@@ -56,52 +65,64 @@ def setup(program: str, args: List[str]):
 
 
 @acoupi.command()
-def start():
+@click.pass_context
+def start(ctx):
     """Start acoupi."""
-    if not system.is_configured():
+    settings = ctx.obj["settings"]
+
+    if not system.is_configured(settings):
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
-    system.enable_services()
-    system.start_services()
+    system.enable_services(settings)
+    system.start_services(settings)
 
 
 @acoupi.command()
-def stop():
+@click.pass_context
+def stop(ctx):
     """Stop acoupi."""
-    system.stop_services()
-    system.disable_services()
+    settings = ctx.obj["settings"]
+    system.stop_services(settings)
+    system.disable_services(settings)
 
 
 @acoupi.command()
-def status():
+@click.pass_context
+def status(ctx):
     """Check the status of acoupi services."""
-    if not system.is_configured():
+    settings = ctx.obj["settings"]
+    if not system.is_configured(settings):
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
     """Check the status of acoupi services."""
     click.echo("Acoupi services status are:")
-    system.status_services()
+    system.status_services(settings)
 
 
 @acoupi.group()
-def config():
+@click.pass_context
+def config(ctx):
     """Manage acoupi configuration."""
-    if not system.is_configured():
+    settings = ctx.obj["settings"]
+    if not system.is_configured(settings):
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
 
 @config.command()
-def show():
+@click.pass_context
+def show(ctx):
     """Show the entire configuration of acoupi."""
-    if not system.is_configured():
+    settings = ctx.obj["settings"]
+
+    if not system.is_configured(settings):
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
     try:
-        config = system.show_config(system.PROGRAM_CONFIG_FILE)
+        config = system.show_config(settings)
         click.echo("Current acoupi configuration:")
         click.echo(config)
 
@@ -111,9 +132,12 @@ def show():
 
 @config.command()
 @click.argument("config_param_name", required=False)
-def get(config_param_name: str):
+@click.pass_context
+def get(ctx, config_param_name: str):
     """Print a configuration value."""
-    if not system.is_configured():
+    settings = ctx.obj["settings"]
+
+    if not system.is_configured(settings):
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
@@ -121,15 +145,12 @@ def get(config_param_name: str):
     if not config_param_name:
         click.echo("Error: Missing argument 'CONFIG_PARAM_NAME'.\n")
         click.echo("Available configuration parameters:")
-        config_keys = system.show_config(system.PROGRAM_CONFIG_FILE).keys()
+        config_keys = system.show_config(settings).keys()
         click.echo("\n".join(config_keys))
         return
 
     try:
-        config_value = system.get_config_value(
-            config_param_name,
-            system.PROGRAM_CONFIG_FILE,
-        )
+        config_value = system.get_config_value(config_param_name, settings)
         click.echo(f"{config_param_name}: {config_value}")
 
     except KeyError:
@@ -137,7 +158,7 @@ def get(config_param_name: str):
             f"Configuration parameter '{config_param_name}' not found.\n"
         )
         click.echo("Available configuration parameters:")
-        config_keys = system.show_config(system.PROGRAM_CONFIG_FILE).keys()
+        config_keys = system.show_config(settings).keys()
         click.echo("\n".join(config_keys))
 
     except Exception as e:
@@ -147,25 +168,29 @@ def get(config_param_name: str):
 @config.command()
 @click.argument("config_param_name", required=True)
 @click.argument("config_param_value", required=True)
-def sub(config_param_name, config_param_value):
+@click.pass_context
+def sub(ctx, config_param_name, config_param_value):
     """Substitute a configuration value."""
-    if not system.is_configured():
+    settings = ctx.obj["settings"]
+
+    if not system.is_configured(settings):
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
-    # If config_paran_name or config_param_value is not provided, show current configuration
+    # If config_paran_name or config_param_value is not provided, show current
+    # configuration
     if not config_param_name or not config_param_value:
         click.echo(
             "Error: Missing argument 'CONFIG_PARAM_NAME' and/or 'CONFIG_PARAM_VALUE'.\n"
         )
         click.echo("Current configuration parameters are:")
-        return system.show_config(system.PROGRAM_CONFIG_FILE)
+        return system.show_config(settings)
 
     try:
         system.sub_config_value(
-            config_param_name=config_param_name,
-            new_config_value=config_param_value,
-            config_file_path=system.PROGRAM_CONFIG_FILE,
+            config_param_name,
+            config_param_value,
+            settings,
         )
         click.echo(
             f"Configuration parameter '{config_param_name}' successfully set to '{config_param_value}'."
@@ -175,13 +200,24 @@ def sub(config_param_name, config_param_value):
         click.echo(f"Error updating configuration: {e}")
 
 
-@config.command()
-def check():
+@acoupi.command()
+@click.pass_context
+def check(ctx):
     """Run the health checks of the current program and configurations."""
-    if not system.is_configured():
+    settings = ctx.obj["settings"]
+
+    if not system.is_configured(settings):
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
+    click.secho("Running health checks...", fg="green")
+    program = system.load_program(settings)
+    try:
+        program.check(program.config)
+    except exceptions.HealthCheckError as err:
+        click.secho(f"Error: {err}", fg="red")
+        raise click.Abort() from err
+    click.secho("Health checks passed.", fg="green")
 
 
 if __name__ == "__main__":
