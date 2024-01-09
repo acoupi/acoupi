@@ -149,6 +149,10 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
                     f"Queue {queue} is not declared in the worker config"
                 )
 
+            if not self.app.conf.task_routes:
+                # initialize the task routes
+                self.app.conf.task_routes = {}
+
             # configure the app to route the task to the queue
             self.app.conf.task_routes[task.__name__] = {"queue": queue}
 
