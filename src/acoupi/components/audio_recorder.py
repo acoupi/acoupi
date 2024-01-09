@@ -17,7 +17,7 @@ audio recorder return a temporary .wav file.
 import datetime
 import wave
 from pathlib import Path
-from typing import Optional
+from typing import Tuple
 
 import pyaudio
 import sounddevice  # noqa: F401
@@ -44,7 +44,7 @@ def has_input_audio_device() -> bool:
         return False
 
 
-def get_microphone_info() -> Optional[int]:
+def get_microphone_info() -> Tuple[int, int, int]:
     """Check if there are any input audio devices available.
     And get the information of a compatible audio device.
 
@@ -79,10 +79,10 @@ def get_microphone_info() -> Optional[int]:
         default_input_device = p.get_default_input_device_info()
 
         # Get the number of channels
-        channels = default_input_device["maxInputChannels"]
+        channels = int(default_input_device["maxInputChannels"])
 
         # Get the input device index
-        input_device_index = default_input_device["index"]
+        input_device_index = int(default_input_device["index"])
 
         # Get the sample rate
         sample_rate = int(default_input_device["defaultSampleRate"])
@@ -91,7 +91,7 @@ def get_microphone_info() -> Optional[int]:
         return channels, sample_rate, input_device_index
 
     except IOError:
-        return "No compatible audio device found."
+        raise IOError("No compatible audio device found.")
 
 
 class PyAudioRecorder(AudioRecorder):

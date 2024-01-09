@@ -175,5 +175,14 @@ def sub(config_param_name, config_param_value):
         click.echo(f"Error updating configuration: {e}")
 
 
+@config.command()
+def check():
+    """Run the health checks of the current program and configurations."""
+    if not system.is_configured():
+        click.echo("Acoupi is not setup. Run `acoupi setup` first.")
+        return
+
+
+
 if __name__ == "__main__":
     acoupi()

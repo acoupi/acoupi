@@ -5,6 +5,7 @@ from pathlib import Path
 ACOUPI_HOME = Path(os.environ.get("ACOUPI_HOME", str(Path.home() / ".acoupi")))
 APP_NAME = "app"
 PROGRAM_PATH = ACOUPI_HOME / (APP_NAME + ".py")
+PROGRAM_NAME_FILE = ACOUPI_HOME / "config" / "name"
 PROGRAM_CONFIG_FILE = ACOUPI_HOME / "config" / "program.json"
 CELERY_CONFIG_PATH = ACOUPI_HOME / "config" / "celery.json"
 ENV_FILE = ACOUPI_HOME / "config" / "env"

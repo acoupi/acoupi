@@ -20,8 +20,14 @@ __all__ = [
 ]
 
 
-def load_program(program: str) -> Type[programs.AcoupiProgram]:
+def load_program(
+    program: Optional[str] = None,
+    program_name_file: Path = constants.PROGRAM_NAME_FILE,
+) -> Type[programs.AcoupiProgram]:
     """Load acoupi program from path."""
+    if program is None:
+        program = program_name_file.read_text().strip()
+
     try:
         program_module = import_module(program)
     except ModuleNotFoundError:
@@ -58,6 +64,7 @@ def write_program_file(
 def setup_program(
     program_name: str,
     args: Optional[List[str]] = None,
+    program_name_file: Path = constants.PROGRAM_NAME_FILE,
     program_config_file: Path = constants.PROGRAM_CONFIG_FILE,
     program_file: Path = constants.PROGRAM_PATH,
     celery_config_file: Path = constants.CELERY_CONFIG_PATH,
@@ -84,6 +91,9 @@ def setup_program(
         config_file=program_config_file,
         path=program_file,
     )
+
+    # Write the name of the program to a file
+    program_name_file.write_text(program_name)
 
     # Get program config schema
     config_schema = program_class.get_config_schema()

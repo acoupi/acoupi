@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from acoupi import components, data, tasks
 from acoupi.programs.base import AcoupiProgram
+from acoupi.programs.workers import WorkerConfig, AcoupiWorker
 from acoupi.system.constants import ACOUPI_HOME
 
 """Default paramaters for Acoupi TestProgram"""
