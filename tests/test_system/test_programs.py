@@ -23,7 +23,7 @@ def test_write_program_file_has_correct_program_name(settings: Settings):
 
     program_name_file = settings.program_name_file
     program_file = settings.program_file
-    line = f'program_name_file="{str(program_name_file)}"'
+    line = f'program_name_file=Path("{str(program_name_file)}")'
     with open(program_file) as file:
         assert line in file.read()
 
@@ -36,7 +36,7 @@ def test_write_program_file_points_to_correct_config_file(settings: Settings):
     config_file = settings.program_config_file
     program_file = settings.program_file
 
-    line = f'config_file="{config_file}"'
+    line = f'config_file=Path("{config_file}")'
     with open(program_file) as file:
         assert line in file.read()
 
