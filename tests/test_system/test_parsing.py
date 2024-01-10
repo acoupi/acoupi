@@ -449,3 +449,29 @@ def test_failed_parse_date_input_message():
             ["--c", "2021-01-32"],
             prompt=False,
         )
+
+
+def test_custom_setup_parsing():
+    class NestedSchema(BaseModel):
+        """Test schema."""
+
+        c: datetime.date
+
+        @classmethod
+        def setup(cls):
+            return cls(c=datetime.date(2021, 1, 1))
+
+    class Schema(BaseModel):
+        """Test schema."""
+
+        c: NestedSchema
+
+    parsed_config = parse_config_from_args(
+        Schema,
+        [],
+        prompt=False,
+    )
+
+    assert isinstance(parsed_config, Schema)
+    assert parsed_config.c is not None
+    assert parsed_config.c.c == datetime.date(2021, 1, 1)

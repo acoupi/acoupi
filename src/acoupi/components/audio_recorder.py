@@ -17,10 +17,11 @@ audio recorder return a temporary .wav file.
 import datetime
 import wave
 from pathlib import Path
-from typing import Optional
+from typing import Tuple
 
 import pyaudio
 import sounddevice  # noqa: F401
+from pydantic import BaseModel
 
 from acoupi import data
 from acoupi.components.types import AudioRecorder
@@ -29,7 +30,18 @@ TMP_PATH = Path("/run/shm/")
 
 __all__ = [
     "PyAudioRecorder",
+    "MicrophoneConfig",
 ]
+
+
+class MicrophoneConfig(BaseModel):
+    device_index: int = 0
+    samplerate: int = 48_000
+    audio_channels: int = 1
+
+    def setup(self):
+        """Setup the microphone configuration."""
+        return
 
 
 def has_input_audio_device() -> bool:
@@ -44,7 +56,7 @@ def has_input_audio_device() -> bool:
         return False
 
 
-def get_microphone_info() -> Optional[int]:
+def get_microphone_info() -> Tuple[int, int, int]:
     """Check if there are any input audio devices available.
     And get the information of a compatible audio device.
 
@@ -61,8 +73,8 @@ def get_microphone_info() -> Optional[int]:
 
     Returns
     -------
-    int
-        The samplerate, audio_channel, device_index of the audio device.
+    samplerate : int
+        The device default samplerate.
 
     Raises
     ------
@@ -79,10 +91,10 @@ def get_microphone_info() -> Optional[int]:
         default_input_device = p.get_default_input_device_info()
 
         # Get the number of channels
-        channels = default_input_device["maxInputChannels"]
+        channels = int(default_input_device["maxInputChannels"])
 
         # Get the input device index
-        input_device_index = default_input_device["index"]
+        input_device_index = int(default_input_device["index"])
 
         # Get the sample rate
         sample_rate = int(default_input_device["defaultSampleRate"])
@@ -91,7 +103,7 @@ def get_microphone_info() -> Optional[int]:
         return channels, sample_rate, input_device_index
 
     except IOError:
-        return "No compatible audio device found."
+        raise IOError("No compatible audio device found.")
 
 
 class PyAudioRecorder(AudioRecorder):
@@ -134,6 +146,10 @@ class PyAudioRecorder(AudioRecorder):
         # Audio Files Parameters
         self.chunksize = chunksize
         self.audio_dir = audio_dir
+
+    def check(self):
+        """Check if the audio recorder is compatible with the config."""
+        return
 
     def record(self, deployment: data.Deployment) -> data.Recording:
         """Record a 3 second temporary audio file.
@@ -202,6 +218,7 @@ class PyAudioRecorder(AudioRecorder):
                 # Create a Recording object and return it
                 return data.Recording(
                     path=Path(temp_audio_path),
+                    audio_channels=self.audio_channels,
                     datetime=self.datetime,
                     duration=self.duration,
                     samplerate=self.samplerate,

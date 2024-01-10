@@ -19,7 +19,6 @@ from acoupi.components.audio_recorder import (
 def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
     """Test getting information from microhpone."""
     audio_channels, samplerate, device_index = get_microphone_info()
-    """Test the audio file recording."""
     recorder = components.PyAudioRecorder(
         duration=0.1,
         samplerate=samplerate,

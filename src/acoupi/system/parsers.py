@@ -150,6 +150,9 @@ def parse_pydantic_model_field_from_args(
     parent: str = "",
 ) -> Optional[BaseModel]:
     """Parse a pydantic model field from the command line arguments."""
+    model = get_field_dtype(field)
+    if hasattr(model, "setup") and callable(model.setup):
+        return model.setup()
 
     parent = f"{parent}.{field_name}" if parent else field_name
 
