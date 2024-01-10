@@ -11,6 +11,7 @@ import pytz
 from pydantic import BaseModel, Field
 
 from acoupi import components, data, tasks
+from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.programs.base import AcoupiProgram
 
 """Default paramaters for Acoupi TestProgram"""
@@ -19,15 +20,13 @@ from acoupi.programs.base import AcoupiProgram
 class AudioConfig(BaseModel):
     """Audio and microphone configuration parameters."""
 
+    microphone_config: MicrophoneConfig = Field(
+        default_factory=MicrophoneConfig,
+    )
+
     audio_duration: int = 10
 
-    samplerate: int = 48_000
-
-    audio_channels: int = 1
-
     chunksize: int = 2048
-
-    device_index: int = 0
 
     recording_interval: int = 5
 
@@ -110,14 +109,16 @@ class TestProgram(AcoupiProgram):
         # Get Timezone
         timezone = pytz.timezone(config.timezone)
 
+        microphone = config.audio_config.microphone_config
+
         # Step 1 - Audio Recordings Task
         recording_task = tasks.generate_recording_task(
             recorder=components.PyAudioRecorder(
                 duration=config.audio_config.audio_duration,
-                samplerate=config.audio_config.samplerate,
-                audio_channels=config.audio_config.audio_channels,
+                samplerate=microphone.samplerate,
+                audio_channels=microphone.audio_channels,
                 chunksize=config.audio_config.chunksize,
-                device_index=config.audio_config.device_index,
+                device_index=microphone.device_index,
             ),
             store=components.SqliteStore(config.dbpath),
             # logger
