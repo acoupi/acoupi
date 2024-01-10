@@ -4,9 +4,26 @@
 
 This file was generated automatically by acoupi, do not edit it manually!
 """
-from acoupi.system import get_celery_app
+from pathlib import Path
+from acoupi.system import get_celery_app, Settings
 
-app = get_celery_app(
-    program_name="{{program_name}}",
-    config_file="{{config_file}}",
+settings = Settings(
+    home=Path("{{settings.home}}"),
+    app_name="{{settings.app_name}}",
+    program_file=Path("{{settings.program_file}}"),
+    program_name_file=Path("{{settings.program_name_file}}"),
+    program_config_file=Path("{{settings.program_config_file}}"),
+    celery_config_file=Path("{{settings.celery_config_file}}"),
+    env_file=Path("{{settings.env_file}}"),
+    run_dir=Path("{{settings.run_dir}}"),
+    log_dir=Path("{{settings.log_dir}}"),
+    log_level="{{settings.log_level}}",
+    start_script_path=Path("{{settings.start_script_path}}"),
+    stop_script_path=Path("{{settings.stop_script_path}}"),
+    restart_script_path=Path("{{settings.restart_script_path}}"),
+    beat_script_path=Path("{{settings.beat_script_path}}"),
+    acoupi_service_file="{{settings.acoupi_service_file}}",
+    acoupi_beat_service_file="{{settings.acoupi_beat_service_file}}",
 )
+
+app = get_celery_app(settings)

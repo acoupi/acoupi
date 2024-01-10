@@ -60,18 +60,18 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         """Setup."""
         raise NotImplementedError
 
-    def test(self, config: ProgramConfig) -> None:
-        """Test the configurations.
+    def check(self, config: ProgramConfig) -> None:
+        """Check the configurations.
 
         This method should raise an exception if the configurations are invalid.
-        The exception should be an instance of InvalidAcoupiConfiguration.
+        The exception should be an instance of HealthCheckError.
 
         User defined programs should override this method if they want to
         validate their configurations. The default implementation does nothing.
 
         Ideally this method should be called before a deployment is made.
         """
-        pass
+        ...
 
     @classmethod
     def get_config_schema(cls) -> Optional[Type[BaseModel]]:

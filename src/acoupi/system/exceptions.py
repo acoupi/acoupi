@@ -40,3 +40,11 @@ class ParameterError(Exception):
         self.value = value
         self.message = message
         self.help = help
+
+
+class HealthCheckError(Exception):
+    """Exception raised when a health check fails."""
+
+    def __init__(self, message: str):
+        """Initialize HealthError exception."""
+        self.message = message

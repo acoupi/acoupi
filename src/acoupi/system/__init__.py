@@ -13,15 +13,12 @@ from acoupi.system.configs import (
     sub_config_value,
     write_config,
 )
-from acoupi.system.constants import (
-    ACOUPI_HOME,
-    PROGRAM_CONFIG_FILE,
-    PROGRAM_PATH,
-)
+from acoupi.system.constants import Settings
 from acoupi.system.deployments import get_current_deployment
 from acoupi.system.parsers import parse_config_from_args
 from acoupi.system.programs import (
     load_program,
+    load_program_class,
     setup_program,
     write_program_file,
 )
@@ -35,24 +32,23 @@ from acoupi.system.services import (
 )
 
 __all__ = [
-    "ACOUPI_HOME",
-    "PROGRAM_CONFIG_FILE",
-    "PROGRAM_PATH",
+    "Settings",
     "disable_services",
     "enable_services",
     "get_celery_app",
-    "get_current_deployment",
     "get_config_value",
+    "get_current_deployment",
     "is_configured",
     "load_config",
     "load_program",
+    "load_program_class",
     "parse_config_from_args",
     "services_are_installed",
     "setup_program",
     "show_config",
     "start_services",
-    "stop_services",
     "status_services",
+    "stop_services",
     "sub_config_value",
     "write_config",
     "write_program_file",

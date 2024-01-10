@@ -1,19 +1,29 @@
 """Path constants for acoupi system."""
-import os
 from pathlib import Path
 
-ACOUPI_HOME = Path(os.environ.get("ACOUPI_HOME", str(Path.home() / ".acoupi")))
-APP_NAME = "app"
-PROGRAM_PATH = ACOUPI_HOME / (APP_NAME + ".py")
-PROGRAM_CONFIG_FILE = ACOUPI_HOME / "config" / "program.json"
-CELERY_CONFIG_PATH = ACOUPI_HOME / "config" / "celery.json"
-ENV_FILE = ACOUPI_HOME / "config" / "env"
-RUN_DIR = ACOUPI_HOME / "run"
-LOG_DIR = ACOUPI_HOME / "log"
-LOG_LEVEL = "INFO"
-START_SCRIPT_PATH = ACOUPI_HOME / "bin" / "acoupi-workers-start.sh"
-STOP_SCRIPT_PATH = ACOUPI_HOME / "bin" / "acoupi-workers-stop.sh"
-RESTART_SCRIPT_PATH = ACOUPI_HOME / "bin" / "acoupi-workers-restart.sh"
-BEAT_SCRIPT_PATH = ACOUPI_HOME / "bin" / "acoupi-beat.sh"
-ACOUPI_SERVICE_FILE = "acoupi.service"
-ACOUPI_BEAT_SERVICE_FILE = "acoupi-beat.service"
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    """Settings for acoupi system."""
+
+    model_config = SettingsConfigDict(
+        env_prefix="ACOUPI_",
+    )
+
+    home: Path = Path.home() / ".acoupi"
+    app_name: str = "app"
+    program_file: Path = home / (app_name + ".py")
+    program_name_file: Path = home / "config" / "name"
+    program_config_file: Path = home / "config" / "program.json"
+    celery_config_file: Path = home / "config" / "celery.json"
+    env_file: Path = home / "config" / "env"
+    run_dir: Path = home / "run"
+    log_dir: Path = home / "log"
+    log_level: str = "INFO"
+    start_script_path: Path = home / "bin" / "acoupi-workers-start.sh"
+    stop_script_path: Path = home / "bin" / "acoupi-workers-stop.sh"
+    restart_script_path: Path = home / "bin" / "acoupi-workers-restart.sh"
+    beat_script_path: Path = home / "bin" / "acoupi-beat.sh"
+    acoupi_service_file: str = "acoupi.service"
+    acoupi_beat_service_file: str = "acoupi-beat.service"

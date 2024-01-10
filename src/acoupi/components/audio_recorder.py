@@ -58,6 +58,7 @@ def has_input_audio_device() -> bool:
 
 def get_microphone_info() -> Tuple[int, int, int]:
     """Check if there are any input audio devices available.
+
     And get the information of a compatible audio device.
 
     Parameters
@@ -73,8 +74,12 @@ def get_microphone_info() -> Tuple[int, int, int]:
 
     Returns
     -------
-    samplerate : int
-        The device default samplerate.
+    channels: int
+        The number of audio channels of the audio device.
+    sample_rate: int
+        The samplerate of the audio device.
+    input_device_index: int
+        The input index of the audio device.
 
     Raises
     ------
@@ -171,12 +176,6 @@ class PyAudioRecorder(AudioRecorder):
             # Create an new instace of PyAudio
             p = pyaudio.PyAudio()
 
-            (
-                self.audio_channels,
-                self.samplerate,
-                self.device_index,
-            ) = get_microphone_info()
-
             # Create new audio stream
             stream = p.open(
                 format=pyaudio.paInt16,
@@ -222,5 +221,7 @@ class PyAudioRecorder(AudioRecorder):
                     datetime=self.datetime,
                     duration=self.duration,
                     samplerate=self.samplerate,
+                    audio_channels=self.audio_channels,
+                    chunksize=self.chunksize,
                     deployment=deployment,
                 )
