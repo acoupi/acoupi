@@ -43,6 +43,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
     """Directory path to save recordings if audio recording contains
     detections."""
 
+<<<<<<< HEAD
     dirpath_true: Optional[Path]
     """Directory path to save recordings if audio recording contains
     detections."""
@@ -50,6 +51,13 @@ class SaveRecordingManager(types.RecordingSavingManager):
     dirpath_false: Optional[Path]
     """Directory path to save recordings if audio recording contain no
     detections."""
+=======
+    dirpath_true: Path
+    """Directory path to save recordings if audio recording contains detections."""
+
+    dirpath_false: Path
+    """Directory path to save recordings if audio recording contain no detections."""
+>>>>>>> fe39b35 (update saving_managers)
 
     timeformat: str
     """Datetime format to use to name the recording file path."""
@@ -60,8 +68,13 @@ class SaveRecordingManager(types.RecordingSavingManager):
     def __init__(
         self,
         dirpath: Path,
+<<<<<<< HEAD
         dirpath_true: Optional[Path] = None,
         dirpath_false: Optional[Path] = None,
+=======
+        dirpath_true: Path,
+        dirpath_false: Path,
+>>>>>>> fe39b35 (update saving_managers)
         timeformat: str = DEFAULT_TIMEFORMAT,
         threshold: float = DEFAULT_THRESHOLD,
     ):
