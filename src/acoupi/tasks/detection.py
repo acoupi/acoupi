@@ -20,7 +20,7 @@ def generate_detection_task(
     output_cleaners: Optional[List[types.ModelOutputCleaner]] = None,
     processing_filters: Optional[List[types.ProcessingFilter]] = None,
     message_factories: Optional[List[types.ModelOutputMessageBuilder]] = None,
-) -> Callable[[data.Recording], Optional[data.ModelOutput]]:
+) -> Callable[[data.Recording], None]:
     """Generate a detection task."""
 
     # def detection_task() -> Optional[data.ModelOutput]:
@@ -67,6 +67,6 @@ def generate_detection_task(
             message = message_factory.build_message(model_output)
             message_store.store_message(message)
 
-        return model_output
+        # return model_output
 
     return detection_task  # type: ignore
