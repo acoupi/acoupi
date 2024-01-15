@@ -59,8 +59,8 @@ class SaveRecordingManager(types.RecordingSavingManager):
         dirpath: Path,
         dirpath_true: Optional[Path] = None,
         dirpath_false: Optional[Path] = None,
-        timeformat: str,
-        threshold: float,
+        timeformat: str = "%Y%m%d_%H%M%S",
+        threshold: float = 0.1,
     ):
         """Initiatilise the Recording SavingManager.
 
@@ -75,6 +75,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
         self.dirpath = dirpath
         self.dirpath_true = dirpath_true
         self.dirpath_false = dirpath_false
+        self.timeformat = timeformat
         self.threshold = threshold
 
     def has_confident_detections(
