@@ -24,7 +24,7 @@ def generate_detection_task(
     """Generate a detection task."""
 
     # def detection_task() -> Optional[data.ModelOutput]:
-    def detection_task() -> Optional[data.ModelOutput]:
+    def detection_task(recording: data.Recording) -> None:
         """Detect events in audio."""
         logger.info("Starting detection process")
 
