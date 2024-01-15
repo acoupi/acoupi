@@ -217,7 +217,6 @@ class PyAudioRecorder(AudioRecorder):
                 # Create a Recording object and return it
                 return data.Recording(
                     path=Path(temp_audio_path),
-                    audio_channels=self.audio_channels,
                     datetime=self.datetime,
                     duration=self.duration,
                     samplerate=self.samplerate,

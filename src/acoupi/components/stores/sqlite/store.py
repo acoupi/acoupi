@@ -156,9 +156,57 @@ class SqliteStore(types.Store):
         orm.commit()
 
     @orm.db_session
+    def get_recordings_temp_path(
+        self,
+        temp_paths: List[str],
+    ) -> List[data.Recording]:
+        """Get the recording temp path.
+
+        Args:
+            temp_paths: The temp paths of recordings.
+
+        Retrun:
+            recordings: The list of recordings to process.
+        """
+        db_recordings = (
+            orm.select(
+                r for r in self.models.Recording if r.path in temp_paths
+            )
+            .order_by(orm.desc(self.models.Recording.datetime))
+            .prefetch(
+                self.models.Recording.path,
+            )
+        )
+
+        recordings: List[data.Recording] = []
+
+        for db_recording in db_recordings:
+            deployment = data.Deployment(
+                id=db_recording.deployment.id,
+                name=db_recording.deployment.name,
+                latitude=db_recording.deployment.latitude,
+                longitude=db_recording.deployment.longitude,
+                started_on=db_recording.deployment.started_on,
+            )
+            recording = data.Recording(
+                id=db_recording.id,
+                deployment=deployment,
+                datetime=db_recording.datetime,
+                duration=db_recording.duration_s,
+                samplerate=db_recording.samplerate_hz,
+                audio_channels=db_recording.audio_channels,
+                path=db_recording.path,
+            )
+
+            recordings.append(recording)
+
+        return recordings
+
+    @orm.db_session
     def get_recordings(
         self,
-        ids: List[UUID],
+        path_ids: List[str],
+        # ids: List[UUID],
     ) -> Tuple[List[data.Recording], List[List[data.ModelOutput]]]:
         """Get a list recordings from the store by their ids.
 
@@ -173,9 +221,9 @@ class SqliteStore(types.Store):
             model_outputs: The list of model outputs for each recording.
         """
         db_recordings = (
-            orm.select(r for r in self.models.Recording if r.id in ids)
-            .order_by(orm.desc(self.models.Recording.datetime))
-            .prefetch(
+            orm.select(r for r in self.models.Recording if r.path in path_ids)
+            # orm.select(r for r in self.models.Recording if r.id in ids)
+            .order_by(orm.desc(self.models.Recording.datetime)).prefetch(
                 self.models.Recording.deployment,
                 self.models.Recording.model_outputs,
                 self.models.ModelOutput.tags,

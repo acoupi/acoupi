@@ -32,9 +32,6 @@ __all__ = [
     "DateFileManager",
 ]
 
-DEFAULT_THRESHOLD = 0.5
-DEFAULT_TIMEFORMAT = "%Y-%m-%d_%H-%M-%S"
-
 
 class SaveRecordingManager(types.RecordingSavingManager):
     """A Recording SavingManager that save audio recordings."""
@@ -43,7 +40,6 @@ class SaveRecordingManager(types.RecordingSavingManager):
     """Directory path to save recordings if audio recording contains
     detections."""
 
-<<<<<<< HEAD
     dirpath_true: Optional[Path]
     """Directory path to save recordings if audio recording contains
     detections."""
@@ -51,13 +47,6 @@ class SaveRecordingManager(types.RecordingSavingManager):
     dirpath_false: Optional[Path]
     """Directory path to save recordings if audio recording contain no
     detections."""
-=======
-    dirpath_true: Path
-    """Directory path to save recordings if audio recording contains detections."""
-
-    dirpath_false: Path
-    """Directory path to save recordings if audio recording contain no detections."""
->>>>>>> fe39b35 (update saving_managers)
 
     timeformat: str
     """Datetime format to use to name the recording file path."""
@@ -68,15 +57,10 @@ class SaveRecordingManager(types.RecordingSavingManager):
     def __init__(
         self,
         dirpath: Path,
-<<<<<<< HEAD
         dirpath_true: Optional[Path] = None,
         dirpath_false: Optional[Path] = None,
-=======
-        dirpath_true: Path,
-        dirpath_false: Path,
->>>>>>> fe39b35 (update saving_managers)
-        timeformat: str = DEFAULT_TIMEFORMAT,
-        threshold: float = DEFAULT_THRESHOLD,
+        timeformat: str,
+        threshold: float,
     ):
         """Initiatilise the Recording SavingManager.
 
@@ -91,7 +75,6 @@ class SaveRecordingManager(types.RecordingSavingManager):
         self.dirpath = dirpath
         self.dirpath_true = dirpath_true
         self.dirpath_false = dirpath_false
-        self.timeformat = timeformat
         self.threshold = threshold
 
     def has_confident_detections(
