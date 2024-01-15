@@ -2,7 +2,6 @@
 
 from pathlib import Path
 from typing import List
-from uuid import UUID
 
 TEMP_PATH = Path("/run/shm/")
 
@@ -35,7 +34,7 @@ def get_temp_file(path: Path) -> str:
     try:
         return str(path)
     except ValueError:
-        ValueError(
+        raise ValueError(
             f"Temporary file {path} - file id {path.stem} is not a valid UUID"
         )
 

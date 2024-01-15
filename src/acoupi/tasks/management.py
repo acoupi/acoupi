@@ -31,7 +31,7 @@ def generate_file_management_task(
 
         temp_wav_files = get_temp_files()
         path_ids = [get_temp_files_paths(path) for path in temp_wav_files]
-        recordings_and_outputs = store.get_recordings(path_ids=path_ids)
+        recordings_and_outputs = store.get_recordings(ids=path_ids)
         logger.info(f" --- Recordings and Outputs: {recordings_and_outputs}")
         # ids = [get_temp_file_id(path) for path in temp_wav_files]
         # recordings_and_outputs = store.get_recordings(ids=ids)
