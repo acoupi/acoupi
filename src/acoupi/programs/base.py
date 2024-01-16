@@ -6,8 +6,8 @@ from functools import wraps
 from typing import Callable, Generic, List, Optional, Type, TypeVar, Union
 
 from celery import Celery, Task, group
-from celery.utils.log import get_task_logger
 from celery.schedules import crontab
+from celery.utils.log import get_task_logger
 from pydantic import BaseModel
 
 from acoupi.programs.workers import AcoupiWorker, WorkerConfig
