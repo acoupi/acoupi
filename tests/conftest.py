@@ -70,13 +70,13 @@ def patched_now(monkeypatch):
 
 
 @pytest.fixture
-def deployment():
+def deployment() -> data.Deployment:
     """Fixture for a deployment object."""
     return data.Deployment(name="test")
 
 
 @pytest.fixture
-def recording(deployment: data.Deployment):
+def recording(deployment: data.Deployment) -> data.Recording:
     """Fixture for a recording object."""
     return data.Recording(
         path=Path("tests"),
@@ -84,6 +84,38 @@ def recording(deployment: data.Deployment):
         samplerate=16000,
         datetime=dt.datetime.now(),
         deployment=deployment,
+    )
+
+
+@pytest.fixture
+def model_output(recording: data.Recording) -> data.ModelOutput:
+    return data.ModelOutput(
+        name_model="test_model",
+        recording=recording,
+        tags=[
+            data.PredictedTag(
+                tag=data.Tag(key="test", value="value1"), probability=0.8
+            ),
+            data.PredictedTag(
+                tag=data.Tag(key="test", value="value2"), probability=0.8
+            ),
+        ],
+        detections=[
+            data.Detection(
+                location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
+                probability=0.6,
+                tags=[
+                    data.PredictedTag(
+                        tag=data.Tag(key="test2", value="value3"),
+                        probability=0.3,
+                    ),
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value1"),
+                        probability=0.2,
+                    ),
+                ],
+            )
+        ],
     )
 
 

@@ -205,8 +205,7 @@ class SqliteStore(types.Store):
     @orm.db_session
     def get_recordings(
         self,
-        path_ids: List[str],
-        # ids: List[UUID],
+        ids: List[UUID],
     ) -> Tuple[List[data.Recording], List[List[data.ModelOutput]]]:
         """Get a list recordings from the store by their ids.
 
@@ -221,9 +220,9 @@ class SqliteStore(types.Store):
             model_outputs: The list of model outputs for each recording.
         """
         db_recordings = (
-            orm.select(r for r in self.models.Recording if r.path in path_ids)
-            # orm.select(r for r in self.models.Recording if r.id in ids)
-            .order_by(orm.desc(self.models.Recording.datetime)).prefetch(
+            orm.select(r for r in self.models.Recording if r.id in ids)
+            .order_by(orm.desc(self.models.Recording.datetime))
+            .prefetch(
                 self.models.Recording.deployment,
                 self.models.Recording.model_outputs,
                 self.models.ModelOutput.tags,
