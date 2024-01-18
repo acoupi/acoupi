@@ -2,7 +2,7 @@ import logging
 from typing import Callable, List, Optional
 
 from acoupi.components import types
-from acoupi.files import delete_recording, get_temp_files_paths, get_temp_files
+from acoupi.files import delete_recording, get_temp_files
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -30,11 +30,10 @@ def generate_file_management_task(
         logger.info("Starting file management process")
 
         temp_wav_files = get_temp_files()
-        path_ids = [get_temp_files_paths(path) for path in temp_wav_files]
-        recordings_and_outputs = store.get_recordings(ids=path_ids)
+        recordings_and_outputs = store.get_recordings_by_path(
+            paths=temp_wav_files
+        )
         logger.info(f" --- Recordings and Outputs: {recordings_and_outputs}")
-        # ids = [get_temp_file_id(path) for path in temp_wav_files]
-        # recordings_and_outputs = store.get_recordings(ids=ids)
 
         for recording, model_outputs in recordings_and_outputs:
             logger.info(f"Recording: {recording}")
