@@ -112,8 +112,8 @@ class SaveRecordingManager(types.RecordingSavingManager):
 
         if (
             not model_outputs
-            or not self.dirpath_true
-            or not self.dirpath_false
+            and not self.dirpath_true
+            and not self.dirpath_false
         ):
             return self.dirpath
 
