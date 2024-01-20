@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from acoupi import components, data, tasks
 from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.programs.base import AcoupiProgram
+from acoupi.programs.workers import AcoupiWorker, WorkerConfig
 
 """Default paramaters for Acoupi TestProgram"""
 
@@ -20,15 +21,11 @@ from acoupi.programs.base import AcoupiProgram
 class AudioConfig(BaseModel):
     """Audio and microphone configuration parameters."""
 
-    microphone_config: MicrophoneConfig = Field(
-        default_factory=MicrophoneConfig,
-    )
+    audio_duration: int = 5
+    """Duration of each audio recording in seconds."""
 
-    audio_duration: int = 10
-
-    chunksize: int = 2048
-
-    recording_interval: int = 5
+    recording_interval: int = 10
+    """Interval between each audio recording in seconds."""
 
 
 class RecordingSchedule(BaseModel):
@@ -55,26 +52,18 @@ class SaveRecordingFilter(BaseModel):
     frequency_interval: int = 5
 
 
-class AudioDirectories(BaseModel):
-    """Audio Recording Directories configuration."""
-
-    audio_dir: Path = Path.home() / "storages" / "recordings"
-
-    audio_dir_true: Optional[Path] = None
-
-    audio_dir_false: Optional[Path] = None
-
-
-class AcoupiTest_ConfigSchema(BaseModel):
+class ConfigSchema(BaseModel):
     """Configuration Schema for Test Program."""
 
-    name: str = "acoupi_testprogram"
-
     dbpath: Path = Path.home() / "storages" / "acoupi.db"
+
+    audio_dir: Path = Path.home() / "storages" / "recordings"
 
     timeformat: str = "%Y%m%d_%H%M%S"
 
     timezone: str = "Europe/London"
+
+    microphone_config: MicrophoneConfig
 
     audio_config: AudioConfig = Field(
         default_factory=AudioConfig,
@@ -84,146 +73,154 @@ class AcoupiTest_ConfigSchema(BaseModel):
         default_factory=RecordingSchedule,
     )
 
-    recording_saving: Optional[SaveRecordingFilter] = Field(
-        default_factory=SaveRecordingFilter,
-    )
-
-    audio_directories: AudioDirectories = Field(
-        default_factory=AudioDirectories,
-    )
+    recording_saving: Optional[SaveRecordingFilter] = None
 
 
-class TestProgram(AcoupiProgram):
+class Program(AcoupiProgram):
     """Test Program."""
 
-    config: AcoupiTest_ConfigSchema
+    config: ConfigSchema
 
-    def setup(self, config: AcoupiTest_ConfigSchema):
-        """Setup.
-
-        1. Create Audio Recording Task
-        2. Create Detection Task
-        3. Create Saving Recording Filter and Management Task
-        4. Create Message Task
-        """
-        # Get Timezone
-        timezone = pytz.timezone(config.timezone)
-
-        microphone = config.audio_config.microphone_config
-
-        # Step 1 - Audio Recordings Task
-        recording_task = tasks.generate_recording_task(
-            recorder=components.PyAudioRecorder(
-                duration=config.audio_config.audio_duration,
-                samplerate=microphone.samplerate,
-                audio_channels=microphone.audio_channels,
-                chunksize=config.audio_config.chunksize,
-                device_index=microphone.device_index,
+    worker_config = WorkerConfig(
+        workers=[
+            AcoupiWorker(
+                name="default",
+                queues=["default"],
             ),
-            store=components.SqliteStore(config.dbpath),
-            # logger
-            recording_conditions=[
-                components.IsInIntervals(
-                    intervals=[
-                        data.TimeInterval(
-                            start=config.recording_schedule.start_recording,
-                            end=datetime.datetime.strptime(
-                                "23:59:59", "%H:%M:%S"
-                            ).time(),
-                        ),
-                        data.TimeInterval(
-                            start=datetime.datetime.strptime(
-                                "00:00:00", "%H:%M:%S"
-                            ).time(),
-                            end=config.recording_schedule.end_recording,
-                        ),
-                    ],
-                    timezone=timezone,
-                )
-            ],
+            AcoupiWorker(
+                name="recording",
+                queues=["recording"],
+                concurrency=1,
+            ),
+        ]
+    )
+
+    def setup(self, config: ConfigSchema):
+        """Setup."""
+        self.validate_dirs(config)
+
+        microphone = config.microphone_config
+        self.recorder = components.PyAudioRecorder(
+            duration=config.audio_config.audio_duration,
+            samplerate=microphone.samplerate,
+            audio_channels=microphone.audio_channels,
+            device_name=microphone.device_name,
         )
+        self.store = components.SqliteStore(config.dbpath)
+        self.file_manager = components.IDFileManager(config.audio_dir)
 
-        # Step 2 - Model Detections Task
-        # Detection Task is ignored. No model is provided.
-
-        # Step 3 - Files Management Task
-        def create_file_filters():
-            saving_filters = []
-
-            if not config.recording_saving:
-                # No saving filters defined
-                return []
-
-            recording_saving = config.recording_saving
-
-            # Main filter
-            # Will only save recordings if the recording time is in the
-            # interval defined by the start and end time.
-            saving_filters.append(
-                components.SaveIfInInterval(
-                    interval=data.TimeInterval(
-                        start=recording_saving.starttime,
-                        end=recording_saving.endtime,
-                    ),
-                    timezone=timezone,
-                )
-            )
-
-            # Additional filters
-            if (
-                recording_saving.frequency_duration is not None
-                and recording_saving.frequency_interval is not None
-            ):
-                # This filter will only save recordings at a frequency defined
-                # by the duration and interval.
-                saving_filters.append(
-                    components.FrequencySchedule(
-                        duration=recording_saving.frequency_duration,
-                        frequency=recording_saving.frequency_interval,
-                    )
-                )
-
-            if recording_saving.before_dawndusk_duration is not None:
-                # This filter will only save recordings if the recording time
-                # is before dawn or dusk.
-                saving_filters.append(
-                    components.Before_DawnDuskTimeInterval(
-                        duration=recording_saving.before_dawndusk_duration,
-                        timezone=timezone,
-                    )
-                )
-
-            if components.After_DawnDuskTimeInterval is not None:
-                # This filter will only save recordings if the recording time
-                # is after dawn or dusk.
-                saving_filters.append(
-                    components.After_DawnDuskTimeInterval(
-                        duration=recording_saving.after_dawndusk_duration,
-                        timezone=timezone,
-                    )
-                )
-
-            return saving_filters
+        recording_task = tasks.generate_recording_task(
+            recorder=self.recorder,
+            store=self.store,
+            logger=self.logger.getChild("recording"),
+            recording_conditions=self.create_recording_conditions(config),
+        )
 
         file_management_task = tasks.generate_file_management_task(
-            store=components.SqliteStore(config.dbpath),
-            file_manager=components.SaveRecordingManager(
-                dirpath=config.audio_directories.audio_dir,
-                timeformat=config.timeformat,
-            ),
-            file_filters=create_file_filters(),
+            store=self.store,
+            logger=self.logger.getChild("file_management"),
+            file_manager=self.file_manager,
+            file_filters=self.create_file_filters(config),
         )
 
-        # Step 4 - Send Data Task
-        """Send Data Task is ignored. No messenger is provided."""
-
-        # Final Step - Add Tasks to Program
         self.add_task(
             function=recording_task,
-            schedule=datetime.timedelta(seconds=10),
+            schedule=datetime.timedelta(
+                seconds=config.audio_config.recording_interval
+            ),
+            queue="recording",
         )
 
         self.add_task(
             function=file_management_task,
-            schedule=datetime.timedelta(minutes=10),
+            schedule=datetime.timedelta(minutes=1),
+            queue="default",
         )
+
+    def validate_dirs(self, config: ConfigSchema):
+        """Validate directories."""
+        if not config.audio_dir.exists():
+            config.audio_dir.mkdir(parents=True)
+
+        if not config.dbpath.parent.exists():
+            config.dbpath.parent.mkdir(parents=True)
+
+    def create_recording_conditions(self, config: ConfigSchema):
+        timezone = pytz.timezone(config.timezone)
+        return [
+            components.IsInIntervals(
+                intervals=[
+                    data.TimeInterval(
+                        start=config.recording_schedule.start_recording,
+                        end=datetime.datetime.strptime(
+                            "23:59:59", "%H:%M:%S"
+                        ).time(),
+                    ),
+                    data.TimeInterval(
+                        start=datetime.datetime.strptime(
+                            "00:00:00", "%H:%M:%S"
+                        ).time(),
+                        end=config.recording_schedule.end_recording,
+                    ),
+                ],
+                timezone=timezone,
+            )
+        ]
+
+    def create_file_filters(self, config: ConfigSchema):
+        if not config.recording_saving:
+            # No saving filters defined
+            return []
+
+        saving_filters = []
+        timezone = pytz.timezone(config.timezone)
+        recording_saving = config.recording_saving
+
+        # Main filter
+        # Will only save recordings if the recording time is in the
+        # interval defined by the start and end time.
+        saving_filters.append(
+            components.SaveIfInInterval(
+                interval=data.TimeInterval(
+                    start=recording_saving.starttime,
+                    end=recording_saving.endtime,
+                ),
+                timezone=timezone,
+            )
+        )
+
+        # Additional filters
+        if (
+            recording_saving.frequency_duration is not None
+            and recording_saving.frequency_interval is not None
+        ):
+            # This filter will only save recordings at a frequency defined
+            # by the duration and interval.
+            saving_filters.append(
+                components.FrequencySchedule(
+                    duration=recording_saving.frequency_duration,
+                    frequency=recording_saving.frequency_interval,
+                )
+            )
+
+        if recording_saving.before_dawndusk_duration is not None:
+            # This filter will only save recordings if the recording time
+            # is before dawn or dusk.
+            saving_filters.append(
+                components.Before_DawnDuskTimeInterval(
+                    duration=recording_saving.before_dawndusk_duration,
+                    timezone=timezone,
+                )
+            )
+
+        if components.After_DawnDuskTimeInterval is not None:
+            # This filter will only save recordings if the recording time
+            # is after dawn or dusk.
+            saving_filters.append(
+                components.After_DawnDuskTimeInterval(
+                    duration=recording_saving.after_dawndusk_duration,
+                    timezone=timezone,
+                )
+            )
+
+        return saving_filters

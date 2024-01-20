@@ -148,7 +148,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
         if schedule:
             # configure the app to schedule the task
-            self.app.add_periodic_task(schedule, task)
+            self.app.add_periodic_task(schedule, task, name=task.__name__)
 
     def _add_task(
         self,

@@ -17,11 +17,11 @@ On top of these, it takes a clean list of detection to be saved.
 """
 import os
 import shutil
-
-# import csv
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional
+
+from celery.utils.log import get_task_logger
 
 from acoupi import data
 from acoupi.components import types
@@ -151,6 +151,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         Args:
             directory: Directory where the files are stored.
         """
+        self.logger = get_task_logger(__name__)
         self.directory = directory
 
         if not os.path.exists(directory):
@@ -204,6 +205,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
             os.makedirs(directory)
 
         # Move the file to the new location
+        self.logger.warning(f"Moving {recording.path} to {full_path}")
         shutil.move(str(recording.path), full_path)
 
         return full_path
