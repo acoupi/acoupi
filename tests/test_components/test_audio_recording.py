@@ -7,7 +7,7 @@ from acoupi import components, data
 
 # from acoupi.components.audio_recorder import has_input_audio_device
 from acoupi.components.audio_recorder import (
-    get_microphone_info,
+    get_default_microphone,
     has_input_audio_device,
 )
 
@@ -18,12 +18,12 @@ from acoupi.components.audio_recorder import (
 )
 def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
     """Test getting information from microhpone."""
-    audio_channels, samplerate, device_index = get_microphone_info()
+    audio_channels, samplerate, device_name = get_default_microphone()
     recorder = components.PyAudioRecorder(
         duration=0.1,
         samplerate=samplerate,
         audio_channels=audio_channels,
-        device_index=device_index,
+        device_name=device_name,
         chunksize=4096,
         audio_dir=tmp_path,
     )
