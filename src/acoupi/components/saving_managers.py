@@ -120,6 +120,11 @@ class SaveRecordingManager(types.RecordingSavingManager):
         detection_bool = self.has_confident_detections(model_outputs)
         sdir = self.dirpath_true if detection_bool else self.dirpath_false
 
+        if sdir is None:
+            raise ValueError(
+                "No directory specified for recordings with detections"
+            )
+
         if not os.path.exists(sdir):
             os.makedirs(sdir)
 
