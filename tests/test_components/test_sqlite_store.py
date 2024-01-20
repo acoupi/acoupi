@@ -305,12 +305,12 @@ def test_get_all_recordings(
     sqlite_store.store_recording(recording2)
 
     # Act
-    recordings, _ = sqlite_store.get_recordings([recording1.id, recording2.id])
+    recordings = sqlite_store.get_recordings([recording1.id, recording2.id])
 
     # Assert
     assert len(recordings) == 2
-    assert recordings[1] == recording1
-    assert recordings[0] == recording2
+    assert recordings[1][0] == recording1
+    assert recordings[0][0] == recording2
 
 
 def test_get_some_recordings(
@@ -342,11 +342,11 @@ def test_get_some_recordings(
     sqlite_store.store_recording(recording2)
 
     # Act
-    recordings, _ = sqlite_store.get_recordings([recording1.id])
+    recordings = sqlite_store.get_recordings([recording1.id])
 
     # Assert
     assert len(recordings) == 1
-    assert recordings[0] == recording1
+    assert recordings[0][0] == recording1
 
 
 def test_can_store_model_outputs(
@@ -356,9 +356,9 @@ def test_can_store_model_outputs(
     sqlite_store.store_model_output(model_output)
     db_path = sqlite_store.db_path
 
-    _, retrieved = sqlite_store.get_recordings([model_output.recording.id])
+    retrieved = sqlite_store.get_recordings([model_output.recording.id])
     assert len(retrieved) == 1
-    assert retrieved[0][0] == model_output
+    assert retrieved[0][1][0] == model_output
 
     # Check that the detections were stored
     with sqlite3.connect(str(db_path)) as conn:

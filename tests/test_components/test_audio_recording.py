@@ -4,12 +4,7 @@ from pathlib import Path
 import pytest
 
 from acoupi import components, data
-
-# from acoupi.components.audio_recorder import has_input_audio_device
-from acoupi.components.audio_recorder import (
-    get_default_microphone,
-    has_input_audio_device,
-)
+from acoupi.devices.audio import get_default_microphone, has_input_audio_device
 
 
 @pytest.mark.skipif(

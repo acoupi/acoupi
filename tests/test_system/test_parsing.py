@@ -2,7 +2,7 @@
 
 import datetime
 from argparse import ArgumentError
-from typing import Optional
+from typing import List, Optional
 from unittest.mock import Mock
 
 import click
@@ -458,7 +458,7 @@ def test_custom_setup_parsing():
         c: datetime.date
 
         @classmethod
-        def setup(cls):
+        def setup(cls, args: List[str], prompt: bool = True, prefix: str = ""):
             return cls(c=datetime.date(2021, 1, 1))
 
     class Schema(BaseModel):
