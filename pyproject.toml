@@ -77,5 +77,6 @@ dev = [
     "mkdocs>=1.5.3",
     "mkdocs-material>=9.2.7",
     "mkdocstrings[python]>=0.22.0",
+    "pytest-celery>=0.0.0",
 ]
 

@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:e6cec76eab3a6fe5071f087da67571cddfca5aad40338db61dc3f27c56e1071f"
+content_hash = "sha256:00dc2803f78eefc416264fff0e1b3fa78555b4683b4ee79fc5de55383146dab5"
 
 [[package]]
 name = "alabaster"
@@ -1244,6 +1244,18 @@ dependencies = [
 files = [
     {file = "pytest-7.4.3-py3-none-any.whl", hash = "sha256:0d009c083ea859a71b76adf7c1d502e4bc170b80a8ef002da5806527b9591fac"},
     {file = "pytest-7.4.3.tar.gz", hash = "sha256:d989d136982de4e3b29dabcc838ad581c64e8ed52c11fbe86ddebd9da0818cd5"},
+]
+
+[[package]]
+name = "pytest-celery"
+version = "0.0.0"
+summary = "pytest-celery a shim pytest plugin to enable celery.contrib.pytest"
+dependencies = [
+    "celery>=4.4.0",
+]
+files = [
+    {file = "pytest-celery-0.0.0.tar.gz", hash = "sha256:cfd060fc32676afa1e4f51b2938f903f7f75d952186b8c6cf631628c4088f406"},
+    {file = "pytest_celery-0.0.0-py2.py3-none-any.whl", hash = "sha256:63dec132df3a839226ecb003ffdbb0c2cb88dd328550957e979c942766578060"},
 ]
 
 [[package]]
