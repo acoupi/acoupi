@@ -133,22 +133,26 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         task = self._add_task(function, callback_tasks)
 
         if queue:
-            # make sure the queue has been declared in the worker config
-            if queue not in self.get_queue_names():
-                raise ValueError(
-                    f"Queue {queue} is not declared in the worker config"
-                )
-
-            if not self.app.conf.task_routes:
-                # initialize the task routes
-                self.app.conf.task_routes = {}
-
-            # configure the app to route the task to the queue
-            self.app.conf.task_routes[task.__name__] = {"queue": queue}
+            # add the task to the queue
+            self.add_task_to_queue(function.__name__, queue)
 
         if schedule:
             # configure the app to schedule the task
             self.app.add_periodic_task(schedule, task, name=task.__name__)
+
+    def add_task_to_queue(self, task_name: str, queue: str):
+        """Add a task to a queue."""
+        if queue not in self.get_queue_names():
+            raise ValueError(
+                f"Queue {queue} is not declared in the worker config"
+            )
+
+        if not self.app.conf.task_routes:
+            # initialize the task routes
+            self.app.conf.task_routes = {}
+
+        # configure the app to route the task to the queue
+        self.app.conf.task_routes[task_name] = {"queue": queue}
 
     def _add_task(
         self,
