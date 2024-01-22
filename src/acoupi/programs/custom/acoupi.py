@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 import pytz
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from acoupi import components, data, tasks
 from acoupi.components.audio_recorder import MicrophoneConfig
@@ -26,6 +26,17 @@ class AudioConfig(BaseModel):
 
     recording_interval: int = 10
     """Interval between each audio recording in seconds."""
+
+    # @model_validator(mode="after")
+    # def validate_audio_duration(cls, value):
+    #     """Validate audio duration."""
+    #
+    #     if value.audio_duration > value.recording_interval:
+    #         raise ValueError(
+    #             "Audio duration cannot be greater than recording interval."
+    #         )
+    #
+    #     return value
 
 
 class RecordingSchedule(BaseModel):
@@ -85,7 +96,7 @@ class Program(AcoupiProgram):
         workers=[
             AcoupiWorker(
                 name="default",
-                queues=["default"],
+                queues=["celery", "default"],
             ),
             AcoupiWorker(
                 name="recording",
@@ -109,6 +120,20 @@ class Program(AcoupiProgram):
         self.store = components.SqliteStore(config.dbpath)
         self.file_manager = components.IDFileManager(config.audio_dir)
 
+        def rename_file(recording: Optional[data.Recording]):
+            """Rename the file."""
+            if not recording:
+                return
+
+            if not recording.path:
+                return
+
+            parent_dir = recording.path.parent
+            name = recording.path.name
+            new_name = parent_dir / f"{name}_processed.wav"
+            recording.path.rename(new_name)
+            self.store.update_recording_path(recording, new_name)
+
         recording_task = tasks.generate_recording_task(
             recorder=self.recorder,
             store=self.store,
@@ -128,6 +153,7 @@ class Program(AcoupiProgram):
             schedule=datetime.timedelta(
                 seconds=config.audio_config.recording_interval
             ),
+            callbacks=[rename_file],
             queue="recording",
         )
 
