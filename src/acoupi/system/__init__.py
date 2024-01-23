@@ -14,7 +14,11 @@ from acoupi.system.configs import (
     write_config,
 )
 from acoupi.system.constants import Settings
-from acoupi.system.deployments import get_current_deployment
+from acoupi.system.deployments import (
+    end_deployment,
+    get_current_deployment,
+    start_deployment,
+)
 from acoupi.system.parsers import parse_config_from_args
 from acoupi.system.programs import (
     load_program,
@@ -35,6 +39,7 @@ __all__ = [
     "Settings",
     "disable_services",
     "enable_services",
+    "end_deployment",
     "get_celery_app",
     "get_config_value",
     "get_current_deployment",
@@ -46,6 +51,7 @@ __all__ = [
     "services_are_installed",
     "setup_program",
     "show_config",
+    "start_deployment",
     "start_services",
     "status_services",
     "stop_services",

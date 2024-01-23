@@ -61,6 +61,9 @@ class Deployment(BaseModel):
     )
     """The datetime when the device was deployed."""
 
+    ended_on: Optional[datetime.datetime] = None
+    """The datetime when the deployment ended."""
+
     @field_validator("latitude")
     def validate_latitude(cls, value):
         """Validate that the latitude are within range."""
