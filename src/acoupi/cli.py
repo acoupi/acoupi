@@ -75,8 +75,23 @@ def setup(ctx, program: str, args: List[str]):
 
 
 @acoupi.command()
+@click.option(
+    "--name",
+    type=str,
+    prompt="Enter the name of the deployment",
+)
+@click.option(
+    "--latitude",
+    type=float,
+    prompt="Enter the latitude of the deployment",
+)
+@click.option(
+    "--longitude",
+    type=float,
+    prompt="Enter the longitude of the deployment",
+)
 @click.pass_context
-def start(ctx):
+def start(ctx, name, latitude, longitude):
     """Start acoupi."""
     settings = ctx.obj["settings"]
 
@@ -85,10 +100,7 @@ def start(ctx):
         return
 
     click.secho("Starting acoupi...", fg="green")
-
-    system.enable_services(settings)
-    system.start_services(settings)
-
+    system.start_program(settings, name, latitude, longitude)
     click.secho("Acoupi started.", fg="green")
 
 
@@ -103,10 +115,7 @@ def stop(ctx):
         return
 
     click.secho("Stopping acoupi...", fg="green")
-
-    system.stop_services(settings)
-    system.disable_services(settings)
-
+    system.stop_program(settings)
     click.secho("Acoupi stopped.", fg="green")
 
 

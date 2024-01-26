@@ -10,6 +10,7 @@ from celery.schedules import crontab
 from celery.utils.log import get_task_logger
 from pydantic import BaseModel
 
+from acoupi import data
 from acoupi.programs.workers import AcoupiWorker, WorkerConfig
 
 __all__ = [
@@ -81,7 +82,29 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
         Ideally this method should be called before a deployment is made.
         """
-        ...
+        self.logger.info("Checking program configuration")
+        self.logger.info("Configuration: %s", config)
+        self.logger.info("Configuration is valid")
+
+    def on_start(self, deployment: data.Deployment) -> None:
+        """Called when the a deployment is started.
+
+        This method should be overridden by user defined programs if they want
+        to do something when the program starts. The default implementation
+        does nothing.
+        """
+        self.logger.info("Starting program")
+        self.logger.info("Deployment: %s", deployment)
+
+    def on_end(self, deployment: data.Deployment) -> None:
+        """Called when the a deployment is ended.
+
+        This method should be overridden by user defined programs if they want
+        to do something when the program ends. The default implementation
+        does nothing.
+        """
+        self.logger.info("Ending program")
+        self.logger.info("Deployment: %s", deployment)
 
     @classmethod
     def get_config_schema(cls) -> Optional[Type[BaseModel]]:
