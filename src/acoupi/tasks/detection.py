@@ -1,14 +1,11 @@
 import logging
-from typing import Callable, List, Optional, TypeVar
+from typing import Callable, List, Optional
 
 from acoupi import data
 from acoupi.components import types
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-
-T = TypeVar("T", bound=types.RecordingCondition, covariant=True)
 
 
 def generate_detection_task(
@@ -24,7 +21,7 @@ def generate_detection_task(
 
     def detection_task(recording: data.Recording) -> None:
         """Detect events in audio."""
-        logger.info("Starting detection process")
+        logger.info("Starting detection process on recording %s", recording)
 
         # Check if recording should be processed
         if not all(
@@ -36,20 +33,23 @@ def generate_detection_task(
             return
 
         # Detect events in recordings
-        logger.info("Detecting events in recordings")
+        logger.info("Running model on recording")
         model_output = model.run(recording)
+        logger.info(f"Model output: {model_output}")
 
         # Clean model output
-        logger.info("Cleaning model output")
         for cleaner in output_cleaners or []:
             model_output = cleaner.clean(model_output)
+            logger.info("Cleaned model output %s", model_output)
 
         # Store detections
+        logger.info("Storing model output")
         store.store_model_output(model_output)
 
         # Create messages
         for message_factory in message_factories or []:
             message = message_factory.build_message(model_output)
+            logger.info("Storing message %s", message)
             message_store.store_message(message)
 
     return detection_task

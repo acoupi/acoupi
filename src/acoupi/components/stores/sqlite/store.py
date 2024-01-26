@@ -156,10 +156,37 @@ class SqliteStore(types.Store):
         orm.commit()
 
     @orm.db_session
+    def get_recordings_by_path(
+        self,
+        paths: List[Path],
+    ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
+        """Get a list of recordings from the store by their paths.
+
+        Args:
+            paths: The paths of the recordings to get.
+
+        Returns:
+            List of tuples of the recording and the corresponding model outputs.
+        """
+        paths_str = [str(path) for path in paths]
+        db_recordings = (
+            orm.select(r for r in self.models.Recording if r.path in paths_str)
+            .order_by(orm.desc(self.models.Recording.datetime))
+            .prefetch(
+                self.models.Recording.deployment,
+                self.models.Recording.model_outputs,
+                self.models.ModelOutput.tags,
+                self.models.ModelOutput.detections,
+                self.models.Detection.tags,
+            )
+        )
+        return _to_recordings_and_outputs(db_recordings)
+
+    @orm.db_session
     def get_recordings(
         self,
         ids: List[UUID],
-    ) -> Tuple[List[data.Recording], List[List[data.ModelOutput]]]:
+    ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
         """Get a list recordings from the store by their ids.
 
         Each recording is returned with the full list of model outputs
@@ -169,8 +196,7 @@ class SqliteStore(types.Store):
             ids: The ids of the recordings to get.
 
         Returns:
-            recordings: The list of recordings.
-            model_outputs: The list of model outputs for each recording.
+            A list of tuples of the recording and the model outputs.
         """
         db_recordings = (
             orm.select(r for r in self.models.Recording if r.id in ids)
@@ -184,75 +210,7 @@ class SqliteStore(types.Store):
             )
         )
 
-        recordings = []
-        model_outputs = []
-
-        for db_recording in db_recordings:
-            deployment = data.Deployment(
-                id=db_recording.deployment.id,
-                name=db_recording.deployment.name,
-                latitude=db_recording.deployment.latitude,
-                longitude=db_recording.deployment.longitude,
-                started_on=db_recording.deployment.started_on,
-            )
-
-            recording = data.Recording(
-                id=db_recording.id,
-                deployment=deployment,
-                datetime=db_recording.datetime,
-                duration=db_recording.duration_s,
-                samplerate=db_recording.samplerate_hz,
-                audio_channels=db_recording.audio_channels,
-                path=db_recording.path,
-            )
-
-            recordings.append(recording)
-
-            model_outputs.append(
-                [
-                    data.ModelOutput(
-                        id=db_model_output.id,
-                        name_model=db_model_output.model_name,
-                        recording=recording,
-                        created_on=db_model_output.created_on,
-                        tags=[
-                            data.PredictedTag(
-                                tag=data.Tag(
-                                    key=db_tag.key,
-                                    value=db_tag.value,
-                                ),
-                                probability=db_tag.probability,
-                            )
-                            for db_tag in db_model_output.tags
-                        ],
-                        detections=[
-                            data.Detection(
-                                id=db_detection.id,
-                                location=(
-                                    None
-                                    if db_detection.location == ""
-                                    else json.loads(db_detection.location)
-                                ),
-                                probability=db_detection.probability,
-                                tags=[
-                                    data.PredictedTag(
-                                        tag=data.Tag(
-                                            key=db_tag.key,
-                                            value=db_tag.value,
-                                        ),
-                                        probability=db_tag.probability,
-                                    )
-                                    for db_tag in db_detection.tags
-                                ],
-                            )
-                            for db_detection in db_model_output.detections
-                        ],
-                    )
-                    for db_model_output in db_recording.model_outputs
-                ]
-            )
-
-        return recordings, model_outputs
+        return _to_recordings_and_outputs(db_recordings)
 
     @orm.db_session
     def update_recording_path(
@@ -389,3 +347,92 @@ class SqliteStore(types.Store):
             raise ValueError("No recording found")
 
         return recording
+
+
+def _to_deployment(db_deployment: db_types.Deployment) -> data.Deployment:
+    return data.Deployment(
+        id=db_deployment.id,
+        name=db_deployment.name,
+        latitude=db_deployment.latitude,
+        longitude=db_deployment.longitude,
+        started_on=db_deployment.started_on,
+    )
+
+
+def _to_recording(db_recording: db_types.Recording) -> data.Recording:
+    deployment = _to_deployment(db_recording.deployment)
+    return data.Recording(
+        id=db_recording.id,
+        deployment=deployment,
+        datetime=db_recording.datetime,
+        duration=db_recording.duration_s,
+        samplerate=db_recording.samplerate_hz,
+        audio_channels=db_recording.audio_channels,
+        path=None if db_recording.path is None else Path(db_recording.path),
+    )
+
+
+def _to_detection(db_detection: db_types.Detection) -> data.Detection:
+    location = (
+        None
+        if db_detection.location == ""
+        else json.loads(str(db_detection.location))
+    )
+    return data.Detection(
+        id=db_detection.id,
+        location=location,
+        probability=db_detection.probability,
+        tags=[
+            data.PredictedTag(
+                tag=data.Tag(
+                    key=db_tag.key,
+                    value=db_tag.value,
+                ),
+                probability=db_tag.probability,
+            )
+            for db_tag in db_detection.tags
+        ],
+    )
+
+
+def _to_model_output(
+    db_model_output: db_types.ModelOutput,
+) -> data.ModelOutput:
+    recording = _to_recording(db_model_output.recording)
+    return data.ModelOutput(
+        id=db_model_output.id,
+        name_model=db_model_output.model_name,
+        recording=recording,
+        created_on=db_model_output.created_on,
+        tags=[
+            data.PredictedTag(
+                tag=data.Tag(
+                    key=db_tag.key,
+                    value=db_tag.value,
+                ),
+                probability=db_tag.probability,
+            )
+            for db_tag in db_model_output.tags
+        ],
+        detections=[
+            _to_detection(db_detection)
+            for db_detection in db_model_output.detections
+        ],
+    )
+
+
+def _to_recordings_and_outputs(
+    db_recordings,
+) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
+    ret = []
+    for db_recording in db_recordings:
+        recording = _to_recording(db_recording)
+
+        outputs = []
+        for db_model_output in db_recording.model_outputs:
+            model_output = _to_model_output(db_model_output)
+            outputs.append(model_output)
+
+        ret.append((recording, outputs))
+
+    return ret

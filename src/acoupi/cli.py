@@ -59,9 +59,19 @@ def setup(ctx, program: str, args: List[str]):
         click.echo("program is invalid")
         raise click.Abort() from err
 
+    except exceptions.ParameterError as err:
+        click.secho(
+            "Setup failed. The was an error configuring the parameter "
+            f"'{err.value}': {err.message}.",
+            fg="red",
+        )
+        if err.help:
+            click.secho(f"Help: {err.help}", fg="yellow")
+        raise click.Abort() from err
+
     except ValueError as err:
         click.echo("program not found")
-        raise click.Abort() from err
+        raise err
 
 
 @acoupi.command()
@@ -74,8 +84,12 @@ def start(ctx):
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
         return
 
+    click.secho("Starting acoupi...", fg="green")
+
     system.enable_services(settings)
     system.start_services(settings)
+
+    click.secho("Acoupi started.", fg="green")
 
 
 @acoupi.command()
@@ -83,8 +97,17 @@ def start(ctx):
 def stop(ctx):
     """Stop acoupi."""
     settings = ctx.obj["settings"]
+
+    if not system.is_configured(settings):
+        click.echo("Acoupi is not setup. Run `acoupi setup` first.")
+        return
+
+    click.secho("Stopping acoupi...", fg="green")
+
     system.stop_services(settings)
     system.disable_services(settings)
+
+    click.secho("Acoupi stopped.", fg="green")
 
 
 @acoupi.command()

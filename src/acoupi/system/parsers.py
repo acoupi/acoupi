@@ -125,7 +125,7 @@ def parse_field_from_args(
     field: FieldInfo,
     args: List[str],
     prompt: bool = True,
-    parent: str = "",
+    prefix: str = "",
 ) -> object:
     """Parse a field from the command line arguments."""
     for dtype, _parse_argument in FIELD_PARSERS.items():
@@ -136,7 +136,7 @@ def parse_field_from_args(
                 field,
                 args,
                 prompt=should_prompt(field, prompt=prompt),
-                parent=parent,
+                prefix=prefix,
             )
 
     raise NotImplementedError(f"Cannot parse argument for field {field}.")
@@ -147,17 +147,21 @@ def parse_pydantic_model_field_from_args(
     field: FieldInfo,
     args: List[str],
     prompt: bool = True,
-    parent: str = "",
+    prefix: str = "",
 ) -> Optional[BaseModel]:
     """Parse a pydantic model field from the command line arguments."""
     model = get_field_dtype(field)
-    if hasattr(model, "setup") and callable(model.setup):
-        return model.setup()
 
-    parent = f"{parent}.{field_name}" if parent else field_name
+    assert issubclass(model, BaseModel)
+
+    prefix = f"{prefix}.{field_name}" if prefix else field_name
+
+    setup = getattr(model, "setup", None)
+    if setup is not None and callable(setup):
+        return setup(args, prompt=prompt, prefix=prefix)
 
     if not field.is_required():
-        has_some_arg = any(arg.startswith(f"--{parent}") for arg in args)
+        has_some_arg = any(arg.startswith(f"--{prefix}") for arg in args)
         if not has_some_arg:
             default_value = field.get_default(call_default_factory=True)
 
@@ -191,7 +195,7 @@ def parse_pydantic_model_field_from_args(
             field,
             args,
             prompt=prompt,
-            parent=parent,
+            prefix=prefix,
         )
         values[field_name] = instance
 
@@ -203,7 +207,7 @@ def parse_list_field_from_args(
     field: FieldInfo,
     args: List[str],
     prompt: bool = True,
-    parent: str = "",
+    prefix: str = "",
     max_items: int = 20,
 ) -> list:
     """Parse a list field from the command line arguments.
@@ -211,7 +215,7 @@ def parse_list_field_from_args(
     Will assume that the list elements are strings.
     """
     parser = argparse.ArgumentParser()
-    name = f"--{parent}.{field_name}" if parent else f"--{field_name}"
+    name = f"--{prefix}.{field_name}" if prefix else f"--{field_name}"
 
     for num_item in range(max_items):
         parser.add_argument(
@@ -239,11 +243,11 @@ def parse_tuple_field_from_args(
     field: FieldInfo,
     args: List[str],
     prompt: bool = True,
-    parent: str = "",
+    prefix: str = "",
 ) -> tuple:
     """Parse a tuple field from the command line arguments."""
     parser = argparse.ArgumentParser()
-    name = f"--{parent}.{field_name}" if parent else f"--{field_name}"
+    name = f"--{prefix}.{field_name}" if prefix else f"--{field_name}"
     parser.add_argument(
         name,
         dest="value",
@@ -282,7 +286,19 @@ class FieldParser(Protocol):
         field: FieldInfo,
         args: List[str],
         prompt: bool = True,
-        parent: str = "",
+        prefix: str = "",
+    ) -> object:
+        """Parse a field from the command line arguments."""
+
+
+class CustomFieldParser(Protocol):
+    """Protocol for custom field parser."""
+
+    def __call__(
+        self,
+        args: List[str],
+        prompt: bool = True,
+        prefix: str = "",
     ) -> object:
         """Parse a field from the command line arguments."""
 
@@ -299,10 +315,10 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
         field: FieldInfo,
         args: List[str],
         prompt: bool = True,
-        parent: str = "",
+        prefix: str = "",
     ):
         parser = argparse.ArgumentParser()
-        name = f"{parent}.{field_name}" if parent else f"{field_name}"
+        name = f"{prefix}.{field_name}" if prefix else f"{field_name}"
 
         default = (
             field.default if field.default is not PydanticUndefined else None

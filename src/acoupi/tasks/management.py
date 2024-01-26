@@ -2,7 +2,7 @@ import logging
 from typing import Callable, List, Optional
 
 from acoupi.components import types
-from acoupi.files import delete_recording, get_temp_file_id, get_temp_files
+from acoupi.files import delete_recording, get_temp_files
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -27,22 +27,30 @@ def generate_file_management_task(
 
     def file_management_task() -> None:
         """Manage files."""
-        logger.info("Starting file management process")
-
         temp_wav_files = get_temp_files()
-        ids = [get_temp_file_id(path) for path in temp_wav_files]
-        recordings_and_outputs = store.get_recordings(ids=ids)
+        recordings_and_outputs = store.get_recordings_by_path(
+            paths=temp_wav_files
+        )
 
         for recording, model_outputs in recordings_and_outputs:
+            logger.debug(f"Recording: {recording}")
+            logger.debug(f"Model Outputs: {model_outputs}")
+
             if recording.path is None:
-                logger.error("Temporary recording has no path")
+                logger.error(
+                    "Temporary recording %s has no path",
+                    recording.id,
+                )
                 continue
 
             if not all(
                 filter.should_save_recording(recording, model_outputs)
                 for filter in file_filters or []
             ):
-                logger.info("Recording should not be saved, deleting")
+                logger.info(
+                    "Recording %s should not be saved, deleting",
+                    recording.id,
+                )
                 delete_recording(recording.path)
                 continue
 

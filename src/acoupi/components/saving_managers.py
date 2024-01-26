@@ -17,11 +17,11 @@ On top of these, it takes a clean list of detection to be saved.
 """
 import os
 import shutil
-
-# import csv
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional
+
+from celery.utils.log import get_task_logger
 
 from acoupi import data
 from acoupi.components import types
@@ -31,9 +31,6 @@ __all__ = [
     "IDFileManager",
     "DateFileManager",
 ]
-
-DEFAULT_THRESHOLD = 0.5
-DEFAULT_TIMEFORMAT = "%Y-%m-%d_%H-%M-%S"
 
 
 class SaveRecordingManager(types.RecordingSavingManager):
@@ -62,8 +59,8 @@ class SaveRecordingManager(types.RecordingSavingManager):
         dirpath: Path,
         dirpath_true: Optional[Path] = None,
         dirpath_false: Optional[Path] = None,
-        timeformat: str = DEFAULT_TIMEFORMAT,
-        threshold: float = DEFAULT_THRESHOLD,
+        timeformat: str = "%Y%m%d_%H%M%S",
+        threshold: float = 0.1,
     ):
         """Initiatilise the Recording SavingManager.
 
@@ -115,13 +112,18 @@ class SaveRecordingManager(types.RecordingSavingManager):
 
         if (
             not model_outputs
-            or not self.dirpath_true
-            or not self.dirpath_false
+            and not self.dirpath_true
+            and not self.dirpath_false
         ):
             return self.dirpath
 
         detection_bool = self.has_confident_detections(model_outputs)
         sdir = self.dirpath_true if detection_bool else self.dirpath_false
+
+        if sdir is None:
+            raise ValueError(
+                "No directory specified for recordings with detections"
+            )
 
         if not os.path.exists(sdir):
             os.makedirs(sdir)
@@ -154,6 +156,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         Args:
             directory: Directory where the files are stored.
         """
+        self.logger = get_task_logger(__name__)
         self.directory = directory
 
         if not os.path.exists(directory):
@@ -207,6 +210,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
             os.makedirs(directory)
 
         # Move the file to the new location
+        self.logger.warning(f"Moving {recording.path} to {full_path}")
         shutil.move(str(recording.path), full_path)
 
         return full_path

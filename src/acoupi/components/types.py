@@ -204,6 +204,23 @@ class Store(ABC):
         """
 
     @abstractmethod
+    def get_recordings_by_path(
+        self,
+        paths: List[Path],
+    ) -> List[Tuple[Recording, List[ModelOutput]]]:
+        """Get a list recordings from the store by their paths.
+
+        Each recording is returned with the full list of model outputs
+        registered.
+
+        Args:
+            paths: The paths of the recordings to get.
+
+        Returns:
+            A list of tuples of the recording and the model outputs.
+        """
+
+    @abstractmethod
     def update_recording_path(
         self,
         recording: Recording,

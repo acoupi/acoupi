@@ -17,14 +17,17 @@ audio recorder return a temporary .wav file.
 import datetime
 import wave
 from pathlib import Path
-from typing import Tuple
+from typing import List
 
+import click
 import pyaudio
-import sounddevice  # noqa: F401
+from celery.utils.log import get_task_logger
 from pydantic import BaseModel
 
 from acoupi import data
 from acoupi.components.types import AudioRecorder
+from acoupi.devices.audio import get_input_devices
+from acoupi.system.exceptions import ParameterError
 
 TMP_PATH = Path("/run/shm/")
 
@@ -32,83 +35,6 @@ __all__ = [
     "PyAudioRecorder",
     "MicrophoneConfig",
 ]
-
-
-class MicrophoneConfig(BaseModel):
-    device_index: int = 0
-    samplerate: int = 48_000
-    audio_channels: int = 1
-
-    def setup(self):
-        """Setup the microphone configuration."""
-        return
-
-
-def has_input_audio_device() -> bool:
-    """Check if there are any input audio devices available."""
-    # Create an instance of PyAudio
-    p = pyaudio.PyAudio()
-
-    try:
-        p.get_default_input_device_info()
-        return True
-    except IOError:
-        return False
-
-
-def get_microphone_info() -> Tuple[int, int, int]:
-    """Check if there are any input audio devices available.
-
-    And get the information of a compatible audio device.
-
-    Parameters
-    ----------
-    samplerate : int
-        The device default samplerate.
-    audio_channels : int
-        The default number of channels. The microphone should have at least
-        one audio channel.
-    device_index : int
-        The input index of the audio device. The input index is linked to
-        USB port the device is connected to.
-
-    Returns
-    -------
-    channels: int
-        The number of audio channels of the audio device.
-    sample_rate: int
-        The samplerate of the audio device.
-    input_device_index: int
-        The input index of the audio device.
-
-    Raises
-    ------
-    IOError
-        If no compatible audio device is found.
-    """
-
-    # Create an instance of PyAudio
-    p = pyaudio.PyAudio()
-    try:
-        p.get_default_input_device_info()
-
-        # Get default input device info
-        default_input_device = p.get_default_input_device_info()
-
-        # Get the number of channels
-        channels = int(default_input_device["maxInputChannels"])
-
-        # Get the input device index
-        input_device_index = int(default_input_device["index"])
-
-        # Get the sample rate
-        sample_rate = int(default_input_device["defaultSampleRate"])
-
-        p.terminate()
-        return channels, sample_rate, input_device_index
-
-    except IOError:
-        raise IOError("No compatible audio device found.")
 
 
 class PyAudioRecorder(AudioRecorder):
@@ -123,8 +49,8 @@ class PyAudioRecorder(AudioRecorder):
     audio_channels: int
     """The number of audio channels."""
 
-    device_index: int
-    """The input index of the audio device."""
+    device_name: str
+    """The name of the input audio device."""
 
     chunksize: int
     """The chunksize of the audio file in bytes."""
@@ -137,91 +63,246 @@ class PyAudioRecorder(AudioRecorder):
         duration: float,
         samplerate: int,
         audio_channels: int,
-        device_index: int,
-        chunksize: int,
+        device_name: str,
+        chunksize: int = 8 * 2048,
         audio_dir: Path = TMP_PATH,
+        logger=None,
     ) -> None:
         """Initialise the AudioRecorder with the audio parameters."""
         # Audio Duration
         self.duration = duration
+
         # Audio Microphone Parameters
         self.samplerate = samplerate
         self.audio_channels = audio_channels
-        self.device_index = device_index
+        self.device_name = device_name
+
         # Audio Files Parameters
         self.chunksize = chunksize
         self.audio_dir = audio_dir
+        self.sample_width = pyaudio.get_sample_size(pyaudio.paInt16)
+
+        if logger is None:
+            logger = get_task_logger(__name__)
+        self.logger = logger
+
+    def record(self, deployment: data.Deployment) -> data.Recording:
+        """Record an audio file.
+
+        Return the temporary path of the file.
+        """
+        now = datetime.datetime.now()
+        temp_path = self.audio_dir / f'{now.strftime("%Y%m%d_%H%M%S")}.wav'
+        frames = self.get_recording_data()
+        self.save_recording(frames, temp_path)
+        return data.Recording(
+            path=temp_path,
+            datetime=now,
+            duration=self.duration,
+            samplerate=self.samplerate,
+            audio_channels=self.audio_channels,
+            chunksize=self.chunksize,
+            deployment=deployment,
+        )
+
+    def get_recording_data(self) -> bytes:
+        p = pyaudio.PyAudio()
+
+        device = self.get_input_device(p)
+
+        stream = p.open(
+            format=pyaudio.paInt16,
+            channels=self.audio_channels,
+            rate=self.samplerate,
+            input=True,
+            frames_per_buffer=self.chunksize,
+            input_device_index=device.index,
+        )
+
+        num_chunks = int(self.duration * self.samplerate / self.chunksize)
+
+        frames = []
+        for _ in range(0, num_chunks if num_chunks > 0 else 1):
+            audio_data = stream.read(
+                self.chunksize,
+                exception_on_overflow=True,
+            )
+            frames.append(audio_data)
+
+        stream.stop_stream()
+        stream.close()
+        p.terminate()
+
+        return b"".join(frames)
+
+    def save_recording(self, data: bytes, path: Path) -> None:
+        """Save the recording to a file."""
+
+        with wave.open(str(path), "wb") as temp_audio_file:
+            temp_audio_file.setnchannels(self.audio_channels)
+            temp_audio_file.setsampwidth(self.sample_width)
+            temp_audio_file.setframerate(self.samplerate)
+            temp_audio_file.writeframes(data)
 
     def check(self):
         """Check if the audio recorder is compatible with the config."""
         return
 
-    def record(self, deployment: data.Deployment) -> data.Recording:
-        """Record a 3 second temporary audio file.
-
-        Return the temporary path of the file.
-        """
-        self.datetime = datetime.datetime.now()
-
-        # Specified the desired path for temporary file - Saved in RAM
-        temp_path = (
-            self.audio_dir / f'{self.datetime.strftime("%Y%m%d_%H%M%S")}.wav'
+    def get_input_device(self, p: pyaudio.PyAudio):
+        """Get the input device."""
+        input_devices = get_input_devices(p)
+        device = next(
+            (d for d in input_devices if d.name == self.device_name), None
         )
 
-        # Create a temporary file to record audio
-        with open(temp_path, "wb") as temp_audiof:
-            # Get the temporary file path from the created temporary audio file
-            temp_audio_path = temp_audiof.name
-
-            # Create an new instace of PyAudio
-            p = pyaudio.PyAudio()
-
-            # Create new audio stream
-            stream = p.open(
-                format=pyaudio.paInt16,
-                channels=self.audio_channels,
-                rate=self.samplerate,
-                input=True,
-                frames_per_buffer=self.chunksize,
-                input_device_index=self.device_index,
+        if device is None:
+            raise ParameterError(
+                value="device_name",
+                message="The selected microphone was not found.",
+                help="Check if the microphone is connected.",
             )
 
-            # Initialise array to store audio frames
-            frames = []
-            # Record audio - read the audio stream
-            for _ in range(
-                0, int(self.samplerate / self.chunksize * self.duration)
+        return device
+
+
+class MicrophoneConfig(BaseModel):
+    device_name: str
+    samplerate: int = 48_000
+    audio_channels: int = 1
+
+    @classmethod
+    def setup(
+        cls,
+        args: List[str],
+        prompt: bool = True,
+        prefix: str = "",
+    ) -> "MicrophoneConfig":
+        """Setup the microphone configuration."""
+
+        return parse_microphone_config(args, prompt, prefix)
+
+
+def parse_microphone_config(
+    args: List[str],
+    prompt: bool = True,
+    prefix: str = "",
+) -> MicrophoneConfig:
+    # TODO: Adapt to use args, prompt and prefix
+    click.secho("\n* Setting up microphone configuration.\n", fg="green")
+
+    p = pyaudio.PyAudio()
+
+    available_devices = get_input_devices(p)
+    if len(available_devices) == 0:
+        click.secho(
+            "\n* No compatible audio device found.\n", fg="red", bold=True
+        )
+        raise ParameterError(
+            value="device_index",
+            message="No compatible audio device found.",
+            help="Check if the microphone is connected.",
+        )
+
+    click.secho("Available audio devices:\n", fg="green", bold=True)
+    click.secho(
+        f"{'Index':<7}{'Name':40}{'Channels':<10}{'Sample Rate':<10}",
+        fg="green",
+    )
+    for device in available_devices:
+        click.secho(f"[{device.index:>2}]   ", fg="green", bold=True, nl=False)
+        click.echo(
+            f"{device.name[:38]:<40}"
+            f"{device.max_input_channels:<10}"
+            f"{device.default_samplerate:<10}",
+        )
+
+    while True:
+        try:
+            index = click.prompt(
+                "\nSelect an audio device index",
+                type=click.Choice([str(d.index) for d in available_devices]),
+                value_proc=int,
+            )
+            selected_device = next(
+                d for d in available_devices if d.index == index
+            )
+            break
+        except (ValueError, StopIteration):
+            click.secho(
+                "Invalid input. Please select a valid audio device index.",
+                fg="red",
+            )
+
+    click.secho("\nInfo of selected audio device:\n", fg="green", bold=True)
+    click.secho(
+        f"{'index':20} = {selected_device.index}\n"
+        f"{'name':20} = {selected_device.name}\n"
+        f"{'max channels':20} = {selected_device.max_input_channels}\n"
+        f"{'default sample rate':20} = {selected_device.default_samplerate}\n",
+        fg="yellow",
+    )
+
+    while True:
+        try:
+            channels = click.prompt(
+                "Select the number of audio channels",
+                type=click.Choice(
+                    [
+                        str(i)
+                        for i in range(
+                            1, 1 + selected_device.max_input_channels
+                        )
+                    ]
+                ),
+                value_proc=int,
+                default=selected_device.max_input_channels,
+            )
+            if channels > selected_device.max_input_channels:
+                raise ValueError
+            break
+        except ValueError:
+            click.secho(
+                "Invalid input. Please select a valid "
+                "number of audio channels.",
+                fg="red",
+            )
+
+    while True:
+        try:
+            samplerate = click.prompt(
+                "\nSelect the samplerate. The default samplerate is "
+                "recommended but your device might support other "
+                "sampling rates.",
+                type=int,
+                default=selected_device.default_samplerate,
+            )
+            if p.is_format_supported(
+                samplerate,
+                input_device=selected_device.index,
+                input_channels=channels,
+                input_format=pyaudio.paInt16,
             ):
-                audio_data = stream.read(
-                    self.chunksize, exception_on_overflow=False
+                break
+        except ValueError as error:
+            if error.args[0] == "Invalid sample rate":
+                click.secho(
+                    "Samplerate not supported by the audio device.",
+                    fg="red",
                 )
-                frames.append(audio_data)
-
-            # Stop Recording and close the port interface
-            stream.stop_stream()
-            stream.close()
-            p.terminate()
-
-            # Create a WAV file to write the audio data
-            with wave.open(temp_audio_path, "wb") as temp_audio_file:
-                temp_audio_file.setnchannels(self.audio_channels)
-                temp_audio_file.setsampwidth(
-                    p.get_sample_size(pyaudio.paInt16)
+                click.secho(
+                    "Please try with another samplerate. "
+                    "We recommend you consult the documentation of your "
+                    "audio device to find the supported samplerates.",
+                    fg="yellow",
                 )
-                temp_audio_file.setframerate(self.samplerate)
-
-                # Write the audio data to the temporary file
-                temp_audio_file.writeframes(b"".join(frames))
-                temp_audio_file.close()
-
-                # Create a Recording object and return it
-                return data.Recording(
-                    path=Path(temp_audio_path),
-                    audio_channels=self.audio_channels,
-                    datetime=self.datetime,
-                    duration=self.duration,
-                    samplerate=self.samplerate,
-                    audio_channels=self.audio_channels,
-                    chunksize=self.chunksize,
-                    deployment=deployment,
+            else:
+                click.secho(
+                    "Invalid input. Please select a valid samplerate.",
+                    fg="red",
                 )
+
+    return MicrophoneConfig(
+        device_name=selected_device.name,
+        samplerate=samplerate,
+        audio_channels=channels,
+    )

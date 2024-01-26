@@ -1,11 +1,13 @@
 """Definition of what a program is."""
 import datetime
+import logging
 from abc import ABC, abstractmethod
 from functools import wraps
 from typing import Callable, Generic, List, Optional, Type, TypeVar, Union
 
-from celery import Celery, group
+from celery import Celery, Task, group
 from celery.schedules import crontab
+from celery.utils.log import get_task_logger
 from pydantic import BaseModel
 
 from acoupi.programs.workers import AcoupiWorker, WorkerConfig
@@ -42,17 +44,25 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
     app: Celery
 
+    logger: logging.Logger
+
     def __init__(
         self,
         program_config: ProgramConfig,
         celery_config: BaseModel,
+        app: Optional[Celery] = None,
     ):
         """Initialize."""
+        if app is None:
+            app = Celery()
+
         self.config = program_config
-        self.app = Celery()
+        self.app = app
         self.tasks = {}
 
         self.app.config_from_object(celery_config)
+        self.logger = get_task_logger(self.__class__.__name__)
+
         self.setup(program_config)
 
     @abstractmethod
@@ -103,6 +113,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         queue: Optional[str] = None,
     ):
         """Add a task to the program."""
+
         if not callbacks:
             callbacks = []
 
@@ -110,8 +121,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         for callback in callbacks:
             if callback.__name__ not in self.tasks:
                 # register the callback as a task with the app
-                callback_task = self.app.task(callback, name=callback.__name__)
-                self.tasks[callback_task.__name__] = callback_task
+                self._add_callback(callback)
 
             # get the task from the list of tasks
             callback_task = self.tasks[callback.__name__]
@@ -119,10 +129,49 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
             # add the task to the list of callback tasks
             callback_tasks.append(callback_task)
 
+        # Add the task to the list of tasks
+        task = self._add_task(function, callback_tasks)
+
+        if queue:
+            # add the task to the queue
+            self.add_task_to_queue(function.__name__, queue)
+
+        if schedule:
+            # configure the app to schedule the task
+            self.app.add_periodic_task(schedule, task, name=task.__name__)
+
+    def add_task_to_queue(self, task_name: str, queue: str):
+        """Add a task to a queue."""
+        if queue not in self.get_queue_names():
+            raise ValueError(
+                f"Queue {queue} is not declared in the worker config"
+            )
+
+        if not self.app.conf.task_routes:
+            # initialize the task routes
+            self.app.conf.task_routes = {}
+
+        # configure the app to route the task to the queue
+        self.app.conf.task_routes[task_name] = {"queue": queue}
+
+    def _add_task(
+        self,
+        function: Callable[[], Optional[B]],
+        callback_tasks: Optional[List[Task]] = None,
+    ) -> Task:
+        # Use the function name as the task name
+        name = function.__name__
+
+        logger = self.logger.getChild(name)
+
         # create a decorated function that will run the task and the callbacks
         @wraps(function)
         def decorated_function():
+            logger.debug("Starting task")
+
             result = function()
+
+            logger.debug("Task finished")
 
             if result is None:
                 # the task did not return anything do not run the callbacks
@@ -132,30 +181,42 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
                 # there are no callbacks to run
                 return
 
+            logger.debug("Queueing callbacks with result: %s", result)
+
             # run the callbacks as a group
             callback_group = group(task.s(result) for task in callback_tasks)
             callback_group.apply_async()
 
         # register the task with the app
-        task = self.app.task(decorated_function, name=function.__name__)
+        task = self.app.task(decorated_function, name=name)
 
         # add the task to the list of tasks
-        self.tasks[task.__name__] = task
+        self.tasks[name] = task
 
-        if queue:
-            # make sure the queue has been declared in the worker config
-            if queue not in self.get_queue_names():
-                raise ValueError(
-                    f"Queue {queue} is not declared in the worker config"
-                )
+        return task  # type: ignore
 
-            if not self.app.conf.task_routes:
-                # initialize the task routes
-                self.app.conf.task_routes = {}
+    def _add_callback(
+        self,
+        function: Callable[[Optional[B]], None],
+    ) -> Task:
+        # Use the function name as the task name
+        name = function.__name__
 
-            # configure the app to route the task to the queue
-            self.app.conf.task_routes[task.__name__] = {"queue": queue}
+        logger = self.logger.getChild(name)
 
-        if schedule:
-            # configure the app to schedule the task
-            self.app.add_periodic_task(schedule, task)
+        # create a decorated function that will run the task and the callbacks
+        @wraps(function)
+        def decorated_function(result: Optional[B] = None):
+            logger.debug("Starting callback with result: %s", result)
+
+            result = function(result)
+
+            logger.debug("Callback finished")
+
+        # register the task with the app
+        task = self.app.task(decorated_function, name=name)
+
+        # add the task to the list of tasks
+        self.tasks[name] = task
+
+        return task  # type: ignore
