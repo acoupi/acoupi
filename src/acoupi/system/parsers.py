@@ -152,10 +152,13 @@ def parse_pydantic_model_field_from_args(
     """Parse a pydantic model field from the command line arguments."""
     model = get_field_dtype(field)
 
+    assert issubclass(model, BaseModel)
+
     prefix = f"{prefix}.{field_name}" if prefix else field_name
 
-    if hasattr(model, "setup") and callable(model.setup):
-        return model.setup(args, prompt=prompt, prefix=prefix)
+    setup = getattr(model, "setup", None)
+    if setup is not None and callable(setup):
+        return setup(args, prompt=prompt, prefix=prefix)
 
     if not field.is_required():
         has_some_arg = any(arg.startswith(f"--{prefix}") for arg in args)
