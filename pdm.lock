@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
-lock_version = "4.4"
-content_hash = "sha256:a82b9511ea4ca6103b6d6f79a5d0b8950540e68f2671aac9e0b63de8b1d1c2cc"
+lock_version = "4.4.1"
+content_hash = "sha256:b8d172c56d92d314cebbd528b4968e5ba6e6265475fa67af37656b2f085cf239"
 
 [[package]]
 name = "alabaster"
@@ -1336,11 +1336,11 @@ files = [
 
 [[package]]
 name = "pytz"
-version = "2023.3"
+version = "2023.3.post1"
 summary = "World timezone definitions, modern and historical"
 files = [
-    {file = "pytz-2023.3-py2.py3-none-any.whl", hash = "sha256:a151b3abb88eda1d4e34a9814df37de2a80e301e68ba0fd856fb9b46bfbbbffb"},
-    {file = "pytz-2023.3.tar.gz", hash = "sha256:1d8ce29db189191fb55338ee6d0387d82ab59f3d00eac103412d64e0ebd0c588"},
+    {file = "pytz-2023.3.post1-py2.py3-none-any.whl", hash = "sha256:ce42d816b81b68506614c11e8937d3aa9e41007ceb50bfdcb0749b921bf646c7"},
+    {file = "pytz-2023.3.post1.tar.gz", hash = "sha256:7b4fddbeb94a1eba4b557da24f19fdf9db575192544270a9101d8509f9f43d7b"},
 ]
 
 [[package]]

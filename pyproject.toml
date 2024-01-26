@@ -18,6 +18,8 @@ dependencies = [
     "celery>=5.2.7",
     "Jinja2>=3.1.2",
     "pydantic-settings>=2.0.3",
+    "pytz>=2023.3.post1",
+    "requests>=2.31.0",
 ]
 requires-python = ">=3.7,<3.12"
 readme = "README.md"

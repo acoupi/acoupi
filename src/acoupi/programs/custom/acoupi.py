@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 import pytz
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 from acoupi import components, data, tasks
 from acoupi.components.audio_recorder import MicrophoneConfig

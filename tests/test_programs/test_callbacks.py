@@ -1,4 +1,5 @@
 from pathlib import Path
+import time
 
 from celery import Celery
 from celery.worker import WorkController
@@ -51,6 +52,9 @@ def test_does_run_callbacks(
 
     output = program.tasks["task_1"].delay()
     output.get()
+
+    # Need to wait a bit in case task_2 has not run yet
+    time.sleep(0.1)
 
     assert path.exists()
     assert path.read_text() == message
@@ -107,6 +111,9 @@ def test_does_run_callbacks_in_other_queues(
 
     output = program.tasks["task_1"].delay()
     output.get()
+
+    # Need to wait a bit in case task_2 has not run yet
+    time.sleep(0.1)
 
     assert path.exists()
     assert path.read_text() == message

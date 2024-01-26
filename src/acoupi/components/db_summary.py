@@ -1,6 +1,6 @@
 from pathlib import Path
+
 from pony import orm
-import datetime
 
 db_path = "bat1_acoupi_102023.db"
 
@@ -9,9 +9,6 @@ database.bind(provider="sqlite", filename=str(db_path), create_db=False)
 
 
 def get_daily_summary(database):
-    # datetime = datetime.datetime.now()
-    day_datetime = datetime.datetime.date("2023-09-29")
-
     with orm.db_session:
         daily_summary = database.select(
             "select count(value) from predicted_tag where value = 'Pipistrellus pipistrellus'"
@@ -27,9 +24,6 @@ def get_daily_summary(database):
 
 daily_summary = get_daily_summary(database)
 print(daily_summary)
-
-
-##
 
 
 class DailySummaryDBContent:
