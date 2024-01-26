@@ -21,8 +21,8 @@ __all__ = [
 def start_deployment(
     settings: Settings,
     name: str,
-    latitude: Optional[float],
-    longitude: Optional[float],
+    latitude: Optional[float] = None,
+    longitude: Optional[float] = None,
 ) -> data.Deployment:
     """Start a new deployment.
 
