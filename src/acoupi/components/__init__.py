@@ -1,5 +1,5 @@
 """Acoupi components."""
-from acoupi.components.audio_recorder import PyAudioRecorder
+from acoupi.components.audio_recorder import PyAudioRecorder, MicrophoneConfig
 from acoupi.components.message_factories import FullModelOutputMessageBuilder
 from acoupi.components.message_stores.sqlite import SqliteMessageStore
 from acoupi.components.messengers import HTTPMessenger, MQTTMessenger
@@ -34,6 +34,7 @@ __all__ = [
     "IntervalScheduler",
     "IsInInterval",
     "IsInIntervals",
+    "MicrophoneConfig",
     "MQTTMessenger",
     "HTTPMessenger",
     "PyAudioRecorder",
