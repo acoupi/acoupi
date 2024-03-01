@@ -4,10 +4,10 @@
 ## Technical 
 
 ### What is acoupi? 
-**Acoupi** is an open-source Python toolkit that's designed to make it easy to create bioacoustic sensors on edge devices like the Raspberry Pi. **Acoupi** has flexibility at its core. **Acoupi** integrates and standardises the entire workflow of bioacoustic monitoring, combining both autonomous recording and classification units. **Acoupi** includes individual components for audio recordings, audio processing, audio classifications and detections, results communication, and audio files and results management. 
+Acoupi is an **open-source Python toolkit** that's designed to make it easy to create bioacoustic sensors on edge devices like the Raspberry Pi. Acoupi integrates and standardises the entire workflow of bioacoustic monitoring, combining both autonomous recording and classification units. Acoupi ensures **standardisation** of data while providing **flexibility of configuration** by defining attributes with specific characteristics, the *data schema* and establishing a set of methods showcasing several behaviours, the *components*. When configuring acoupi, users configure the set of acoupi components that suit their use case. 
 
 ### What isn't acoupi?
-While **acoupi** provides modular components to build your own autonomous recording and classification units, it is not a tool for training bioacoustic AI classifiers. **Acoupi** integrates already trained and well-tested AI bioacoustics models through its pre-built programs that you can use to perform on-device bioacoustics classification. 
+While **acoupi** provides modular components to build your own autonomous recording and classification units, it is not a tool for training bioacoustic AI classifiers. Acoupi integrates already trained and well-tested AI bioacoustics models through its pre-built programs that you can use to perform on-device bioacoustics classification. 
 
 ### Why acoupi? 
 Passive acoustic monitoring (PAM) has emerged as a practical and helpful tool for biodiversity monitoring and conservation. Combining PAM with on-device domain-specific deep-learning bioacoustics classifiers provides opportunities for extending the scale and length of data collection while alleviating downstream data storage and processing burdens. However, deploying and adapting existing solutions for its use still requires substantial technical expertise. 
