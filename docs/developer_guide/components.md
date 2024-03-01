@@ -19,6 +19,10 @@ The set of components available in the acoupi software package was chosen to ref
 
 ## Overview Components
 
+The components mentioned aboved are abstract components (i.e., Python classes). They are examples of the abstraction concept. These abstract component classes are templates that are used by the implemented components (i.e, subclasses) of a deployed acoupi program. The implemented components are called “subclasses”, as they inherit from the abstract component classes. 
+
+Below we provide details about each of the abstract components and mentioned the currently available pre-built subclasses for each. 
+
 #### Recording Conditions
 The [RecordingConditions](../../src/acoupi/components/recording_conditions.py) component is in charge of verifying if a certain condition for recording is met, such as checking whether or not it is time for the system to record audio files. Acoupi comes with the class `IsInIntervals` configured. The class implement the `should_record()`
 method that takes datetime.datetime objects `start_recording` and `end_recording` and returns a boolean indicating if a recording should be made at that time.
@@ -31,10 +35,7 @@ Recording Schedulers implement the `time_until_next_recording()` method, which
 returns the time in seconds until the next recording should be made.
 
 #### Audio Recorder
-The [AudioRecorder](../../src/acoupi/components/raudio_recorder.py) component defines how to record audio files. The class `PyAudioRecorder` derived from AudioRecorder configures the parameters of recordings. It uses multiple arguments such as the recording
-duration `audio_duration`, the sample rate `samplerate`, the number of
-audio_channels `audio_channels`, the device index `device_index` and the audio
-chunk size `chunksize`. The class should implement the `record()` method.
+The [AudioRecorder](../../src/acoupi/components/raudio_recorder.py) component defines how to record audio files. The AudioRecorde' subclass called `PyAudioRecorder` configures the parameters of recordings. It uses multiple arguments such as the recording duration `audio_duration`, the sample rate `samplerate`, the number of audio_channels `audio_channels`, the device index `device_index` and the audio chunk size `chunksize`. The class and subclass implement the `record()` method.
 
 #### Model
 The [Model](../../src/acoupi/components/model_template.py) component is in charge of processing a recording and generating predictions. This includes running machine learning models to detect specific sounds or patterns in the audio. Define the model that is employed to analyse audio recordings. Here, the class name refers to the bioacoustics model name that detect, classify or identify related species in audio recordings.
@@ -56,7 +57,7 @@ The [RecordingSavingManagers](../../src/acoupi/components/saving_managers.py) co
 The [Messengers](../../src/acoupi/components/messengers.py): component defines how to send detections (i.e., clean model outputs) to a remote server. The class implements two subclasses `MQTTMessenger` and `HTTPMessenger`.  
 
 #### Stores
-The [Stores](../../src/acoupi/components/stores/sqlite/store.py) component is in charge of storing the information ofwhat recordings and detections have been made. This includes storing metadata about the recordings and detections, such as the date and time of the recording, and the type of animal or sound detected. The class implements the subclass SqliteStore. 
+The [Stores](../../src/acoupi/components/stores/sqlite/store.py) component is in charge of storing the information ofwhat recordings and detections have been made. This includes storing metadata about the recordings and detections, such as the date and time of the recording, and the type of animal or sound detected. The class implements the subclass `SqliteStore`. 
 
 #### Message Stores
 The [MessageStores](../../src/acoupi/components/message_stores/sqlite/message_store.py) component is charge of storing information about which messages have been successfully sent or are missing.
