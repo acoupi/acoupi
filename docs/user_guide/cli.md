@@ -1,14 +1,12 @@
 # Acoupi CLI
 
-The Acoupi Command-Line Interface (CLI) serves as the essential bridge between
-users and the Acoupi backend, facilitating interaction with the acoupi system.
-Utilizing the CLI simplifies the process of program setup and management.
+The Acoupi Command-Line Interface (CLI) serves as the essential bridge between acoupi users and acoupi backend, facilitating interaction with the acoupi system. Utilizing the CLI simplifies the process of program setup and management.
 
 Executing `acoupi setup` initiates the configuration stage. Within this phase,
 users can opt for a specific program to run and provide any necessary
 configurations. This process triggers the `acoupi.system.setup_program()`
 function, which automates the creation of essential files within `ACOUPI_HOME`,
-aligning them with the user's selections.
+aligning them with the user's selections. 
 
 The CLI also offers the following commands:
 

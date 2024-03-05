@@ -24,7 +24,7 @@
 
 Below we provide an overview of the 4 layers of acoupi. This is not to scare users but mostly to illustrate the modularity and flexibility of around acoupi building blocks. 
 
-![Figure 1: Overview of acoupi layers](/docs/img/acoupi_buildingblocks.png)
+![Figure 1: Overview of acoupi layers](/docs/img/acoupi_architecture.png)
 *Figure 1: Overview of acoupi layers*
 
 ![Figure 2: Example of Acoupi Flow of Information](/docs/img/acoupi_flowchart_img.png)
