@@ -21,13 +21,15 @@ pip install acoupi
 ```bash
 acoupi setup --program acoupi.programs.custom.acoupi
 ```
-> ![IMPORTANT] Please refer to the page [/user_guide/configurations](configurations.md) for an overview of the default and available configuration options when setting up the custom acoupi program.
+> ![IMPORTANT]
+Please refer to the page [/user_guide/configurations](configurations.md) for an overview of the default and available configuration options when setting up the custom acoupi program.
 
 **Step 3:** To start acoupi run the command: 
 ```bash
 acoupi start
 ```
-> ![IMPORTANT] Please refer to the page [/user_guide/cli](cli.md) for an overview of the commands lines options available to manage acoupi package. 
+> ![IMPORTANT]
+Please refer to the page [/user_guide/cli](cli.md) for an overview of the commands lines options available to manage acoupi package. 
 
 ## Other acoupi installation
 Sometimes the programs might have some additional or different installation requirements. Please refer to the following links, if you wish to implement one of the pre-built bioacoustics classifiers model. 
