@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     program_name_file: Path = home / "config" / "name"
     program_config_file: Path = home / "config" / "program.json"
     celery_config_file: Path = home / "config" / "celery.json"
+    deployment_file: Path = home / "config" / "deployment.json"
     env_file: Path = home / "config" / "env"
     run_dir: Path = home / "run"
     log_dir: Path = home / "log"

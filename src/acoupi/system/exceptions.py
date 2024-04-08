@@ -48,3 +48,11 @@ class HealthCheckError(Exception):
     def __init__(self, message: str):
         """Initialize HealthError exception."""
         self.message = message
+
+
+class DeploymentError(Exception):
+    """Exception raised when a deployment fails."""
+
+    def __init__(self, message: str):
+        """Initialize DeploymentError exception."""
+        self.message = message

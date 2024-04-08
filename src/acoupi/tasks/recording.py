@@ -18,7 +18,6 @@ def generate_recording_task(
     logger: logging.Logger = logger,
     recording_conditions: Optional[List[T]] = None,
 ) -> Callable[[], Optional[data.Recording]]:
-    # ) -> Optional[data.Recording]:
     """Generate a recording task."""
 
     def recording_task() -> Optional[data.Recording]:

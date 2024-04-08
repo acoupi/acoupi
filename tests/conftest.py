@@ -131,6 +131,7 @@ def settings(tmp_path: Path) -> Settings:
         program_name_file=home / "config" / "name",
         program_config_file=home / "config" / "program.json",
         celery_config_file=home / "config" / "celery.json",
+        deployment_file=home / "config" / "deployment.json",
         env_file=home / "config" / "env",
         run_dir=home / "run",
         log_dir=home / "log",
