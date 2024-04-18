@@ -35,7 +35,6 @@ def generate_detection_task(
         # Detect events in recordings
         logger.info("Running model on recording")
         model_output = model.run(recording)
-        logger.info(f"Model output: {model_output}")
 
         # Clean model output
         for cleaner in output_cleaners or []:

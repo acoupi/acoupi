@@ -9,21 +9,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def has_model_output(outputs: List[data.ModelOutput], model_name: str) -> bool:
-    for output in outputs:
-        if output.name_model == model_name:
-            return True
-    return False
-
-
-def has_outputs_from_all_models(outputs: List[data.ModelOutput], model_names: List[str]) -> bool:
-    for model_name in model_names:
-        if not has_model_output(outputs, model_name):
-            return False
-
-    return True
-
-
 def generate_file_management_task(
     store: types.Store,
     file_manager: types.RecordingSavingManager,
@@ -54,8 +39,8 @@ def generate_file_management_task(
         )
 
         for recording, model_outputs in recordings_and_outputs:
-            logger.debug(f"Recording: {recording}")
-            logger.debug(f"Model Outputs: {model_outputs}")
+            logger.info(f"Recording: {recording.path}")
+            logger.info(f"Model Outputs: {model_outputs}")
 
             if recording.path is None:
                 logger.error(
@@ -63,26 +48,14 @@ def generate_file_management_task(
                     recording.id,
                 )
                 continue
-
-            if not has_outputs_from_all_models(model_outputs, required_models):
+            
+            if len(model_outputs) == 0:
+                logger.info(f"RECORDING HAS NOT BEEN PROCESSED: {recording.path}")
                 continue
 
-            if not all(
-                filter.should_save_recording(recording, model_outputs)
-                for filter in file_filters or []
-            ):
-                logger.info(
-                    "Recording %s should not be saved, deleting",
-                    recording.id,
-                )
-                delete_recording(recording.path)
-                continue
-
-            path = file_manager.save_recording(
-                recording,
-                model_outputs=model_outputs,
-            )
-
-            store.update_recording_path(recording, path)
+            else:
+                new_path = file_manager.save_recording(recording, model_outputs=model_outputs)
+                logger.info(f"RECORDING HAS BEEN MOVED: {new_path}")
+                store.update_recording_path(recording, new_path)
 
     return file_management_task
