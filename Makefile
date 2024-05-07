@@ -1,5 +1,6 @@
 TEST_DIR := tests/
 SRC_DIR := src/
+ENV_PREFIX=.venv/bin/
 DOCS_SOURCE_DIR := docs/
 DOCS_BUILD_DIR := site/
 
@@ -28,36 +29,36 @@ clean-cache:
 	rm -fr .pytest_cache
 
 coverage:
-	coverage run -m pytest $(TEST_DIR)
-	coverage report -m
-	coverage html
+	$(ENV_PREFIX)coverage run -m pytest $(TEST_DIR)
+	$(ENV_PREFIX)coverage report -m
+	$(ENV_PREFIX)coverage html
 
 lint/pyright:
-	pyright $(SRC_DIR)
+	$(ENV_PREFIX)pyright $(SRC_DIR)
 
 lint/ruff:
-	ruff $(SRC_DIR)
+	$(ENV_PREFIX)ruff $(SRC_DIR)
 
 lint/black:
-	black --check $(SRC_DIR)
+	$(ENV_PREFIX)black --check $(SRC_DIR)
 
 lint: lint/pyright lint/ruff lint/black
 
 test:
-	pytest --verbose --color=yes $(TEST_DIR)
+	$(ENV_PREFIX)pytest --verbose --color=yes $(TEST_DIR)
 
 format:
-	black $(SRC_DIR) $(TEST_DIR)
-	isort $(SRC_DIR) $(TEST_DIR)
+	$(ENV_PREFIX)black $(SRC_DIR) $(TEST_DIR)
+	$(ENV_PREFIX)isort $(SRC_DIR) $(TEST_DIR)
 
 clean-docs:
 	rm -rf $(DOCS_BUILD_DIR)
 
 docs: clean-docs
-	mkdocs build --clean
+	$(ENV_PREFIX)mkdocs build --clean
 
 serve-coverage:
-	python -m http.server --directory htmlcov/ 8080
+	$(ENV_PREFIX)python -m http.server --directory htmlcov/ 8080
 
 serve-docs:
-	mkdocs serve
+	$(ENV_PREFIX)mkdocs serve
