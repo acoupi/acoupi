@@ -30,7 +30,7 @@ class TimeInterval(BaseModel):
     end: datetime.time
     """End time of the interval."""
 
-    @model_validator(mode="before")
+    @model_validator(mode="before")  # type: ignore
     def validate_interval(cls, values):
         """Validate that the start time is before the end time."""
         if values["start"] >= values["end"]:
