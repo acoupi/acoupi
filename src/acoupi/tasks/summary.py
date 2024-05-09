@@ -15,14 +15,25 @@ def generate_summariser_task(
     store: types.Store,
     message_store: types.MessageStore,
     logger: logging.Logger = logger,
-    summariser_conditions: Optional[List[T]] = None,
+    # summariser_conditions: Optional[List[T]] = None,
 ) -> Callable[[], None]:
     """Generate a summariser task."""
 
     def summary_task() -> None:
 
+        end_time = datetime.datetime.now()
+        start_time = end_time - datetime.timedelta(
+            seconds=summariser.summary_interval
+        )
+        logger.info("Starting summary process")
+
+        # Determine Time Interval to retrieve model outputs
+        # summary_interval
+
         # Get ModelOutputs
-        model_outputs = store.get_model_outputs_by_datetime()
+        model_outputs = store.get_model_outputs_by_datetime(
+            start_time, end_time
+        )
 
         # Summarise Detections
         logger.info("Summarising model outputs")

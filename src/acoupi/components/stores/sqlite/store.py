@@ -1,4 +1,5 @@
 """Module defining the SqliteStore class."""
+
 import datetime
 import json
 from pathlib import Path
@@ -211,6 +212,41 @@ class SqliteStore(types.Store):
         )
 
         return _to_recordings_and_outputs(db_recordings)
+
+    @orm.db_session
+    def get_model_outputs_by_datetime(
+        self,
+        start_time: datetime.datetime,
+        end_time: datetime.datetime,
+    ) -> List[data.ModelOutput]:
+        """Get a list of model outputs from the store by their id.
+
+        Args:
+            start_time: The time to start the search from.
+            end_time: The time to end the search at.
+
+        Returns:
+            List of model_outputs matching the created_on datetime.
+        """
+        db_model_outputs = (
+            orm.select(
+                mo
+                for mo in self.models.ModelOutput
+                if start_time <= mo.created_on <= end_time
+            )
+            .order_by(orm.desc(self.models.ModelOutput.created_on))
+            .prefetch(
+                self.models.ModelOutput.created_on,
+                self.models.ModelOutput.tags,
+                self.models.ModelOutput.detections,
+                self.models.Detection.tags,
+            )
+        )
+
+        return [
+            _to_model_output(db_model_output)
+            for db_model_output in db_model_outputs
+        ]
 
     @orm.db_session
     def update_recording_path(

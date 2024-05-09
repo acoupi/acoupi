@@ -10,7 +10,7 @@ from typing import List, Dict
 from acoupi import data
 from acoupi.components import types
 
-__all__ = []
+__all__ = ["DetectionsSummariser"]
 
 
 class DetectionsSummariser(types.Summariser):
@@ -25,7 +25,6 @@ class DetectionsSummariser(types.Summariser):
 
     def __init__(
         self,
-        summary_interval: float,
         threshold_lowband: float = 0.5,
         threshold_midband: float = 0.7,
         threshold_highband: float = 0.9,
@@ -39,14 +38,9 @@ class DetectionsSummariser(types.Summariser):
           threshold_highband: The higher threshold for detection.
         """
 
-        self.summary_interval = summary_interval
         self.threshold_highband = threshold_highband
         self.threshold_midband = threshold_midband
         self.threshold_lowband = threshold_lowband
-
-    # def get_model_outputs(self, model_outputs: List[types.ModelOutput]) -> List[types.ModelOutput]:
-    #   """Get the model outputs from the SQLite database."""
-    #   return model_outputs
 
     def get_species_name(
         self, model_outputs: List[types.ModelOutput]
