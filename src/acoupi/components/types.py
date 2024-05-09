@@ -287,46 +287,4 @@ class Summariser(ABC):
     """Summarise model outputs.
 
     The Summariser is responsible for summarising model outputs (i.e., detections)
-    into a message.
-    """
-
-    @abstractmethod
-    def build_summary(
-        self,
-        model_outputs: List[ModelOutput],
-    ) -> Message:
-        """Send the message to a remote server."""
-
-
-class Messenger(ABC):
-    """Send messages to a remote server.
-
-    The Messenger is responsible for sending messages to
-    a remote server
-    """
-
-    @abstractmethod
-    def send_message(self, message: Message) -> Response:
-        """Send the message to a remote server."""
-
-
-class MessageStore(ABC):
-    """Keeps track of messages that have been sent."""
-
-    @abstractmethod
-    def get_unsent_messages(self) -> List[Message]:
-        """Get the recordings that have not been synced to the server."""
-
-    @abstractmethod
-    def store_message(
-        self,
-        message: Message,
-    ) -> None:
-        """Register a message with the store."""
-
-    @abstractmethod
-    def store_response(
-        self,
-        response: Response,
-    ) -> None:
-        """Register a message response with the store."""
+    int
