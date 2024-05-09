@@ -23,7 +23,7 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
 
     def get_clean_tags(self, tags: List[PredictedTag]) -> List[PredictedTag]:
         """Removes tags with low probability."""
-        return [tag for tag in tags if tag.probability >= self.threshold]
+        return [tag for tag in tags if tag.classification_probability >= self.threshold]
 
     def get_clean_detections(
         self, detections: List[Detection]
@@ -32,7 +32,7 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
         return [
             self.clean_detection(detection)
             for detection in detections
-            if detection.probability >= self.threshold
+            if detection.detection_probability >= self.threshold
         ]
 
     def clean_detection(self, detection: Detection) -> Detection:
@@ -40,7 +40,7 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
         return Detection(
             id=detection.id,
             location=detection.location,
-            probability=detection.probability,
+            probability=detection.detection_probability,
             tags=self.get_clean_tags(detection.tags),
         )
 

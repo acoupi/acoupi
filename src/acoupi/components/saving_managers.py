@@ -89,12 +89,12 @@ class SaveRecordingManager(types.RecordingSavingManager):
         for model_output in model_outputs:
             # Check if any tags or detectinos are confident
             if any(
-                tag.probability >= self.threshold for tag in model_output.tags
+                tag.classification_probability >= self.threshold for tag in model_output.tags
             ):
                 return True
 
             if any(
-                detection.probability >= self.threshold
+                detection.detection_probability >= self.threshold
                 for detection in model_output.detections
             ):
                 return True

@@ -54,14 +54,14 @@ def create_test_detection():
     ) -> data.Detection:
         """Return a random detection."""
         return data.Detection(
-            probability=detection_probability,
+            detection_probability=detection_probability,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(
                         value=tag_value,
                         key=tag_key,
                     ),
-                    probability=tag_probability,
+                    classification_probability=tag_probability,
                 ),
             ],
         )

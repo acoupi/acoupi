@@ -161,10 +161,10 @@ class PredictedTag(BaseModel):
     tag: Tag
     """The tag predicted by the model."""
 
-    probability: float = 1
+    classification_probability: float = 1
     """The probability of the tag prediction."""
 
-    @field_validator("probability")
+    @field_validator("classification_probability")
     def validate_probability(cls, value):
         """Validate that the probability is between 0 and 1."""
         if value < 0 or value > 1:
@@ -220,13 +220,13 @@ class Detection(BaseModel):
     location: Optional[BoundingBox] = None
     """The location of the detection in the recording."""
 
-    probability: float = 1
+    detection_probability: float = 1
     """The probability of the detection."""
 
     tags: List[PredictedTag] = Field(default_factory=list)
     """The tags predicted by the model for the detection."""
 
-    @field_validator("probability")
+    @field_validator("detection_probability")
     def validate_probability(cls, value):
         """Validate that the probability is between 0 and 1."""
         if value < 0 or value > 1:
@@ -238,7 +238,7 @@ class Detection(BaseModel):
         """Sort tags."""
         return sorted(
             value,
-            key=lambda x: (x.probability, x.tag.key, x.tag.value),
+            key=lambda x: (x.classification_probability, x.tag.key, x.tag.value),
             reverse=True,
         )
 
@@ -271,7 +271,7 @@ class ModelOutput(BaseModel):
         """Sort tags."""
         return sorted(
             value,
-            key=lambda x: (x.probability, x.tag.key, x.tag.value),
+            key=lambda x: (x.classification_probability, x.tag.key, x.tag.value),
             reverse=True,
         )
 

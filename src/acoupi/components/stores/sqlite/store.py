@@ -131,7 +131,7 @@ class SqliteStore(types.Store):
             db_model_output.tags.create(
                 key=tag.tag.key,
                 value=tag.tag.value,
-                probability=tag.probability,
+                classification_probability=tag.classification_probability,
             )
 
         for detection in model_output.detections:
@@ -143,14 +143,14 @@ class SqliteStore(types.Store):
             db_detection = db_model_output.detections.create(
                 id=detection.id,
                 location=location,
-                probability=detection.probability,
+                detection_probability=detection.detection_probability,
             )
 
             for tag in detection.tags:
                 db_detection.tags.create(
                     key=tag.tag.key,
                     value=tag.tag.value,
-                    probability=tag.probability,
+                    classification_probability=tag.classification_probability,
                 )
 
         orm.commit()
@@ -381,14 +381,14 @@ def _to_detection(db_detection: db_types.Detection) -> data.Detection:
     return data.Detection(
         id=db_detection.id,
         location=location,
-        probability=db_detection.probability,
+        detection_probability=db_detection.detection_probability,
         tags=[
             data.PredictedTag(
                 tag=data.Tag(
                     key=db_tag.key,
                     value=db_tag.value,
                 ),
-                probability=db_tag.probability,
+                classification_probability=db_tag.classification_probability,
             )
             for db_tag in db_detection.tags
         ],
@@ -410,7 +410,7 @@ def _to_model_output(
                     key=db_tag.key,
                     value=db_tag.value,
                 ),
-                probability=db_tag.probability,
+                classification_probability=db_tag.classification_probability,
             )
             for db_tag in db_model_output.tags
         ],
