@@ -1,4 +1,5 @@
 """Data objects for acoupi System."""
+
 import datetime
 from enum import IntEnum
 from pathlib import Path
@@ -238,7 +239,11 @@ class Detection(BaseModel):
         """Sort tags."""
         return sorted(
             value,
-            key=lambda x: (x.classification_probability, x.tag.key, x.tag.value),
+            key=lambda x: (
+                x.classification_probability,
+                x.tag.key,
+                x.tag.value,
+            ),
             reverse=True,
         )
 
@@ -271,7 +276,11 @@ class ModelOutput(BaseModel):
         """Sort tags."""
         return sorted(
             value,
-            key=lambda x: (x.classification_probability, x.tag.key, x.tag.value),
+            key=lambda x: (
+                x.classification_probability,
+                x.tag.key,
+                x.tag.value,
+            ),
             reverse=True,
         )
 
