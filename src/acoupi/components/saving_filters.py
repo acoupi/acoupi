@@ -215,11 +215,14 @@ class ThresholdRecordingFilter(types.RecordingSavingFilter):
         Returns:
             bool
         """
-        if any(tag.classification_probability >= self.threshold for tag in model_output.tags):
+        if any(
+            tag.classification_probability >= self.threshold
+            for tag in model_output.tags
+        ):
             return True
 
         return any(
-            detection.probability >= self.threshold
+            detection.detection_probability >= self.threshold
             for detection in model_output.detections
         )
 
@@ -284,7 +287,8 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
             bool
         """
         if any(
-            tag.tag in self.tags and tag.classification_probability >= self.threshold
+            tag.tag in self.tags
+            and tag.classification_probability >= self.threshold
             for tag in model_output.tags
         ):
             return True
