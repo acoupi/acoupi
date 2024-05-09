@@ -1,4 +1,5 @@
 """This module contains the types used by the aucupi."""
+
 import datetime
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -26,6 +27,29 @@ class RecordingScheduler(ABC):
 
         Args:
             time: The time to use for determining the next recording.
+                Defaults to None.
+        """
+
+
+class Scheduler(ABC):
+    """Manage time between repetitive actions.
+
+    The Scheduler responsible for determining the interval between
+    two actions such as the time between recordings, or the time between
+    creating messages to be sent to a remote server.
+    """
+
+    @abstractmethod
+    def waiting_time(
+        self,
+        time: Optional[datetime.datetime] = None,
+    ) -> float:
+        """Return the number of seconds until the next action.
+
+        This should return 0 if something should be done immediately.
+
+        Args:
+            time: The time to use for determining the next repetitive action.
                 Defaults to None.
         """
 
@@ -257,6 +281,21 @@ class RecordingMessageBuilder(ABC):
         recording: Recording,
     ) -> Message:
         """Build a message from the recording."""
+
+
+class Summariser(ABC):
+    """Summarise model outputs.
+
+    The Summariser is responsible for summarising model outputs (i.e., detections)
+    into a message.
+    """
+
+    @abstractmethod
+    def build_summary(
+        self,
+        model_outputs: List[ModelOutput],
+    ) -> Message:
+        """Send the message to a remote server."""
 
 
 class Messenger(ABC):

@@ -1,4 +1,5 @@
 """Acoupi components."""
+
 from acoupi.components.audio_recorder import PyAudioRecorder, MicrophoneConfig
 from acoupi.components.message_factories import FullModelOutputMessageBuilder
 from acoupi.components.message_stores.sqlite import SqliteMessageStore
@@ -21,17 +22,21 @@ from acoupi.components.saving_managers import (
     IDFileManager,
     SaveRecordingManager,
 )
+from acoupi.components.schedulers import Interval_Scheduler
 from acoupi.components.stores.sqlite import SqliteStore
+from acoupi.components.summariser import DetectionsSummariser
 
 __all__ = [
     "After_DawnDuskTimeInterval",
     "Before_DawnDuskTimeInterval",
     "DateFileManager",
+    "DetectionsSummariser",
     "FocusSpeciesRecordingFilter",
     "FrequencySchedule",
     "FullModelOutputMessageBuilder",
     "IDFileManager",
     "IntervalScheduler",
+    "Interval_Scheduler",
     "IsInInterval",
     "IsInIntervals",
     "MicrophoneConfig",
