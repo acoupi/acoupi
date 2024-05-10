@@ -143,4 +143,6 @@ def settings(tmp_path: Path) -> Settings:
         stop_script_path=home / "bin" / "acoupi-workers-stop.sh",
         restart_script_path=home / "bin" / "acoupi-workers-restart.sh",
         beat_script_path=home / "bin" / "acoupi-beat.sh",
-   
+        acoupi_service_file="acoupi.service",
+        acoupi_beat_service_file="acoupi-beat.service",
+    )
