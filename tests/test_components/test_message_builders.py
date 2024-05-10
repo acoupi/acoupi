@@ -125,4 +125,8 @@ def test_full_model_output_message_can_be_sent_with_http_messenger(
     )
 
     # Act
-    
+    response = messenger.send_message(message)
+
+    # Assert
+    assert response.status == data.ResponseStatus.SUCCESS
+    assert response.content == "OK"

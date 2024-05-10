@@ -210,4 +210,4 @@ def test_http_messenger_fails_with_bad_request(
 
     # Assert
     assert response.status == data.ResponseStatus.ERROR
-    
+    assert response.content == "BAD REQUEST"
