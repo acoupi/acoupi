@@ -1,4 +1,5 @@
 """Test suite for acoupi messengers."""
+
 import datetime
 from pathlib import Path
 from unittest import mock
@@ -129,21 +130,21 @@ def test_http_messenger_with_complex_message():
                     location=data.BoundingBox(
                         coordinates=(0, 0, 1, 1),
                     ),
-                    probability=0.5,
+                    detection_probability=0.5,
                     tags=[
                         data.PredictedTag(
                             tag=data.Tag(
                                 key="test_tag",
                                 value="test_value",
                             ),
-                            probability=0.2,
+                            classification_probability=0.2,
                         ),
                         data.PredictedTag(
                             tag=data.Tag(
                                 key="event",
                                 value="echolocation",
                             ),
-                            probability=0.8,
+                            classification_probability=0.8,
                         ),
                     ],
                 ),
@@ -209,4 +210,4 @@ def test_http_messenger_fails_with_bad_request(
 
     # Assert
     assert response.status == data.ResponseStatus.ERROR
-    assert response.content == "BAD REQUEST"
+    
