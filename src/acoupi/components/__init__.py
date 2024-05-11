@@ -22,7 +22,6 @@ from acoupi.components.saving_managers import (
     IDFileManager,
     SaveRecordingManager,
 )
-from acoupi.components.schedulers import Interval_Scheduler
 from acoupi.components.stores.sqlite import SqliteStore
 from acoupi.components.summariser import DetectionsSummariser
 
@@ -36,7 +35,6 @@ __all__ = [
     "FullModelOutputMessageBuilder",
     "IDFileManager",
     "IntervalScheduler",
-    "Interval_Scheduler",
     "IsInInterval",
     "IsInIntervals",
     "MicrophoneConfig",

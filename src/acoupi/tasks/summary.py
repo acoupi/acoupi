@@ -23,21 +23,21 @@ def generate_summariser_task(
 
         end_time = datetime.datetime.now()
         start_time = end_time - datetime.timedelta(
-            seconds=summariser.summary_interval
+            seconds=summariser.interval
         )
-        logger.info("Starting summary process")
+        logger.info(f"SUMMARY INTERVAL START: {start_time} and END: {end_time}")
 
-        # Determine Time Interval to retrieve model outputs
-        # summary_interval
-
-        # Get ModelOutputs
-        model_outputs = store.get_model_outputs_by_datetime(
-            start_time, end_time
+        # Get Summary 
+        logger.info(" -- STORE GET SUMMARY -- ")
+        summary = store.summarise_predictedtags(
+            starttime=start_time,
+            endtime=end_time,
         )
+        logger.info(f" -- SUMMARY IS: {summary}")
 
-        # Summarise Detections
-        logger.info("Summarising model outputs")
-        message = summariser.build_summary(model_outputs)
+        # Buid and store summary message
+        logger.info("Building summary message.")
+        message = summariser.build_summary(summary)
 
         # Store Message
         message_store.store_message(message)

@@ -14,6 +14,25 @@ __all__ = ["DetectionsSummariser"]
 
 
 class DetectionsSummariser(types.Summariser):
+    def __init__(
+        self,
+        interval: float = 120,
+    ):
+        """Initialise the Summariser.
+
+        Args:
+          start_time: The start time to summarise detections.
+          end_time: The end time to summarise detections.
+        """
+
+        self.interval = interval
+
+    def build_summary(self, summary) -> data.Message:
+        """Build a message from a summary."""
+        return data.Message(content=json.dumps(summary))
+
+
+class PredictedTagsSummariser(types.Summariser):
     """A Summariser that builds hourly detections summary.
 
     This Summariser builds an hourly message to summarise the detections stored the SQLite DB.
@@ -57,15 +76,20 @@ class DetectionsSummariser(types.Summariser):
         species_name = []
 
         for model_output in model_outputs:
-            for tag in model_output.tags:
-                for value in tag.value:
-                    if tag.key == "species" and value not in species_name:
-                        species_name.append(value)
+            print(f"GETTING MODELOutputs: {model_output}")
+            for detection in model_output.detections:
+                print(f"LOOKING AT THE DETECTIONS: {detection}")
+                for tag in detection.tags:
+                    print(f"LOOKING AT THE TAGS: {tag}")
+                    print(f"Trying to access tag.key: {tag.tag.key}")
+                    if tag.tag.key == "species" and tag.tag.value not in species_name:
+                        species_name.append(tag.tag.value)
+
 
         return species_name
 
     def get_species_count_in_bands(
-        self, species_name: str, model_outputs: List[types.ModelOutput]
+        self, species_name: List[str], model_outputs: List[types.ModelOutput]
     ) -> Dict[str, int]:
         """Count the number of dections for each species in each threshold band."""
 
@@ -73,29 +97,30 @@ class DetectionsSummariser(types.Summariser):
 
         for model_output in model_outputs:
             for detection in model_output.detections:
-                if (
-                    detection.tags.tag.key == "species"
-                    and detection.tags.tag.value == species_name
-                ):
+                for tag in detection.tags:
                     if (
-                        detection.tags.classification_probability
-                        >= self.threshold_highband
+                        tag.tag.key == "species"
+                        and tag.tag.value == species_name
                     ):
-                        detection_count["high_band"] += 1
-                    if (
-                        detection.tags.classification_probability
-                        >= self.threshold_midband
-                        and detection.tags.classification_probability
-                        < self.threshold_highband
-                    ):
-                        detection_count["mid_band"] += 1
-                    if (
-                        detection.tags.classification_probability
-                        >= self.threshold_lowband
-                        and detection.tags.classification_probability
-                        < self.threshold_midband
-                    ):
-                        detection_count["low_band"] += 1
+                        if (
+                            tag.classification_probability
+                            >= self.threshold_highband
+                        ): 
+                            detection_count["high_band"] += 1
+                        if (
+                            tag.classification_probability
+                            >= self.threshold_midband
+                            and tag.classification_probability
+                            < self.threshold_highband
+                        ):
+                            detection_count["mid_band"] += 1
+                        if (
+                            tag.classification_probability
+                            >= self.threshold_lowband
+                            and tag.classification_probability
+                            < self.threshold_midband
+                        ):
+                            detection_count["low_band"] += 1
 
         return detection_count
 
@@ -121,9 +146,13 @@ class DetectionsSummariser(types.Summariser):
         species_name = self.get_species_name(model_outputs)
 
         for specie in species_name:
+            print(f"COUNTING DETECTIONS FOR SPECIE: {specie}")
             detection_count = self.get_species_count_in_bands(
                 specie, model_outputs
             )
+            print(f"NUMBER OF DETECTIONS FOR SPECIE: {detection_count}")
             summary["species"][specie] = detection_count
+
+        print(f"SUMMARY OF DETECTIONS: {summary}")
 
         return data.Message(content=json.dumps(summary))
