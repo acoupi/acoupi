@@ -29,15 +29,15 @@ def generate_summariser_task(
 
         # Get Summary 
         logger.info(" -- STORE GET SUMMARY -- ")
-        summary = store.summarise_predictedtags(
+        summary = store.summary_predictedtags_by_datetime(
             starttime=start_time,
             endtime=end_time,
         )
-        logger.info(f" -- SUMMARY IS: {summary}")
-
+        
         # Buid and store summary message
         logger.info("Building summary message.")
         message = summariser.build_summary(summary)
+        logger.info(f"Summary Message is: {message}")
 
         # Store Message
         message_store.store_message(message)
