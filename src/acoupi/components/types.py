@@ -261,10 +261,7 @@ class ModelOutputMessageBuilder(ABC):
     """
 
     @abstractmethod
-    def build_message(
-        self,
-        model_output: ModelOutput,
-    ) -> Message:
+    def build_message(self,) -> Message:
         """Build a message from the model output."""
 
 
