@@ -290,7 +290,7 @@ class Summariser(ABC):
     @abstractmethod
     def build_summary(
         self,
-        model_outputs: List[ModelOutput],
+        summary: List,
     ) -> Message:
         """Send the message to a remote server."""
 
