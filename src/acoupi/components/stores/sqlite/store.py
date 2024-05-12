@@ -252,8 +252,6 @@ class SqliteStore(types.Store):
     ) -> List[data.Detection]:
         """Get a list of detections from the store based on their model_output ids."""
         ids_uuid = [id for id in modeloutput_ids]
-        print(f"GET MODELOUTPUT IDS: {ids_uuid}")
-        print(f"TYPE IDS: {type(ids_uuid[0])}")
         db_detections = orm.select(
             d for d in self.models.Detection if d.model_output.id in ids_uuid 
         ).prefetch(
@@ -268,7 +266,6 @@ class SqliteStore(types.Store):
     ) -> List[data.PredictedTag]:
         """Get a list of predicted tags from the store based on their detection ids."""
         ids = [id for id in detection_ids]
-        print(f"GET DETECTIONS IDS: {ids}")
         db_tags = orm.select(
             t for t in self.models.PredictedTag if t.detection.id in ids
         )
@@ -276,7 +273,7 @@ class SqliteStore(types.Store):
         return [_to_predictedtag(db_tag) for db_tag in db_tags]
 
     @orm.db_session
-    def summarise_predictedtags(
+    def summary_predictedtags_by_datetime(
         self, starttime: datetime.datetime, endtime: datetime.datetime
     ):
         """Summarise the detections."""
@@ -287,69 +284,15 @@ class SqliteStore(types.Store):
         db_detections = self.get_detections_by_id(
             [model_output.id for model_output in db_model_outputs]
         )
-        db_predictedtags = self.get_predictedtags_by_id(
-            [detection.id for detection in db_detections]
-        )
-        
-        print(f"DETECTIONS: {db_detections}")
-        if len(db_predictedtags) == 0:
+        if not len(db_detections) != 0:
             return []
-
         else:
-            print(f"DETECTIONS TAGS: {db_predictedtags}")
-            #detections_ids = [id for id in db_detections]
-            #print(f"DETECTIONS IDS: {detections_ids}")
-            
-            db_species_name = set(t.tag.value for t in db_predictedtags)
-            print(f"SPECIES NAME: {db_species_name}")
-            #orm_db_species_name = orm.select(
-            #    t.tag.value for t in db_predictedtags
-            #)
-            #print(f"ORM SPECIES NAME: {orm_db_species_name}")
-            #db_tags_value = orm.select(
-            #    t for t in self.models.PredictedTag if t.detection.id in detections_ids
-            #).prefetch()
 
-            #print(f"TAGS VALUE: {db_tags_value}")
+            db_predictedtags = self.get_predictedtags_by_id(
+                [detection.id for detection in db_detections]
+            )
 
-            db_species_stats = []
-
-            for species_name in db_species_name:
-                print(f"GETTING SPECIES STATS FOR SPECIES: {species_name}")
-                species_probabilities = [t.classification_probability for t in db_predictedtags if t.tag.value == species_name]
-                print(f"PROBABILITIES FOR SPECIES: {species_probabilities}")
-
-                mean_prob = np.mean(species_probabilities)
-                print(f"MEAN: {mean_prob}")
-
-                species_stat = {
-                    "mean": orm.avg(
-                        t.classification_probability
-                        for t in self.models.PredictedTag
-                        if t.value == species_name
-                    ),
-                    "min": orm.min(
-                        t.classification_probability
-                        for t in self.models.PredictedTag
-                        if t.value == species_name
-                    ),
-                    "max": orm.max(
-                        t.classification_probability
-                        for t in self.models.PredictedTag
-                        if t.value == species_name
-                    ),
-                    "count": orm.count(
-                        t.classification_probability
-                        for t in self.models.PredictedTag
-                        if t.value == species_name
-                    ),
-                }
-                print(f"ORM SPECIES STAT: {species_stat}")
-                db_species_stats.append(species_stat)
-    
-            summary = {zip(db_species_name, db_species_stats)}
-    
-            return summary
+        return db_predictedtags
 
     @orm.db_session
     def update_recording_path(
