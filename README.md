@@ -3,76 +3,56 @@
 > [!TIP]
 > Read the latest [documentation](https://acoupi.github.io/acoupi/)
 
-## What is acoupi? 
-**acoupi** is an open-source Python software package to facilitate the deployment of bioacoustic classifiers on edge devices like the Raspberry Pi. It includes individual components for audio recordings, audio processing, audio classifications and detections, results communication, and audio files and results management. **Acoupi** integrates and standardises the entire workflow of biacoustic monitoring, combining both autonomous recording and classification units. 
-
+#### Readme Content
+- [What is acoupi?](#what-is-acoupi)
+- [Acoupi software architecture](#acoupi-software-architecture)
+    - [Framework](#acoupi-framework)
+    - [Application](#acoupi-application)
 - [Requirements](#requirements)
-- [What is acoupi? Acoupi software architecture.](#acoupi-software-architecture)
-- [Pre-built AI bioacoustics classifiers](#pre-built-ai-bioacoustics-classifiers)
-- [Features and development](#features)
 - [Installation](#installation)
+- [Pre-built AI Classifiers](#pre-built-ai-bioacoustics-classifiers)
+- [Features](#features)
+
+## What is acoupi? 
+**acoupi** is an open-source Python software package to facilitate the deployment of bioacoustic classifiers on edge devices like the Raspberry Pi. It includes individual components for audio recordings, audio processing, audio classifications and detections, results communication, and audio files and results management. **acoupi** integrates and standardises the entire workflow of biacoustic monitoring, combining both autonomous recording and classification units. The figure below illustrates how **acoupi** software fits in the toolbox of bioacoustic researchers. 
+
+![Figure 1: Overview of where the acoupi software package fits in the toolbox of bioacoustics research](/docs/img/acoupi_software_overview.png)
+*Figure 1: Overview of where the acoupi software package fits in the toolbox 
+of bioacoustics research.*
+
+
+## Acoupi Software Architecture
+Acoupi software is divided into two parts; the code base framework and the running application. The ***acoupi framework*** is organised into a layered architecture that ensures standardisation of data while providing flexibility of configuration. The ***acoupi application*** provides a simple
+command line interface (CLI) allowing users to configure the acoupi framework for deployment. 
+
+### Acoupi Framework
+The **acoupi** framework has been designed to provide maximum flexibility and keep away the internal complexity from a user. The framework is made of four intricate elements, which we call the data schema, components, tasks, and programs. 
+
+The figure below provides a simplified example of an acoupi program. This program illustrates some of the most important data schema, components, and tasks.
+
+![Figure 2: Example of a simplified acoupi program.](/docs/img/acoupi_program_simplified.png)
+*Figure 2: Example of a simplified acoupi program.*
+
+Refer to the [**Developer Guide**](docs/developer_guide/index.md) section of the documentation for full details on each of these elements.
+
+### Acoupi Application
+An acoupi application consists of the full set of code that runs at the deployment stage. This includes a set of scripts made of an acoupi program with user configurations, celery files to organise queues and workers, and bash scripts to start, stop, and reboot the application processes. An acoupi application requires the acoupi package and related dependencies to be installed before a user can configure and run it. The figure below gives an overview of key stages related to the installation, configuration and runtime of an acoupi application.
+
+![Figure 3: Overview of steps to follow to install, configure, and start an acoupi application.](/docs/img/acoupi_installation_steps.png)
+*Figure 3: Overview of steps to follow to install, configure, and start an acoupi application.*
 
 ## Requirements
+Acoupi has been designed to run on single-board computer devices like the RPi. The software has been extensively developed and tested with the RPi 4B. We advise users to select the RPi 4B or a device featuring similar specifications. 
+
+Users should be able to download and test acoupi software on any Linux-based machines with Python version > 3.7 installed. 
 
 - A Linux-based single board computer such as the Raspberry Pi 4B. 
 - A SD Card with 64-bit Lite OS version installed.
-- A USB Microphone such as an AudioMoth, a µMoth an Ultramic 192K.
+- A USB Microphone such as an AudioMoth, a µMoth, an Ultramic 192K/250K.
 
-## Acoupi Software Architecture
-
-**acoupi** is built following a structure of 4 layers: program, tasks, components and data schema. Users of **acoupi** will principally interact with the program layers, while developers will likely interact with the other layers. 
-
-Below we provide an overview of the 4 layers of acoupi. This is not to scare users but mostly to illustrate the modularity and flexibility of around acoupi building blocks. 
-
-![Figure 1: Overview of acoupi layers](/docs/img/acoupi_architecture.png)
-*Figure 1: Overview of acoupi layers*
-
-![Figure 2: Example of Acoupi Flow of Information](/docs/img/acoupi_flowchart_img.png)
-*Figure 2: Example of Acoupi Flow of Information*
-
-Acoupi components form the building blocks of acoupi. Each component has a single responsibility and performs a specific action. 
-
-1. [**RecordingConditions**](src/acoupi/components/recording_conditions.py): Define the specific time that recordings should be made. The class `IsInIntervals` derived from RecordingCondition uses two arguments `START_TIME` and `END_TIME` to specify the recording conditions. The conditions tell the system whether or not to record audio files. 
-1. [**RecordingSchedulers**](src/acoupi/components/recording_schedulers.py): Define how often recordings should be made. The class `IntervalScheduler` derived from RecordingSchedulers uses an argument called `DEFAULT_RECORDING_INTERVAL` to set a time interval in seconds.
-3. [**AudioRecorders**](src/acoupi/components/audio_recorder.py): Define how to record audio files. The class `PyAudioRecorder` derived from AudioRecorder configures the parameters of recordings. It uses multiple arguments such as the recording duration `DURATION`, the sample rate `SAMPLERATE`, the number of audio_channels `AUDIO_CHANNELS`, the device index `DEVICE_INDEX` and the audio chunk length `AUDIO_CHUNK`. 
-4. [**Models**](src/acoupi/components/model_template.py): Define the model that is employed to analyse audio recordings. Here, the class name refers to the bioacoustics model name that detects, classifies or identifies related species in audio recordings. Acoupi comes with two pre-built models [`BatDetect2`](https://github.com/macaodha/batdetect2) for UK Bat species detection and [`BirdNET`](https://github.com/kahst/BirdNET-Lite) for bird species classification. The `Model` class takes an audio recording (the output of the method `record()` from the class `PyAudioRecorder`).
-5. **[ProcessingFilters](/src/acoupi/components/processing_filters.py) & [OutputCleaners](/src/acoupi/components/output_cleaners.py)**: Define the conditions that determine how a recording and its associated detections should be saved such as recording and detections that meet a probability threshold criteria and a specific species. We implemented the classes `ThresholdRecordingFilter` and `ThresholdDetectionFilter`. Both classes require a threshold argument called `DEFAULT_THRESHOLD`. This argument is used to determine whether any detections are found above (return TRUE) or below (return FALSE) the specified threshold.
-6. [**SavingFilters**](/src/acoupi/components/saving_filters.py): Responsible for saving the audio recordings. The SavingFilters class is optional. It allows a user to save audio recording files on an SD Card. The SavingFilters implemented many subclasses to allow for specific use cases. Examples of classes are `Before_DawnDusk`and `After_DawnDusk`, `Detection_Threshold`, `FrequencySchedule`, and `Start_Time` and `End_Time`. The SaveRecordingFilters classes take a `TIMEFORMAT` argument, which specifies the datetime format to use for the file name. 
-
-## Pre-built AI Bioacoustics Classifiers
-
-With acoupi, we aim to facilitate the use and implementation of open-source AI bioacoustics models. We currently provide the configuration for two modelds [BatDetect2]((https://github.com/macaodha/batdetect2) developed by [@macodha and al.](https://doi.org/10.1101/2022.12.14.520490) and [BirdNET-Lite](https://github.com/kahst/BirdNET-Lite) developed by [@kahst and al.](https://github.com/kahst).
-
-### BatDetect2
-
-The [`BatDetect2`](https://github.com/macaodha/batdetect2) AI Detection Model for UK bats species is installed and configured in the [`acoupi_batdetect2`](https://github.com/acoupi/acoupi_batdetect2) GitHub folder. If you wish to use acoupi to record and detect bats in the UK. You can directly install it and configure it using the commands: 
-```
-pip install acoupi_batdetect2
-acoupi setup --program acoupi_batdetect2.program.batdetect2
-```
-
-### BirdNET-Lite
-
-The `BirdNET-Lite` AI Detection Model for UK bat species is installed and configured in the [`acoupi_birdnet`](https://github.com/acoupi/acoupi_birdnet) GitHub folder. If you wish to use acoupi to record and detect bats in the UK. You can directly install it and configure it using the commands: 
-```
-pip install acoupi_batdetect2
-acoupi setup --program acoupi_birdnet.program.birdnet
-```
-
-## Features and development
-**acoupi** builds on other Python packages. The list of the most important packages and their functions is summarised below. For more information about each of them, make sure to check their respective documentation. 
-- [PDM](https://pdm-project.org/2.10/) to manage package dependencies. 
-- [Pydantic](https://docs.pydantic.dev/dev/) for data validation. 
-- [Pytest](https://docs.pytest.org/en/7.4.x/) as a testing framework.
-- [Pony-ORM](https://ponyorm.org/) for databse queries. 
-- [Celery](https://docs.celeryq.dev/en/stable/getting-started/introduction.html) to manage the processing of tasks. 
-- [Jinja](#jinja) for text templating. 
-
-## Acoupi Installation
-
+## Installation
 > [!IMPORTANT]
-> To install one of the acoupi pre-built programs containing either the `BatDetect2` or the `BirdNET-Lite` bioacoustics classifiers, refer to the information in the above section:  [Pre-built AI bioacoustics classifiers](#pre-built-ai-bioacoustics-classifiers).
-
+> To install one of the acoupi pre-built programs containing either the **BatDetect2** or the **BirdNET-Lite** bioacoustics classifiers, refer to the information in the below section: [Pre-built AI bioacoustics classifiers](#pre-built-ai-bioacoustics-classifiers).
 
 To install and use the bare-bone framework of acoupi on your embedded device follow these steps: 
 
@@ -80,7 +60,9 @@ To install and use the bare-bone framework of acoupi on your embedded device fol
 ```
 pip install acoupi
 ```
-**Step 2:** Configure acoupi default program. (*acoupi comes with a test and a default program. The default program is only recording and saving audio files based on the users' settings. Think like something similar to the setup of an AudioMoth*). 
+**Step 2:** Configure acoupi default program. 
+
+(*Note: acoupi comes with a test and a default program. The default program is only recording and saving audio files based on the users' settings. Think like something similar to the setup of an AudioMoth*). 
 ```
 acoupi setup --program `program-name`
 ```
@@ -93,8 +75,38 @@ acoupi setup --program acoupi.programs.custom.acoupi
 acoupi start
 ```
 
->[!TIP]
-> To check what are the available commands for acoupi, enter:
->```
-> acoupi --help
->```
+> [!TIP]
+> To check what are the available commands for acoupi, enter `acoupi --help`.
+
+## Pre-built AI Bioacoustics Classifiers
+
+With acoupi, we aim to facilitate the use and implementation of open-source AI bioacoustics models. We currently provide the configuration for two bioacoustics classifers; the [**BatDetect2**](https://github.com/macaodha/batdetect2) developed by [@macodha and al.](https://doi.org/10.1101/2022.12.14.520490) and the [**BirdNET-Lite**](https://github.com/kahst/BirdNET-Lite) developed by [@kahst and al.](https://github.com/kahst).
+
+### BatDetect2
+
+The BatDetect2 bioacoustics DL model has been trained to detect and classify UK bats species. The [**acoupi_batdetect2**](https://github.com/acoupi/acoupi_batdetect2) repository provides users with a pre-build acoupi program that can be configured and tailored to their use cases of UK Bats monitoring. 
+
+The program can directly be installed and configured by typing these two commands in a CLI: 
+```
+pip install acoupi_batdetect2
+acoupi setup --program acoupi_batdetect2.program
+```
+
+### BirdNET-Lite
+
+The BirdNET-Lite bioacoustics DL model has been trained to detect and classify a large number of bird species. The [**acoupi_birdnet**](https://github.com/acoupi/acoupi_birdnet) repository provides users with a pre-build acoupi program that can be configured and tailored to their use cases of birds monitoring. 
+
+The program can directly be installed and configured by typing these two commands in a CLI: 
+```
+pip install acoupi_birdnet
+acoupi setup --program acoupi_birdnet.program
+```
+
+## Features and development
+**acoupi** builds on other Python packages. The list of the most important packages and their functions is summarised below. For more information about each of them, make sure to check their respective documentation. 
+- [PDM](https://pdm-project.org/2.10/) to manage package dependencies. 
+- [Pydantic](https://docs.pydantic.dev/dev/) for data validation. 
+- [Pytest](https://docs.pytest.org/en/7.4.x/) as a testing framework.
+- [Pony-ORM](https://ponyorm.org/) for databse queries. 
+- [Celery](https://docs.celeryq.dev/en/stable/getting-started/introduction.html) to manage the processing of tasks. 
+- [Jinja](#jinja) for text templating. 
