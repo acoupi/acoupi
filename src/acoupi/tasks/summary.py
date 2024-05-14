@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Callable, Optional, List, TypeVar
+from typing import Callable, TypeVar
 
 from acoupi import data
 from acoupi.components import types
@@ -36,13 +36,15 @@ def generate_summariser_task(
         )
         
         # Create the summary content and message
-        logger.info("Building summary message.")
+        logger.info("-- BUILDING SUMMARY MESSAGE --.")
+
+        timeinterval = dict(start=start_time.isoformat(), end=end_time.isoformat())
         summary_content = summariser.build_summary(summary)
+
         summary_message = message_factory.build_message(
-            timeinterval=data.TimeInterval(start=start_time.time(), end=end_time.time()),
-            content=summary_content,
+            timeinterval=timeinterval,
+            summary_content=summary_content,
         )
-        logger.info(f"Summary Message is: {summary_message}")
 
         # Store Message
         message_store.store_message(summary_message)

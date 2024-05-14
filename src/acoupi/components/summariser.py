@@ -2,11 +2,9 @@
 
 The Summariser is reponsible summarising information related to the deployment of acoupi to a remote server.
 """
-import json
 import numpy as np
 from typing import Dict
 
-from acoupi import data
 from acoupi.components import types
 
 __all__ = [
@@ -32,7 +30,7 @@ class StatisticsDetectionsSummariser(types.Summariser):
         """Build a message from a summary."""
 
         if len(summary) == 0:
-            return data.Message(content=json.dumps({}))
+            return {}
 
         else:
             db_species_name = set(t.tag.value for t in summary)
@@ -56,6 +54,7 @@ class StatisticsDetectionsSummariser(types.Summariser):
                 }
 
         return db_species_stats
+
 
 class ThresholdsDetectionsSummariser(types.Summariser):
     def __init__(
@@ -84,7 +83,7 @@ class ThresholdsDetectionsSummariser(types.Summariser):
         """Build a message from a summary."""
 
         if len(summary) == 0:
-            return data.Message(content=json.dumps({}))
+            return {}
 
         else:
             db_species_name = set(t.tag.value for t in summary)

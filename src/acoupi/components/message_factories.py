@@ -41,11 +41,11 @@ class SummaryMessageBuilder(types.MessageBuilder):
     """
 
     def build_message(
-        self, timeinterval: data.TimeInterval, summary_content: Dict
+        self, timeinterval: Dict, summary_content: Dict
     ) -> data.Message:
         """Build a message from a recording and model outputs."""
         return data.Message(
             content=json.dumps(
-                {"timeinterval": timeinterval, "content": summary_content}
+                {"timeinterval": timeinterval, "summary_content": summary_content}
             )
         )
