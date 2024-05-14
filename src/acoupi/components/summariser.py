@@ -9,8 +9,7 @@ import numpy as np
 from acoupi import data
 from acoupi.components import types
 
-__all__ = ["StatisticsDetectionsSummariser"]
-
+__all__ = ["StatisticsDetectionsSummariser",]
 
 class StatisticsDetectionsSummariser(types.Summariser):
     def __init__(
