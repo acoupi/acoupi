@@ -23,7 +23,7 @@ from acoupi.components.saving_managers import (
     SaveRecordingManager,
 )
 from acoupi.components.stores.sqlite import SqliteStore
-from acoupi.components.summariser import StatisticsDetectionsSummariser
+from acoupi.components.summariser import StatisticsDetectionsSummariser, ThresholdsDetectionsSummariser
 
 __all__ = [
     "After_DawnDuskTimeInterval",
@@ -45,6 +45,7 @@ __all__ = [
     "SqliteMessageStore",
     "SqliteStore",
     "StatisticsDetectionsSummariser",
+    "ThresholdsDetectionsSummariser",
     "SummaryMessageBuilder",
     "ThresholdDetectionFilter",
     "ThresholdRecordingFilter",
