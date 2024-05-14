@@ -2,7 +2,6 @@ import datetime
 import logging
 from typing import Callable, TypeVar
 
-from acoupi import data
 from acoupi.components import types
 
 logger = logging.getLogger(__name__)
@@ -26,7 +25,6 @@ def generate_summariser_task(
         start_time = end_time - datetime.timedelta(
             seconds=summariser.interval
         )
-        logger.info(f"SUMMARY INTERVAL START: {start_time} and END: {end_time}")
 
         # Get Summary
         logger.info(" -- STORE GET SUMMARY -- ")
@@ -34,12 +32,15 @@ def generate_summariser_task(
             starttime=start_time,
             endtime=end_time,
         )
-        
+
         # Create the summary content and message
-        logger.info("-- BUILDING SUMMARY MESSAGE --.")
+        logger.info("-- BUILDING SUMMARY MESSAGE --")
 
         timeinterval = dict(start=start_time.isoformat(), end=end_time.isoformat())
         summary_content = summariser.build_summary(summary)
+
+        logger.info(f"TIMEINTERVAL: {timeinterval, type(interval)}")
+        logger.info(f"SUMMARY CONTENT: {summary_content, type(summary_content)}")
 
         summary_message = message_factory.build_message(
             timeinterval=timeinterval,
