@@ -261,7 +261,12 @@ class MessageBuilder(ABC):
     """
 
     @abstractmethod
-    def build_message(self,) -> Message:
+    def build_message(
+        self,
+        model_output: Optional[ModelOutput] = None,
+        timeinterval: Optional[Dict] = None,
+        summary_content: Optional[Dict] = None
+    ) -> Message:
         """Build a message from the model output."""
 
 
