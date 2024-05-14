@@ -1,7 +1,7 @@
 """Acoupi components."""
 
 from acoupi.components.audio_recorder import PyAudioRecorder, MicrophoneConfig
-from acoupi.components.message_factories import FullModelOutputMessageBuilder
+from acoupi.components.message_factories import FullModelOutputMessageBuilder, SummaryMessageBuilder
 from acoupi.components.message_stores.sqlite import SqliteMessageStore
 from acoupi.components.messengers import HTTPMessenger, MQTTMessenger
 from acoupi.components.output_cleaners import ThresholdDetectionFilter
@@ -45,6 +45,7 @@ __all__ = [
     "SqliteMessageStore",
     "SqliteStore",
     "StatisticsDetectionsSummariser",
+    "SummaryMessageBuilder",
     "ThresholdDetectionFilter",
     "ThresholdRecordingFilter",
 ]

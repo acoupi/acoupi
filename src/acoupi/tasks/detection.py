@@ -15,7 +15,7 @@ def generate_detection_task(
     logger: logging.Logger = logger,
     output_cleaners: Optional[List[types.ModelOutputCleaner]] = None,
     processing_filters: Optional[List[types.ProcessingFilter]] = None,
-    message_factories: Optional[List[types.ModelOutputMessageBuilder]] = None,
+    message_factories: Optional[List[types.MessageBuilder]] = None,
 ) -> Callable[[data.Recording], None]:
     """Generate a detection task."""
 

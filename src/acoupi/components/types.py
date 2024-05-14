@@ -3,7 +3,7 @@
 import datetime
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Dict, Optional, Tuple
 from uuid import UUID
 
 from acoupi.data import Deployment, Message, ModelOutput, Recording, Response
@@ -253,7 +253,7 @@ class Store(ABC):
         """Update the path of the recording."""
 
 
-class ModelOutputMessageBuilder(ABC):
+class MessageBuilder(ABC):
     """Build a message from the model output.
 
     The ModelOutputMessageBuilder is responsible for building a message
@@ -291,7 +291,7 @@ class Summariser(ABC):
     def build_summary(
         self,
         summary: List,
-    ) -> Message:
+    ) -> Dict:
         """Send the message to a remote server."""
 
 
