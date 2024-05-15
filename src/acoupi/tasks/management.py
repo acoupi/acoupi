@@ -48,13 +48,17 @@ def generate_file_management_task(
                     recording.id,
                 )
                 continue
-            
+
             if len(model_outputs) == 0:
-                logger.info(f"RECORDING HAS NOT BEEN PROCESSED: {recording.path}")
+                logger.info(
+                    f"RECORDING HAS NOT BEEN PROCESSED: {recording.path}"
+                )
                 continue
 
             else:
-                new_path = file_manager.save_recording(recording, model_outputs=model_outputs)
+                new_path = file_manager.save_recording(
+                    recording, model_outputs=model_outputs
+                )
                 logger.info(f"RECORDING HAS BEEN MOVED: {new_path}")
                 store.update_recording_path(recording, new_path)
 

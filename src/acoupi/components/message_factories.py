@@ -1,4 +1,5 @@
 """Message factories for acoupi."""
+
 import json
 from typing import Dict
 
@@ -46,6 +47,9 @@ class SummaryMessageBuilder(types.MessageBuilder):
         """Build a message from a recording and model outputs."""
         return data.Message(
             content=json.dumps(
-                {"timeinterval": timeinterval, "summary_content": summary_content}
+                {
+                    "timeinterval": timeinterval,
+                    "summary_content": summary_content,
+                }
             )
         )

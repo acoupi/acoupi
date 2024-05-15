@@ -3,6 +3,7 @@
 This module contains utility functions for acoupi programs
 such as loading programs and getting celery apps from programs.
 """
+
 import datetime
 from pathlib import Path
 from typing import Optional

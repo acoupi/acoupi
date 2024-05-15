@@ -2,7 +2,6 @@
 
 import datetime
 import json
-import numpy as np
 from pathlib import Path
 from typing import List, Optional, Tuple
 from uuid import UUID
@@ -214,7 +213,6 @@ class SqliteStore(types.Store):
 
         return _to_recordings_and_outputs(db_recordings)
 
-
     @orm.db_session
     def get_modeloutputs_by_datetime(
         self,
@@ -231,7 +229,11 @@ class SqliteStore(types.Store):
             List of model_outputs matching the created_on datetime.
         """
         db_model_outputs = (
-            orm.select(mo for mo in self.models.ModelOutput if mo.created_on >= start_time)
+            orm.select(
+                mo
+                for mo in self.models.ModelOutput
+                if mo.created_on >= start_time
+            )
             .order_by(orm.desc(self.models.ModelOutput.created_on))
             .prefetch(
                 self.models.ModelOutput.created_on,
@@ -253,7 +255,7 @@ class SqliteStore(types.Store):
         """Get a list of detections from the store based on their model_output ids."""
         ids_uuid = [id for id in modeloutput_ids]
         db_detections = orm.select(
-            d for d in self.models.Detection if d.model_output.id in ids_uuid 
+            d for d in self.models.Detection if d.model_output.id in ids_uuid
         ).prefetch(
             self.models.Detection.tags,
         )
@@ -287,7 +289,6 @@ class SqliteStore(types.Store):
         if not len(db_detections) != 0:
             return []
         else:
-
             db_predictedtags = self.get_predictedtags_by_id(
                 [detection.id for detection in db_detections]
             )
@@ -453,6 +454,7 @@ def _to_recording(db_recording: db_types.Recording) -> data.Recording:
         path=None if db_recording.path is None else Path(db_recording.path),
     )
 
+
 def _to_predictedtag(db_tag: db_types.PredictedTag) -> data.PredictedTag:
     return data.PredictedTag(
         tag=data.Tag(
@@ -461,6 +463,7 @@ def _to_predictedtag(db_tag: db_types.PredictedTag) -> data.PredictedTag:
         ),
         classification_probability=db_tag.classification_probability,
     )
+
 
 def _to_detection(db_detection: db_types.Detection) -> data.Detection:
     location = (

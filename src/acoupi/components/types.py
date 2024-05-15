@@ -265,7 +265,7 @@ class MessageBuilder(ABC):
         self,
         model_output: Optional[ModelOutput] = None,
         timeinterval: Optional[Dict] = None,
-        summary_content: Optional[Dict] = None
+        summary_content: Optional[Dict] = None,
     ) -> Message:
         """Build a message from the model output."""
 

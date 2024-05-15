@@ -20,11 +20,8 @@ def generate_summariser_task(
     """Generate a summariser task."""
 
     def summary_task() -> None:
-
         end_time = datetime.datetime.now()
-        start_time = end_time - datetime.timedelta(
-            seconds=summariser.interval
-        )
+        start_time = end_time - datetime.timedelta(seconds=summariser.interval)
 
         # Get Summary
         logger.info(" -- STORE GET SUMMARY -- ")
@@ -36,11 +33,15 @@ def generate_summariser_task(
         # Create the summary content and message
         logger.info("-- BUILDING SUMMARY MESSAGE --")
 
-        timeinterval = dict(start=start_time.isoformat(), end=end_time.isoformat())
+        timeinterval = dict(
+            start=start_time.isoformat(), end=end_time.isoformat()
+        )
         summary_content = summariser.build_summary(summary)
 
         logger.info(f"TIMEINTERVAL: {timeinterval, type(timeinterval)}")
-        logger.info(f"SUMMARY CONTENT: {summary_content, type(summary_content)}")
+        logger.info(
+            f"SUMMARY CONTENT: {summary_content, type(summary_content)}"
+        )
 
         summary_message = message_factory.build_message(
             timeinterval=timeinterval,

@@ -1,4 +1,5 @@
 """Acoupi detection and classification Test Model."""
+
 from acoupi import data
 from acoupi.components import types
 

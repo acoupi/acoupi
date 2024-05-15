@@ -2,7 +2,8 @@
 
 The Summariser is reponsible summarising information related to the deployment of acoupi to a remote server.
 """
-import numpy as np
+
+from statistics import mean
 from typing import Dict
 
 from acoupi.components import types
@@ -11,6 +12,7 @@ __all__ = [
     "StatisticsDetectionsSummariser",
     "ThresholdsDetectionsSummariser",
 ]
+
 
 class StatisticsDetectionsSummariser(types.Summariser):
     def __init__(
@@ -37,12 +39,16 @@ class StatisticsDetectionsSummariser(types.Summariser):
             db_species_stats = {}
 
             for species_name in db_species_name:
-                species_probabilities = [t.classification_probability for t in summary if t.tag.value == species_name]
+                species_probabilities = [
+                    t.classification_probability
+                    for t in summary
+                    if t.tag.value == species_name
+                ]
 
                 stats = {
-                    "mean": np.round(np.mean(species_probabilities),3),
-                    "min": np.min(species_probabilities),
-                    "max": np.max(species_probabilities),
+                    "mean": round(mean(species_probabilities), 3),
+                    "min": min(species_probabilities),
+                    "max": max(species_probabilities),
                     "count": len(species_probabilities),
                 }
 
@@ -120,8 +126,8 @@ class ThresholdsDetectionsSummariser(types.Summariser):
                             if self.mid_band_threshold < d
                         ]
                     ),
-                    "mean_low_threshold": np.round(
-                        np.mean(
+                    "mean_low_threshold": round(
+                        mean(
                             [
                                 d
                                 for d in species_probabilities
@@ -130,8 +136,8 @@ class ThresholdsDetectionsSummariser(types.Summariser):
                         ),
                         3,
                     ),
-                    "mean_mid_threshold": np.round(
-                        np.mean(
+                    "mean_mid_threshold": round(
+                        mean(
                             [
                                 d
                                 for d in species_probabilities
@@ -142,8 +148,8 @@ class ThresholdsDetectionsSummariser(types.Summariser):
                         ),
                         3,
                     ),
-                    "mean_high_threshold": np.round(
-                        np.mean(
+                    "mean_high_threshold": round(
+                        mean(
                             [
                                 d
                                 for d in species_probabilities

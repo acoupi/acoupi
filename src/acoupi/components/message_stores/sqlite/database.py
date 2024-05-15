@@ -1,4 +1,5 @@
 """Database models for the acoupi database."""
+
 from datetime import datetime
 from uuid import UUID
 

@@ -3,6 +3,7 @@
 This is the most basic acoupi program. It only records audio files and
 does not do any processing and messanging.
 """
+
 import datetime
 from pathlib import Path
 from typing import Optional

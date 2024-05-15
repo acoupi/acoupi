@@ -1,4 +1,5 @@
 """Module to Clean the Database."""
+
 from pathlib import Path
 
 from pony import orm

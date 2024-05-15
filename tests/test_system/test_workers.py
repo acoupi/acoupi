@@ -35,6 +35,7 @@ def test_write_workers_start_script_with_one_worker(settings: Settings):
     multi \
     start \
     acoupi \
+    --pool=eventlet \
     --loglevel=INFO \
     --pidfile={settings.run_dir}/%n.pid \
     --logfile={settings.log_dir}/%n%I.log
@@ -72,6 +73,7 @@ def test_write_workers_start_script_for_worker_with_queues(
     start \
     acoupi \
     -Q:acoupi default,celery \
+    --pool=eventlet \
     --loglevel=INFO \
     --pidfile={settings.run_dir}/%n.pid \
     --logfile={settings.log_dir}/%n%I.log
@@ -109,6 +111,7 @@ def test_write_workers_start_script_with_concurrency(
     start \
     acoupi \
     -c:acoupi 2 \
+    --pool=eventlet \
     --loglevel=INFO \
     --pidfile={settings.run_dir}/%n.pid \
     --logfile={settings.log_dir}/%n%I.log
@@ -151,6 +154,7 @@ def test_write_start_script_with_multiple_workers(
     -c:worker2 2 \
     worker3 \
     -Q:worker3 queue \
+    --pool=eventlet \
     --loglevel=INFO \
     --pidfile={settings.run_dir}/%n.pid \
     --logfile={settings.log_dir}/%n%I.log

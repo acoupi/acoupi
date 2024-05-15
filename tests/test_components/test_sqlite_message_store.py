@@ -1,4 +1,5 @@
 """Test the SQLite Message store."""
+
 import sqlite3
 from pathlib import Path
 from typing import Generator

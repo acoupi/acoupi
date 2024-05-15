@@ -1,4 +1,5 @@
 """Test suite for the setup command."""
+
 import pytest
 from click.testing import CliRunner
 

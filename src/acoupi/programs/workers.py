@@ -10,6 +10,7 @@ The AcoupiWorker is implemented as a Celery worker, which listens to designated
 queues for task execution and coordination.
 
 """
+
 from typing import List, Optional
 
 from pydantic import BaseModel, Field, field_validator

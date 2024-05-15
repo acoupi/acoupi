@@ -1,4 +1,5 @@
 """Database models for the sqlite store."""
+
 from datetime import datetime
 from uuid import UUID
 
