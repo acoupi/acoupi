@@ -10,6 +10,7 @@ RecordingCondition. The class should implement the should_record method,
 which takes a datetime.datetime object and returns a boolean indicating if a
 recording should be made at that time.
 """
+
 import datetime
 from typing import List
 

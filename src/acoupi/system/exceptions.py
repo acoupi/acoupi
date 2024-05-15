@@ -1,4 +1,5 @@
 """Custom Exceptions for Acoupi system."""
+
 from typing import Optional
 
 __all__ = [

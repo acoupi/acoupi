@@ -1,4 +1,5 @@
 """System functions for managing Acoupi programs."""
+
 import inspect
 from importlib import import_module
 from typing import Type

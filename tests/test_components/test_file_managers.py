@@ -1,4 +1,5 @@
 """Test Acoupi file managers."""
+
 import datetime
 from pathlib import Path
 

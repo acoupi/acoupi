@@ -1,4 +1,5 @@
 """System functions for managing celery apps."""
+
 from celery import Celery
 
 from acoupi.system.constants import Settings

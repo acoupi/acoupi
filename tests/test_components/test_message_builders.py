@@ -1,4 +1,5 @@
 """Test suite for message builder components."""
+
 import datetime
 from pathlib import Path
 
@@ -21,15 +22,15 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
     tags=[
         data.PredictedTag(
             tag=data.Tag(key="species", value="Myotis myotis"),
-            probability=0.9,
+            score=0.9,
         ),
         data.PredictedTag(
             tag=data.Tag(key="species", value="Eptesicus serotinus"),
-            probability=0.7,
+            score=0.7,
         ),
         data.PredictedTag(
             tag=data.Tag(key="antropophony", value="Human voice"),
-            probability=0.4,
+            score=0.4,
         ),
     ],
     detections=[
@@ -37,15 +38,15 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             location=data.BoundingBox(
                 coordinates=(0.1, 15_000, 0.2, 30_000),
             ),
-            probability=0.9,
+            detection_probability=0.9,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Myotis myotis"),
-                    probability=0.6,
+                    score=0.6,
                 ),
                 data.PredictedTag(
                     tag=data.Tag(key="event", value="Echolocation"),
-                    probability=0.8,
+                    score=0.8,
                 ),
             ],
         ),
@@ -53,15 +54,15 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             location=data.BoundingBox(
                 coordinates=(0.5, 19_000, 0.7, 38_000),
             ),
-            probability=0.6,
+            detection_probability=0.6,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Myotis myotis"),
-                    probability=0.5,
+                    score=0.5,
                 ),
                 data.PredictedTag(
                     tag=data.Tag(key="event", value="Feeding buzz"),
-                    probability=0.4,
+                    score=0.4,
                 ),
             ],
         ),
@@ -69,11 +70,11 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             location=data.BoundingBox(
                 coordinates=(0.9, 24_000, 0.95, 41_000),
             ),
-            probability=0.4,
+            detection_probability=0.4,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Eptesicus serotinus"),
-                    probability=0.7,
+                    score=0.7,
                 ),
             ],
         ),

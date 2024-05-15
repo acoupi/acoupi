@@ -37,22 +37,18 @@ lint/pyright:
 	$(ENV_PREFIX)pyright $(SRC_DIR)
 
 lint/ruff:
-	$(ENV_PREFIX)ruff $(SRC_DIR)
+	$(ENV_PREFIX)ruff check $(SRC_DIR)
 
-lint/black:
-	$(ENV_PREFIX)black --check $(SRC_DIR)
-
-lint: lint/pyright lint/ruff lint/black
+lint: lint/pyright lint/ruff
 
 test:
 	$(ENV_PREFIX)pytest --verbose --color=yes $(TEST_DIR)
 
 format:
-	$(ENV_PREFIX)black $(SRC_DIR) $(TEST_DIR)
-	$(ENV_PREFIX)isort $(SRC_DIR) $(TEST_DIR)
+	$(ENV_PREFIX)ruff format $(SRC_DIR) $(TEST_DIR)
 
 clean-docs:
-	rm -rf $(DOCS_BUILD_DIR)
+	$(ENV_PREFIX)rm -rf $(DOCS_BUILD_DIR)
 
 docs: clean-docs
 	$(ENV_PREFIX)mkdocs build --clean

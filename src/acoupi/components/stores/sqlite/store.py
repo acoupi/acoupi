@@ -1,4 +1,5 @@
 """Module defining the SqliteStore class."""
+
 import datetime
 import json
 from pathlib import Path
@@ -131,7 +132,7 @@ class SqliteStore(types.Store):
             db_model_output.tags.create(
                 key=tag.tag.key,
                 value=tag.tag.value,
-                probability=tag.probability,
+                classification_probability=tag.classification_probability,
             )
 
         for detection in model_output.detections:
@@ -143,14 +144,14 @@ class SqliteStore(types.Store):
             db_detection = db_model_output.detections.create(
                 id=detection.id,
                 location=location,
-                probability=detection.probability,
+                detection_probability=detection.detection_probability,
             )
 
             for tag in detection.tags:
                 db_detection.tags.create(
                     key=tag.tag.key,
                     value=tag.tag.value,
-                    probability=tag.probability,
+                    classification_probability=tag.classification_probability,
                 )
 
         orm.commit()
@@ -211,6 +212,152 @@ class SqliteStore(types.Store):
         )
 
         return _to_recordings_and_outputs(db_recordings)
+
+    @orm.db_session
+    def get_model_outputs(
+        self,
+        after: Optional[datetime.datetime] = None,
+        before: Optional[datetime.datetime] = None,
+        ids: Optional[List[UUID]] = None,
+        recording_ids: Optional[List[UUID]] = None,
+        model_names: Optional[List[str]] = None,
+        limit: Optional[int] = None,
+    ) -> List[data.ModelOutput]:
+        """Get a list of model outputs from the store by their id.
+
+        Args:
+            start_time: The time to start the search from.
+            end_time: The time to end the search at.
+
+        Returns:
+            List of model_outputs matching the created_on datetime.
+        """
+        query = orm.select(mo for mo in self.models.ModelOutput)
+
+        if after is not None:
+            query = query.filter(lambda mo: mo.created_on >= after)
+
+        if before is not None:
+            query = query.filter(lambda mo: mo.created_on <= before)
+
+        if ids is not None:
+            query = query.filter(lambda mo: mo.id in ids)
+
+        if recording_ids is not None:
+            query = query.filter(lambda mo: mo.recording.id in recording_ids)
+
+        if model_names is not None:
+            query = query.filter(lambda mo: mo.model_name in model_names)
+
+        query = query.order_by(
+            orm.desc(self.models.ModelOutput.created_on)
+        ).prefetch(
+            self.models.ModelOutput.tags,
+            self.models.ModelOutput.detections,
+            self.models.Detection.tags,
+        )
+
+        if limit is not None:
+            query = query[:limit]
+
+        return [_to_model_output(db_model_output) for db_model_output in query]
+
+    @orm.db_session
+    def get_detections(
+        self,
+        ids: Optional[List[UUID]] = None,
+        model_output_ids: Optional[List[UUID]] = None,
+        probability_gt: Optional[float] = None,
+        probability_lt: Optional[float] = None,
+        model_names: Optional[List[str]] = None,
+        after: Optional[datetime.datetime] = None,
+        before: Optional[datetime.datetime] = None,
+    ) -> List[data.Detection]:
+        """Get a list of detections from the store based on their model_output ids."""
+        query = orm.select(d for d in self.models.Detection)
+
+        if ids:
+            query = query.filter(lambda d: d.id in ids)
+
+        if model_output_ids:
+            query = query.filter(
+                lambda d: d.model_output.id in model_output_ids
+            )
+
+        if probability_gt is not None:
+            query = query.filter(
+                lambda d: d.detection_probability > probability_gt
+            )
+
+        if probability_lt is not None:
+            query = query.filter(
+                lambda d: d.detection_probability < probability_lt
+            )
+
+        if after is not None:
+            query = query.filter(lambda d: d.model_output.created_on >= after)
+
+        if before is not None:
+            query = query.filter(lambda d: d.model_output.created_on <= before)
+
+        if model_names:
+            query = query.filter(
+                lambda d: d.model_output.model_name in model_names
+            )
+
+        query = query.prefetch(self.models.Detection.tags)
+
+        return [_to_detection(db_detection) for db_detection in query]
+
+    @orm.db_session
+    def get_predicted_tags(
+        self,
+        detection_ids: Optional[List[UUID]] = None,
+        after: Optional[datetime.datetime] = None,
+        before: Optional[datetime.datetime] = None,
+        probability_gt: Optional[float] = None,
+        probability_lt: Optional[float] = None,
+        keys: Optional[List[str]] = None,
+        values: Optional[List[str]] = None,
+    ) -> List[data.PredictedTag]:
+        """Get a list of predicted tags from the store based on their detection ids."""
+        query = orm.select(t for t in self.models.PredictedTag)
+
+        if detection_ids:
+            query = query.filter(
+                lambda t: t.detection is not None
+                and t.detection.id in detection_ids
+            )
+
+        if after is not None:
+            query = query.filter(
+                lambda t: t.detection is not None
+                and t.detection.model_output.created_on >= after
+            )
+
+        if before is not None:
+            query = query.filter(
+                lambda t: t.detection is not None
+                and t.detection.model_output.created_on <= before
+            )
+
+        if probability_gt is not None:
+            query = query.filter(
+                lambda t: t.classification_probability > probability_gt
+            )
+
+        if probability_lt is not None:
+            query = query.filter(
+                lambda t: t.classification_probability < probability_lt
+            )
+
+        if keys:
+            query = query.filter(lambda t: t.key in keys)
+
+        if values:
+            query = query.filter(lambda t: t.value in values)
+
+        return [_to_predictedtag(db_tag) for db_tag in query]
 
     @orm.db_session
     def update_recording_path(
@@ -372,6 +519,16 @@ def _to_recording(db_recording: db_types.Recording) -> data.Recording:
     )
 
 
+def _to_predictedtag(db_tag: db_types.PredictedTag) -> data.PredictedTag:
+    return data.PredictedTag(
+        tag=data.Tag(
+            key=db_tag.key,
+            value=db_tag.value,
+        ),
+        classification_probability=db_tag.classification_probability,
+    )
+
+
 def _to_detection(db_detection: db_types.Detection) -> data.Detection:
     location = (
         None
@@ -381,14 +538,14 @@ def _to_detection(db_detection: db_types.Detection) -> data.Detection:
     return data.Detection(
         id=db_detection.id,
         location=location,
-        probability=db_detection.probability,
+        detection_probability=db_detection.detection_probability,
         tags=[
             data.PredictedTag(
                 tag=data.Tag(
                     key=db_tag.key,
                     value=db_tag.value,
                 ),
-                probability=db_tag.probability,
+                classification_probability=db_tag.classification_probability,
             )
             for db_tag in db_detection.tags
         ],
@@ -410,7 +567,7 @@ def _to_model_output(
                     key=db_tag.key,
                     value=db_tag.value,
                 ),
-                probability=db_tag.probability,
+                classification_probability=db_tag.classification_probability,
             )
             for db_tag in db_model_output.tags
         ],

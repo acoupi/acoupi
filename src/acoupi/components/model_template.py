@@ -1,4 +1,5 @@
 """Acoupi detection and classification Test Model."""
+
 from acoupi import data
 from acoupi.components import types
 
@@ -17,7 +18,7 @@ class TestModel(types.Model):
 
         detections = [
             data.Detection(
-                probability=0.9,
+                detection_probability=0.9,
                 location=data.BoundingBox.from_coordinates(
                     start_time=0,
                     low_freq=4000,
@@ -30,7 +31,7 @@ class TestModel(types.Model):
                             key="species",
                             value="scientific_name",
                         ),
-                        probability=0.9,
+                        classification_probability=0.9,
                     ),
                 ],
             )

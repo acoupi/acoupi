@@ -1,4 +1,5 @@
 """Jinja2 environment for rendering templates."""
+
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 __all__ = [

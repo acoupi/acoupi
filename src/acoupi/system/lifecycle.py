@@ -1,4 +1,5 @@
 """System functions for managing Acoupi programs."""
+
 from typing import List, Optional
 
 from acoupi.system.configs import CeleryConfig, write_config

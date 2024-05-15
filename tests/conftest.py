@@ -3,6 +3,7 @@
 This file is automatically loaded by pytest when running tests.
 It contains fixtures that are can be used in multiple test files.
 """
+
 import datetime as dt
 from pathlib import Path
 
@@ -94,24 +95,26 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
         recording=recording,
         tags=[
             data.PredictedTag(
-                tag=data.Tag(key="test", value="value1"), probability=0.8
+                tag=data.Tag(key="test", value="value1"),
+                score=0.8,
             ),
             data.PredictedTag(
-                tag=data.Tag(key="test", value="value2"), probability=0.8
+                tag=data.Tag(key="test", value="value2"),
+                score=0.8,
             ),
         ],
         detections=[
             data.Detection(
                 location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
-                probability=0.6,
+                detection_probability=0.6,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="test2", value="value3"),
-                        probability=0.3,
+                        score=0.3,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="test", value="value1"),
-                        probability=0.2,
+                        score=0.2,
                     ),
                 ],
             )

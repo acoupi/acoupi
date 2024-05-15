@@ -5,11 +5,12 @@ This is useful for example if you want to record at a constant interval, or if
 you want to record at a variable interval, such as every 10 minutes during the
 day and every 30 minutes at night.
 
-Recording schedulers are implemented as classes that inherit from 
-RecordingScheduler. The class should implement the time_until_next_recording 
-method, which returns the time in seconds until the next recording should be 
+Recording schedulers are implemented as classes that inherit from
+RecordingScheduler. The class should implement the time_until_next_recording
+method, which returns the time in seconds until the next recording should be
 made.
 """
+
 import datetime
 from typing import Optional
 

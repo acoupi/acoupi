@@ -33,6 +33,27 @@ acoupi = "acoupi.cli:acoupi"
 requires = ["pdm-pep517>=1.0"]
 build-backend = "pdm.pep517.api"
 
+[tool]
+rye = { dev-dependencies = [
+    "pytest>=7.4.4",
+    "pony-stubs>=0.5.2",
+    "coverage[toml]>=7.2.2",
+    "sphinx>=5.3.0",
+    "furo>=2023.3.27",
+    "sphinx-copybutton>=0.5.1",
+    "sphinx-autobuild>=2021.3.14",
+    "pytest-httpserver>=1.0.6",
+    "black>=23.3.0",
+    "pyright>=1.1.337",
+    "ruff>=0.1.6",
+    "isort>=5.11.5",
+    "mkdocs>=1.5.3",
+    "mkdocs-material>=9.2.7",
+    "mkdocstrings[python]>=0.22.0",
+    "pytest-celery>=0.0.0",
+    "flower>=2.0.1",
+] }
+
 [tool.black]
 line-length = 79
 

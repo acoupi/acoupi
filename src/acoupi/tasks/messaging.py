@@ -10,7 +10,7 @@ logger.setLevel(logging.INFO)
 def generate_send_data_task(
     message_store: types.MessageStore,
     messenger: types.Messenger,
-    logger: logging.Logger = logger, 
+    logger: logging.Logger = logger,
 ) -> Callable[[], None]:
     """Build a process to send data to a remote server.
 
@@ -30,7 +30,7 @@ def generate_send_data_task(
     Returns:
         A function that can be used to start the process.
     """
-    
+
     def send_data_task() -> None:
         "Send Messages."
         messages = message_store.get_unsent_messages()
@@ -40,13 +40,11 @@ def generate_send_data_task(
             logger.info(f"SENDING MESSAGE: {message.content}")
 
             if message.content is None:
-                logger.info(f"MESSAGE IS EMPTY")
+                logger.info("MESSAGE IS EMPTY")
                 continue
 
-            else:
-                response = messenger.send_message(message)
-                logger.info(f"RESPONSE STATUS: {response.status}")
-                message_store.store_response(response)
+            response = messenger.send_message(message)
+            logger.info(f"RESPONSE STATUS: {response.status}")
+            message_store.store_response(response)
 
     return send_data_task
-

@@ -21,7 +21,7 @@ def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
         samplerate=samplerate,
         audio_channels=audio_channels,
         device_name=device_name,
-        chunksize=4096,
+        chunksize=8192,
         audio_dir=tmp_path,
     )
 
@@ -32,7 +32,7 @@ def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
     assert recording.duration == 0.1
     assert recording.samplerate == samplerate
     assert recording.audio_channels == audio_channels
-    assert recording.chunksize == 4096
+    assert recording.chunksize == 8192
     assert recording.path is not None
     assert recording.path.exists()
 

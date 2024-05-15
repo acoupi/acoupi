@@ -1,4 +1,5 @@
 """Definition of what a program is."""
+
 import datetime
 import logging
 from abc import ABC, abstractmethod
