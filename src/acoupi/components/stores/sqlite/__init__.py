@@ -55,6 +55,7 @@ Example:
     >>> store.store_detections(recording, [detection])
 
 """
+
 # TODO: Update sqlite store documentation
 from acoupi.components.stores.sqlite.store import SqliteStore
 

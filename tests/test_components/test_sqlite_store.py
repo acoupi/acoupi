@@ -1,4 +1,5 @@
 """Test the SQLite store."""
+
 import datetime
 import sqlite3
 from pathlib import Path

@@ -14,6 +14,7 @@ recording should be processed by the model.
 Keep in mind that the should_process_recording method is called for every
 recording, so it should be as efficient as possible.
 """
+
 from acoupi.components.types import ProcessingFilter, Recording
 
 __all__ = [

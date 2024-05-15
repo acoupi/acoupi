@@ -1,10 +1,11 @@
 """Messengers for the acoupi package."""
+
 import datetime
 import json
 from typing import Optional
-import logging
 
 import paho.mqtt.client as mqtt
+from paho.mqtt.enums import CallbackAPIVersion
 import requests
 
 from acoupi import data
@@ -14,6 +15,7 @@ __all__ = [
     "MQTTMessenger",
     "HTTPMessenger",
 ]
+
 
 class MQTTMessenger(types.Messenger):
     """Messenger that sends messages via MQTT."""
@@ -40,43 +42,39 @@ class MQTTMessenger(types.Messenger):
         """Initialize the MQTT messenger."""
         self.topic = topic
         self.timeout = timeout
-        self.client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2, client_id=clientid)
+        self.client = mqtt.Client(
+            callback_api_version=CallbackAPIVersion.VERSION2,
+            client_id=clientid,
+        )
         self.client.username_pw_set(username, password)
         self.client.connect(host, port=port)
 
     def send_message(self, message: data.Message) -> data.Response:
         """Send a recording message."""
-        status = data.ResponseStatus.SUCCESS 
-        
+        status = data.ResponseStatus.SUCCESS
+
+        if not self.client.is_connected():
+            self.client.reconnect()
+
         try:
-            if not self.client.is_connected():
-                self.client.reconnect()
-                response = self.client.publish(
-                    topic = self.topic,
-                    payload=message.content,
-                )
-                response.wait_for_publish(timeout=5)
-            
-                if response[0] != 0:
-                    status = data.ResponseStatus.ERROR
-                    print(f"Failed to publish message. MQTT error code: {response[0]}")
+            response = self.client.publish(
+                topic=self.topic,
+                payload=message.content,
+            )
+            response.wait_for_publish(timeout=5)
 
-                elif len(message.content) > self.max_payload_size: 
-                    status = data.ResponseStatus.WARNING  # Or ERROR if preferred
-                    print(f"Message payload exceeds the maximum size ({self.max_payload_size} bytes)")
+            if response[0] != 0:
+                status = data.ResponseStatus.ERROR
 
-        except ValueError as e:
+        except ValueError:
             status = data.ResponseStatus.ERROR
-            print(f"Invalid message payload: {e}")
-        except RuntimeError as e:
+        except RuntimeError:
             status = data.ResponseStatus.FAILED
-            print(f"Critical MQTT error: {e}")  # Log exception details
-        except Exception as e:  # Catch-all for unexpected errors
+        except Exception:  # Catch-all for unexpected errors
             status = data.ResponseStatus.FAILED
-            print(f"Unhandled error during message sending: {e}")
 
         received_on = datetime.datetime.now()
-        
+
         return data.Response(
             message=message,
             status=status,

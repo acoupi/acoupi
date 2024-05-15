@@ -1,11 +1,18 @@
 """This module contains the types used by the aucupi."""
+
+import sys
 import datetime
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Generic
 from uuid import UUID
 
 from acoupi.data import Deployment, Message, ModelOutput, Recording, Response
+
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
 
 
 class RecordingScheduler(ABC):
@@ -26,6 +33,29 @@ class RecordingScheduler(ABC):
 
         Args:
             time: The time to use for determining the next recording.
+                Defaults to None.
+        """
+
+
+class Scheduler(ABC):
+    """Manage time between repetitive actions.
+
+    The Scheduler responsible for determining the interval between
+    two actions such as the time between recordings, or the time between
+    creating messages to be sent to a remote server.
+    """
+
+    @abstractmethod
+    def waiting_time(
+        self,
+        time: Optional[datetime.datetime] = None,
+    ) -> float:
+        """Return the number of seconds until the next action.
+
+        This should return 0 if something should be done immediately.
+
+        Args:
+            time: The time to use for determining the next repetitive action.
                 Defaults to None.
         """
 
@@ -229,34 +259,34 @@ class Store(ABC):
         """Update the path of the recording."""
 
 
-class ModelOutputMessageBuilder(ABC):
-    """Build a message from the model output.
+P = ParamSpec("P")
 
-    The ModelOutputMessageBuilder is responsible for building a message
-    from the model output.
-    """
+
+class MessageBuilder(ABC, Generic[P]):
+    """Build a message from the model output."""
 
     @abstractmethod
     def build_message(
         self,
-        model_output: ModelOutput,
+        *args: P.args,
+        **kwargs: P.kwargs,
     ) -> Message:
         """Build a message from the model output."""
 
 
-class RecordingMessageBuilder(ABC):
-    """Build a message from the recording.
+class Summariser(ABC):
+    """Summarise model outputs.
 
-    The RecordingMessageBuilder is responsible for building a message
-    from the recording.
+    The Summariser is responsible for summarising model outputs (i.e., detections)
+    into a message.
     """
 
     @abstractmethod
-    def build_message(
+    def build_summary(
         self,
-        recording: Recording,
+        now: datetime.datetime,
     ) -> Message:
-        """Build a message from the recording."""
+        """Send the message to a remote server."""
 
 
 class Messenger(ABC):

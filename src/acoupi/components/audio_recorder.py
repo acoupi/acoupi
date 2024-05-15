@@ -14,6 +14,7 @@ size, and the index of the audio device. The index of the audio device
 corresponds to the index of the USB port the device is connected to. The
 audio recorder return a temporary .wav file.
 """
+
 import datetime
 import wave
 from pathlib import Path

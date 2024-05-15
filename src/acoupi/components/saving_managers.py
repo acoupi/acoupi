@@ -15,6 +15,7 @@ recording object, and the recording filter output. The save_detection
 methods also takes a recording object and the detection filter output.
 On top of these, it takes a clean list of detection to be saved.
 """
+
 import os
 import shutil
 from abc import ABC, abstractmethod
@@ -89,12 +90,13 @@ class SaveRecordingManager(types.RecordingSavingManager):
         for model_output in model_outputs:
             # Check if any tags or detectinos are confident
             if any(
-                tag.probability >= self.threshold for tag in model_output.tags
+                tag.classification_probability >= self.threshold
+                for tag in model_output.tags
             ):
                 return True
 
             if any(
-                detection.probability >= self.threshold
+                detection.detection_probability >= self.threshold
                 for detection in model_output.detections
             ):
                 return True

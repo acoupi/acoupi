@@ -1,4 +1,5 @@
 """Test suite for acoupi messengers."""
+
 import datetime
 from pathlib import Path
 from unittest import mock
@@ -129,21 +130,21 @@ def test_http_messenger_with_complex_message():
                     location=data.BoundingBox(
                         coordinates=(0, 0, 1, 1),
                     ),
-                    probability=0.5,
+                    detection_probability=0.5,
                     tags=[
                         data.PredictedTag(
                             tag=data.Tag(
                                 key="test_tag",
                                 value="test_value",
                             ),
-                            probability=0.2,
+                            score=0.2,
                         ),
                         data.PredictedTag(
                             tag=data.Tag(
                                 key="event",
                                 value="echolocation",
                             ),
-                            probability=0.8,
+                            score=0.8,
                         ),
                     ],
                 ),

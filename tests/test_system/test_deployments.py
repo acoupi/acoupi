@@ -1,4 +1,5 @@
 """Test suite for system deployment functions."""
+
 import pytest
 
 from acoupi import data

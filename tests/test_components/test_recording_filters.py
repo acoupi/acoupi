@@ -1,4 +1,5 @@
 """Test acoupi recording filters."""
+
 from acoupi import components, data
 
 
@@ -24,11 +25,11 @@ def test_threshold_recording_filter_rejects_low_confidence_recordings(
         recording=recording,
         detections=[
             data.Detection(
-                probability=0.4,
+                detection_probability=0.4,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        probability=0.4,
+                        classification_probability=0.4,
                     ),
                 ],
             )
@@ -54,7 +55,7 @@ def test_threshold_recording_filter_keeps_high_confidence_recordings(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        probability=0.6,
+                        classification_probability=0.6,
                     ),
                 ],
             )
@@ -77,20 +78,20 @@ def test_threshold_recording_filter_with_multiple_detections(
         recording=recording,
         detections=[
             data.Detection(
-                probability=0.4,
+                detection_probability=0.4,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        probability=0.4,
+                        classification_probability=0.4,
                     ),
                 ],
             ),
             data.Detection(
-                probability=0.6,
+                detection_probability=0.6,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        probability=0.6,
+                        classification_probability=0.6,
                     ),
                 ],
             ),
@@ -127,7 +128,7 @@ def test_focus_species_filter_rejects_if_no_target_species_found(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        probability=0.6,
+                        classification_probability=0.6,
                     ),
                 ],
             ),
@@ -151,7 +152,7 @@ def test_focus_species_filter_rejects_low_confidence_detections(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        probability=0.4,
+                        classification_probability=0.4,
                     ),
                 ],
             ),
@@ -173,11 +174,11 @@ def test_focus_species_filter_keeps_high_confidence_detections(
         recording=recording,
         detections=[
             data.Detection(
-                probability=0.6,
+                detection_probability=0.6,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        probability=0.6,
+                        classification_probability=0.6,
                     ),
                 ],
             ),
@@ -203,15 +204,15 @@ def test_focus_species_filter_rejects_even_with_confident_non_target(
         recording=recording,
         detections=[
             data.Detection(
-                probability=0.6,
+                detection_probability=0.6,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        probability=0.6,
+                        classification_probability=0.6,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        probability=0.4,
+                        classification_probability=0.4,
                     ),
                 ],
             ),
@@ -243,11 +244,11 @@ def test_focus_species_filter_keeps_with_at_least_one_target_species(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        probability=0.6,
+                        classification_probability=0.6,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        probability=0.4,
+                        classification_probability=0.4,
                     ),
                 ],
             ),

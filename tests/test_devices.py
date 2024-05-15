@@ -1,4 +1,5 @@
 """Test the utils module."""
+
 import unittest.mock as um
 
 import pytest

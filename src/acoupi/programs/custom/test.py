@@ -1,4 +1,5 @@
 """Test Acoupi Program."""
+
 from pydantic import BaseModel
 
 from acoupi.programs.base import AcoupiProgram

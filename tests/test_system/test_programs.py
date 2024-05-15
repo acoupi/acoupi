@@ -1,4 +1,5 @@
 """Test suite for acoupi program system module."""
+
 import pytest
 
 from acoupi.programs.custom.acoupi import Program as SampleProgram

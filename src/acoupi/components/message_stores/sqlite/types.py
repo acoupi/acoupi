@@ -1,4 +1,5 @@
 """Auxiliary type definitions for message store models."""
+
 from datetime import datetime
 from typing import List, NamedTuple
 from uuid import UUID

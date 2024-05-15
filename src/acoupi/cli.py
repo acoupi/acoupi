@@ -1,4 +1,5 @@
 """CLI for acoupi."""
+
 from typing import List
 
 import click

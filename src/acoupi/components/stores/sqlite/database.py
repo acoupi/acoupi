@@ -1,4 +1,5 @@
 """Database models for the sqlite store."""
+
 from datetime import datetime
 from uuid import UUID
 
@@ -77,7 +78,7 @@ def create_base_models(database: orm.Database) -> BaseModels:
         value = orm.Required(str)
         """Value of the predicted tag"""
 
-        probability = orm.Required(float)
+        classification_probability = orm.Required(float)
         """Probability of the predicted tag"""
 
         detection = orm.Optional("Detection", column="detection_id")
@@ -93,7 +94,7 @@ def create_base_models(database: orm.Database) -> BaseModels:
         location = orm.Optional(str)
         """Location of the detection in the recording"""
 
-        probability = orm.Required(float)
+        detection_probability = orm.Required(float)
         """Probability of the detection"""
 
         tags = orm.Set(PredictedTag)
