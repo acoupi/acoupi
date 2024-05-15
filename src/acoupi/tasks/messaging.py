@@ -40,12 +40,11 @@ def generate_send_data_task(
             logger.info(f"SENDING MESSAGE: {message.content}")
 
             if message.content is None:
-                logger.info(f"MESSAGE IS EMPTY")
+                logger.info("MESSAGE IS EMPTY")
                 continue
 
-            else:
-                response = messenger.send_message(message)
-                logger.info(f"RESPONSE STATUS: {response.status}")
-                message_store.store_response(response)
+            response = messenger.send_message(message)
+            logger.info(f"RESPONSE STATUS: {response.status}")
+            message_store.store_response(response)
 
     return send_data_task

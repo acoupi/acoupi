@@ -29,7 +29,7 @@ def test_threshold_recording_filter_rejects_low_confidence_recordings(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        classification_probability=0.4,
+                        score=0.4,
                     ),
                 ],
             )
@@ -55,7 +55,7 @@ def test_threshold_recording_filter_keeps_high_confidence_recordings(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        classification_probability=0.6,
+                        score=0.6,
                     ),
                 ],
             )
@@ -82,7 +82,7 @@ def test_threshold_recording_filter_with_multiple_detections(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        classification_probability=0.4,
+                        score=0.4,
                     ),
                 ],
             ),
@@ -91,7 +91,7 @@ def test_threshold_recording_filter_with_multiple_detections(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        classification_probability=0.6,
+                        score=0.6,
                     ),
                 ],
             ),
@@ -128,7 +128,7 @@ def test_focus_species_filter_rejects_if_no_target_species_found(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        classification_probability=0.6,
+                        score=0.6,
                     ),
                 ],
             ),
@@ -152,7 +152,7 @@ def test_focus_species_filter_rejects_low_confidence_detections(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        classification_probability=0.4,
+                        score=0.4,
                     ),
                 ],
             ),
@@ -178,7 +178,7 @@ def test_focus_species_filter_keeps_high_confidence_detections(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        classification_probability=0.6,
+                        score=0.6,
                     ),
                 ],
             ),
@@ -208,11 +208,11 @@ def test_focus_species_filter_rejects_even_with_confident_non_target(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        classification_probability=0.6,
+                        score=0.6,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        classification_probability=0.4,
+                        score=0.4,
                     ),
                 ],
             ),
@@ -244,11 +244,11 @@ def test_focus_species_filter_keeps_with_at_least_one_target_species(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        classification_probability=0.6,
+                        score=0.6,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        classification_probability=0.4,
+                        score=0.4,
                     ),
                 ],
             ),

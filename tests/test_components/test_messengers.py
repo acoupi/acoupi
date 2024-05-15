@@ -137,14 +137,14 @@ def test_http_messenger_with_complex_message():
                                 key="test_tag",
                                 value="test_value",
                             ),
-                            classification_probability=0.2,
+                            score=0.2,
                         ),
                         data.PredictedTag(
                             tag=data.Tag(
                                 key="event",
                                 value="echolocation",
                             ),
-                            classification_probability=0.8,
+                            score=0.8,
                         ),
                     ],
                 ),

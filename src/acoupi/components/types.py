@@ -1,12 +1,18 @@
 """This module contains the types used by the aucupi."""
 
+import sys
 import datetime
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple
+from typing import List, Optional, Tuple, Generic
 from uuid import UUID
 
 from acoupi.data import Deployment, Message, ModelOutput, Recording, Response
+
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
 
 
 class RecordingScheduler(ABC):
@@ -253,36 +259,19 @@ class Store(ABC):
         """Update the path of the recording."""
 
 
-class MessageBuilder(ABC):
-    """Build a message from the model output.
+P = ParamSpec("P")
 
-    The ModelOutputMessageBuilder is responsible for building a message
-    from the model output.
-    """
+
+class MessageBuilder(ABC, Generic[P]):
+    """Build a message from the model output."""
 
     @abstractmethod
     def build_message(
         self,
-        model_output: Optional[ModelOutput] = None,
-        timeinterval: Optional[Dict] = None,
-        summary_content: Optional[Dict] = None,
+        *args: P.args,
+        **kwargs: P.kwargs,
     ) -> Message:
         """Build a message from the model output."""
-
-
-class RecordingMessageBuilder(ABC):
-    """Build a message from the recording.
-
-    The RecordingMessageBuilder is responsible for building a message
-    from the recording.
-    """
-
-    @abstractmethod
-    def build_message(
-        self,
-        recording: Recording,
-    ) -> Message:
-        """Build a message from the recording."""
 
 
 class Summariser(ABC):
@@ -295,8 +284,8 @@ class Summariser(ABC):
     @abstractmethod
     def build_summary(
         self,
-        summary: List,
-    ) -> Dict:
+        now: datetime.datetime,
+    ) -> Message:
         """Send the message to a remote server."""
 
 

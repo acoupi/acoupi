@@ -3,9 +3,9 @@
 import datetime
 import json
 from typing import Optional
-import logging
 
 import paho.mqtt.client as mqtt
+from paho.mqtt.enums import CallbackAPIVersion
 import requests
 
 from acoupi import data
@@ -43,7 +43,7 @@ class MQTTMessenger(types.Messenger):
         self.topic = topic
         self.timeout = timeout
         self.client = mqtt.Client(
-            callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
+            callback_api_version=CallbackAPIVersion.VERSION2,
             client_id=clientid,
         )
         self.client.username_pw_set(username, password)
@@ -65,15 +65,12 @@ class MQTTMessenger(types.Messenger):
 
             if response[0] != 0:
                 status = data.ResponseStatus.ERROR
-                print(
-                    f"Failed to publish message. MQTT error code: {response[0]}"
-                )
 
-        except ValueError as e:
+        except ValueError:
             status = data.ResponseStatus.ERROR
-        except RuntimeError as e:
+        except RuntimeError:
             status = data.ResponseStatus.FAILED
-        except Exception as e:  # Catch-all for unexpected errors
+        except Exception:  # Catch-all for unexpected errors
             status = data.ResponseStatus.FAILED
 
         received_on = datetime.datetime.now()

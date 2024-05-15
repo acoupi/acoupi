@@ -3,7 +3,7 @@
 import datetime
 from enum import IntEnum
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -31,12 +31,13 @@ class TimeInterval(BaseModel):
     end: datetime.time
     """End time of the interval."""
 
-    @model_validator(mode="before")
-    def validate_interval(cls, values):
+    @model_validator(mode="before")  # type: ignore
+    @classmethod
+    def validate_interval(cls, data: Any) -> Any:
         """Validate that the start time is before the end time."""
-        if values["start"] >= values["end"]:
+        if data["start"] >= data["end"]:
             raise ValueError("start time must be before end time")
-        return values
+        return data
 
 
 class Deployment(BaseModel):

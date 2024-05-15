@@ -2,8 +2,7 @@ import logging
 from typing import Callable, List, Optional
 
 from acoupi.components import types
-from acoupi import data
-from acoupi.files import delete_recording, get_temp_files
+from acoupi.files import get_temp_files
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -55,11 +54,19 @@ def generate_file_management_task(
                 )
                 continue
 
-            else:
-                new_path = file_manager.save_recording(
-                    recording, model_outputs=model_outputs
+            if file_filters and not all(
+                file_filter.should_save_recording(recording, model_outputs)
+                for file_filter in file_filters
+            ):
+                logger.info(
+                    f"RECORDING DOES NOT PASS FILTERS: {recording.path}"
                 )
-                logger.info(f"RECORDING HAS BEEN MOVED: {new_path}")
-                store.update_recording_path(recording, new_path)
+                continue
+
+            new_path = file_manager.save_recording(
+                recording, model_outputs=model_outputs
+            )
+            logger.info(f"RECORDING HAS BEEN MOVED: {new_path}")
+            store.update_recording_path(recording, new_path)
 
     return file_management_task

@@ -1,55 +1,36 @@
 import datetime
 import logging
-from typing import Callable, TypeVar
+from typing import Callable, List
 
 from acoupi.components import types
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-T = TypeVar("T", bound=types.Summariser, covariant=True)
-
 
 def generate_summariser_task(
-    summariser: types.Summariser,
-    message_factory: types.MessageBuilder,
-    store: types.Store,
+    summarisers: List[types.Summariser],
     message_store: types.MessageStore,
     logger: logging.Logger = logger,
 ) -> Callable[[], None]:
     """Generate a summariser task."""
 
     def summary_task() -> None:
-        end_time = datetime.datetime.now()
-        start_time = end_time - datetime.timedelta(seconds=summariser.interval)
+        now = datetime.datetime.now()
 
-        # Get Summary
-        logger.info(" -- STORE GET SUMMARY -- ")
-        summary = store.summary_predictedtags_by_datetime(
-            starttime=start_time,
-            endtime=end_time,
-        )
+        for summariser in summarisers:
+            try:
+                summary_message = summariser.build_summary(now)
+            except Exception as e:
+                logger.error(
+                    "Error building summary message for summariser %s: %s",
+                    summariser,
+                    e,
+                )
+                continue
 
-        # Create the summary content and message
-        logger.info("-- BUILDING SUMMARY MESSAGE --")
-
-        timeinterval = dict(
-            start=start_time.isoformat(), end=end_time.isoformat()
-        )
-        summary_content = summariser.build_summary(summary)
-
-        logger.info(f"TIMEINTERVAL: {timeinterval, type(timeinterval)}")
-        logger.info(
-            f"SUMMARY CONTENT: {summary_content, type(summary_content)}"
-        )
-
-        summary_message = message_factory.build_message(
-            timeinterval=timeinterval,
-            summary_content=summary_content,
-        )
-
-        # Store Message
-        message_store.store_message(summary_message)
-        logger.info("Message stored %s", summary_message)
+            # Store Message
+            message_store.store_message(summary_message)
+            logger.debug("Message stored %s", summary_message)
 
     return summary_task
