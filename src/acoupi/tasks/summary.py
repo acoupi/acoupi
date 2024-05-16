@@ -19,8 +19,10 @@ def generate_summariser_task(
         now = datetime.datetime.now()
 
         for summariser in summarisers:
+            logger.info(f"SUMMARISER: {summariser}")
             try:
                 summary_message = summariser.build_summary(now)
+                logger.info(f"SUMMARY MESSAGE: {summary_message}")
             except Exception as e:
                 logger.error(
                     "Error building summary message for summariser %s: %s",

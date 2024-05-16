@@ -36,14 +36,15 @@ def generate_send_data_task(
         messages = message_store.get_unsent_messages()
 
         for message in messages:
-            logger.info("START SENDING MESSAGE")
-            logger.info(f"SENDING MESSAGE: {message.content}")
+            logger.info("MESSAGE TASK")
+            logger.info(f"MESSAGE CONTENT: {message.content}")
 
             if message.content is None:
                 logger.info("MESSAGE IS EMPTY")
                 continue
 
             for messenger in messengers:
+                logger.info(f"MESSENGER: {messenger}")
                 response = messenger.send_message(message)
                 logger.info(f"RESPONSE STATUS: {response.status}")
                 message_store.store_response(response)
