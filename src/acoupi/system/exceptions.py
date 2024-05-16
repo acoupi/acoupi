@@ -42,6 +42,10 @@ class ParameterError(Exception):
         self.message = message
         self.help = help
 
+    def __str__(self):
+        """Return the error message."""
+        return self.message
+
 
 class HealthCheckError(Exception):
     """Exception raised when a health check fails."""
@@ -50,6 +54,10 @@ class HealthCheckError(Exception):
         """Initialize HealthError exception."""
         self.message = message
 
+    def __str__(self):
+        """Return the error message."""
+        return self.message
+
 
 class DeploymentError(Exception):
     """Exception raised when a deployment fails."""
@@ -57,3 +65,7 @@ class DeploymentError(Exception):
     def __init__(self, message: str):
         """Initialize DeploymentError exception."""
         self.message = message
+
+    def __str__(self):
+        """Return the error message."""
+        return self.message

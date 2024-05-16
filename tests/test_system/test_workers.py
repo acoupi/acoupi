@@ -40,6 +40,7 @@ def test_write_workers_start_script_with_one_worker(settings: Settings):
     --pidfile={settings.run_dir}/%n.pid \
     --logfile={settings.log_dir}/%n%I.log
     """
+    print(script_path.read_text())
     assert expected_line.strip() in script_path.read_text()
 
 

@@ -18,7 +18,7 @@ audio recorder return a temporary .wav file.
 import datetime
 import wave
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import click
 import pyaudio
@@ -28,7 +28,7 @@ from pydantic import BaseModel
 from acoupi import data
 from acoupi.components.types import AudioRecorder
 from acoupi.devices.audio import get_input_devices
-from acoupi.system.exceptions import ParameterError
+from acoupi.system.exceptions import HealthCheckError, ParameterError
 
 TMP_PATH = Path("/run/shm/")
 
@@ -94,7 +94,7 @@ class PyAudioRecorder(AudioRecorder):
         """
         now = datetime.datetime.now()
         temp_path = self.audio_dir / f'{now.strftime("%Y%m%d_%H%M%S")}.wav'
-        frames = self.get_recording_data()
+        frames = self.get_recording_data(duration=self.duration)
         self.save_recording(frames, temp_path)
         return data.Recording(
             path=temp_path,
@@ -106,7 +106,17 @@ class PyAudioRecorder(AudioRecorder):
             deployment=deployment,
         )
 
-    def get_recording_data(self) -> bytes:
+    def get_recording_data(
+        self,
+        duration: Optional[float] = None,
+        num_chunks: Optional[int] = None,
+    ) -> bytes:
+        if num_chunks is None:
+            if duration is None:
+                raise ValueError("duration or num_chunks must be provided")
+
+            num_chunks = int(duration * self.samplerate / self.chunksize)
+
         p = pyaudio.PyAudio()
 
         device = self.get_input_device(p)
@@ -119,8 +129,6 @@ class PyAudioRecorder(AudioRecorder):
             frames_per_buffer=self.chunksize,
             input_device_index=device.index,
         )
-
-        num_chunks = int(self.duration * self.samplerate / self.chunksize)
 
         frames = []
         for _ in range(0, num_chunks if num_chunks > 0 else 1):
@@ -145,10 +153,6 @@ class PyAudioRecorder(AudioRecorder):
             temp_audio_file.setframerate(self.samplerate)
             temp_audio_file.writeframes(data)
 
-    def check(self):
-        """Check if the audio recorder is compatible with the config."""
-        return
-
     def get_input_device(self, p: pyaudio.PyAudio):
         """Get the input device."""
         input_devices = get_input_devices(p)
@@ -159,11 +163,51 @@ class PyAudioRecorder(AudioRecorder):
         if device is None:
             raise ParameterError(
                 value="device_name",
-                message="The selected microphone was not found.",
+                message="The selected input device was not found.",
                 help="Check if the microphone is connected.",
             )
 
         return device
+
+    def check(self):
+        """Check if the audio recorder is compatible with the config."""
+
+        try:
+            data = self.get_recording_data(num_chunks=1)
+        except ParameterError as error:
+            raise HealthCheckError(
+                message=(
+                    "The audio recorder is not compatible with the "
+                    "selected microphone. Check the configurations."
+                    f"Error: {error}"
+                )
+            ) from error
+        except OSError as error:
+            if "Invalid sample rate" in str(error):
+                raise HealthCheckError(
+                    message=(
+                        "The audio recorder is not compatible with the "
+                        "selected samplerate. Check the configurations."
+                    )
+                ) from error
+
+            if "Invalid number of channels" in str(error):
+                raise HealthCheckError(
+                    message=(
+                        "The audio recorder is not compatible with the "
+                        "selected number of channels. Check the configurations."
+                    )
+                ) from error
+
+            raise error
+
+        if len(data) != self.chunksize * self.audio_channels * 2:
+            raise HealthCheckError(
+                message=(
+                    "The audio recorder is not working properly. "
+                    "Check the configurations."
+                )
+            )
 
 
 class MicrophoneConfig(BaseModel):
