@@ -37,6 +37,10 @@ def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
     assert recording.path.exists()
 
 
+@pytest.mark.skipif(
+    not has_input_audio_device(),
+    reason="No audio device found.",
+)
 def test_check_is_succesful(tmp_path: Path):
     """Test check_is_succesful"""
 
@@ -54,6 +58,10 @@ def test_check_is_succesful(tmp_path: Path):
     recorder.check()
 
 
+@pytest.mark.skipif(
+    not has_input_audio_device(),
+    reason="No audio device found.",
+)
 def test_check_fails_if_recording_duration_is_zero(
     monkeypatch, tmp_path: Path
 ):
@@ -81,6 +89,10 @@ def test_check_fails_if_recording_duration_is_zero(
         recorder.check()
 
 
+@pytest.mark.skipif(
+    not has_input_audio_device(),
+    reason="No audio device found.",
+)
 def test_check_fails_if_invalid_samplerate(tmp_path: Path):
     audio_channels, _, device_name = get_default_microphone()
     recorder = components.PyAudioRecorder(
@@ -97,6 +109,10 @@ def test_check_fails_if_invalid_samplerate(tmp_path: Path):
         recorder.check()
 
 
+@pytest.mark.skipif(
+    not has_input_audio_device(),
+    reason="No audio device found.",
+)
 def test_check_fails_if_audio_device_is_not_found(tmp_path: Path):
     audio_channels, samplerate, _ = get_default_microphone()
     recorder = components.PyAudioRecorder(
@@ -112,6 +128,10 @@ def test_check_fails_if_audio_device_is_not_found(tmp_path: Path):
         recorder.check()
 
 
+@pytest.mark.skipif(
+    not has_input_audio_device(),
+    reason="No audio device found.",
+)
 def test_check_fails_if_invalid_number_of_audio_channels(tmp_path: Path):
     _, samplerate, device_name = get_default_microphone()
     recorder = components.PyAudioRecorder(
