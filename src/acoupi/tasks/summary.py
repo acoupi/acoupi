@@ -31,6 +31,7 @@ def generate_summariser_task(
 
             # Store Message
             message_store.store_message(summary_message)
+            logger.info(f"Summary Message Stored: {summary_message}")
             logger.debug("Message stored %s", summary_message)
 
     return summary_task

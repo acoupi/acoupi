@@ -77,6 +77,13 @@ class StatisticsDetectionsSummariser(types.Summariser):
                 "count": stats["count"],
             }
 
+        db_species_stats['species_stats'] = db_species_stats
+
+        db_species_stats['timeinterval'] = {
+            "starttime": (now - self.interval).isoformat(),
+            "endtime": now.isoformat(),
+        }
+
         return data.Message(content=json.dumps(db_species_stats))
 
 
@@ -195,5 +202,12 @@ class ThresholdsDetectionsSummariser(types.Summariser):
                 "mean_mid_threshold": stats["mean_mid_threshold"],
                 "mean_high_threshold": stats["mean_high_threshold"],
             }
+
+        db_species_stats['species_stats'] = db_species_stats
+
+        db_species_stats['timeinterval'] = {
+            "starttime": (now - self.interval).isoformat(),
+            "endtime": now.isoformat(),
+        }
 
         return data.Message(content=json.dumps(db_species_stats))
