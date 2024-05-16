@@ -50,7 +50,7 @@ def test_check_is_succesful(tmp_path: Path):
         samplerate=samplerate,
         audio_channels=audio_channels,
         device_name=device_name,
-        chunksize=4096,
+        chunksize=8192,
         audio_dir=tmp_path,
     )
 
@@ -71,7 +71,7 @@ def test_check_fails_if_recording_duration_is_zero(
         samplerate=samplerate,
         audio_channels=audio_channels,
         device_name=device_name,
-        chunksize=4096,
+        chunksize=8192,
         audio_dir=tmp_path,
     )
 
@@ -100,7 +100,7 @@ def test_check_fails_if_invalid_samplerate(tmp_path: Path):
         samplerate=10,
         audio_channels=audio_channels,
         device_name=device_name,
-        chunksize=4096,
+        chunksize=8192,
         audio_dir=tmp_path,
     )
 
@@ -120,7 +120,7 @@ def test_check_fails_if_audio_device_is_not_found(tmp_path: Path):
         samplerate=samplerate,
         audio_channels=audio_channels,
         device_name="invalid_device",
-        chunksize=4096,
+        chunksize=8192,
         audio_dir=tmp_path,
     )
 
@@ -139,7 +139,7 @@ def test_check_fails_if_invalid_number_of_audio_channels(tmp_path: Path):
         samplerate=samplerate,
         audio_channels=1000,
         device_name=device_name,
-        chunksize=4096,
+        chunksize=8192,
         audio_dir=tmp_path,
     )
 
