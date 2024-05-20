@@ -31,14 +31,6 @@ class TimeInterval(BaseModel):
     end: datetime.time
     """End time of the interval."""
 
-    @model_validator(mode="before")  # type: ignore
-    @classmethod
-    def validate_interval(cls, data: Any) -> Any:
-        """Validate that the start time is before the end time."""
-        if data["start"] >= data["end"]:
-            raise ValueError("start time must be before end time")
-        return data
-
 
 class Deployment(BaseModel):
     """A Deployment captures information about the device deployment.
