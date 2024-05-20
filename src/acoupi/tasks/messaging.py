@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 from acoupi.components import types
 
@@ -9,7 +9,7 @@ logger.setLevel(logging.INFO)
 
 def generate_send_data_task(
     message_store: types.MessageStore,
-    messengers: List[types.Messenger],
+    messengers: Optional[List[types.Messenger]] = None,
     logger: logging.Logger = logger,
 ) -> Callable[[], None]:
     """Build a process to send data to a remote server.
@@ -43,6 +43,10 @@ def generate_send_data_task(
                 logger.info("MESSAGE IS EMPTY")
                 continue
 
+            if len(messengers) == 0:
+                logger.info("NO MESSENGER DEFINED")
+                continue
+            
             for messenger in messengers:
                 logger.info(f"MESSENGER: {messenger}")
                 response = messenger.send_message(message)
