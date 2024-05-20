@@ -70,14 +70,14 @@ class StatisticsDetectionsSummariser(types.Summariser):
                 "count": len(species_probabilities),
             }
 
-            db_species_stats[species_name] = {
-                "mean": stats["mean"],
-                "min": stats["min"],
-                "max": stats["max"],
-                "count": stats["count"],
-            }
+            db_species_stats[species_name] = stats
 
-        db_species_stats['species_stats'] = db_species_stats
+            #db_species_stats[species_name] = {
+            #    "mean": stats["mean"],
+            #    "min": stats["min"],
+            #    "max": stats["max"],
+            #    "count": stats["count"],
+            #}
 
         db_species_stats['timeinterval'] = {
             "starttime": (now - self.interval).isoformat(),
@@ -202,9 +202,6 @@ class ThresholdsDetectionsSummariser(types.Summariser):
                 "mean_mid_threshold": stats["mean_mid_threshold"],
                 "mean_high_threshold": stats["mean_high_threshold"],
             }
-
-        db_species_stats['species_stats'] = db_species_stats
-
         db_species_stats['timeinterval'] = {
             "starttime": (now - self.interval).isoformat(),
             "endtime": now.isoformat(),
