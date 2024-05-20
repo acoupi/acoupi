@@ -73,7 +73,6 @@ def get_default_microphone() -> Tuple[int, int, str]:
     IOError
         If no compatible audio device is found.
     """
-
     # Create an instance of PyAudio
     p = pyaudio.PyAudio()
     try:
@@ -94,5 +93,5 @@ def get_default_microphone() -> Tuple[int, int, str]:
         p.terminate()
         return channels, sample_rate, name
 
-    except IOError:
-        raise IOError("No compatible audio device found.")
+    except IOError as e:
+        raise IOError("No compatible audio device found.") from e

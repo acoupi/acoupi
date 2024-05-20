@@ -222,8 +222,7 @@ class MicrophoneConfig(BaseModel):
         prompt: bool = True,
         prefix: str = "",
     ) -> "MicrophoneConfig":
-        """Setup the microphone configuration."""
-
+        """Set up the microphone configuration."""
         return parse_microphone_config(args, prompt, prefix)
 
 
