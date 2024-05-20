@@ -1,8 +1,9 @@
 import logging
+from pathlib import Path
 from typing import Callable, List, Optional
 
 from acoupi.components import types
-from acoupi.files import get_temp_files
+from acoupi.files import TEMP_PATH, get_temp_files
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -14,6 +15,7 @@ def generate_file_management_task(
     logger: logging.Logger = logger,
     file_filters: Optional[List[types.RecordingSavingFilter]] = None,
     required_models: Optional[List[str]] = None,
+    temp_path: Path = TEMP_PATH,
 ) -> Callable[[], None]:
     """Build a process to manage files.
 
@@ -25,13 +27,12 @@ def generate_file_management_task(
     writes to the disk. This process will move recordings from the memory to
     the disk, and remove recordings that are no longer needed.
     """
-
     if required_models is None:
         required_models = []
 
     def file_management_task() -> None:
         """Manage files."""
-        temp_wav_files = get_temp_files()
+        temp_wav_files = get_temp_files(path=temp_path)
 
         recordings_and_outputs = store.get_recordings_by_path(
             paths=temp_wav_files

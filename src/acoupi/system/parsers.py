@@ -59,7 +59,8 @@ def parse_config_from_args(
         args: The arguments to parse. If None, will use an empty list.
         prompt: Whether to prompt the user for missing configuration.
 
-    Returns:
+    Returns
+    -------
         config: The parsed configuration.
     """
     if args is None:
@@ -432,7 +433,6 @@ def parse_time(value: str) -> datetime.time:
 
 def parse_date(value: str) -> datetime.date:
     """Parse a date from a string."""
-
     try:
         return datetime.datetime.strptime(value, "%Y-%m-%d").date()
     except ValueError:

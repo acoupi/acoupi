@@ -1,10 +1,10 @@
-"""This module contains the types used by the aucupi."""
+"""Module containing the types used by the acoupi."""
 
-import sys
 import datetime
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Optional, Tuple, Generic
+from typing import Generic, List, Optional, Tuple
 from uuid import UUID
 
 from acoupi.data import Deployment, Message, ModelOutput, Recording, Response
@@ -176,7 +176,8 @@ class RecordingSavingManager(ABC):
             model_outputs: Optionally use the model outputs to determine where
                 to save the recording.
 
-        Returns:
+        Returns
+        -------
             The path to the saved recording.
         """
 
@@ -229,7 +230,8 @@ class Store(ABC):
         Args:
             ids: The ids of the recordings to get.
 
-        Returns:
+        Returns
+        -------
             A list of tuples of the recording and the model outputs.
         """
 
@@ -246,7 +248,8 @@ class Store(ABC):
         Args:
             paths: The paths of the recordings to get.
 
-        Returns:
+        Returns
+        -------
             A list of tuples of the recording and the model outputs.
         """
 

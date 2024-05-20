@@ -33,10 +33,10 @@ def get_temp_file(path: Path) -> str:
     """Get the temporary recording UUID from the path."""
     try:
         return str(path)
-    except ValueError:
+    except ValueError as err:
         raise ValueError(
             f"Temporary file {path} - file id {path.stem} is not a valid UUID"
-        )
+        ) from err
 
 
 def delete_recording(path: Path) -> None:

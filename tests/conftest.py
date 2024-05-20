@@ -12,6 +12,8 @@ import pytest
 from acoupi import data
 from acoupi.system import Settings
 
+pytest_plugins = ("celery.contrib.pytest",)
+
 
 @pytest.fixture
 def patched_rpi_serial_number(monkeypatch) -> str:
@@ -96,11 +98,11 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
         tags=[
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value1"),
-                score=0.8,
+                classification_probability=0.8,
             ),
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value2"),
-                score=0.8,
+                classification_probability=0.8,
             ),
         ],
         detections=[
@@ -110,11 +112,11 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="test2", value="value3"),
-                        score=0.3,
+                        classification_probability=0.3,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="test", value="value1"),
-                        score=0.2,
+                        classification_probability=0.2,
                     ),
                 ],
             )

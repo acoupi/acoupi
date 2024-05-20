@@ -3,10 +3,10 @@
 import datetime
 from enum import IntEnum
 from pathlib import Path
-from typing import List, Optional, Tuple, Any
+from typing import List, Optional, Tuple
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 
 __all__ = [
     "TimeInterval",

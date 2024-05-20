@@ -54,7 +54,7 @@ def setup_program(
     args: Optional[List[str]] = None,
     prompt: bool = False,
 ) -> None:
-    """Setup an Acoupi Program."""
+    """Set up an Acoupi Program."""
     if args is None:
         args = []
 

@@ -12,7 +12,8 @@ __all__ = [
 def get_rpi_serial_number() -> str:
     """Get the serial number of the Raspberry Pi.
 
-    Returns:
+    Returns
+    -------
         The serial number of the Raspberry Pi as a string.
     """
     with open("/proc/cpuinfo", "r") as f:
@@ -25,7 +26,8 @@ def get_rpi_serial_number() -> str:
 def get_rpi_host_name() -> str:
     """Get the hostname of the Raspberry Pi.
 
-    Returns:
+    Returns
+    -------
         The hostname of the Raspberry Pi as a string.
     """
     return socket.gethostname()
@@ -34,7 +36,8 @@ def get_rpi_host_name() -> str:
 def is_rpi() -> bool:
     """Check if the current device is a Raspberry Pi.
 
-    Returns:
+    Returns
+    -------
         True if the current device is a Raspberry Pi, False otherwise.
     """
     try:

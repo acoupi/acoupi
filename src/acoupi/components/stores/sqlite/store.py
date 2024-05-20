@@ -8,11 +8,10 @@ from uuid import UUID
 
 from pony import orm
 
-from acoupi import data
-from acoupi.components import types
-
 from . import types as db_types
 from .database import create_base_models
+from acoupi import data
+from acoupi.components import types
 
 
 class SqliteStore(types.Store):
@@ -45,6 +44,22 @@ class SqliteStore(types.Store):
 
     The store is thread-safe, and can be used from multiple threads
     simultaneously.
+
+    Notes
+    -----
+    The ID of the deployment, recording, model output and detection is a UUID
+    field. Note that sqlite stores UUIDs as a BLOB, so when querying the
+    database with SQL, you should use the hex function to convert the UUID to a string.
+
+    Example queries:
+
+    .. code-block:: sql
+
+        -- Find a specific deployment by UUID
+        SELECT * FROM Deployment WHERE hex(id) = '00000000000000000000000000000000';
+
+        -- Get all deployment UUIDs as strings
+        SELECT hex(id) FROM Deployment;
     """
 
     db_path: Path
@@ -84,7 +99,8 @@ class SqliteStore(types.Store):
         If no deployment is found, a new deployment will be registered with the
         current datetime, and the latitude and longitude set to None.
 
-        Returns:
+        Returns
+        -------
             The current deployment
         """
         deployment = self._get_current_deployment()
@@ -166,7 +182,8 @@ class SqliteStore(types.Store):
         Args:
             paths: The paths of the recordings to get.
 
-        Returns:
+        Returns
+        -------
             List of tuples of the recording and the corresponding model outputs.
         """
         paths_str = [str(path) for path in paths]
@@ -196,7 +213,8 @@ class SqliteStore(types.Store):
         Args:
             ids: The ids of the recordings to get.
 
-        Returns:
+        Returns
+        -------
             A list of tuples of the recording and the model outputs.
         """
         db_recordings = (
@@ -221,6 +239,7 @@ class SqliteStore(types.Store):
         ids: Optional[List[UUID]] = None,
         recording_ids: Optional[List[UUID]] = None,
         model_names: Optional[List[str]] = None,
+        detection_ids: Optional[List[UUID]] = None,
         limit: Optional[int] = None,
     ) -> List[data.ModelOutput]:
         """Get a list of model outputs from the store by their id.
@@ -229,7 +248,8 @@ class SqliteStore(types.Store):
             start_time: The time to start the search from.
             end_time: The time to end the search at.
 
-        Returns:
+        Returns
+        -------
             List of model_outputs matching the created_on datetime.
         """
         query = orm.select(mo for mo in self.models.ModelOutput)
@@ -248,6 +268,13 @@ class SqliteStore(types.Store):
 
         if model_names is not None:
             query = query.filter(lambda mo: mo.model_name in model_names)
+
+        if detection_ids is not None:
+            query = query.filter(
+                lambda mo: orm.exists(
+                    d for d in mo.detections if d.id in detection_ids
+                )
+            )
 
         query = query.order_by(
             orm.desc(self.models.ModelOutput.created_on)

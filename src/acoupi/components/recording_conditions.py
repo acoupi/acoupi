@@ -41,11 +41,12 @@ class IsInInterval(RecordingCondition):
 
     def should_record(self, time: datetime.datetime) -> bool:
         """Determine if a recording should be made."""
-        
-        if self.interval.start <= time.time() <= self.interval.end:
-            return True
-        else: 
-            return self.interval.start <= time.time() or time.time() <= self.interval.end
+        if self.interval.start > self.interval.end:
+            return (
+                self.interval.start <= time.time()
+                or time.time() <= self.interval.end
+            )
+        return self.interval.start <= time.time() <= self.interval.end
 
 
 class IsInIntervals(RecordingCondition):

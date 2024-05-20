@@ -1,5 +1,5 @@
-from pathlib import Path
 import time
+from pathlib import Path
 
 from celery import Celery
 from celery.worker import WorkController

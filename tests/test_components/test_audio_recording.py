@@ -43,7 +43,6 @@ def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
 )
 def test_check_is_succesful(tmp_path: Path):
     """Test check_is_succesful"""
-
     audio_channels, samplerate, device_name = get_default_microphone()
     recorder = components.PyAudioRecorder(
         duration=0.1,

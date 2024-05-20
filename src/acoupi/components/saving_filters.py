@@ -212,7 +212,8 @@ class ThresholdRecordingFilter(types.RecordingSavingFilter):
         Args:
             model_output: The model output to check.
 
-        Returns:
+        Returns
+        -------
             bool
         """
         if any(
@@ -237,7 +238,8 @@ class ThresholdRecordingFilter(types.RecordingSavingFilter):
             recording: The recording to check.
             model_outputs: The model outputs for the recording.
 
-        Returns:
+        Returns
+        -------
             bool
         """
         if model_outputs is None:
@@ -283,7 +285,8 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
         Args:
             model_output: The model output to check.
 
-        Returns:
+        Returns
+        -------
             bool
         """
         if any(
@@ -317,7 +320,8 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
             recording: The recording to check.
             model_outputs: The model outputs for the recording.
 
-        Returns:
+        Returns
+        -------
             bool
         """
         if model_outputs is None:

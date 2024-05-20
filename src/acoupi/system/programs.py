@@ -39,8 +39,8 @@ def load_program_class(program: str) -> Type[programs.AcoupiProgram]:
     """
     try:
         program_module = import_module(program)
-    except ModuleNotFoundError:
-        raise exceptions.ProgramNotFoundError(program=program)
+    except ModuleNotFoundError as e:
+        raise exceptions.ProgramNotFoundError(program=program) from e
 
     for _, class_ in inspect.getmembers(program_module, inspect.isclass):
         if (

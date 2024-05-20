@@ -5,11 +5,10 @@ from typing import List
 
 from pony import orm
 
-from acoupi import data
-from acoupi.components import types
-
 from . import types as db_types
 from .database import create_message_models
+from acoupi import data
+from acoupi.components import types
 
 
 class SqliteMessageStore(types.MessageStore):

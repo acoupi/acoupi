@@ -42,7 +42,7 @@ Example:
     ...     datetime=datetime.datetime(2021, 1, 1, 0, 0),
     ...     duration=10,
     ...     samplerate=44100,
-    ...                     audio_channels=1,
+    ...     audio_channels=1,
     ... )
     >>> store.store_recording(recording)
 

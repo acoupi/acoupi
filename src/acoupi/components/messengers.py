@@ -2,17 +2,17 @@
 
 import datetime
 import json
-from typing import Optional
 import logging
-from acoupi.system.exceptions import HealthCheckError
-from celery.utils.log import get_task_logger
+from typing import Optional
 
 import paho.mqtt.client as mqtt
-from paho.mqtt.enums import CallbackAPIVersion, MQTTErrorCode
 import requests
+from celery.utils.log import get_task_logger
+from paho.mqtt.enums import CallbackAPIVersion, MQTTErrorCode
 
 from acoupi import data
 from acoupi.components import types
+from acoupi.system.exceptions import HealthCheckError
 
 __all__ = [
     "MQTTMessenger",

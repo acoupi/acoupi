@@ -108,7 +108,7 @@ class Program(AcoupiProgram):
     )
 
     def setup(self, config: ConfigSchema):
-        """Setup."""
+        """Set up."""
         self.validate_dirs(config)
 
         microphone = config.microphone_config
