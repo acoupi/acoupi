@@ -69,12 +69,7 @@ class StatisticsDetectionsSummariser(types.Summariser):
                 "count": len(species_probabilities),
             }
 
-            db_species_stats[species_name] = {
-                "mean": stats["mean"],
-                "min": stats["min"],
-                "max": stats["max"],
-                "count": stats["count"],
-            }
+            db_species_stats[species_name] = stats
 
         db_species_stats["species_stats"] = db_species_stats
 
