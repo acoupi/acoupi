@@ -16,6 +16,7 @@ methods also takes a recording object and the detection filter output.
 On top of these, it takes a clean list of detection to be saved.
 """
 
+import logging
 import os
 import shutil
 from abc import ABC, abstractmethod
@@ -41,11 +42,11 @@ class SaveRecordingManager(types.RecordingSavingManager):
     """Directory path to save recordings if audio recording contains
     detections."""
 
-    dirpath_true: Optional[Path]
+    dirpath_true: Path
     """Directory path to save recordings if audio recording contains
     detections."""
 
-    dirpath_false: Optional[Path]
+    dirpath_false: Path
     """Directory path to save recordings if audio recording contain no
     detections."""
 
@@ -62,7 +63,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
         dirpath_false: Optional[Path] = None,
         timeformat: str = "%Y%m%d_%H%M%S",
         threshold: float = 0.1,
-        logger=None,
+        logger: Optional[logging.Logger] = None,
     ):
         """Initiatilise the Recording SavingManager.
 
@@ -75,10 +76,18 @@ class SaveRecordingManager(types.RecordingSavingManager):
             threshold: Threshold to use to determine if a recording contains
         """
         self.dirpath = dirpath
+
+        if dirpath_true is None:
+            dirpath_true = dirpath / "true_detections"
         self.dirpath_true = dirpath_true
+
+        if dirpath_false is None:
+            dirpath_false = dirpath / "false_detections"
         self.dirpath_false = dirpath_false
+
         self.timeformat = timeformat
         self.threshold = threshold
+
         if logger is None:
             logger = get_task_logger(__name__)
         self.logger = logger
@@ -156,7 +165,9 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
     directory: Path
     """Directory where the files are stored."""
 
-    def __init__(self, directory: Path):
+    def __init__(
+        self, directory: Path, logger: Optional[logging.Logger] = None
+    ):
         """Create a new BaseFileManager.
 
         Args:
@@ -172,7 +183,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
 
     @abstractmethod
     def get_file_path(self, recording: data.Recording) -> Path:
-        """The the path where the file of a recording should be stored.
+        """Get the path where the file of a recording should be stored.
 
         The path must be relative to the directory specified in the
         constructor.
@@ -180,7 +191,8 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         Args:
             recording: Recording to get the path for.
 
-        Returns:
+        Returns
+        -------
             Path of the file.
         """
         raise NotImplementedError
@@ -195,7 +207,8 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         Args:
             recording: Recording to save.
 
-        Returns:
+        Returns
+        -------
             Path of the saved file.
         """
         if not recording.path:
@@ -241,12 +254,13 @@ class DateFileManager(BaseFileManager):
     """
 
     def get_file_path(self, recording: types.Recording) -> Path:
-        """The the path where the file of a recording should be stored.
+        """Get the path where the file of a recording should be stored.
 
         Args:
             recording: Recording to get the path for.
 
-        Returns:
+        Returns
+        -------
             Path of the file.
         """
         date = recording.datetime
@@ -268,12 +282,13 @@ class IDFileManager(BaseFileManager):
     """
 
     def get_file_path(self, recording: types.Recording) -> Path:
-        """The the path where the file of a recording should be stored.
+        """Get the the path where the file of a recording should be stored.
 
         Args:
             recording: Recording to get the path for.
 
-        Returns:
+        Returns
+        -------
             Path of the file.
         """
         return Path(f"{recording.id}.wav")

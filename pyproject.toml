@@ -110,3 +110,4 @@ dev = [
     "pytest-celery>=0.0.0",
     "flower>=2.0.1",
 ]
+

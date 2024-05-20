@@ -8,6 +8,30 @@ import pytest
 from acoupi import components, data
 
 
+def test_save_recording_manager_fails_if_recording_has_no_path(
+    deployment: data.Deployment,
+    tmp_path: Path,
+):
+    manager = components.SaveRecordingManager(tmp_path)
+    recording = data.Recording(
+        path=None,
+        duration=1,
+        samplerate=8000,
+        datetime=datetime.datetime.now(),
+        deployment=deployment,
+    )
+    with pytest.raises(ValueError):
+        manager.save_recording(recording)
+
+
+def test_save_recording_manager_moves_recording_to_true_directory(
+    tmp_path: Path,
+    recording: data.Recording,
+):
+    manager = components.SaveRecordingManager(tmp_path)
+    pass
+
+
 def test_date_file_manager_save_recording(
     tmp_path: Path,
     deployment: data.Deployment,
