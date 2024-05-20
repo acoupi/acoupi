@@ -9,7 +9,6 @@ class TestModel(types.Model):
 
     def run(self, recording: data.Recording) -> data.ModelOutput:
         """Run the model on the recording."""
-
         if not recording.path:
             return data.ModelOutput(
                 name_model="TestModel",

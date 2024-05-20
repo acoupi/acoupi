@@ -22,17 +22,22 @@ def generate_send_data_task(
     to the remote server. The process will then store the response from the
     remote server, so that the data can be marked as synced.
 
-    Args:
-        message_store: The message store to use. The message store
-            is used to get unsynced data and store any messages that are sent.
-        messenger: The messenger to use.
+    Parameters
+    ----------
+    message_store: The message store to use. The message store
+        is used to get unsynced data and store any messages that are sent.
+    messenger: The messenger to use.
 
-    Returns:
+    Returns
+    -------
+    send_data_task : Callable[[], None]
         A function that can be used to start the process.
     """
+    if messengers is None:
+        messengers = []
 
     def send_data_task() -> None:
-        "Send Messages."
+        """Send Messages."""
         messages = message_store.get_unsent_messages()
 
         for message in messages:
@@ -46,7 +51,7 @@ def generate_send_data_task(
             if len(messengers) == 0:
                 logger.info("NO MESSENGER DEFINED")
                 continue
-            
+
             for messenger in messengers:
                 logger.info(f"MESSENGER: {messenger}")
                 response = messenger.send_message(message)

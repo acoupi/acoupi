@@ -7,8 +7,7 @@ from acoupi.data import Detection, ModelOutput, PredictedTag
 
 
 class ThresholdDetectionFilter(ModelOutputCleaner):
-    """Keeps predictions with a probability (i.e., classification_probability
-    and detection_probability) above a defined threshold.
+    """Keeps predictions with a probability higher than a threshold.
 
     This class implements a model output cleaner that removes any
     predictions with a probability below a threshold. This includes
@@ -24,7 +23,7 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
         self.threshold = threshold
 
     def get_clean_tags(self, tags: List[PredictedTag]) -> List[PredictedTag]:
-        """Removes tags with low probability."""
+        """Remove tags with low probability."""
         return [
             tag
             for tag in tags
@@ -34,7 +33,7 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
     def get_clean_detections(
         self, detections: List[Detection]
     ) -> List[Detection]:
-        """Removes detections with low probability."""
+        """Remove detections with low probability."""
         return [
             self.clean_detection(detection)
             for detection in detections
@@ -42,7 +41,7 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
         ]
 
     def clean_detection(self, detection: Detection) -> Detection:
-        """Removes tags with low probability from detection."""
+        """Remove tags with low probability from detection."""
         return Detection(
             id=detection.id,
             location=detection.location,
@@ -59,7 +58,8 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
         Args:
             model_output: The model output to clean.
 
-        Returns:
+        Returns
+        -------
             The cleaned model output.
         """
         return ModelOutput(

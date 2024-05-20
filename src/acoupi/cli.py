@@ -41,7 +41,7 @@ def acoupi(ctx):
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
 @click.pass_context
 def setup(ctx, program: str, args: List[str]):
-    """Setup acoupi."""
+    """Set up acoupi."""
     click.echo(
         "Collecting program files. It will take a minute or so, be patient..."
     )

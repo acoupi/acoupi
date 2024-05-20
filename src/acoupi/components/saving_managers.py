@@ -75,14 +75,20 @@ class SaveRecordingManager(types.RecordingSavingManager):
             timeformat: Datetime format to use to name the recording file path.
             threshold: Threshold to use to determine if a recording contains
         """
+        if not dirpath.exists():
+            dirpath.mkdir(parents=True)
         self.dirpath = dirpath
 
         if dirpath_true is None:
             dirpath_true = dirpath / "true_detections"
+        if not dirpath_true.exists():
+            dirpath_true.mkdir(parents=True)
         self.dirpath_true = dirpath_true
 
         if dirpath_false is None:
             dirpath_false = dirpath / "false_detections"
+        if not dirpath_false.exists():
+            dirpath_false.mkdir(parents=True)
         self.dirpath_false = dirpath_false
 
         self.timeformat = timeformat
@@ -94,12 +100,9 @@ class SaveRecordingManager(types.RecordingSavingManager):
 
     def has_confident_detections(
         self,
-        model_outputs: Optional[List[data.ModelOutput]] = None,
+        model_outputs: List[data.ModelOutput],
     ) -> bool:
         """Determine if the model outputs contain confident detections."""
-        if model_outputs is None:
-            return False
-
         for model_output in model_outputs:
             # Check if any tags or detectinos are confident
             if any(
@@ -116,6 +119,16 @@ class SaveRecordingManager(types.RecordingSavingManager):
 
         return False
 
+    def get_parent_dir(
+        self,
+        model_outputs: Optional[List[data.ModelOutput]],
+    ) -> Path:
+        if not model_outputs:
+            return self.dirpath
+
+        detection_bool = self.has_confident_detections(model_outputs)
+        return self.dirpath_true if detection_bool else self.dirpath_false
+
     def save_recording(
         self,
         recording: data.Recording,
@@ -125,24 +138,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
         if recording.path is None:
             raise ValueError("Recording has no path")
 
-        if (
-            not model_outputs
-            and not self.dirpath_true
-            and not self.dirpath_false
-        ):
-            return self.dirpath
-
-        detection_bool = self.has_confident_detections(model_outputs)
-        sdir = self.dirpath_true if detection_bool else self.dirpath_false
-
-        if sdir is None:
-            raise ValueError(
-                "No directory specified for recordings with detections"
-            )
-
-        if not os.path.exists(sdir):
-            os.makedirs(sdir)
-
+        sdir = self.get_parent_dir(model_outputs)
         srec_filename = recording.datetime.strftime(self.timeformat)
 
         # Move recording to the path it should be saved

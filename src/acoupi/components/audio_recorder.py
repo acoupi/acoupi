@@ -146,7 +146,6 @@ class PyAudioRecorder(AudioRecorder):
 
     def save_recording(self, data: bytes, path: Path) -> None:
         """Save the recording to a file."""
-
         with wave.open(str(path), "wb") as temp_audio_file:
             temp_audio_file.setnchannels(self.audio_channels)
             temp_audio_file.setsampwidth(self.sample_width)
@@ -171,7 +170,6 @@ class PyAudioRecorder(AudioRecorder):
 
     def check(self):
         """Check if the audio recorder is compatible with the config."""
-
         try:
             data = self.get_recording_data(num_chunks=1)
         except ParameterError as error:

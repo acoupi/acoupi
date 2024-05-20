@@ -18,7 +18,7 @@ class TestProgram(AcoupiProgram):
     config: TestConfigSchema
 
     def setup(self, config: TestConfigSchema):
-        """Setup Test Program."""
+        """Set up Test Program."""
         print("Setting up test program")
 
         def test_task():

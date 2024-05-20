@@ -24,12 +24,234 @@ def test_save_recording_manager_fails_if_recording_has_no_path(
         manager.save_recording(recording)
 
 
-def test_save_recording_manager_moves_recording_to_true_directory(
+def test_save_recording_without_detections(
     tmp_path: Path,
-    recording: data.Recording,
 ):
-    manager = components.SaveRecordingManager(tmp_path)
-    pass
+    audio_dir = tmp_path / "audio"
+    tmp_dir = tmp_path / "tmp"
+    tmp_dir.mkdir()
+    recording_file = tmp_dir / "recording.wav"
+    recording_file.touch()
+    recording_file.write_text("test content")
+    recording = data.Recording(
+        path=recording_file,
+        duration=1,
+        samplerate=8000,
+        datetime=datetime.datetime.now(),
+        deployment=data.Deployment(name="test"),
+    )
+    manager = components.SaveRecordingManager(audio_dir)
+
+    new_path = manager.save_recording(recording)
+    assert not recording_file.exists()
+    assert new_path.parent == audio_dir
+    assert new_path.exists()
+    assert new_path.read_text() == "test content"
+
+
+def test_save_recording_without_confident_detections(
+    tmp_path: Path,
+):
+    audio_dir = tmp_path / "audio"
+    tmp_dir = tmp_path / "tmp"
+    tmp_dir.mkdir()
+    recording_file = tmp_dir / "recording.wav"
+    recording_file.touch()
+    recording_file.write_text("test content")
+    recording = data.Recording(
+        path=recording_file,
+        duration=1,
+        samplerate=8000,
+        datetime=datetime.datetime.now(),
+        deployment=data.Deployment(name="test"),
+    )
+    model_output = data.ModelOutput(
+        name_model="test_model",
+        recording=recording,
+        detections=[
+            data.Detection(detection_probability=0.4),
+            data.Detection(detection_probability=0.3),
+        ],
+    )
+    manager = components.SaveRecordingManager(audio_dir, threshold=0.5)
+
+    new_path = manager.save_recording(recording, model_outputs=[model_output])
+    assert not recording_file.exists()
+    assert new_path.parent == audio_dir / "false_detections"
+    assert new_path.exists()
+    assert new_path.read_text() == "test content"
+
+
+def test_save_recording_with_confident_detections(
+    tmp_path: Path,
+):
+    audio_dir = tmp_path / "audio"
+    tmp_dir = tmp_path / "tmp"
+    tmp_dir.mkdir()
+    recording_file = tmp_dir / "recording.wav"
+    recording_file.touch()
+    recording_file.write_text("test content")
+    recording = data.Recording(
+        path=recording_file,
+        duration=1,
+        samplerate=8000,
+        datetime=datetime.datetime.now(),
+        deployment=data.Deployment(name="test"),
+    )
+    model_output = data.ModelOutput(
+        name_model="test_model",
+        recording=recording,
+        detections=[
+            data.Detection(detection_probability=0.6),
+            data.Detection(detection_probability=0.3),
+        ],
+    )
+    manager = components.SaveRecordingManager(audio_dir, threshold=0.5)
+
+    new_path = manager.save_recording(recording, model_outputs=[model_output])
+    assert not recording_file.exists()
+    assert new_path.parent == audio_dir / "true_detections"
+    assert new_path.exists()
+    assert new_path.read_text() == "test content"
+
+
+def test_save_recording_with_custom_dirpaths(tmp_path: Path):
+    dirpath = tmp_path / "audio"
+    dirpath_true = dirpath / "custom_true"
+    dirpath_false = dirpath / "custom_false"
+
+    tmp_dir = tmp_path / "tmp"
+    tmp_dir.mkdir()
+    recording_file = tmp_dir / "recording.wav"
+    recording_file.touch()
+    recording_file.write_text("test content")
+    recording = data.Recording(
+        path=recording_file,
+        duration=1,
+        samplerate=8000,
+        datetime=datetime.datetime.now(),
+        deployment=data.Deployment(name="test"),
+    )
+    model_output = data.ModelOutput(
+        name_model="test_model",
+        recording=recording,
+        detections=[
+            data.Detection(detection_probability=0.6),
+            data.Detection(detection_probability=0.3),
+        ],
+    )
+
+    manager = components.SaveRecordingManager(
+        dirpath,
+        dirpath_true=dirpath_true,
+        dirpath_false=dirpath_false,
+        threshold=0.5,
+    )
+
+    new_path = manager.save_recording(recording, model_outputs=[model_output])
+    assert not recording_file.exists()
+    assert new_path.parent == dirpath_true
+    assert new_path.exists()
+    assert new_path.read_text() == "test content"
+
+    recording_file_2 = tmp_dir / "recording2.wav"
+    recording_file_2.touch()
+    recording_file_2.write_text("test content 2")
+    recording = data.Recording(
+        path=recording_file_2,
+        duration=1,
+        samplerate=8000,
+        datetime=datetime.datetime.now(),
+        deployment=data.Deployment(name="test"),
+    )
+    model_output = data.ModelOutput(
+        name_model="test_model",
+        recording=recording,
+        detections=[
+            data.Detection(detection_probability=0.4),
+            data.Detection(detection_probability=0.3),
+        ],
+    )
+
+    new_path = manager.save_recording(recording, model_outputs=[model_output])
+    assert not recording_file_2.exists()
+    assert new_path.parent == dirpath_false
+    assert new_path.exists()
+    assert new_path.read_text() == "test content 2"
+
+
+def test_save_recording_with_confident_tags(tmp_path: Path):
+    audio_dir = tmp_path / "audio"
+    tmp_dir = tmp_path / "tmp"
+    tmp_dir.mkdir()
+    recording_file = tmp_dir / "recording.wav"
+    recording_file.touch()
+    recording_file.write_text("test content")
+    recording = data.Recording(
+        path=recording_file,
+        duration=1,
+        samplerate=8000,
+        datetime=datetime.datetime.now(),
+        deployment=data.Deployment(name="test"),
+    )
+    model_output = data.ModelOutput(
+        name_model="test_model",
+        recording=recording,
+        tags=[
+            data.PredictedTag(
+                tag=data.Tag(key="test", value="value1"),
+                classification_probability=0.6,
+            ),
+            data.PredictedTag(
+                tag=data.Tag(key="test", value="value2"),
+                classification_probability=0.3,
+            ),
+        ],
+    )
+    manager = components.SaveRecordingManager(audio_dir, threshold=0.5)
+
+    new_path = manager.save_recording(recording, model_outputs=[model_output])
+    assert not recording_file.exists()
+    assert new_path.parent == audio_dir / "true_detections"
+    assert new_path.exists()
+    assert new_path.read_text() == "test content"
+
+
+def test_save_recording_with_unconfident_tags(tmp_path: Path):
+    audio_dir = tmp_path / "audio"
+    tmp_dir = tmp_path / "tmp"
+    tmp_dir.mkdir()
+    recording_file = tmp_dir / "recording.wav"
+    recording_file.touch()
+    recording_file.write_text("test content")
+    recording = data.Recording(
+        path=recording_file,
+        duration=1,
+        samplerate=8000,
+        datetime=datetime.datetime.now(),
+        deployment=data.Deployment(name="test"),
+    )
+    model_output = data.ModelOutput(
+        name_model="test_model",
+        recording=recording,
+        tags=[
+            data.PredictedTag(
+                tag=data.Tag(key="test", value="value1"),
+                classification_probability=0.4,
+            ),
+            data.PredictedTag(
+                tag=data.Tag(key="test", value="value2"),
+                classification_probability=0.3,
+            ),
+        ],
+    )
+    manager = components.SaveRecordingManager(audio_dir, threshold=0.5)
+
+    new_path = manager.save_recording(recording, model_outputs=[model_output])
+    assert not recording_file.exists()
+    assert new_path.parent == audio_dir / "false_detections"
+    assert new_path.exists()
+    assert new_path.read_text() == "test content"
 
 
 def test_date_file_manager_save_recording(
@@ -105,7 +327,8 @@ def test_date_file_manager_fails_if_recording_file_does_not_exist(
     tmp_path: Path, deployment: data.Deployment
 ):
     """Test DateFileManager.save_recording fails if recording file does not
-    exist."""
+    exist.
+    """
     # Arrange
     path = tmp_path / "test.wav"
     directory = tmp_path / "recordings"
@@ -197,7 +420,8 @@ def test_id_file_manager_fails_if_recording_file_does_not_exist(
     tmp_path: Path, deployment: data.Deployment
 ):
     """Test IDFileManager.save_recording fails if recording file does not
-    exist."""
+    exist.
+    """
     # Arrange
     path = tmp_path / "test.wav"
     directory = tmp_path / "recordings"

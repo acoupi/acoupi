@@ -47,7 +47,6 @@ class StatisticsDetectionsSummariser(types.Summariser):
 
     def build_summary(self, now: datetime.datetime) -> data.Message:
         """Build a message from a summary."""
-
         predicted_tags = self.store.get_predicted_tags(
             before=now,
             after=now - self.interval,
@@ -77,9 +76,9 @@ class StatisticsDetectionsSummariser(types.Summariser):
                 "count": stats["count"],
             }
 
-        db_species_stats['species_stats'] = db_species_stats
+        db_species_stats["species_stats"] = db_species_stats
 
-        db_species_stats['timeinterval'] = {
+        db_species_stats["timeinterval"] = {
             "starttime": (now - self.interval).isoformat(),
             "endtime": now.isoformat(),
         }
@@ -120,7 +119,6 @@ class ThresholdsDetectionsSummariser(types.Summariser):
 
     def build_summary(self, now: datetime.datetime) -> data.Message:
         """Build a message from a summary."""
-
         predicted_tags = self.store.get_predicted_tags(
             before=now,
             after=now - self.interval,
@@ -203,9 +201,9 @@ class ThresholdsDetectionsSummariser(types.Summariser):
                 "mean_high_threshold": stats["mean_high_threshold"],
             }
 
-        db_species_stats['species_stats'] = db_species_stats
+        db_species_stats["species_stats"] = db_species_stats
 
-        db_species_stats['timeinterval'] = {
+        db_species_stats["timeinterval"] = {
             "starttime": (now - self.interval).isoformat(),
             "endtime": now.isoformat(),
         }

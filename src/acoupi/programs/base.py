@@ -69,7 +69,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
     @abstractmethod
     def setup(self, config: ProgramConfig):
-        """Setup."""
+        """Set up the program."""
         raise NotImplementedError
 
     def check(self, config: ProgramConfig) -> None:
@@ -88,7 +88,9 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         self.logger.info("Configuration is valid")
 
     def on_start(self, deployment: data.Deployment) -> None:
-        """Called when the a deployment is started.
+        """Start a deployment.
+
+        Called when the user starts a deployment.
 
         This method should be overridden by user defined programs if they want
         to do something when the program starts. The default implementation
@@ -98,7 +100,9 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         self.logger.info("Deployment: %s", deployment)
 
     def on_end(self, deployment: data.Deployment) -> None:
-        """Called when the a deployment is ended.
+        """End a deployment.
+
+        Called when the user ends a deployment.
 
         This method should be overridden by user defined programs if they want
         to do something when the program ends. The default implementation
@@ -137,7 +141,6 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         queue: Optional[str] = None,
     ):
         """Add a task to the program."""
-
         if not callbacks:
             callbacks = []
 

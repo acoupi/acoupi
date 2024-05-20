@@ -1,6 +1,6 @@
 """Acoupi components."""
 
-from acoupi.components.audio_recorder import PyAudioRecorder, MicrophoneConfig
+from acoupi.components.audio_recorder import MicrophoneConfig, PyAudioRecorder
 from acoupi.components.message_factories import (
     FullModelOutputMessageBuilder,
     SummaryMessageBuilder,

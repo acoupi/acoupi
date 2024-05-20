@@ -9,8 +9,8 @@ import pytest_httpserver
 from paho.mqtt.enums import MQTTErrorCode
 
 from acoupi import data
-from acoupi.system.exceptions import HealthCheckError
 from acoupi.components import messengers
+from acoupi.system.exceptions import HealthCheckError
 
 
 def test_http_messenger():
