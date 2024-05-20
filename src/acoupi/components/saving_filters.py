@@ -51,11 +51,11 @@ class SaveIfInInterval(types.RecordingSavingFilter):
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be saved."""
-        return (
-            self.interval.start
-            <= recording.datetime.time()
-            <= self.interval.end
-        )
+        time = recording.datetime.time()
+        if self.interval.start > self.interval.end:
+            return self.interval.start <= time or time <= self.interval.end
+
+        return self.interval.start <= time <= self.interval.end
 
 
 class FrequencySchedule(types.RecordingSavingFilter):

@@ -10,19 +10,21 @@
 -e file:.
 amqp==5.2.0
     # via kombu
-annotated-types==0.5.0
+annotated-types==0.6.0
     # via pydantic
 astral==3.2
     # via acoupi
 backports-zoneinfo==0.2.1
     # via astral
-billiard==3.6.4.0
     # via celery
-celery==5.2.7
+    # via kombu
+billiard==4.2.0
+    # via celery
+celery==5.4.0
     # via acoupi
 certifi==2024.2.2
     # via requests
-cffi==1.15.1
+cffi==1.16.0
     # via sounddevice
 charset-normalizer==3.3.2
     # via requests
@@ -38,7 +40,7 @@ click-plugins==1.1.1
     # via celery
 click-repl==0.3.0
     # via celery
-dnspython==2.3.0
+dnspython==2.6.1
     # via eventlet
 eventlet==0.36.1
     # via acoupi
@@ -48,7 +50,7 @@ idna==3.7
     # via requests
 jinja2==3.1.4
     # via acoupi
-kombu==5.2.4
+kombu==5.3.7
     # via celery
 markupsafe==2.1.5
     # via jinja2
@@ -60,31 +62,38 @@ prompt-toolkit==3.0.43
     # via click-repl
 pyaudio==0.2.14
     # via acoupi
-pycparser==2.21
+pycparser==2.22
     # via cffi
-pydantic==2.5.3
+pydantic==2.7.1
     # via acoupi
     # via pydantic-settings
-pydantic-core==2.14.6
+pydantic-core==2.18.2
     # via pydantic
-pydantic-settings==2.0.3
+pydantic-settings==2.2.1
     # via acoupi
-python-dotenv==0.21.1
+python-dateutil==2.9.0.post0
+    # via celery
+python-dotenv==1.0.1
     # via pydantic-settings
 pytz==2024.1
     # via acoupi
-    # via celery
 pyyaml==6.0.1
     # via acoupi
-requests==2.31.0
+requests==2.32.0
     # via acoupi
+six==1.16.0
+    # via python-dateutil
 sounddevice==0.4.6
     # via acoupi
-typing-extensions==4.7.1
+typing-extensions==4.11.0
     # via annotated-types
+    # via kombu
     # via pydantic
     # via pydantic-core
-urllib3==2.0.7
+tzdata==2024.1
+    # via backports-zoneinfo
+    # via celery
+urllib3==2.2.1
     # via requests
 vine==5.1.0
     # via amqp
