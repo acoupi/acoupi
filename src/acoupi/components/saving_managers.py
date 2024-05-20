@@ -62,6 +62,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
         dirpath_false: Optional[Path] = None,
         timeformat: str = "%Y%m%d_%H%M%S",
         threshold: float = 0.1,
+        logger=None,
     ):
         """Initiatilise the Recording SavingManager.
 
@@ -78,6 +79,9 @@ class SaveRecordingManager(types.RecordingSavingManager):
         self.dirpath_false = dirpath_false
         self.timeformat = timeformat
         self.threshold = threshold
+        if logger is None:
+            logger = get_task_logger(__name__)
+        self.logger = logger
 
     def has_confident_detections(
         self,
@@ -158,7 +162,9 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         Args:
             directory: Directory where the files are stored.
         """
-        self.logger = get_task_logger(__name__)
+        if logger is None:
+            logger = get_task_logger(__name__)
+        self.logger = logger
         self.directory = directory
 
         if not os.path.exists(directory):
