@@ -12,6 +12,8 @@ import pytest
 from acoupi import data
 from acoupi.system import Settings
 
+pytest_plugins = ("celery.contrib.pytest",)
+
 
 @pytest.fixture
 def patched_rpi_serial_number(monkeypatch) -> str:
