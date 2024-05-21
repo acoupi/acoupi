@@ -6,7 +6,6 @@ from acoupi.components import types
 from acoupi.files import TEMP_PATH, get_temp_files
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 def generate_file_management_task(
@@ -30,6 +29,8 @@ def generate_file_management_task(
     if required_models is None:
         required_models = []
 
+    required = set(required_models)
+
     def file_management_task() -> None:
         """Manage files."""
         temp_wav_files = get_temp_files(path=temp_path)
@@ -39,8 +40,8 @@ def generate_file_management_task(
         )
 
         for recording, model_outputs in recordings_and_outputs:
-            logger.info(f"Recording: {recording.path}")
-            logger.info(f"Model Outputs: {model_outputs}")
+            logger.debug(f"Recording: {recording.path}")
+            logger.debug(f"Model Outputs: {model_outputs}")
 
             if recording.path is None:
                 logger.error(
@@ -49,9 +50,9 @@ def generate_file_management_task(
                 )
                 continue
 
-            if len(model_outputs) == 0:
-                logger.info(
-                    f"RECORDING HAS NOT BEEN PROCESSED: {recording.path}"
+            if set(required) - {model.name_model for model in model_outputs}:
+                logger.debug(
+                    f"Recording has not been processed: {recording.path}"
                 )
                 continue
 
@@ -59,15 +60,16 @@ def generate_file_management_task(
                 file_filter.should_save_recording(recording, model_outputs)
                 for file_filter in file_filters
             ):
-                logger.info(
-                    f"RECORDING DOES NOT PASS FILTERS: {recording.path}"
+                logger.debug(
+                    f"Recording does not pass filters: {recording.path}"
                 )
+                recording.path.unlink()
                 continue
 
             new_path = file_manager.save_recording(
                 recording, model_outputs=model_outputs
             )
-            logger.info(f"RECORDING HAS BEEN MOVED: {new_path}")
+            logger.debug(f"Recording has been moved: {new_path}")
             store.update_recording_path(recording, new_path)
 
     return file_management_task
