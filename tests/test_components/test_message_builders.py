@@ -22,15 +22,15 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
     tags=[
         data.PredictedTag(
             tag=data.Tag(key="species", value="Myotis myotis"),
-            score=0.9,
+            classification_probability=0.9,
         ),
         data.PredictedTag(
             tag=data.Tag(key="species", value="Eptesicus serotinus"),
-            score=0.7,
+            classification_probability=0.7,
         ),
         data.PredictedTag(
             tag=data.Tag(key="antropophony", value="Human voice"),
-            score=0.4,
+            classification_probability=0.4,
         ),
     ],
     detections=[
@@ -42,11 +42,11 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Myotis myotis"),
-                    score=0.6,
+                    classification_probability=0.6,
                 ),
                 data.PredictedTag(
                     tag=data.Tag(key="event", value="Echolocation"),
-                    score=0.8,
+                    classification_probability=0.8,
                 ),
             ],
         ),
@@ -58,11 +58,11 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Myotis myotis"),
-                    score=0.5,
+                    classification_probability=0.5,
                 ),
                 data.PredictedTag(
                     tag=data.Tag(key="event", value="Feeding buzz"),
-                    score=0.4,
+                    classification_probability=0.4,
                 ),
             ],
         ),
@@ -74,7 +74,7 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Eptesicus serotinus"),
-                    score=0.7,
+                    classification_probability=0.7,
                 ),
             ],
         ),

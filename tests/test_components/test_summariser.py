@@ -56,21 +56,21 @@ def create_test_predictedtags():
                     key=tag_key,
                     value="specie_a",
                 ),
-                score=0.45,
+                classification_probability=0.45,
             ),
             data.PredictedTag(
                 tag=data.Tag(
                     key=tag_key,
                     value="specie_b",
                 ),
-                score=0.65,
+                classification_probability=0.65,
             ),
             data.PredictedTag(
                 tag=data.Tag(
                     key=tag_key,
                     value="specie_c",
                 ),
-                score=0.85,
+                classification_probability=0.85,
             ),
         ]
 
