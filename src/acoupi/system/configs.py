@@ -1,4 +1,5 @@
-"""System functions from managing program config files.""" ""
+"""System functions from managing program config files."""
+
 import json
 from pathlib import Path
 from typing import List, Type, TypeVar

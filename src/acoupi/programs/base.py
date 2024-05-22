@@ -136,7 +136,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
     def add_task(
         self,
         function: Callable[[], Optional[B]],
-        callbacks: Optional[List[Callable[[B], None]]] = None,
+        callbacks: Optional[List[Callable[[Optional[B]], None]]] = None,
         schedule: Union[int, datetime.timedelta, crontab, None] = None,
         queue: Optional[str] = None,
     ):
