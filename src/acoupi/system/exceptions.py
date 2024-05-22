@@ -13,6 +13,7 @@ class ProgramNotFoundError(Exception):
     def __init__(self, program: str):
         """Initialize ProgramNotFoundError exception."""
         self.program = program
+        super().__init__(program)
 
 
 class InvalidProgramError(Exception):
@@ -21,6 +22,7 @@ class InvalidProgramError(Exception):
     def __init__(self, program: str):
         """Initialize InvalidProgramError exception."""
         self.program = program
+        super().__init__(program)
 
 
 class ParameterError(Exception):
@@ -41,6 +43,7 @@ class ParameterError(Exception):
         self.value = value
         self.message = message
         self.help = help
+        super().__init__(value, message, help)
 
     def __str__(self):
         """Return the error message."""
@@ -53,6 +56,7 @@ class HealthCheckError(Exception):
     def __init__(self, message: str):
         """Initialize HealthError exception."""
         self.message = message
+        super().__init__(message)
 
     def __str__(self):
         """Return the error message."""
@@ -65,6 +69,7 @@ class DeploymentError(Exception):
     def __init__(self, message: str):
         """Initialize DeploymentError exception."""
         self.message = message
+        super().__init__(message)
 
     def __str__(self):
         """Return the error message."""
