@@ -6,6 +6,7 @@
 #   features: []
 #   all-features: true
 #   with-sources: false
+#   generate-hashes: false
 
 -e file:.
 alabaster==0.7.13
@@ -190,7 +191,7 @@ pygments==2.18.0
 pymdown-extensions==10.8.1
     # via mkdocs-material
     # via mkdocstrings
-pyright==1.1.364
+pyright==1.1.366
 pytest==8.2.1
     # via pytest-docker-tools
 pytest-celery==1.0.0

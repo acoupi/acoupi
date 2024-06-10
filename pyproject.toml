@@ -44,7 +44,7 @@ dev-dependencies = [
     "sphinx-autobuild>=2021.3.14",
     "pytest-httpserver>=1.0.6",
     "black>=23.3.0",
-    "pyright>=1.1.364",
+    "pyright>=1.1.366",
     "ruff>=0.1.6",
     "isort>=5.11.5",
     "mkdocs>=1.5.3",
@@ -53,13 +53,6 @@ dev-dependencies = [
     "pytest-celery>=0.0.0",
     "flower>=2.0.1",
 ]
-
-[tool.black]
-line-length = 79
-
-[tool.isort]
-profile = "black"
-line_length = 79
 
 [tool.pyright]
 venvPath = "."
