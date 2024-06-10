@@ -10,9 +10,9 @@ import pytest
 
 from acoupi import data
 from acoupi.components.types import (
+    RecordingSavingFilter,
     RecordingSavingManager,
     Store,
-    RecordingSavingFilter,
 )
 from acoupi.tasks import generate_file_management_task
 

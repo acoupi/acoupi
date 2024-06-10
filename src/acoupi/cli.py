@@ -1,9 +1,9 @@
 """CLI for acoupi."""
 
+import json
 from typing import List
 
 import click
-import json
 
 from acoupi import system
 from acoupi.system import Settings, exceptions
@@ -20,7 +20,6 @@ __all__ = [
 @click.pass_context
 def acoupi(ctx):
     """Welcome to acoupi.
-
 
     This is the main command line interface for acoupi and allows you to
     setup and run acoupi programs.
@@ -225,7 +224,9 @@ def sub(ctx, config_param_name, config_param_value):
 
     try:
         # update the system with the new value
-        system.sub_config_value(settings, config_param_name, config_param_value)
+        system.sub_config_value(
+            settings, config_param_name, config_param_value
+        )
         click.echo(
             f"Configuration parameter '{config_param_name}' successfully set to '{config_param_value}'."
         )

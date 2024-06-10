@@ -50,10 +50,7 @@ def generate_file_management_task(
                 )
                 continue
 
-            if len(model_outputs) == 0:
-                logger.debug(
-                    f"Recording has not been processed: {recording.path}"
-                )
+            if required - {model.name_model for model in model_outputs}:
                 continue
 
             if file_filters and not all(

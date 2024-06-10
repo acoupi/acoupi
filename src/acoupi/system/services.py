@@ -22,17 +22,10 @@ __all__ = [
 def get_user_unit_dir() -> Path:
     """Get the user unit directory.
 
-    Use `pkg-config` to find the user unit directory.
-
     Returns
     -------
     Path
         The user unit directory.
-
-    Raises
-    ------
-    subprocess.CalledProcessError
-        If `pkg-config` returns a non-zero exit code.
     """
     # NOTE: Might need to revisit this in case systemd
     # user unit directory changes in other platforms.
@@ -109,10 +102,12 @@ def enable_services(settings: Settings, path: Optional[Path] = None, **kwargs):
         install_services(settings, path, **kwargs)
 
     subprocess.run(
-        ["systemctl", "--user", "enable", "acoupi.service"], check=True
+        ["systemctl", "--user", "enable", "acoupi.service"],
+        check=True,
     )
     subprocess.run(
-        ["systemctl", "--user", "enable", "acoupi-beat.service"], check=True
+        ["systemctl", "--user", "enable", "acoupi-beat.service"],
+        check=True,
     )
 
 
