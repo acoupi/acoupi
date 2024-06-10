@@ -8,3 +8,5 @@ sudo apt install -y \
   python3-pyaudio \
   portaudio19-dev \
   rabbitmq-server
+
+sudo loginctl enable-linger 
