@@ -14,7 +14,6 @@ __all__ = [
     "is_configured",
     "show_config",
     "get_config_value",
-    "update_config",
     "sub_config_value",
 ]
 
@@ -81,11 +80,9 @@ def get_config_value(config_value: str, settings: Settings):
 
 
 def sub_config_value(
-    settings: Settings, 
-    config_param_name: str, 
-    new_config_value: Type[S]
+    settings: Settings, config_param_name: str, new_config_value: Type[S]
 ):
-    """Update Values in Configuration File"""
+    """Update Values in Configuration File."""
     config_schema = show_config(settings)
 
     if config_param_name in config_schema:
@@ -93,4 +90,3 @@ def sub_config_value(
 
     with open(settings.program_config_file, "w") as file:
         return json.dump(config_schema, file)
-
