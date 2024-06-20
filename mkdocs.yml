@@ -5,7 +5,9 @@ nav:
   - User Guide:
       - user_guide/index.md
       - Installation: user_guide/installation.md
-      - Configuration: user_guide/programs.md
+      - CLI: user_guide/cli.md
+      - Pre-Built Programs: user_guide/programs.md
+      - Configuration: user_guide/configurations.md
       - FAQ: user_guide/faq.md
   - Developer Guide:
       - developer_guide/index.md
@@ -21,6 +23,7 @@ nav:
       - Components: reference/components.md
       - Programs: reference/programs.md
       - System: reference/system.md
+      - CLI: reference/cli.md
   - About the Project:
       - Authors: authors.md
       - License: license.md
@@ -61,6 +64,7 @@ markdown_extensions:
   - pymdownx.critic
   - pymdownx.keys
   - pymdownx.details
+  - mkdocs-click
   - pymdownx.superfences:
       preserve_tabs: true
       custom_fences:

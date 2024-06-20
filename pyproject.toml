@@ -52,6 +52,7 @@ dev-dependencies = [
     "mkdocstrings[python]>=0.22.0",
     "pytest-celery>=0.0.0",
     "flower>=2.0.1",
+    "mkdocs-click>=0.8.1",
 ]
 
 [tool.pyright]

@@ -86,6 +86,7 @@ def setup(ctx, program: str, args: List[str]):
     "--latitude",
     type=float,
     prompt="Enter the latitude of the deployment",
+    help="Latitude of the deployment",
 )
 @click.option(
     "--longitude",

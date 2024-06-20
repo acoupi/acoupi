@@ -49,6 +49,7 @@ click==8.1.7
     # via click-plugins
     # via click-repl
     # via mkdocs
+    # via mkdocs-click
     # via mkdocstrings
 click-didyoumean==0.3.1
     # via celery
@@ -112,6 +113,7 @@ livereload==2.6.3
 markdown==3.6
     # via mkdocs
     # via mkdocs-autorefs
+    # via mkdocs-click
     # via mkdocs-material
     # via mkdocstrings
     # via pymdown-extensions
@@ -130,6 +132,7 @@ mkdocs==1.6.0
     # via mkdocstrings
 mkdocs-autorefs==1.0.1
     # via mkdocstrings
+mkdocs-click==0.8.1
 mkdocs-get-deps==0.2.0
     # via mkdocs
 mkdocs-material==9.5.24

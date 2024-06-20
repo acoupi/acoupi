@@ -91,7 +91,7 @@ The **acoupi** framework has been designed to provide maximum flexibility and ke
 
 The figure below provides a simplified example of an acoupi program. This program illustrates some of the most important data schema, components, and tasks.
 
-![Figure 2: Example of a simplified acoupi program.](/docs/img/acoupi_program_simplified.png)
+![Figure 2: Example of a simplified acoupi program.](img/acoupi_program_simplified.png)
 *Figure 2: Example of a simplified acoupi program.*
 
 Refer to the [**Developer Guide**](docs/developer_guide/index.md) section of the documentation for full details on each of these elements.
