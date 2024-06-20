@@ -10,7 +10,7 @@ This documentation is still under development. If you have any questions, please
 ## Naviguation
 Please naviguate to the following pages to learn more about acoupi package, how to install, configure, use, and develop it.
 
-1. [Acoupi FAQ](/docs/user_guide/faq.md): What it is? What it isn't? 
+1. [Acoupi FAQ](/docs/user_guide/faq.md)
 2. [Acoupi Installation](/docs/user_guide/installation.md) 
 3. [Acoupi Configuration](/docs/user_guide/configurations.md)
 4. [Acoupi Command Line Interface (CLI)](/docs/user_guide/cli.md)

@@ -5,11 +5,11 @@
 
 #### Readme Content
 - [What is acoupi?](#what-is-acoupi)
+- [Requirements](#requirements)
+- [Installation](#installation)
 - [Acoupi software architecture](#acoupi-software-architecture)
     - [Framework](#acoupi-framework)
     - [Application](#acoupi-application)
-- [Requirements](#requirements)
-- [Installation](#installation)
 - [Pre-built AI Classifiers](#pre-built-ai-bioacoustics-classifiers)
 - [Features](#features)
 
@@ -20,31 +20,10 @@
 *Figure 1: Overview of where the acoupi software package fits in the toolbox 
 of bioacoustics research.*
 
-
-## Acoupi Software Architecture
-Acoupi software is divided into two parts; the code base framework and the running application. The ***acoupi framework*** is organised into a layered architecture that ensures standardisation of data while providing flexibility of configuration. The ***acoupi application*** provides a simple
-command line interface (CLI) allowing users to configure the acoupi framework for deployment. 
-
-### Acoupi Framework
-The **acoupi** framework has been designed to provide maximum flexibility and keep away the internal complexity from a user. The framework is made of four intricate elements, which we call the data schema, components, tasks, and programs. 
-
-The figure below provides a simplified example of an acoupi program. This program illustrates some of the most important data schema, components, and tasks.
-
-![Figure 2: Example of a simplified acoupi program.](/docs/img/acoupi_program_simplified.png)
-*Figure 2: Example of a simplified acoupi program.*
-
-Refer to the [**Developer Guide**](docs/developer_guide/index.md) section of the documentation for full details on each of these elements.
-
-### Acoupi Application
-An acoupi application consists of the full set of code that runs at the deployment stage. This includes a set of scripts made of an acoupi program with user configurations, celery files to organise queues and workers, and bash scripts to start, stop, and reboot the application processes. An acoupi application requires the acoupi package and related dependencies to be installed before a user can configure and run it. The figure below gives an overview of key stages related to the installation, configuration and runtime of an acoupi application.
-
-![Figure 3: Overview of steps to follow to install, configure, and start an acoupi application.](/docs/img/acoupi_installation_steps.png)
-*Figure 3: Overview of steps to follow to install, configure, and start an acoupi application.*
-
 ## Requirements
 Acoupi has been designed to run on single-board computer devices like the RPi. The software has been extensively developed and tested with the RPi 4B. We advise users to select the RPi 4B or a device featuring similar specifications. 
 
-Users should be able to download and test acoupi software on any Linux-based machines with Python version > 3.7 installed. 
+Users should be able to download and test acoupi software on any Linux-based machines with Python version >=3.8,<3.12 installed. 
 
 - A Linux-based single board computer such as the Raspberry Pi 4B. 
 - A SD Card with 64-bit Lite OS version installed.
@@ -66,9 +45,9 @@ pip install acoupi
 ```
 acoupi setup --program `program-name`
 ```
-For acoupi default program, enter this command: 
+For acoupi  program, enter this command: 
 ```
-acoupi setup --program acoupi.programs.custom.acoupi
+acoupi setup --program acoupi.custom.acoupi
 ```
 **Step 3:** To start acoupi run the command: 
 ```
@@ -101,6 +80,27 @@ The program can directly be installed and configured by typing these two command
 pip install acoupi_birdnet
 acoupi setup --program acoupi_birdnet.program
 ```
+
+
+## Acoupi Software Architecture
+Acoupi software is divided into two parts; the code base framework and the running application. The ***acoupi framework*** is organised into a layered architecture that ensures standardisation of data while providing flexibility of configuration. The ***acoupi application*** provides a simple
+command line interface (CLI) allowing users to configure the acoupi framework for deployment. 
+
+### Acoupi Framework
+The **acoupi** framework has been designed to provide maximum flexibility and keep away the internal complexity from a user. The framework is made of four intricate elements, which we call the data schema, components, tasks, and programs. 
+
+The figure below provides a simplified example of an acoupi program. This program illustrates some of the most important data schema, components, and tasks.
+
+![Figure 2: Example of a simplified acoupi program.](/docs/img/acoupi_program_simplified.png)
+*Figure 2: Example of a simplified acoupi program.*
+
+Refer to the [**Developer Guide**](docs/developer_guide/index.md) section of the documentation for full details on each of these elements.
+
+### Acoupi Application
+An acoupi application consists of the full set of code that runs at the deployment stage. This includes a set of scripts made of an acoupi program with user configurations, celery files to organise queues and workers, and bash scripts to start, stop, and reboot the application processes. An acoupi application requires the acoupi package and related dependencies to be installed before a user can configure and run it. The figure below gives an overview of key stages related to the installation, configuration and runtime of an acoupi application.
+
+![Figure 3: Overview of steps to follow to install, configure, and start an acoupi application.](/docs/img/acoupi_installation_steps.png)
+*Figure 3: Overview of steps to follow to install, configure, and start an acoupi application.*
 
 ## Features and development
 **acoupi** builds on other Python packages. The list of the most important packages and their functions is summarised below. For more information about each of them, make sure to check their respective documentation. 
