@@ -3,6 +3,14 @@ from typing import List, Tuple
 import pyaudio
 from pydantic import BaseModel
 
+__all__ = [
+    "DeviceInfo",
+    "get_input_devices",
+    "get_input_device_by_name",
+    "has_input_audio_device",
+    "get_default_microphone",
+]
+
 
 class DeviceInfo(BaseModel):
     """A dataclass to store the information of an audio device."""
@@ -33,7 +41,7 @@ def get_input_devices(p: pyaudio.PyAudio) -> List[DeviceInfo]:
                 DeviceInfo.model_validate(
                     {
                         "index": i,
-                        "name": info["name"],
+                        "name": parse_device_name(str(info["name"])),
                         "max_input_channels": info["maxInputChannels"],
                         "default_samplerate": info["defaultSampleRate"],
                     }
@@ -41,6 +49,57 @@ def get_input_devices(p: pyaudio.PyAudio) -> List[DeviceInfo]:
             )
 
     return devices
+
+
+def parse_device_name(full_name: str) -> str:
+    """Parse the name of an audio device.
+
+    Notes
+    -----
+    PyAudio appends additional information to the name of the audio device
+    in the form of "<name>: <additional_info>". This function removes the
+    additional information and returns the name of the audio device.
+    """
+    return full_name.split(":")[0].strip()
+
+
+def get_input_device_by_name(p: pyaudio.PyAudio, name: str) -> DeviceInfo:
+    """Get an input device by its name.
+
+    Parameters
+    ----------
+    p: pyaudio.PyAudio
+        An instance of PyAudio.
+    name: str
+        The name of the audio device.
+
+    Returns
+    -------
+    DeviceInfo
+        The information of the audio device.
+
+    Raises
+    ------
+    IOError
+        If the audio device with the given name is not found.
+
+    Notes
+    -----
+    It is assumed that the name of the audio device has been cleaned
+    using the `parse_device_name` function, i.e., the additional information
+    added by PyAudio has been removed. This should coincide with the name
+    provided by `arecord -l` or `lsusb`.
+    """
+    avaliable_devices = get_input_devices(p)
+
+    for device in avaliable_devices:
+        if name == device.name:
+            return device
+
+    raise IOError(
+        f"Audio device with name '{name}' not found."
+        f" Available devices: {', '.join([device.name for device in avaliable_devices])}"
+    )
 
 
 def has_input_audio_device() -> bool:

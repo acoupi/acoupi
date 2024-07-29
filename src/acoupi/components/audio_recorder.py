@@ -27,7 +27,7 @@ from pydantic import BaseModel
 
 from acoupi import data
 from acoupi.components.types import AudioRecorder
-from acoupi.devices.audio import get_input_devices
+from acoupi.devices.audio import get_input_device_by_name, get_input_devices
 from acoupi.system.exceptions import HealthCheckError, ParameterError
 
 TMP_PATH = Path("/run/shm/")
@@ -154,17 +154,17 @@ class PyAudioRecorder(AudioRecorder):
 
     def get_input_device(self, p: pyaudio.PyAudio):
         """Get the input device."""
-        input_devices = get_input_devices(p)
-        device = next(
-            (d for d in input_devices if d.name == self.device_name), None
-        )
-
-        if device is None:
+        try:
+            device = get_input_device_by_name(p, self.device_name)
+        except IOError as error:
             raise ParameterError(
                 value="device_name",
-                message="The selected input device was not found.",
+                message=(
+                    "The selected input device was not found. "
+                    f"Device name: {self.device_name}"
+                ),
                 help="Check if the microphone is connected.",
-            )
+            ) from error
 
         return device
 
@@ -235,6 +235,7 @@ def parse_microphone_config(
     p = pyaudio.PyAudio()
 
     available_devices = get_input_devices(p)
+
     if len(available_devices) == 0:
         click.secho(
             "\n* No compatible audio device found.\n", fg="red", bold=True
