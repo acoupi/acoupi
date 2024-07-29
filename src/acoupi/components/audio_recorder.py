@@ -155,6 +155,7 @@ class PyAudioRecorder(AudioRecorder):
     def get_input_device(self, p: pyaudio.PyAudio):
         """Get the input device."""
         input_devices = get_input_devices(p)
+
         device = next(
             (d for d in input_devices if d.name == self.device_name), None
         )
@@ -162,7 +163,11 @@ class PyAudioRecorder(AudioRecorder):
         if device is None:
             raise ParameterError(
                 value="device_name",
-                message="The selected input device was not found.",
+                message=(
+                    "The selected input device was not found. "
+                    f"Device name: {self.device_name}"
+                    f"Available devices: {', '.join(d.name for d in input_devices)}"
+                ),
                 help="Check if the microphone is connected.",
             )
 
