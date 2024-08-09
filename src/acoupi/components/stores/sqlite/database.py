@@ -28,6 +28,9 @@ def create_base_models(database: orm.Database) -> BaseModels:
         started_on = orm.Required(datetime, unique=True)
         """Datetime when the deployment started. Should be unique."""
 
+        ended_on = orm.Optional(datetime)
+        """Datetime when the deployment ended."""
+
         latitude = orm.Optional(float)
         """Latitude of the deployment site. Can be None if unknown."""
 
