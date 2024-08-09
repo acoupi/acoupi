@@ -3,7 +3,7 @@
 import pytest
 
 from acoupi import data
-from acoupi.system import Settings, deployments, exceptions
+from acoupi.system import Settings, deployments, exceptions, programs
 
 
 def test_start_deployment_saves_deployment_in_file(settings: Settings):
