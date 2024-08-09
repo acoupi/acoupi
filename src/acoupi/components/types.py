@@ -198,6 +198,10 @@ class Store(ABC):
         """Store the deployment locally."""
 
     @abstractmethod
+    def update_deployment(self, deployment: Deployment) -> None:
+        """Update the deployment."""
+
+    @abstractmethod
     def store_recording(
         self,
         recording: Recording,

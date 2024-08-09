@@ -110,6 +110,7 @@ class SqliteStore(types.Store):
             latitude=deployment.latitude,
             longitude=deployment.longitude,
             started_on=deployment.started_on,
+            ended_on=deployment.ended_on,
         )
 
     @orm.db_session
@@ -120,6 +121,18 @@ class SqliteStore(types.Store):
             deployment: The deployment to store
         """
         self._get_or_create_deployment(deployment)
+
+    @orm.db_session
+    def update_deployment(self, deployment: data.Deployment) -> None:
+        db_deployment = self._get_deployment_by_id(deployment.id)
+        db_deployment.name = deployment.name
+        db_deployment.latitude = deployment.latitude
+        db_deployment.longitude = deployment.longitude
+
+        if deployment.ended_on is not None:
+            db_deployment.ended_on = deployment.ended_on
+
+        orm.commit()
 
     @orm.db_session
     def store_recording(self, recording: data.Recording) -> None:
@@ -463,7 +476,7 @@ class SqliteStore(types.Store):
         """Get the deployment by the started_on datetime."""
         deployment: Optional[db_types.Deployment] = self.models.Deployment.get(
             started_on=started_on
-        )  # type: ignore
+        )
 
         if deployment is None:
             raise ValueError("No deployment found")

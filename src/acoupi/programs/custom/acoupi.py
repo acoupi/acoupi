@@ -28,17 +28,6 @@ class AudioConfig(BaseModel):
     recording_interval: int = 10
     """Interval between each audio recording in seconds."""
 
-    # @model_validator(mode="after")
-    # def validate_audio_duration(cls, value):
-    #     """Validate audio duration."""
-    #
-    #     if value.audio_duration > value.recording_interval:
-    #         raise ValueError(
-    #             "Audio duration cannot be greater than recording interval."
-    #         )
-    #
-    #     return value
-
 
 class RecordingSchedule(BaseModel):
     """Recording schedule config."""
@@ -163,6 +152,10 @@ class Program(AcoupiProgram):
             schedule=datetime.timedelta(minutes=1),
             queue="default",
         )
+
+    def on_start(self, deployment: data.Deployment) -> None:
+        super().on_start(deployment)
+        self.store.store_deployment(deployment)
 
     def validate_dirs(self, config: ConfigSchema):
         """Validate directories."""

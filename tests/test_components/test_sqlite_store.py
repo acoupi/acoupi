@@ -74,6 +74,7 @@ def test_deployment_table_has_correct_columns(sqlite_store) -> None:
     expected_columns = {
         "id",
         "started_on",
+        "ended_on",
         "latitude",
         "longitude",
         "name",
@@ -369,3 +370,45 @@ def test_can_store_model_outputs(
 
         cursor.execute("SELECT id FROM detection;")
         assert len(cursor.fetchall()) == 1
+
+
+def test_can_update_deployment_info(
+    sqlite_store: components.SqliteStore,
+):
+    start = datetime.datetime.now()
+    deployment = data.Deployment(
+        started_on=start,
+        latitude=1.0,
+        longitude=2.0,
+        name="test_device",
+    )
+    sqlite_store.store_deployment(deployment)
+
+    current_deployment = sqlite_store.get_current_deployment()
+    assert deployment == current_deployment
+
+    assert current_deployment.ended_on is None
+
+    updated_deployment = deployment.model_copy(
+        update=dict(ended_on=start + datetime.timedelta(days=2))
+    )
+    assert updated_deployment.ended_on is not None
+    sqlite_store.update_deployment(updated_deployment)
+
+    current_deployment = sqlite_store.get_current_deployment()
+    assert updated_deployment.model_dump() == current_deployment.model_dump()
+    assert current_deployment.ended_on is not None
+
+
+def test_update_deployment_fails_if_corresponding_deployment_does_not_exist(
+    sqlite_store: components.SqliteStore,
+):
+    start = datetime.datetime.now()
+    deployment = data.Deployment(
+        started_on=start,
+        latitude=1.0,
+        longitude=2.0,
+        name="test_device",
+    )
+    with pytest.raises(ValueError):
+        sqlite_store.update_deployment(deployment)

@@ -32,6 +32,9 @@ class DummyStore(Store):
     def store_deployment(self, deployment: data.Deployment) -> None:
         pass
 
+    def update_deployment(self, deployment: data.Deployment) -> None:
+        pass
+
     def store_recording(
         self,
         recording: data.Recording,
