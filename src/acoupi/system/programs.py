@@ -73,6 +73,13 @@ def load_program(settings: Settings) -> programs.AcoupiProgram:
     -------
     programs.AcoupiProgram
         A fully configured instance of the acoupi program class.
+
+    Raises
+    ------
+    exceptions.ProgramNotFoundError
+        If the program module is not found.
+    exceptions.InvalidProgramError
+        If the loaded class is not a valid acoupi program class.
     """
     program_name = settings.program_name_file.read_text().strip()
     program_class = load_program_class(program_name)

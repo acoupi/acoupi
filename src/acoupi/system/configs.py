@@ -2,10 +2,11 @@
 
 import json
 from pathlib import Path
-from typing import List, Type, TypeVar
+from typing import List, Optional, Type, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
+from acoupi.system import exceptions
 from acoupi.system.constants import Settings
 
 __all__ = [
@@ -35,7 +36,7 @@ S = TypeVar("S", bound=BaseModel)
 
 
 def write_config(
-    config: BaseModel,
+    config: Optional[BaseModel],
     path: Path,
 ) -> None:
     """Write config to file."""
@@ -49,13 +50,36 @@ def write_config(
         file.write(config.model_dump_json())
 
 
-def load_config(
-    path: Path,
-    schema: Type[S],
-) -> S:
-    """Load config from file."""
+def load_config(path: Path, schema: Type[S]) -> S:
+    """Load config from file.
+
+    Parameters
+    ----------
+    path
+        Path to the config file.
+    schema
+        Pydantic model to validate the config.
+
+    Returns
+    -------
+    S
+        The loaded config.
+
+    Raises
+    ------
+    ConfigurationError
+        If the configuration is invalid.
+    FileNotFoundError
+        If the config file does not exist.
+    """
     with open(path) as file:
-        return schema.model_validate_json(file.read())
+        try:
+            return schema.model_validate_json(file.read())
+        except (ValueError, ValidationError) as error:
+            raise exceptions.ConfigurationError(
+                message=f"Invalid configuration in {path}: {error}",
+                help="Check the configuration file for errors.",
+            ) from error
 
 
 def is_configured(settings: Settings) -> bool:
