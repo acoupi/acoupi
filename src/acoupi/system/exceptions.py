@@ -3,7 +3,7 @@
 from typing import Optional
 
 __all__ = [
-    "ConfigurationError"
+    "ConfigurationError",
     "DeploymentError",
     "HealthCheckError",
     "InvalidProgramError",
