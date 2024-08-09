@@ -5,13 +5,13 @@ This module provides functions that facilitate the creation of programs.
 
 import datetime
 from pathlib import Path
-from typing import Annotated, List, Type, Optional, Type
+from typing import Annotated, List, Optional, Type
 
 from pydantic import BaseModel, Field
 
-from acoupi.data import TimeInterval
 from acoupi.components import types
-from acoupi.programs.base import NoUserPrompt, AcoupiProgram
+from acoupi.data import TimeInterval
+from acoupi.programs.base import AcoupiProgram, NoUserPrompt
 
 __all__ = [
     "create_base_program",
@@ -56,10 +56,10 @@ def create_base_program(
     models: Optional[List[Type[types.Model]]] = None,
     messenger: Optional[Type[types.Messenger]] = None,
     summarizers: Optional[List[Type[types.Summariser]]] = None,
+    config_schema: Optional[Type[BaseModel]] = None,
 ) -> Type[AcoupiProgram]:
-
-    # class Program(AcoupiProgram):
-    #     config: config_schema
+    class Program(AcoupiProgram):
+        config: config_schema
 
     # Recording
     # - Recording Schedule: Frequency
