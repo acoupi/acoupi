@@ -28,7 +28,7 @@ acoupi check
 Deploys and activates the selected program on your edge device.
 
 ```bash
-acoupi start
+acoupi deployment start
 ```
 
 ## Stop Deployment
@@ -36,7 +36,7 @@ acoupi start
 Stops the running program.
 
 ```bash
-acoupi stop
+acoupi deployment stop
 ```
 
 ## System Status
@@ -44,7 +44,7 @@ acoupi stop
 Displays the current status of your Acoupi program (running, stopped, etc.).
 
 ```bash
-acoupi status
+acoupi deployment status
 ```
 
 ## Configuration
@@ -54,7 +54,7 @@ acoupi status
 Displays your current configuration settings.
 
 ```bash
-acoupi config show
+acoupi config get
 ```
 
 ### Get Configuration
@@ -62,13 +62,13 @@ acoupi config show
 Retrieves the value of a specific configuration parameter (e.g., acoupi config get sampling_rate).
 
 ```bash
-acoupi config get <parameter_name>
+acoupi config get --field <field_name>
 ```
 
 ### Modify Configuration
 
-Modifies the value of a specific configuration parameter (e.g., `acoupi config sub sampling_rate 22050`).
+Modifies the value of a specific configuration parameter (e.g., `acoupi config set sampling_rate 22050`).
 
 ```bash
-acoupi config sub <parameter_name> <new_value>
+acoupi config set <field_name> <new_value>
 ```

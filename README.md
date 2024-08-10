@@ -56,7 +56,7 @@ acoupi check
 ```
  ### Step 4: Start running your configured program.
 ```
-acoupi start
+acoupi deployment start
 ```
 
 > [!TIP]
