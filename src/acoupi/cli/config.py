@@ -17,7 +17,14 @@ __all__ = [
 @acoupi.group()
 @click.pass_context
 def config(ctx):
-    """Manage acoupi configuration."""
+    """Manage the acoupi configuration.
+
+    This command group provides subcommands to view and modify the acoupi
+    configuration settings.
+
+    Before using any subcommands, ensure that acoupi is properly set up by
+    running `acoupi setup`.
+    """
     settings = ctx.obj["settings"]
 
     if not system.is_configured(settings):
@@ -61,22 +68,52 @@ def config(ctx):
 @click.option(
     "--field",
     type=str,
-    help="Show a specific field from the configuration.",
+    help=(
+        "Retrieve a specific field or nested field from the configuration "
+        "using dot notation (e.g., 'section.subsection.value'). If not "
+        "provided, the entire configuration is displayed."
+    ),
 )
 @click.option(
     "--color/--no-color",
     default=True,
-    help="Enable or disable color output.",
+    help=(
+        "Enable or disable syntax highlighting for improved readability. "
+        "Default is enabled."
+    ),
 )
 @click.option(
     "--indent",
     "-i",
     type=int,
     default=2,
-    help="Indentation level.",
+    help="Set the indentation level for the output JSON. Default is 2 spaces.",
 )
 def get_config_field(ctx, field: str, color: bool, indent: int):
-    """Show the entire configuration of acoupi."""
+    """Display the full (or a specific field of the) acoupi configuration.
+
+    This command allows you to view the current configuration settings for
+    acoupi. You can either retrieve the entire configuration or a specific
+    field or nested field within the configuration.
+
+    Examples
+    --------
+    To display the entire configuration:
+
+        acoupi config get
+
+    To display the value of the `username` field:
+
+        acoupi config get --field username
+
+    To display the value of the nested field `server.port`:
+
+        acoupi config get --field server.port
+
+    To display the configuration without color highlighting:
+
+        acoupi config get --no-color
+    """
     config = ctx.obj["config"]
 
     if field:
@@ -95,11 +132,48 @@ def get_config_field(ctx, field: str, color: bool, indent: int):
 
 
 @config.command("set")
-@click.argument("field", type=str)
 @click.argument("value", required=True, type=str)
+@click.option(
+    "--field",
+    type=str,
+    default="",
+    help=(
+        "Set a specific field of the configuration using dot notation "
+        "(e.g., 'section.subsection.value'). "
+        "If not provided, the entire configuration is modified."
+    ),
+)
 @click.pass_context
 def set_field(ctx, field: str, value: str):
-    """Set a configuration value."""
+    """Set a specific field or the entire acoupi configuration to a new VALUE.
+
+    This command allows you to update a configuration value by specifying its
+    new value. You can:
+
+    * Modify the entire configuration (if `--field` is not provided)
+
+    * Modify a specific field
+
+    * Modify nested fields using dot notation (e.g., 'section.subsection.value')
+
+    Note: Any configuration changes provided are validated against the original
+    configuration schema to ensure data integrity.
+
+    Examples
+    --------
+    To change the `username` to "new_user":
+
+        acoupi config set username new_user
+
+    To change the nested field `server.port` to 8080:
+
+        acoupi config set server.port 8080
+
+    To replace the entire configuration with a new one (assuming
+    'new_config.json' contains valid JSON):
+
+        acoupi config set "$(cat new_config.json)"
+    """
     config = ctx.obj["config"]
     settings = ctx.obj["settings"]
 
