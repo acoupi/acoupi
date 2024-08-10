@@ -77,7 +77,7 @@ def test_can_set_configuration(settings: Settings):
     # Set the configuration
     result = runner.invoke(
         acoupi,
-        ["config", "set", "name", "new_name"],
+        ["config", "set", "--field", "name", "new_name"],
         obj={"settings": settings},
     )
     assert result.exit_code == 0
