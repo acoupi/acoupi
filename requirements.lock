@@ -66,12 +66,12 @@ pyaudio==0.2.14
     # via acoupi
 pycparser==2.22
     # via cffi
-pydantic==2.7.1
+pydantic==2.8.2
     # via acoupi
     # via pydantic-settings
-pydantic-core==2.18.2
+pydantic-core==2.20.1
     # via pydantic
-pydantic-settings==2.2.1
+pydantic-settings==2.4.0
     # via acoupi
 pygments==2.18.0
     # via acoupi
