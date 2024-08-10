@@ -6,11 +6,11 @@ such as loading programs and getting celery apps from programs.
 
 from acoupi.system.apps import get_celery_app
 from acoupi.system.config import (
-    get_config,
-    get_config_value,
+    dump_config,
+    get_config_field,
     load_config,
     parse_config_from_args,
-    set_config_value,
+    set_config_field,
     write_config,
 )
 from acoupi.system.constants import Settings
@@ -38,10 +38,11 @@ from acoupi.system.state import is_configured
 __all__ = [
     "Settings",
     "disable_services",
+    "dump_config",
     "enable_services",
     "end_deployment",
     "get_celery_app",
-    "get_config_value",
+    "get_config_field",
     "get_current_deployment",
     "is_configured",
     "load_config",
@@ -49,15 +50,14 @@ __all__ = [
     "load_program_class",
     "parse_config_from_args",
     "services_are_installed",
+    "set_config_field",
     "setup_program",
-    "get_config",
     "start_deployment",
     "start_program",
     "start_services",
     "status_services",
     "stop_program",
     "stop_services",
-    "set_config_value",
     "write_config",
     "write_program_file",
 ]
