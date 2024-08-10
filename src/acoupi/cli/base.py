@@ -90,17 +90,3 @@ def check(ctx):
         click.secho(f"Error: {err}", fg="red")
         raise click.Abort() from err
     click.secho("Health checks passed.", fg="green")
-
-
-@acoupi.command()
-@click.pass_context
-def status(ctx):
-    """Check the status of acoupi services."""
-    settings = ctx.obj["settings"]
-    if not system.is_configured(settings):
-        click.echo("Acoupi is not setup. Run `acoupi setup` first.")
-        return
-
-    """Check the status of acoupi services."""
-    click.echo("Acoupi services status are:")
-    system.status_services(settings)
