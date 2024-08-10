@@ -1,8 +1,12 @@
 """Path constants for acoupi system."""
 
 from pathlib import Path
+from typing import List
 
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+__all__ = ["Settings", "CeleryConfig"]
 
 
 class Settings(BaseSettings):
@@ -29,3 +33,16 @@ class Settings(BaseSettings):
     beat_script_path: Path = home / "bin" / "acoupi-beat.sh"
     acoupi_service_file: str = "acoupi.service"
     acoupi_beat_service_file: str = "acoupi-beat.service"
+
+
+class CeleryConfig(BaseModel):
+    """Celery config."""
+
+    enable_utc: bool = True
+    timezone: str = "UTC"
+    broker_url: str = "pyamqp://guest@localhost//"
+    result_backend: str = "rpc://"
+    result_persistent: bool = False
+    task_serializer: str = "pickle"
+    result_serializer: str = "pickle"
+    accept_content: List[str] = Field(default_factory=lambda: ["pickle"])

@@ -1,6 +1,6 @@
 import pytest
 
-from acoupi.system.configs import CeleryConfig
+from acoupi.system.constants import CeleryConfig
 
 
 @pytest.fixture(scope="session")

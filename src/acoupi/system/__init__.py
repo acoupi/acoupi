@@ -5,10 +5,11 @@ such as loading programs and getting celery apps from programs.
 """
 
 from acoupi.system.apps import get_celery_app
-from acoupi.system.configs import (
+from acoupi.system.config import (
     get_config_value,
     is_configured,
     load_config,
+    parse_config_from_args,
     show_config,
     sub_config_value,
     write_config,
@@ -20,7 +21,6 @@ from acoupi.system.deployments import (
     start_deployment,
 )
 from acoupi.system.lifecycle import setup_program, start_program, stop_program
-from acoupi.system.parsers import parse_config_from_args
 from acoupi.system.programs import (
     load_program,
     load_program_class,

@@ -6,8 +6,8 @@ from typing import Type
 
 from acoupi import programs
 from acoupi.system import exceptions
-from acoupi.system.configs import CeleryConfig, load_config
-from acoupi.system.constants import Settings
+from acoupi.system.config import load_config
+from acoupi.system.constants import CeleryConfig, Settings
 from acoupi.system.templates import render_template
 
 __all__ = [

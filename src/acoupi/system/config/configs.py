@@ -2,34 +2,21 @@
 
 import json
 from pathlib import Path
-from typing import List, Optional, Type, TypeVar
+from typing import Optional, Type, TypeVar
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, ValidationError
 
 from acoupi.system import exceptions
 from acoupi.system.constants import Settings
 
 __all__ = [
-    "write_config",
-    "load_config",
-    "is_configured",
-    "show_config",
     "get_config_value",
+    "is_configured",
+    "load_config",
+    "show_config",
     "sub_config_value",
+    "write_config",
 ]
-
-
-class CeleryConfig(BaseModel):
-    """Celery config."""
-
-    enable_utc: bool = True
-    timezone: str = "UTC"
-    broker_url: str = "pyamqp://guest@localhost//"
-    result_backend: str = "rpc://"
-    result_persistent: bool = False
-    task_serializer: str = "pickle"
-    result_serializer: str = "pickle"
-    accept_content: List[str] = Field(default_factory=lambda: ["pickle"])
 
 
 S = TypeVar("S", bound=BaseModel)
@@ -104,7 +91,9 @@ def get_config_value(config_value: str, settings: Settings):
 
 
 def sub_config_value(
-    settings: Settings, config_param_name: str, new_config_value: Type[S]
+    settings: Settings,
+    config_param_name: str,
+    new_config_value: Type[S],
 ):
     """Update Values in Configuration File."""
     config_schema = show_config(settings)
