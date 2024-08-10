@@ -73,6 +73,8 @@ pydantic-core==2.18.2
     # via pydantic
 pydantic-settings==2.2.1
     # via acoupi
+pygments==2.18.0
+    # via acoupi
 python-dateutil==2.9.0.post0
     # via celery
 python-dotenv==1.0.1

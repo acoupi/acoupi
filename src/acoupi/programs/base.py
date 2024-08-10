@@ -112,7 +112,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         self.logger.info("Deployment: %s", deployment)
 
     @classmethod
-    def get_config_schema(cls) -> Optional[Type[BaseModel]]:
+    def get_config_schema(cls) -> Type[BaseModel]:
         """Get the config class."""
         return cls.__annotations__["config"]
 

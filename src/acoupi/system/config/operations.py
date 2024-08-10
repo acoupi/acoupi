@@ -11,10 +11,9 @@ from acoupi.system.constants import Settings
 
 __all__ = [
     "get_config_value",
-    "is_configured",
     "load_config",
-    "show_config",
-    "sub_config_value",
+    "get_config",
+    "set_config_value",
     "write_config",
 ]
 
@@ -69,16 +68,7 @@ def load_config(path: Path, schema: Type[S]) -> S:
             ) from error
 
 
-def is_configured(settings: Settings) -> bool:
-    """Check if acoupi is configured."""
-    return (
-        settings.program_config_file.exists()
-        and settings.program_file.exists()
-        and settings.program_name_file.exists()
-    )
-
-
-def show_config(settings: Settings) -> dict:
+def get_config(settings: Settings) -> dict:
     """Show acoupi config file."""
     with open(settings.program_config_file) as file:
         return json.load(file)
@@ -86,17 +76,17 @@ def show_config(settings: Settings) -> dict:
 
 def get_config_value(config_value: str, settings: Settings):
     """Get a specific configuration value of acoupi."""
-    config = show_config(settings)
+    config = get_config(settings)
     return config[config_value]
 
 
-def sub_config_value(
+def set_config_value(
     settings: Settings,
     config_param_name: str,
     new_config_value: Type[S],
 ):
     """Update Values in Configuration File."""
-    config_schema = show_config(settings)
+    config_schema = get_config(settings)
 
     if config_param_name in config_schema:
         config_schema[config_param_name] = new_config_value
