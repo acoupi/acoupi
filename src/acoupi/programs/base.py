@@ -186,6 +186,8 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         function: Callable[[], Optional[B]],
         callback_tasks: Optional[List[Task]] = None,
     ) -> Task:
+        # TODO: Check Celery docs for best callback practices
+
         # Use the function name as the task name
         name = function.__name__
 
