@@ -112,7 +112,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         self.logger.info("Deployment: %s", deployment)
 
     @classmethod
-    def get_config_schema(cls) -> Optional[Type[BaseModel]]:
+    def get_config_schema(cls) -> Type[BaseModel]:
         """Get the config class."""
         return cls.__annotations__["config"]
 
@@ -186,6 +186,8 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         function: Callable[[], Optional[B]],
         callback_tasks: Optional[List[Task]] = None,
     ) -> Task:
+        # TODO: Check Celery docs for best callback practices
+
         # Use the function name as the task name
         name = function.__name__
 

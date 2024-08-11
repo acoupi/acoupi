@@ -54,6 +54,32 @@ plugins:
   - search
   - mkdocstrings:
       default_handler: python
+      handlers:
+        python:
+          paths: ["src"]
+          import:
+            - https://docs.python.org/3.11/objects.inv
+            - https://docs.xarray.dev/en/stable/objects.inv
+            - https://numpy.org/doc/stable/objects.inv
+            - https://mbsantiago.github.io/soundevent/objects.inv
+          options:
+            show_source: false
+            show_root_toc_entry: true
+            show_symbol_type_toc: true
+            show_root_heading: true
+            show_category_heading: true
+            show_symbol_type_heading: true
+            show_if_no_docstring: true
+            docstring_style: "numpy"
+            docstring_section_style: "table"
+            summary: true
+            signature_crossrefs: true
+            show_signature_annotations: false
+            filters:
+              - "!^_"
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
 markdown_extensions:
   - abbr
   - attr_list

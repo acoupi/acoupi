@@ -48,7 +48,7 @@ acoupi setup --program acoupi.custom.acoupi
 ```
 **Step 3:** To start acoupi run the command: 
 ```
-acoupi start
+acoupi deployment start
 ```
 
 > [!TIP]

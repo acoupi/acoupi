@@ -9,8 +9,8 @@ import click
 import pytest
 from pydantic import BaseModel, Field
 
+from acoupi.system.config import parse_config_from_args
 from acoupi.system.exceptions import ParameterError
-from acoupi.system.parsers import parse_config_from_args
 
 
 def test_parse_config_with_empty_args_has_default_values():

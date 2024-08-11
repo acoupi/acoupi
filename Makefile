@@ -57,4 +57,4 @@ serve-coverage:
 	$(ENV_PREFIX)python -m http.server --directory htmlcov/ 8080
 
 serve-docs:
-	$(ENV_PREFIX)mkdocs serve
+	$(ENV_PREFIX)mkdocs serve --open

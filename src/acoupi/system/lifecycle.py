@@ -3,10 +3,9 @@
 from typing import List, Optional
 
 from acoupi.system import programs, services
-from acoupi.system.configs import CeleryConfig, write_config
-from acoupi.system.constants import Settings
+from acoupi.system.config import parse_config_from_args, write_config
+from acoupi.system.constants import CeleryConfig, Settings
 from acoupi.system.deployments import end_deployment, start_deployment
-from acoupi.system.parsers import parse_config_from_args
 from acoupi.system.scripts import write_scripts
 
 __all__ = [
