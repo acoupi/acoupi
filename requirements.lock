@@ -16,10 +16,6 @@ annotated-types==0.6.0
     # via pydantic
 astral==3.2
     # via acoupi
-backports-zoneinfo==0.2.1
-    # via astral
-    # via celery
-    # via kombu
 billiard==4.2.0
     # via celery
 celery==5.4.0
@@ -90,12 +86,10 @@ six==1.16.0
 sounddevice==0.4.6
     # via acoupi
 typing-extensions==4.11.0
-    # via annotated-types
     # via kombu
     # via pydantic
     # via pydantic-core
 tzdata==2024.1
-    # via backports-zoneinfo
     # via celery
 urllib3==2.2.1
     # via requests

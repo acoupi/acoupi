@@ -80,13 +80,29 @@ def check(ctx):
 
     if not system.is_configured(settings):
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
-        return
+        raise click.Abort()
 
     click.secho("Running health checks...", fg="green")
     program = system.load_program(settings)
+
     try:
         program.check(program.config)
     except exceptions.HealthCheckError as err:
         click.secho(f"Error: {err}", fg="red")
         raise click.Abort() from err
+
     click.secho("Health checks passed.", fg="green")
+
+
+@acoupi.command()
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.pass_context
+def celery(ctx, args: List[str]):
+    """Run a celery command."""
+    settings: Settings = ctx.obj["settings"]
+
+    if not system.is_configured(settings):
+        click.echo("Acoupi is not setup. Run `acoupi setup` first.")
+        raise click.Abort()
+
+    system.run_celery_command(settings, args)
