@@ -5,6 +5,7 @@ such as loading programs and getting celery apps from programs.
 """
 
 from acoupi.system.apps import get_celery_app
+from acoupi.system.celery import run_celery_command
 from acoupi.system.config import (
     dump_config,
     get_config_field,
@@ -49,6 +50,7 @@ __all__ = [
     "load_program",
     "load_program_class",
     "parse_config_from_args",
+    "run_celery_command",
     "services_are_installed",
     "set_config_field",
     "setup_program",
