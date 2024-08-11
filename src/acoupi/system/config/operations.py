@@ -360,7 +360,7 @@ class PydanticJSONEncoder(json.JSONEncoder):
 
     def default(self, o: Any) -> Any:
         if isinstance(o, BaseModel):
-            return o.model_dump()
+            return json.loads(o.model_dump_json(round_trip=True))
 
         return super().default(o)
 
