@@ -27,8 +27,9 @@ __all__ = [
     "FrequencySchedule",
     "After_DawnDuskTimeInterval",
     "Before_DawnDuskTimeInterval",
-    "FocusSpeciesRecordingFilter",
-    "ThresholdRecordingFilter",
+    "FocusTagValueSavingRecordingFilter"
+    "FocusTagsSavingRecordingFilter",
+    "ThresholdDetectionSavingRecordingFilter",
 ]
 
 
@@ -178,36 +179,36 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         )
 
 
-class ThresholdRecordingFilter(types.RecordingSavingFilter):
+class ThresholdDetectionSavingRecordingFilter(types.RecordingSavingFilter):
     """Save recording if confident.
 
     A RecordingFilter that return True or False if an audio recording contains
-    any detections above a specified threshold. The threshold argument can be
-    used to set the minimum probability threshold for a detection to be
-    considered confident.
+    any detections above a specified threshold. The saving threshold argument can be
+    used to set the minimum detection and classification probability that need to be 
+    be met for a recording to be saved.
 
     IF True : Recording is likely to contain bat calls.
     IF False: Recording is unlikely to contain bat calls.
 
-    The result of ThresholdRecordingFilter is used by the SavingManagers. It tells the
+    The result of ThresholdDetectionSavingRecordingFilter is used by the SavingManagers. It tells the
     SavingManager how to save detections.
     """
 
-    def __init__(self, threshold: float):
+    def __init__(self, saving_threshold: float):
         """Initialize the filter.
 
         Args:
-            threshold: The probability threshold to use.
+            saving_treshold: The probability threshold to use.
         """
-        self.threshold = threshold
+        self.saving_threshold = saving_threshold
 
-    def is_confident_model_output(
+    def has_confident_model_output(
         self, model_output: data.ModelOutput
     ) -> bool:
         """Determine if a model output is confident.
 
-        An output is considered confident if any of its tags or detections
-        have a probability greater than or equal to the threshold.
+        An output will be saved if any of its tags or detections
+        have a probability greater than or equal to the saving_threshold.
 
         Args:
             model_output: The model output to check.
@@ -217,19 +218,22 @@ class ThresholdRecordingFilter(types.RecordingSavingFilter):
             bool
         """
         if any(
-            tag.classification_probability >= self.threshold
+            tag.classification_probability >= self.saving_threshold
             for tag in model_output.tags
         ):
             return True
 
-        return any(
-            detection.detection_probability >= self.threshold
+        if any(
+            detection.detection_probability >= self.saving_threshold
             for detection in model_output.detections
-        )
+        ):
+            return True
+
+        return False
+
 
     def should_save_recording(
         self,
-        recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be kept.
@@ -246,12 +250,67 @@ class ThresholdRecordingFilter(types.RecordingSavingFilter):
             return False
 
         return any(
-            self.is_confident_model_output(model_output)
+            self.has_confident_model_output(model_output)
             for model_output in model_outputs
         )
 
 
-class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
+class FocusTagValueSavingRecordingFilter(types.RecordingSavingFilter):
+    """A RecordingFilter that keeps recordings with specific tag values."""
+
+    values: List[str]
+    """The tag values to focus on."""
+
+    def __init__(self, values: List[str]):
+        """Initialize the filter.
+
+        Args:
+            values: The tag values to focus on.
+        """
+        self.values = values
+    
+    def has_confident_tagvalues(self, model_output: data.ModelOutput) -> bool:
+        """Determine if a model output has a confident tag.
+
+        An output is considered confident if any of its tags or detections
+        have a probability greater than or equal to the threshold.
+
+        Args:
+            model_output: The model output to check.
+
+        Returns
+        -------
+            bool
+        """
+        for detection in model_output.detections:
+            for tag in detection.tags:
+                if tag.tag.value in self.values:
+                    return True
+        return False
+
+    def should_save_recording(
+        self,
+        model_outputs: Optional[List[data.ModelOutput]] = None,
+    ) -> bool:
+        """Determine if a model output has a confident tag value.
+
+        Args:
+            model_output: The model output to check.
+
+        Returns
+        -------
+            bool
+        """
+        if model_outputs is None:
+            return False
+
+        return any(
+            self.has_confident_tagvalues(model_output) for model_output in model_outputs
+        )
+
+
+
+class FocusTagsSavingRecordingFilter(types.RecordingSavingFilter):
     """A RecordingFilter that keeps recordings with selected tags.
 
     This filter will keep recordings that contain confident tag
@@ -261,10 +320,10 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
     tags: List[data.Tag]
     """The tags to focus on."""
 
-    threshold: float
+    saving_threshold: float
     """The probability threshold to use."""
 
-    def __init__(self, tags: List[data.Tag], threshold: float = 0.5):
+    def __init__(self, tags: List[data.Tag], saving_threshold: float = 0.5):
         """Initialize the filter.
 
         Args:
@@ -274,7 +333,7 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
                 greater than or equal to this threshold.
         """
         self.tags = tags
-        self.threshold = threshold
+        self.saving_threshold = saving_threshold
 
     def has_confident_tag(self, model_output: data.ModelOutput) -> bool:
         """Determine if a model output has a confident tag.
@@ -291,20 +350,20 @@ class FocusSpeciesRecordingFilter(types.RecordingSavingFilter):
         """
         if any(
             tag.tag in self.tags
-            and tag.classification_probability >= self.threshold
+            and tag.classification_probability >= self.saving_threshold
             for tag in model_output.tags
         ):
             return True
 
         for detection in model_output.detections:
-            if detection.detection_probability < self.threshold:
+            if detection.detection_probability < self.saving_threshold:
                 continue
 
             for tag in detection.tags:
                 if tag.tag not in self.tags:
                     continue
 
-                if tag.classification_probability >= self.threshold:
+                if tag.classification_probability >= self.saving_threshold:
                     return True
 
         return False
