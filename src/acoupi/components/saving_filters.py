@@ -172,12 +172,7 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         dusktime_interval = dusktime + datetime.timedelta(
             minutes=self.duration
         )
-
-        print(f"Recording time: {recording_time}")
-        print(f"Dawn time: {dawntime}, Dusk time: {dusktime}")
-        print(f"Dawn interval: {dawntime_interval} to {dawntime}")
-        print(f"Dusk interval: {dusktime_interval} to {dusktime}")
-
+        
         return (
             (dawntime <= recording_time <= dawntime_interval)
             or (dusktime <= recording_time <= dusktime_interval)
