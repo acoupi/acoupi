@@ -4,6 +4,8 @@ import datetime
 from pathlib import Path
 from typing import List
 import pytz
+from astral import LocationInfo
+from astral.sun import sun
 
 import pytest
 
@@ -178,7 +180,7 @@ def test_before_dawndusk_time_interval(
 
     # Fetch sun information
     test_date = datetime.datetime(2024, 8, 1, tzinfo=timezone)
-    sun_info = sun(location.observer, date=test_date, tzinfo=timezone)
+    sun_info = sun(LocationInfo(str(timezone)).observer, date=test_date, tzinfo=timezone)
     dawntime = sun_info["dawn"]
     dusktime = sun_info["dusk"]
 
