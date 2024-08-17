@@ -179,8 +179,8 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         print(f"Dusk interval: {dusktime_interval} to {dusktime}")
 
         return (
-            (dawntime_interval <= recording_time <= dawntime)
-            or (dusktime_interval <= recording_time <= dusktime)
+            (dawntime <= recording_time <= dawntime_interval)
+            or (dusktime <= recording_time <= dusktime_interval)
         )
 
 
