@@ -168,7 +168,7 @@ class RecordingSavingManager(ABC):
         self,
         recording: Recording,
         model_outputs: Optional[List[ModelOutput]] = None,
-    ) -> Path:
+    ) -> Optional[Path]:
         """Save the recording locally.
 
         Args:
