@@ -182,10 +182,11 @@ def test_before_dawndusk_time_interval(
     test_date = datetime.datetime(2024, 8, 1, tzinfo=timezone)
     sun_info = sun(LocationInfo(str(timezone)).observer, date=test_date, tzinfo=timezone)
     dawntime = sun_info["dawn"]
+    print(f"DawnTime: {dawntime}")
     dusktime = sun_info["dusk"]
 
     # Case 1: Recording exactly at dawn
-    recording_at_dawn = create_test_recording(recording_time=dawntime)
+    recording_at_dawn = create_test_recording(recording_time=datetime.datetime(2024, 8, 1, 4, 30, 0)
     assert saving_filter.should_save_recording(recording_at_dawn) == True
 
     # Case 2: Recording within the interval before dawn
