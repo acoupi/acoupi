@@ -119,6 +119,9 @@ def create_test_model_output():
 
     return factory
 
+
+
+""" TESTS - RECORDING TIME INTERVAL - SAVING MANAGERS"""
 def test_save_recording_ifin_interval(
         create_test_timeinterval,
         create_test_recording,
@@ -202,11 +205,33 @@ def test_delete_recording_before_dawndusk_outsideinterval(
     assert result == False
 
 
+
+""" TESTS - THRESHOLD DETECTIONS - SAVING FILTERS """
+def test_delete_recording_without_detections(
+    create_test_model_output,
+) -> None:
+    """Test if the recording is deleted if it has no detections."""
+    # Setup
+    saving_threshold = 0.6
+    model_output = create_test_model_output(
+        detections=[]
+    )
+
+    saving_filter = saving_filters.ThresholdDetectionSavingRecordingFilter(
+        saving_threshold=saving_threshold
+    )
+    # Act
+    result = saving_filter.should_save_recording(model_outputs=[model_output])
+
+    # Check
+    assert result == False 
+
+
 def test_save_recording_ifboth_detclassprob_above_savingthreshold(
         create_test_detection,
         create_test_model_output,
 ) -> None:
-    """Test if the recording is saved if it contains the focus species."""
+    """Test if the recording is saved if both det. and class. probabilities are above the saving threshold."""
     # Setup
     saving_threshold = 0.6
     model_output = create_test_model_output(
@@ -236,7 +261,7 @@ def test_save_recording_if_onlydetprob_above_savingthreshold(
         create_test_detection,
         create_test_model_output,
 ) -> None:
-    """Test if the recording is saved if it contains the focus species."""
+    """Test if the recording is saved if only detection probabilities are above the saving threshold."""
     # Setup
     saving_threshold = 0.6
     model_output = create_test_model_output(
@@ -266,7 +291,7 @@ def test_delete_recording_if_detclassprob_below_savingthreshold(
         create_test_model_output,
         create_test_detection,
 ) -> None:
-    """Test if the recording is saved if it contains the focus species."""
+    """Test if the recording is deleted if none of the probabilities are above the saving threshold."""
     # Setup
     saving_threshold = 0.6
     model_output = create_test_model_output(
@@ -292,6 +317,8 @@ def test_delete_recording_if_detclassprob_below_savingthreshold(
     assert result == False
 
 
+
+""" TESTS - TAG VALUES - SAVING FILTERS """
 def test_save_recording_with_focus_tagvalues(
         create_test_model_output,
         create_test_detection,
@@ -350,3 +377,10 @@ def test_delete_recording_ifnot_focus_tagvalues(
 
     # Check
     assert result == False
+
+
+
+""" TESTS - FOCUS TAGS - SAVING FILTERS """
+
+
+
