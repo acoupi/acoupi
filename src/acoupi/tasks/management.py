@@ -63,7 +63,7 @@ def generate_file_management_task(
                 recording.path.unlink()
                 continue
 
-            new_path = file_manager.save_recording(
+            new_path = file_manager.update_recording_path(
                 recording, model_outputs=model_outputs
             )
             logger.debug(f"Recording has been moved: {new_path}")
