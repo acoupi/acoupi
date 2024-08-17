@@ -4,7 +4,7 @@ import stat
 from pathlib import Path
 from typing import Optional
 
-from acoupi.programs.workers import WorkerConfig
+from acoupi.programs.custom.workers import WorkerConfig
 from acoupi.system.constants import Settings
 from acoupi.system.templates import render_template
 

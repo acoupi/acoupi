@@ -5,7 +5,8 @@ from celery import Celery
 from celery.worker import WorkController
 from pydantic import BaseModel
 
-from acoupi.programs import AcoupiProgram, AcoupiWorker, WorkerConfig
+from acoupi.programs.custom.base import AcoupiProgram
+from acoupi.programs.custom.workers import AcoupiWorker, WorkerConfig
 from acoupi.system.configs import CeleryConfig
 
 

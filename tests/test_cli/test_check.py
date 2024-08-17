@@ -29,7 +29,7 @@ def test_can_run_check(settings: Settings):
         [
             "setup",
             "--program",
-            "acoupi.programs.custom.test",
+            "acoupi.programs.test",
         ],
         obj={"settings": settings},
     )
@@ -47,7 +47,7 @@ def test_can_run_check_with_failed_checks(settings: Settings):
         [
             "setup",
             "--program",
-            "acoupi.programs.custom.test",
+            "acoupi.programs.test",
             "--name",
             "test",
         ],

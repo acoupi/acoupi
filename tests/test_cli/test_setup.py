@@ -43,7 +43,7 @@ def test_can_setup_test_program(settings: Settings):
         [
             "setup",
             "--program",
-            "acoupi.programs.custom.test",
+            "acoupi.programs.test",
             "--name",
             "test",
         ],
@@ -53,4 +53,4 @@ def test_can_setup_test_program(settings: Settings):
     name_file = settings.program_name_file
     assert result.exit_code == 0
     assert name_file.exists()
-    assert name_file.read_text() == "acoupi.programs.custom.test"
+    assert name_file.read_text() == "acoupi.programs.test"
