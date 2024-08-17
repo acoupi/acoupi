@@ -12,7 +12,7 @@ from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefined
 from typing_extensions import Annotated, Protocol, get_args, get_origin
 
-from acoupi.programs.base import NoUserPrompt
+from acoupi.programs.custom.base import NoUserPrompt
 from acoupi.system.exceptions import ParameterError
 
 __all__ = [
