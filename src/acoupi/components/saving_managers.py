@@ -62,8 +62,8 @@ class SaveRecordingManager(types.RecordingSavingManager):
     def __init__(
         self,
         dirpath: Path,
-        dirpath_true: Optional[Path],
-        dirpath_false: Optional[Path],
+        dirpath_true: Optional[Path] = None,
+        dirpath_false: Optional[Path] = None,
         timeformat: str = "%Y%m%d_%H%M%S",
         detection_threshold: float = 0.6,
         saving_threshold: float = 0.3,
