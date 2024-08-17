@@ -168,8 +168,7 @@ def test_before_dawndusk_time_interval(
     """Test if a recording is saved if it is in the interval."""
     # Setup
     interval_duration: float = 20 # in minutes
-    timezone = datetime.datetime.utc
-    #timezone = pytz.timezone("Europe/London")
+    timezone = pytz.timezone("Europe/London")
 
     saving_filter = saving_filters.Before_DawnDuskTimeInterval(duration=interval_duration, timezone=timezone)
 
