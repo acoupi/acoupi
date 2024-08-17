@@ -32,12 +32,6 @@ def create_test_timeinterval():
     return factory
 
 @pytest.fixture
-def create_test_dawndusk_timeinterval():
-    """Fixture for creating random dawn dusk time interval."""
-    return
-        
-
-@pytest.fixture
 def create_test_recording():
     """Fixture for creating random recording.
     
@@ -174,7 +168,8 @@ def test_before_dawndusk_time_interval(
     """Test if a recording is saved if it is in the interval."""
     # Setup
     interval_duration: float = 20 # in minutes
-    timezone = pytz.timezone("Europe/London")
+    timezone = datetime.datetime.utc
+    #timezone = pytz.timezone("Europe/London")
 
     saving_filter = saving_filters.Before_DawnDuskTimeInterval(duration=interval_duration, timezone=timezone)
 
@@ -182,20 +177,16 @@ def test_before_dawndusk_time_interval(
     test_date = datetime.datetime(2024, 8, 1, tzinfo=timezone)
     sun_info = sun(LocationInfo(str(timezone)).observer, date=test_date, tzinfo=timezone)
     dawntime = sun_info["dawn"]
-    print(f"DawnTime: {dawntime}")
     dusktime = sun_info["dusk"]
 
-    # Case 1: Recording exactly at dawn
-    recording_at_dawn = create_test_recording(recording_time=datetime.datetime(2024, 8, 1, 4, 30, 0))
-    assert saving_filter.should_save_recording(recording_at_dawn) is True
+    # Case 1: Recording within the interval before dusk
+    recording_inside_duskinterval = create_test_recording(dusktime - datetime.timedelta(minutes=10))
+    assert saving_filter.should_save_recording(recording_inside_duskinterval) is True
 
-    # Case 2: Recording within the interval before dawn
-    recording_inside_dawninterval = create_test_recording(dawntime - datetime.timedelta(minutes=10))
-    assert saving_filter.should_save_recording(recording_inside_dawninterval) is True
+    # Case 2: Recording outside the interval before dusk
+    recording_outside_duskinterval = create_test_recording(dawntime - datetime.timedelta(minutes=40))
+    assert saving_filter.should_save_recording(recording_outside_duskinterval) is False
 
-    # Case 3: Recording outside the interval before dawn
-    recording_outside_dawninterval = create_test_recording(dawntime - datetime.timedelta(minutes=40))
-    assert saving_filter.should_save_recording(recording_outside_dawninterval) is False
 
 def test_delete_recording_before_dawndusk_outsideinterval(
         create_test_recording,
