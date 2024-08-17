@@ -109,7 +109,6 @@ class SaveRecordingManager(types.RecordingSavingManager):
         model_outputs: Optional[List[data.ModelOutput]],
     ) -> Optional[Path]:
         """Determine where the recording should be saved."""
-
         if not model_outputs:
             return self.dirpath
         
@@ -120,28 +119,24 @@ class SaveRecordingManager(types.RecordingSavingManager):
                 for tag in model_output.tags
             ):
                 return self.dirpath_true
-                #meet_detection_threshold = True
-
+                
             if any(
                 detection.detection_probability >= self.detection_threshold
                 for detection in model_output.detections
             ):
                 return self.dirpath_true
-                #meet_detection_threshold = True
-
+                
             if any(
                 tag.classification_probability >= self.saving_threshold
                 for tag in model_output.tags
             ):
                 return self.dirpath_false
-                #meet_saving_threshold = True
 
             if any(
                 detection.detection_probability >= self.saving_threshold
                 for detection in model_output.detections
             ):
                 return self.dirpath_false
-                #meet_saving_threshold = True
 
         return None #Indicate the recording should be deleted
     
@@ -181,7 +176,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
 
     directory: Path
     """Directory where the files are stored."""
-
+    
     def __init__(
         self, directory: Path, logger: Optional[logging.Logger] = None
     ):
