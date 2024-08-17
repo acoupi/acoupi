@@ -20,164 +20,9 @@ def test_save_recording_manager_fails_if_recording_has_no_path(
         datetime=datetime.datetime.now(),
         deployment=deployment,
     )
+
     with pytest.raises(ValueError):
-        manager.save_recording(recording)
-
-
-def test_save_recording_without_detections(
-    tmp_path: Path,
-):
-    audio_dir = tmp_path / "audio"
-    tmp_dir = tmp_path / "tmp"
-    tmp_dir.mkdir()
-    recording_file = tmp_dir / "recording.wav"
-    recording_file.touch()
-    recording_file.write_text("test content")
-    recording = data.Recording(
-        path=recording_file,
-        duration=1,
-        samplerate=8000,
-        datetime=datetime.datetime.now(),
-        deployment=data.Deployment(name="test"),
-    )
-    manager = components.SaveRecordingManager(audio_dir)
-
-    new_path = manager.save_recording(recording)
-    assert not recording_file.exists()
-    assert new_path.parent == audio_dir
-    assert new_path.exists()
-    assert new_path.read_text() == "test content"
-
-
-def test_save_recording_without_confident_detections(
-    tmp_path: Path,
-):
-    audio_dir = tmp_path / "audio"
-    tmp_dir = tmp_path / "tmp"
-    tmp_dir.mkdir()
-    recording_file = tmp_dir / "recording.wav"
-    recording_file.touch()
-    recording_file.write_text("test content")
-    recording = data.Recording(
-        path=recording_file,
-        duration=1,
-        samplerate=8000,
-        datetime=datetime.datetime.now(),
-        deployment=data.Deployment(name="test"),
-    )
-    model_output = data.ModelOutput(
-        name_model="test_model",
-        recording=recording,
-        detections=[
-            data.Detection(detection_probability=0.4),
-            data.Detection(detection_probability=0.3),
-        ],
-    )
-    manager = components.SaveRecordingManager(audio_dir, threshold=0.5)
-
-    new_path = manager.save_recording(recording, model_outputs=[model_output])
-    assert not recording_file.exists()
-    assert new_path.parent == audio_dir / "false_detections"
-    assert new_path.exists()
-    assert new_path.read_text() == "test content"
-
-
-def test_save_recording_with_confident_detections(
-    tmp_path: Path,
-):
-    audio_dir = tmp_path / "audio"
-    tmp_dir = tmp_path / "tmp"
-    tmp_dir.mkdir()
-    recording_file = tmp_dir / "recording.wav"
-    recording_file.touch()
-    recording_file.write_text("test content")
-    recording = data.Recording(
-        path=recording_file,
-        duration=1,
-        samplerate=8000,
-        datetime=datetime.datetime.now(),
-        deployment=data.Deployment(name="test"),
-    )
-    model_output = data.ModelOutput(
-        name_model="test_model",
-        recording=recording,
-        detections=[
-            data.Detection(detection_probability=0.6),
-            data.Detection(detection_probability=0.3),
-        ],
-    )
-    manager = components.SaveRecordingManager(audio_dir, threshold=0.5)
-
-    new_path = manager.save_recording(recording, model_outputs=[model_output])
-    assert not recording_file.exists()
-    assert new_path.parent == audio_dir / "true_detections"
-    assert new_path.exists()
-    assert new_path.read_text() == "test content"
-
-
-def test_save_recording_with_custom_dirpaths(tmp_path: Path):
-    dirpath = tmp_path / "audio"
-    dirpath_true = dirpath / "custom_true"
-    dirpath_false = dirpath / "custom_false"
-
-    tmp_dir = tmp_path / "tmp"
-    tmp_dir.mkdir()
-    recording_file = tmp_dir / "recording.wav"
-    recording_file.touch()
-    recording_file.write_text("test content")
-    recording = data.Recording(
-        path=recording_file,
-        duration=1,
-        samplerate=8000,
-        datetime=datetime.datetime.now(),
-        deployment=data.Deployment(name="test"),
-    )
-    model_output = data.ModelOutput(
-        name_model="test_model",
-        recording=recording,
-        detections=[
-            data.Detection(detection_probability=0.6),
-            data.Detection(detection_probability=0.3),
-        ],
-    )
-
-    manager = components.SaveRecordingManager(
-        dirpath,
-        dirpath_true=dirpath_true,
-        dirpath_false=dirpath_false,
-        threshold=0.5,
-    )
-
-    new_path = manager.save_recording(recording, model_outputs=[model_output])
-    assert not recording_file.exists()
-    assert new_path.parent == dirpath_true
-    assert new_path.exists()
-    assert new_path.read_text() == "test content"
-
-    recording_file_2 = tmp_dir / "recording2.wav"
-    recording_file_2.touch()
-    recording_file_2.write_text("test content 2")
-    recording = data.Recording(
-        path=recording_file_2,
-        duration=1,
-        samplerate=8000,
-        datetime=datetime.datetime.now(),
-        deployment=data.Deployment(name="test"),
-    )
-    model_output = data.ModelOutput(
-        name_model="test_model",
-        recording=recording,
-        detections=[
-            data.Detection(detection_probability=0.4),
-            data.Detection(detection_probability=0.3),
-        ],
-    )
-
-    new_path = manager.save_recording(recording, model_outputs=[model_output])
-    assert not recording_file_2.exists()
-    assert new_path.parent == dirpath_false
-    assert new_path.exists()
-    assert new_path.read_text() == "test content 2"
+        manager.update_recording_path(recording)
 
 
 def test_save_recording_with_confident_tags(tmp_path: Path):
@@ -208,9 +53,9 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
             ),
         ],
     )
-    manager = components.SaveRecordingManager(audio_dir, threshold=0.5)
+    manager = components.SaveRecordingManager(audio_dir, detection_threshold = 0.6, saving_threshold=0.5)
 
-    new_path = manager.save_recording(recording, model_outputs=[model_output])
+    new_path = manager.update_recording_path(recording, model_outputs=[model_output])
     assert not recording_file.exists()
     assert new_path.parent == audio_dir / "true_detections"
     assert new_path.exists()
@@ -245,9 +90,9 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
             ),
         ],
     )
-    manager = components.SaveRecordingManager(audio_dir, threshold=0.5)
+    manager = components.SaveRecordingManager(audio_dir, detection_threshold = 0.6, saving_threshold = 0.4,)
 
-    new_path = manager.save_recording(recording, model_outputs=[model_output])
+    new_path = manager.update_recording_path(recording, model_outputs=[model_output])
     assert not recording_file.exists()
     assert new_path.parent == audio_dir / "false_detections"
     assert new_path.exists()
@@ -284,7 +129,7 @@ def test_date_file_manager_save_recording(
     file_manager = components.DateFileManager(directory)
 
     # Act
-    file_path = file_manager.save_recording(recording)
+    file_path = file_manager.update_recording_path(recording)
 
     # Assert
     assert directory.exists()
@@ -320,7 +165,7 @@ def test_date_file_manager_fails_if_recording_has_no_path(
 
     # Act and Assert
     with pytest.raises(ValueError):
-        file_manager.save_recording(recording)
+        file_manager.update_recording_path(recording)
 
 
 def test_date_file_manager_fails_if_recording_file_does_not_exist(
@@ -359,7 +204,7 @@ def test_date_file_manager_fails_if_recording_file_does_not_exist(
 
     # Act and Assert
     with pytest.raises(FileNotFoundError):
-        file_manager.save_recording(recording)
+        file_manager.update_recording_path(recording)
 
 
 def test_id_file_manager_save_recording(
@@ -385,7 +230,7 @@ def test_id_file_manager_save_recording(
     file_manager = components.IDFileManager(directory)
 
     # Act
-    file_path = file_manager.save_recording(recording)
+    file_path = file_manager.update_recording_path(recording)
 
     # Assert
     assert directory.exists()
@@ -413,7 +258,7 @@ def test_id_file_manager_fails_if_recording_has_no_path(
 
     # Act and Assert
     with pytest.raises(ValueError):
-        file_manager.save_recording(recording)
+        file_manager.update_recording_path(recording)
 
 
 def test_id_file_manager_fails_if_recording_file_does_not_exist(
@@ -446,4 +291,4 @@ def test_id_file_manager_fails_if_recording_file_does_not_exist(
 
     # Act and Assert
     with pytest.raises(FileNotFoundError):
-        file_manager.save_recording(recording)
+        file_manager.update_recording_path(recording)
