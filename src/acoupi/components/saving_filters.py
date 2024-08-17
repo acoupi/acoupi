@@ -117,11 +117,6 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
         )
         dawntime = sun_info["dawn"]
         dusktime = sun_info["dusk"]
-        
-        print(f"Recording time: {recording_time}")
-        print(f"Dawn time: {dawntime}, Dusk time: {dusktime}")
-        print(f"Dawn interval: {dawntime_interval} to {dawntime}")
-        print(f"Dusk interval: {dusktime_interval} to {dusktime}")
 
         dawntime_interval = dawntime - datetime.timedelta(
             minutes=self.duration
@@ -130,6 +125,11 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
             minutes=self.duration
         )
 
+        print(f"Recording time: {recording_time}")
+        print(f"Dawn time: {dawntime}, Dusk time: {dusktime}")
+        print(f"Dawn interval: {dawntime_interval} to {dawntime}")
+        print(f"Dusk interval: {dusktime_interval} to {dusktime}")
+        
         return (
             (dawntime_interval <= recording_time <= dawntime)
             or (dusktime_interval <= recording_time <= dusktime)
