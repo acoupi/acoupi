@@ -51,7 +51,9 @@ def test_can_load_the_test_program():
 
 def test_can_load_the_acoupi_program():
     """Test can load the test program."""
-    program_class = programs.load_program_class("acoupi.programs.default")
+    program_class = programs.load_program_class(
+        "acoupi.programs.default"
+    )
     assert program_class == SampleProgram
 
 
