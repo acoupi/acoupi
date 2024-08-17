@@ -66,7 +66,11 @@ def generate_file_management_task(
             new_path = file_manager.update_recording_path(
                 recording, model_outputs=model_outputs
             )
-            logger.debug(f"Recording has been moved: {new_path}")
-            store.update_recording_path(recording, new_path)
+            if new_path is not None:
+                store.update_recording_path(recording, new_path)
+                logger.debug(f"Recording has been moved: {new_path}")
+            
+            else:
+                logger.debug("Recording has not been deleted.")
 
     return file_management_task
