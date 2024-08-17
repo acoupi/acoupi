@@ -170,7 +170,7 @@ def test_save_recording_before_dawndusk_ininterval(
 ) -> None:
     """Test if a recording is saved if it is in the interval."""
     # Setup
-    interval_duration: float = 20 # in minutes
+    interval_duration: float = 60 # in minutes
     timezone = datetime.timezone.utc
 
     recording = create_test_recording(
