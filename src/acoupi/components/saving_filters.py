@@ -174,8 +174,8 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         )
 
         return (
-            dawntime_interval <= recording_time <= dawntime
-            or dusktime_interval <= recording_time <= dusktime
+            (dawntime_interval <= recording_time <= dawntime)
+            or (dusktime_interval <= recording_time <= dusktime)
         )
 
 
