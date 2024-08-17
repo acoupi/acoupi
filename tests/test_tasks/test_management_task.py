@@ -65,7 +65,7 @@ class DummyRecordingManager(RecordingSavingManager):
         if not self.path.exists():
             self.path.mkdir(parents=True)
 
-    def save_recording(
+    def update_recording_path(
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
