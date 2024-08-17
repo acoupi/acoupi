@@ -37,7 +37,7 @@ __all__ = [
     "Before_DawnDuskTimeInterval",
     "DateFileManager",
     "FocusTagsSavingRecordingFilter",
-    "FocusTagValueSavingFilter",
+    "FocusTagValueSavingRecordingFilter",
     "FrequencySchedule",
     "FullModelOutputMessageBuilder",
     "IDFileManager",

@@ -62,8 +62,8 @@ class SaveRecordingManager(types.RecordingSavingManager):
     def __init__(
         self,
         dirpath: Path,
-        dirpath_true: Optional[Path] = None,
-        dirpath_false: Optional[Path] = None,
+        dirpath_true: Optional[Path],
+        dirpath_false: Optional[Path],
         timeformat: str = "%Y%m%d_%H%M%S",
         detection_threshold: float = 0.6,
         saving_threshold: float = 0.3,
@@ -109,9 +109,6 @@ class SaveRecordingManager(types.RecordingSavingManager):
         model_outputs: Optional[List[data.ModelOutput]],
     ) -> Optional[Path]:
         """Determine where the recording should be saved."""
-
-        #meet_detection_threshold = False
-        #meet_saving_threshold = False
 
         if not model_outputs:
             return self.dirpath
