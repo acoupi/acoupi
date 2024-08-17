@@ -234,6 +234,7 @@ class ThresholdDetectionSavingRecordingFilter(types.RecordingSavingFilter):
 
     def should_save_recording(
         self,
+        recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be kept.
@@ -290,6 +291,7 @@ class FocusTagValueSavingRecordingFilter(types.RecordingSavingFilter):
 
     def should_save_recording(
         self,
+        recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a model output has a confident tag value.
