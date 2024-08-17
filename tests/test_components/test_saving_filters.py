@@ -170,11 +170,11 @@ def test_save_recording_before_dawndusk_ininterval(
 ) -> None:
     """Test if a recording is saved if it is in the interval."""
     # Setup
-    interval_duration: float = 30 # in minutes
+    interval_duration: float = 20 # in minutes
     timezone = datetime.timezone.utc
 
     recording = create_test_recording(
-        recording_time=datetime.datetime(2024, 8, 1, 21, 0, 0),
+        recording_time=datetime.datetime(2024, 8, 1, 21, 20, 0),
     )
 
     saving_filter = saving_filters.Before_DawnDuskTimeInterval(duration=interval_duration, timezone=datetime.timezone.utc)
