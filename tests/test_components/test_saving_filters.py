@@ -3,6 +3,7 @@
 import datetime
 from pathlib import Path
 from typing import List
+import pytz
 
 import pytest
 
@@ -165,25 +166,33 @@ def test_delete_recording_ifnotin_interval(
     assert result == False
 
 
-def test_save_recording_before_dawndusk_ininterval(
+def test_before_dawndusk_time_interval(
         create_test_recording,
 ) -> None:
     """Test if a recording is saved if it is in the interval."""
     # Setup
-    interval_duration: float = 60 # in minutes
-    timezone = datetime.timezone.utc
+    interval_duration: float = 20 # in minutes
+    timezone = pytz.timezone("Europe/London")
 
-    recording = create_test_recording(
-        recording_time=datetime.datetime(2024, 8, 1, 21, 20, 0),
-    )
+    saving_filter = saving_filters.Before_DawnDuskTimeInterval(duration=interval_duration, timezone=timezone)
 
-    saving_filter = saving_filters.Before_DawnDuskTimeInterval(duration=interval_duration, timezone=datetime.timezone.utc)
-    # Act
-    result = saving_filter.should_save_recording(recording)
+    # Fetch sun information
+    test_date = datetime.datetime(2024, 8, 1, tzinfo=timezone)
+    sun_info = sun(location.observer, date=test_date, tzinfo=timezone)
+    dawntime = sun_info["dawn"]
+    dusktime = sun_info["dusk"]
 
-    # Check
-    assert result == True
+    # Case 1: Recording exactly at dawn
+    recording_at_dawn = create_test_recording(recording_time=dawntime)
+    assert saving_filter.should_save_recording(recording_at_dawn) == True
 
+    # Case 2: Recording within the interval before dawn
+    recording_inside_dawninterval = create_test_recording(dawntime - datetime.timedelta(minutes=10))
+    assert saving_filter.should_save_recording(recording_inside_dawninterval)
+
+    # Case 3: Recording outside the interval before dawn
+    recording_outside_dawninterval = create_test_recording(dawntime - datetime.timedelta(minutes=40))
+    assert saving_filter.should_save_recording(recording_outside_dawninterval)
 
 def test_delete_recording_before_dawndusk_outsideinterval(
         create_test_recording,
