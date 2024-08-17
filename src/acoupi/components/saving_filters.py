@@ -27,7 +27,7 @@ __all__ = [
     "FrequencySchedule",
     "After_DawnDuskTimeInterval",
     "Before_DawnDuskTimeInterval",
-    "FocusTagValueSavingRecordingFilter"
+    "FocusTagValueSavingRecordingFilter",
     "FocusTagsSavingRecordingFilter",
     "ThresholdDetectionSavingRecordingFilter",
 ]
