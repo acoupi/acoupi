@@ -76,7 +76,7 @@ def test_threshold_detection_filter_removes_detections_with_low_confidence(
     """Test threshold filter removes detections with low confidence."""
     # Arrange
     cleaner = output_cleaners.ThresholdDetectionFilter(
-        threshold=0.5,
+        detection_threshold=0.5,
     )
     model_output = create_test_model_output(
         detections=[
@@ -107,7 +107,7 @@ def test_threshold_detection_keeps_detections_even_with_low_confidence_tags(
 ):
     """Test threshold filter keeps detections even with low confidence tags."""
     cleaner = output_cleaners.ThresholdDetectionFilter(
-        threshold=0.5,
+        detection_threshold=0.5,
     )
     model_output = create_test_model_output(
         detections=[
@@ -138,7 +138,7 @@ def test_threshold_removes_detections_with_default_tag_probability(
     """Test threshold filter removes detections with default tag probability."""
     # Arrange
     cleaner = output_cleaners.ThresholdDetectionFilter(
-        threshold=0.5,
+        detection_threshold=0.5,
     )
     model_output = create_test_model_output(
         detections=[
@@ -170,7 +170,7 @@ def test_threshold_removes_low_probability_tags(
     """Test filter keeps tags even if with low probability score."""
     # Arrange
     cleaner = output_cleaners.ThresholdDetectionFilter(
-        threshold=0.5,
+        detection_threshold=0.5,
     )
     model_output = create_test_model_output(
         detections=[
