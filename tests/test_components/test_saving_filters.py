@@ -14,24 +14,6 @@ from acoupi.components import saving_filters
 
 
 @pytest.fixture
-def create_test_timeinterval():
-    """Fixture for creating random time interval.
-    
-    Will create a time interval with a start and end time.
-    """
-
-    def factory(
-        start_time: datetime.time, 
-        end_time: datetime.time,
-    ) -> data.TimeInterval:
-        """Return a time interval."""
-        return data.TimeInterval(
-            start=start_time,
-            end=end_time,
-        )
-    return factory
-
-@pytest.fixture
 def create_test_recording():
     """Fixture for creating random recording.
     
@@ -118,16 +100,15 @@ def create_test_model_output():
 
 
 
-""" TESTS - RECORDING TIME INTERVAL - SAVING MANAGERS"""
+""" TESTS - RECORDING TIME INTERVAL - SAVING FILTERS"""
 def test_save_recording_ifin_interval(
-        create_test_timeinterval,
         create_test_recording,
 ) -> None:
     """Test if a recording is saved if it is in the interval."""
     # Setup
-    time_interval = create_test_timeinterval(
-        start_time=datetime.time(22, 0, 0),
-        end_time=datetime.time(4, 0, 0),
+    time_interval = data.TimeInterval(
+        start=datetime.time(22, 0, 0),
+        end=datetime.time(4, 0, 0),
     )
     recording = create_test_recording(
         recording_time=datetime.datetime(2024, 8, 1, 23, 0, 0),
@@ -138,17 +119,16 @@ def test_save_recording_ifin_interval(
     result = saving_filter.should_save_recording(recording)
 
     # Check
-    assert result == True
+    assert result is True
 
 def test_delete_recording_ifnotin_interval(
-        create_test_timeinterval,
         create_test_recording,
 ) -> None:
     """Test if a recording is saved if it is in the interval."""
     # Setup
-    time_interval = create_test_timeinterval(
-        start_time=datetime.time(22, 0, 0),
-        end_time=datetime.time(4, 0, 0),
+    time_interval = data.TimeInterval(
+        start=datetime.time(22, 0, 0),
+        end=datetime.time(4, 0, 0),
     )
     recording = create_test_recording(
         recording_time=datetime.datetime(2024, 8, 1, 12, 0, 0),
@@ -159,7 +139,7 @@ def test_delete_recording_ifnotin_interval(
     result = saving_filter.should_save_recording(recording)
 
     # Check
-    assert result == False
+    assert result is False
     
 
 """ TESTS - DAWN DUSK TIME INTERVAL - SAVING FILTERS """
@@ -251,7 +231,7 @@ def test_delete_recording_without_detections(
     result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
 
     # Check
-    assert result == False 
+    assert result is False 
 
 
 def test_save_recording_ifboth_detclassprob_above_savingthreshold(
@@ -285,7 +265,7 @@ def test_save_recording_ifboth_detclassprob_above_savingthreshold(
     result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
 
     # Check
-    assert result == True
+    assert result is True
 
 
 def test_save_recording_if_onlydetprob_above_savingthreshold(
@@ -319,7 +299,7 @@ def test_save_recording_if_onlydetprob_above_savingthreshold(
     result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
 
     # Check
-    assert result == True
+    assert result is True
 
 
 def test_delete_recording_if_detclassprob_below_savingthreshold(
@@ -353,7 +333,7 @@ def test_delete_recording_if_detclassprob_below_savingthreshold(
     result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
     
     # Check
-    assert result == False
+    assert result is False
 
 
 
@@ -389,7 +369,7 @@ def test_save_recording_with_focus_tagvalues(
     result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
 
     # Check
-    assert result == True
+    assert result is True
 
 
 def test_delete_recording_ifnot_focus_tagvalues(
@@ -423,7 +403,7 @@ def test_delete_recording_ifnot_focus_tagvalues(
     result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
 
     # Check
-    assert result == False
+    assert result is False
 
 
 
