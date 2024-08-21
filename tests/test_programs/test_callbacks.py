@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from acoupi.programs.custom.base import AcoupiProgram
 from acoupi.programs.custom.workers import AcoupiWorker, WorkerConfig
-from acoupi.system.configs import CeleryConfig
+from acoupi.system.constants import CeleryConfig
 
 
 class Config(BaseModel):
