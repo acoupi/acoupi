@@ -138,9 +138,11 @@ class SaveRecordingManager(types.RecordingSavingManager):
             ):
                 return self.dirpath_false
 
-        return None  # Indicate the recording should be deleted
+        return (
+            self.dirpath
+        )  # Default path if any of the above conditions are not met.
 
-    def update_recording_path(
+    def saving_recording(
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
@@ -151,11 +153,6 @@ class SaveRecordingManager(types.RecordingSavingManager):
 
         sdir = self.get_saving_recording_path(model_outputs)
         srec_filename = recording.datetime.strftime(self.timeformat)
-
-        if sdir is None:
-            # Delete the recording
-            recording.path.unlink()
-            return None
 
         # Move recording to the path it should be saved
         new_path = sdir / f"{srec_filename}.wav"
@@ -209,7 +206,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         """
         raise NotImplementedError
 
-    def update_recording_path(
+    def saving_recording(
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,

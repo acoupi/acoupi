@@ -22,7 +22,7 @@ def test_save_recording_manager_fails_if_recording_has_no_path(
     )
 
     with pytest.raises(ValueError):
-        manager.update_recording_path(recording)
+        manager.saving_recording(recording)
 
 
 def test_save_recording_with_confident_tags(tmp_path: Path):
@@ -57,7 +57,7 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
         audio_dir, detection_threshold=0.6, saving_threshold=0.5
     )
 
-    new_path = manager.update_recording_path(
+    new_path = manager.saving_recording(
         recording, model_outputs=[model_output]
     )
     assert not recording_file.exists()
@@ -100,7 +100,7 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
         saving_threshold=0.4,
     )
 
-    new_path = manager.update_recording_path(
+    new_path = manager.saving_recording(
         recording, model_outputs=[model_output]
     )
     assert not recording_file.exists()
@@ -139,7 +139,7 @@ def test_date_file_manager_save_recording(
     file_manager = components.DateFileManager(directory)
 
     # Act
-    file_path = file_manager.update_recording_path(recording)
+    file_path = file_manager.saving_recording(recording)
 
     # Assert
     assert directory.exists()
@@ -175,7 +175,7 @@ def test_date_file_manager_fails_if_recording_has_no_path(
 
     # Act and Assert
     with pytest.raises(ValueError):
-        file_manager.update_recording_path(recording)
+        file_manager.saving_recording(recording)
 
 
 def test_date_file_manager_fails_if_recording_file_does_not_exist(
@@ -214,7 +214,7 @@ def test_date_file_manager_fails_if_recording_file_does_not_exist(
 
     # Act and Assert
     with pytest.raises(FileNotFoundError):
-        file_manager.update_recording_path(recording)
+        file_manager.saving_recording(recording)
 
 
 def test_id_file_manager_save_recording(
@@ -240,7 +240,7 @@ def test_id_file_manager_save_recording(
     file_manager = components.IDFileManager(directory)
 
     # Act
-    file_path = file_manager.update_recording_path(recording)
+    file_path = file_manager.saving_recording(recording)
 
     # Assert
     assert directory.exists()
@@ -268,7 +268,7 @@ def test_id_file_manager_fails_if_recording_has_no_path(
 
     # Act and Assert
     with pytest.raises(ValueError):
-        file_manager.update_recording_path(recording)
+        file_manager.saving_recording(recording)
 
 
 def test_id_file_manager_fails_if_recording_file_does_not_exist(
@@ -301,4 +301,4 @@ def test_id_file_manager_fails_if_recording_file_does_not_exist(
 
     # Act and Assert
     with pytest.raises(FileNotFoundError):
-        file_manager.update_recording_path(recording)
+        file_manager.saving_recording(recording)
