@@ -11,7 +11,7 @@ from acoupi.system.files import (
 )
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.INFO)
 
 def generate_file_management_task(
     store: types.Store,
@@ -50,15 +50,17 @@ def generate_file_management_task(
 
     def file_management_task() -> None:
         """Manage files."""
+        logger.info(" ----  START MANAGEMENT TASK ---- ")
         temp_wav_files = get_temp_files(path=temp_path)
 
         recordings_and_outputs = store.get_recordings_by_path(
             paths=temp_wav_files
         )
+        logger.info(f"Recordings to manage: {recordings_and_outputs}")
 
         for recording, model_outputs in recordings_and_outputs:
             logger.debug(f"Recording: {recording.path}")
-            logger.debug(f"Model Outputs: {model_outputs}")
+            logger.info(f"Model Outputs: {model_outputs}")
 
             if recording.path is None:
                 logger.error(
