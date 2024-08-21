@@ -8,7 +8,7 @@ def test_setup_program_creates_all_the_required_files(
 ):
     lifecycle.setup_program(
         settings,
-        program_name="acoupi.programs.custom.test",
+        program_name="acoupi.programs.test",
         prompt=False,
     )
 
@@ -18,7 +18,7 @@ def test_setup_program_creates_all_the_required_files(
     # The program name is stored in a file
     assert settings.program_name_file.exists()
     assert (
-        settings.program_name_file.read_text() == "acoupi.programs.custom.test"
+        settings.program_name_file.read_text() == "acoupi.programs.test"
     )
 
     # Check that configurations are created
