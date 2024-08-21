@@ -5,7 +5,7 @@ import json
 from click.testing import CliRunner
 
 from acoupi.cli import acoupi
-from acoupi.system import Settings
+from acoupi.system.constants import Settings
 
 
 def test_the_config_command_shows_help(settings: Settings):
@@ -40,7 +40,7 @@ def test_can_get_the_current_configuration(settings: Settings):
         [
             "setup",
             "--program",
-            "acoupi.programs.custom.test",
+            "acoupi.programs.test",
             "--name",
             "test_program",
         ],
@@ -67,7 +67,7 @@ def test_can_set_configuration(settings: Settings):
         [
             "setup",
             "--program",
-            "acoupi.programs.custom.test",
+            "acoupi.programs.test",
             "--name",
             "test_program",
         ],
