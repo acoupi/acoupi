@@ -53,9 +53,13 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
             ),
         ],
     )
-    manager = components.SaveRecordingManager(audio_dir, detection_threshold = 0.6, saving_threshold=0.5)
+    manager = components.SaveRecordingManager(
+        audio_dir, detection_threshold=0.6, saving_threshold=0.5
+    )
 
-    new_path = manager.update_recording_path(recording, model_outputs=[model_output])
+    new_path = manager.update_recording_path(
+        recording, model_outputs=[model_output]
+    )
     assert not recording_file.exists()
     assert new_path.parent == audio_dir / "true_detections"
     assert new_path.exists()
@@ -90,9 +94,15 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
             ),
         ],
     )
-    manager = components.SaveRecordingManager(audio_dir, detection_threshold = 0.6, saving_threshold = 0.4,)
+    manager = components.SaveRecordingManager(
+        audio_dir,
+        detection_threshold=0.6,
+        saving_threshold=0.4,
+    )
 
-    new_path = manager.update_recording_path(recording, model_outputs=[model_output])
+    new_path = manager.update_recording_path(
+        recording, model_outputs=[model_output]
+    )
     assert not recording_file.exists()
     assert new_path.parent == audio_dir / "false_detections"
     assert new_path.exists()
