@@ -111,7 +111,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
         """Determine where the recording should be saved."""
         if not model_outputs:
             return self.dirpath
-        
+
         for model_output in model_outputs:
             # Check if any tags or detectinos are confident
             if any(
@@ -119,13 +119,13 @@ class SaveRecordingManager(types.RecordingSavingManager):
                 for tag in model_output.tags
             ):
                 return self.dirpath_true
-                
+
             if any(
                 detection.detection_probability >= self.detection_threshold
                 for detection in model_output.detections
             ):
                 return self.dirpath_true
-                
+
             if any(
                 tag.classification_probability >= self.saving_threshold
                 for tag in model_output.tags
@@ -138,12 +138,12 @@ class SaveRecordingManager(types.RecordingSavingManager):
             ):
                 return self.dirpath_false
 
-        return None #Indicate the recording should be deleted
-    
+        return None  # Indicate the recording should be deleted
+
     def update_recording_path(
         self,
         recording: data.Recording,
-        model_outputs: Optional[List[data.ModelOutput]] = None, 
+        model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> Optional[Path]:
         """Determine where the recording should be saved."""
         if recording.path is None:
@@ -156,7 +156,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
             # Delete the recording
             recording.path.unlink()
             return None
-        
+
         # Move recording to the path it should be saved
         new_path = sdir / f"{srec_filename}.wav"
         shutil.move(str(recording.path), new_path)
@@ -176,7 +176,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
 
     directory: Path
     """Directory where the files are stored."""
-    
+
     def __init__(
         self, directory: Path, logger: Optional[logging.Logger] = None
     ):
