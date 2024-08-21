@@ -6,7 +6,7 @@ from acoupi.components import types
 from acoupi.files import TEMP_PATH, get_temp_files
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.INFO)
 
 def generate_file_management_task(
     store: types.Store,
@@ -33,15 +33,17 @@ def generate_file_management_task(
 
     def file_management_task() -> None:
         """Manage files."""
+        logger.info(" ----  START MANAGEMENT TASK ---- ")
         temp_wav_files = get_temp_files(path=temp_path)
 
         recordings_and_outputs = store.get_recordings_by_path(
             paths=temp_wav_files
         )
+        logger.info(f"Recordings to manage: {recordings_and_outputs}")
 
         for recording, model_outputs in recordings_and_outputs:
             logger.debug(f"Recording: {recording.path}")
-            logger.debug(f"Model Outputs: {model_outputs}")
+            logger.info(f"Model Outputs: {model_outputs}")
 
             if recording.path is None:
                 logger.error(
@@ -57,7 +59,7 @@ def generate_file_management_task(
                 file_filter.should_save_recording(recording, model_outputs)
                 for file_filter in file_filters
             ):
-                logger.debug(
+                logger.info(
                     f"Recording does not pass filters: {recording.path}"
                 )
                 recording.path.unlink()
@@ -66,10 +68,10 @@ def generate_file_management_task(
             new_path = file_manager.saving_recording(
                 recording, model_outputs=model_outputs
             )
+            print(f"New Path to recordings: {new_path}")
             if new_path is not None:
                 store.update_recording_path(recording, new_path)
                 logger.debug(f"Recording has been moved: {new_path}")
-
             else:
                 logger.debug("Recording has not been deleted.")
 
