@@ -27,9 +27,9 @@ __all__ = [
     "FrequencySchedule",
     "After_DawnDuskTimeInterval",
     "Before_DawnDuskTimeInterval",
-    "FocusTagValueSavingRecordingFilter",
-    "FocusTagsSavingRecordingFilter",
-    "ThresholdDetectionSavingRecordingFilter",
+    "DetectionTagValue",
+    "DetectionTags",
+    "SavingThreshold",
 ]
 
 
@@ -125,9 +125,8 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
             minutes=self.duration
         )
 
-        return (
-            (dawntime_interval <= recording_time <= dawntime)
-            or (dusktime_interval <= recording_time <= dusktime)
+        return (dawntime_interval <= recording_time <= dawntime) or (
+            dusktime_interval <= recording_time <= dusktime
         )
 
 
@@ -172,25 +171,24 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         dusktime_interval = dusktime + datetime.timedelta(
             minutes=self.duration
         )
-        
-        return (
-            (dawntime <= recording_time <= dawntime_interval)
-            or (dusktime <= recording_time <= dusktime_interval)
+
+        return (dawntime <= recording_time <= dawntime_interval) or (
+            dusktime <= recording_time <= dusktime_interval
         )
 
 
-class ThresholdDetectionSavingRecordingFilter(types.RecordingSavingFilter):
+class SavingThreshold(types.RecordingSavingFilter):
     """Save recording if confident.
 
     A RecordingFilter that return True or False if an audio recording contains
     any detections above a specified threshold. The saving threshold argument can be
-    used to set the minimum detection and classification probability that need to be 
+    used to set the minimum detection and classification probability that need to be
     be met for a recording to be saved.
 
     IF True : Recording is likely to contain bat calls.
     IF False: Recording is unlikely to contain bat calls.
 
-    The result of ThresholdDetectionSavingRecordingFilter is used by the SavingManagers. It tells the
+    The result of SavingThreshold is used by the SavingManagers. It tells the
     SavingManager how to save detections.
     """
 
@@ -221,16 +219,18 @@ class ThresholdDetectionSavingRecordingFilter(types.RecordingSavingFilter):
             tag.classification_probability >= self.saving_threshold
             for tag in model_output.tags
         ):
+            print("Classification Probability greater than saving_threshold")
             return True
 
         if any(
             detection.detection_probability >= self.saving_threshold
             for detection in model_output.detections
         ):
+            print("Detection Probability greater than saving_threshold")
             return True
 
+        print("ModelOutput not meeting criteria.")
         return False
-
 
     def should_save_recording(
         self,
@@ -247,16 +247,21 @@ class ThresholdDetectionSavingRecordingFilter(types.RecordingSavingFilter):
         -------
             bool
         """
-        if model_outputs is None:
-            return False
 
-        return any(
+        if any(
             self.has_confident_model_output(model_output)
             for model_output in model_outputs
-        )
+        ):
+            print(f"Recording Saved: {recording.path}")
+            return True
+        else:
+            if recording.path is not None:
+                print(f"Delete Recording: {recording.path}")
+                recording.path.unlink()
+            return False
 
 
-class FocusTagValueSavingRecordingFilter(types.RecordingSavingFilter):
+class DetectionTagValue(types.RecordingSavingFilter):
     """A RecordingFilter that keeps recordings with specific tag values."""
 
     values: List[str]
@@ -269,7 +274,7 @@ class FocusTagValueSavingRecordingFilter(types.RecordingSavingFilter):
             values: The tag values to focus on.
         """
         self.values = values
-    
+
     def has_confident_tagvalues(self, model_output: data.ModelOutput) -> bool:
         """Determine if a model output has a confident tag.
 
@@ -307,12 +312,12 @@ class FocusTagValueSavingRecordingFilter(types.RecordingSavingFilter):
             return False
 
         return any(
-            self.has_confident_tagvalues(model_output) for model_output in model_outputs
+            self.has_confident_tagvalues(model_output)
+            for model_output in model_outputs
         )
 
 
-
-class FocusTagsSavingRecordingFilter(types.RecordingSavingFilter):
+class DetectionTags(types.RecordingSavingFilter):
     """A RecordingFilter that keeps recordings with selected tags.
 
     This filter will keep recordings that contain confident tag

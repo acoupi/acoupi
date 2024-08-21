@@ -7,7 +7,7 @@ def test_focus_species_filter_rejects_recordings_without_detections(
     recording: data.Recording,
 ):
     """Test focus species recording filter rejects recordings without detections."""
-    filter = components.FocusTagsSavingRecordingFilter(
+    filter = components.DetectionTags(
         tags=[data.Tag(key="species", value="test")],
         saving_threshold=0.5,
     )
@@ -18,7 +18,7 @@ def test_focus_species_filter_rejects_if_no_target_species_found(
     recording: data.Recording,
 ):
     """Test focus species recording filter rejects if no target species found."""
-    filter = components.FocusTagsSavingRecordingFilter(
+    filter = components.DetectionTags(
         tags=[data.Tag(key="species", value="test")],
         saving_threshold=0.5,
     )
@@ -43,8 +43,8 @@ def test_focus_species_filter_rejects_low_confidence_detections(
     recording: data.Recording,
 ):
     """Test focus species recording filter rejects low confidence detections."""
-    filter = components.FocusTagsSavingRecordingFilter(
-        tags=[data.Tag(key="species", value="test")], 
+    filter = components.DetectionTags(
+        tags=[data.Tag(key="species", value="test")],
         saving_threshold=0.5,
     )
     model_output = data.ModelOutput(
@@ -68,7 +68,7 @@ def test_focus_species_filter_keeps_high_confidence_detections(
     recording: data.Recording,
 ):
     """Test focus species recording filter keeps high confidence detections."""
-    filter = components.FocusTagsSavingRecordingFilter(
+    filter = components.DetectionTags(
         tags=[data.Tag(key="species", value="test")],
         saving_threshold=0.5,
     )
@@ -98,7 +98,7 @@ def test_focus_species_filter_rejects_even_with_confident_non_target(
 
     Even in the case with confident non-target detections.
     """
-    filter = components.FocusTagsSavingRecordingFilter(
+    filter = components.DetectionTags(
         tags=[data.Tag(key="species", value="test")],
         saving_threshold=0.5,
     )
@@ -132,7 +132,7 @@ def test_focus_species_filter_keeps_with_at_least_one_target_species(
     It should keep recordings with at least one target species detection
     with a probability above the provided threshold.
     """
-    filter = components.FocusTagsSavingRecordingFilter(
+    filter = components.DetectionTags(
         tags=[
             data.Tag(key="species", value="test"),
             data.Tag(key="species", value="test2"),

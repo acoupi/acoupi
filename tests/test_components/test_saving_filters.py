@@ -3,6 +3,7 @@
 import datetime
 from pathlib import Path
 from typing import List
+import tempfile
 import pytz
 from astral import LocationInfo
 from astral.sun import sun
@@ -16,7 +17,7 @@ from acoupi.components import saving_filters
 @pytest.fixture
 def create_test_recording():
     """Fixture for creating random recording.
-    
+
     Will create a recording with a path, duration, samplerate, deployment and datetime.
     """
     deployment = data.Deployment(
@@ -39,12 +40,14 @@ def create_test_recording():
             deployment=deployment,
             datetime=recording_time,
         )
+
     return factory
+
 
 @pytest.fixture
 def create_test_detection():
     """Fixture for creating random detections.
-    
+
     Will create detections with no location and a single tag.
     """
 
@@ -67,8 +70,9 @@ def create_test_detection():
                 ),
             ],
         )
-    
+
     return factory
+
 
 @pytest.fixture
 def create_test_model_output():
@@ -87,7 +91,7 @@ def create_test_model_output():
     )
 
     def factory(
-            detections: List[data.Detection],
+        detections: List[data.Detection],
     ) -> data.ModelOutput:
         """Return a model output."""
         return data.ModelOutput(
@@ -99,10 +103,11 @@ def create_test_model_output():
     return factory
 
 
-
 """ TESTS - RECORDING TIME INTERVAL - SAVING FILTERS"""
+
+
 def test_save_recording_ifin_interval(
-        create_test_recording,
+    create_test_recording,
 ) -> None:
     """Test if a recording is saved if it is in the interval."""
     # Setup
@@ -114,15 +119,18 @@ def test_save_recording_ifin_interval(
         recording_time=datetime.datetime(2024, 8, 1, 23, 0, 0),
     )
 
-    saving_filter = saving_filters.SaveIfInInterval(interval=time_interval, timezone=datetime.timezone.utc)
+    saving_filter = saving_filters.SaveIfInInterval(
+        interval=time_interval, timezone=datetime.timezone.utc
+    )
     # Act
     result = saving_filter.should_save_recording(recording)
 
     # Check
     assert result is True
 
+
 def test_delete_recording_ifnotin_interval(
-        create_test_recording,
+    create_test_recording,
 ) -> None:
     """Test if a recording is saved if it is in the interval."""
     # Setup
@@ -134,82 +142,136 @@ def test_delete_recording_ifnotin_interval(
         recording_time=datetime.datetime(2024, 8, 1, 12, 0, 0),
     )
 
-    saving_filter = saving_filters.SaveIfInInterval(interval=time_interval, timezone=datetime.timezone.utc)
+    saving_filter = saving_filters.SaveIfInInterval(
+        interval=time_interval, timezone=datetime.timezone.utc
+    )
     # Act
     result = saving_filter.should_save_recording(recording)
 
     # Check
     assert result is False
-    
+
 
 """ TESTS - DAWN DUSK TIME INTERVAL - SAVING FILTERS """
+
+
 def test_before_dawndusk_time_interval(
-        create_test_recording,
+    create_test_recording,
 ) -> None:
     """Test if a recording is saved if it is in the interval."""
     # Setup
-    interval_duration: float = 20 # in minutes
+    interval_duration: float = 20  # in minutes
     timezone = pytz.timezone("Europe/London")
 
-    saving_filter = saving_filters.Before_DawnDuskTimeInterval(duration=interval_duration, timezone=timezone)
+    saving_filter = saving_filters.Before_DawnDuskTimeInterval(
+        duration=interval_duration, timezone=timezone
+    )
 
     # Fetch sun information
     test_date = datetime.datetime(2024, 8, 1, tzinfo=timezone)
-    sun_info = sun(LocationInfo(str(timezone)).observer, date=test_date, tzinfo=timezone)
+    sun_info = sun(
+        LocationInfo(str(timezone)).observer, date=test_date, tzinfo=timezone
+    )
     dawntime = sun_info["dawn"]
     dusktime = sun_info["dusk"]
 
     # Case 1: Recording within the interval before dusk
-    recording_inside_duskinterval = create_test_recording(dusktime - datetime.timedelta(minutes=10))
-    assert saving_filter.should_save_recording(recording_inside_duskinterval) is True
+    recording_inside_duskinterval = create_test_recording(
+        dusktime - datetime.timedelta(minutes=10)
+    )
+    assert (
+        saving_filter.should_save_recording(recording_inside_duskinterval)
+        is True
+    )
 
     # Case 2: Recording outside the interval before dusk
-    recording_outside_duskinterval = create_test_recording(dusktime - datetime.timedelta(minutes=40))
-    assert saving_filter.should_save_recording(recording_outside_duskinterval) is False
+    recording_outside_duskinterval = create_test_recording(
+        dusktime - datetime.timedelta(minutes=40)
+    )
+    assert (
+        saving_filter.should_save_recording(recording_outside_duskinterval)
+        is False
+    )
 
     # Case 3: Recording within the interval before dawn
-    recording_inside_dawninterval = create_test_recording(dawntime - datetime.timedelta(minutes=10))
-    assert saving_filter.should_save_recording(recording_inside_dawninterval) is True
+    recording_inside_dawninterval = create_test_recording(
+        dawntime - datetime.timedelta(minutes=10)
+    )
+    assert (
+        saving_filter.should_save_recording(recording_inside_dawninterval)
+        is True
+    )
 
     # Case 4: Recording outside the interval before dawn
-    recording_outside_dawninterval = create_test_recording(dawntime - datetime.timedelta(minutes=40))
-    assert saving_filter.should_save_recording(recording_outside_dawninterval) is False
+    recording_outside_dawninterval = create_test_recording(
+        dawntime - datetime.timedelta(minutes=40)
+    )
+    assert (
+        saving_filter.should_save_recording(recording_outside_dawninterval)
+        is False
+    )
 
 
 def test_after_dawndusk_time_interval(
-        create_test_recording,
+    create_test_recording,
 ) -> None:
     """Test if a recording is saved if it is in the interval."""
     # Setup
-    interval_duration: float = 20 # in minutes
+    interval_duration: float = 20  # in minutes
     timezone = pytz.timezone("Europe/London")
 
-    saving_filter = saving_filters.After_DawnDuskTimeInterval(duration=interval_duration, timezone=timezone)
+    saving_filter = saving_filters.After_DawnDuskTimeInterval(
+        duration=interval_duration, timezone=timezone
+    )
 
     # Fetch sun information
     test_date = datetime.datetime(2024, 8, 1, tzinfo=timezone)
-    sun_info = sun(LocationInfo(str(timezone)).observer, date=test_date, tzinfo=timezone)
+    sun_info = sun(
+        LocationInfo(str(timezone)).observer, date=test_date, tzinfo=timezone
+    )
     dawntime = sun_info["dawn"]
     dusktime = sun_info["dusk"]
 
     # Case 1: Recording within the interval before dusk
-    recording_inside_duskinterval = create_test_recording(dusktime + datetime.timedelta(minutes=10))
-    assert saving_filter.should_save_recording(recording_inside_duskinterval) is True
+    recording_inside_duskinterval = create_test_recording(
+        dusktime + datetime.timedelta(minutes=10)
+    )
+    assert (
+        saving_filter.should_save_recording(recording_inside_duskinterval)
+        is True
+    )
 
     # Case 2: Recording outside the interval before dusk
-    recording_outside_duskinterval = create_test_recording(dusktime + datetime.timedelta(minutes=40))
-    assert saving_filter.should_save_recording(recording_outside_duskinterval) is False
+    recording_outside_duskinterval = create_test_recording(
+        dusktime + datetime.timedelta(minutes=40)
+    )
+    assert (
+        saving_filter.should_save_recording(recording_outside_duskinterval)
+        is False
+    )
 
     # Case 3: Recording within the interval before dawn
-    recording_inside_dawninterval = create_test_recording(dawntime + datetime.timedelta(minutes=10))
-    assert saving_filter.should_save_recording(recording_inside_dawninterval) is True
+    recording_inside_dawninterval = create_test_recording(
+        dawntime + datetime.timedelta(minutes=10)
+    )
+    assert (
+        saving_filter.should_save_recording(recording_inside_dawninterval)
+        is True
+    )
 
     # Case 4: Recording outside the interval before dawn
-    recording_outside_dawninterval = create_test_recording(dawntime + datetime.timedelta(minutes=40))
-    assert saving_filter.should_save_recording(recording_outside_dawninterval) is False
+    recording_outside_dawninterval = create_test_recording(
+        dawntime + datetime.timedelta(minutes=40)
+    )
+    assert (
+        saving_filter.should_save_recording(recording_outside_dawninterval)
+        is False
+    )
 
 
 """ TESTS - THRESHOLD DETECTIONS - SAVING FILTERS """
+
+
 def test_delete_recording_without_detections(
     create_test_recording,
     create_test_model_output,
@@ -217,27 +279,34 @@ def test_delete_recording_without_detections(
     """Test if the recording is deleted if it has no detections."""
     # Setup
     saving_threshold = 0.6
+    # create tempfile
+    with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
+        temp_path = tmpfile.name
+
     recording = create_test_recording(
         recording_time=datetime.datetime(2024, 8, 1, 20, 0, 0),
-    )
-    model_output = create_test_model_output(
-        detections=[]
+        recording_path=Path(temp_path),
     )
 
-    saving_filter = saving_filters.ThresholdDetectionSavingRecordingFilter(
+    model_output = create_test_model_output(detections=[])
+
+    saving_filter = saving_filters.SavingThreshold(
         saving_threshold=saving_threshold
     )
     # Act
-    result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
+    result = saving_filter.should_save_recording(
+        recording, model_outputs=[model_output]
+    )
 
     # Check
-    assert result is False 
+    assert not result
+    assert not Path(temp_path).exists()
 
 
 def test_save_recording_ifboth_detclassprob_above_savingthreshold(
-        create_test_detection,
-        create_test_recording,
-        create_test_model_output,
+    create_test_detection,
+    create_test_recording,
+    create_test_model_output,
 ) -> None:
     """Test if the recording is saved if both det. and class. probabilities are above the saving threshold."""
     # Setup
@@ -249,29 +318,33 @@ def test_save_recording_ifboth_detclassprob_above_savingthreshold(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability = 0.7,
-                detection_probability = 0.8,
+                classification_probability=0.7,
+                detection_probability=0.8,
             ),
             create_test_detection(
                 tag_value="species_2",
-                classification_probability = 0.8,
-                detection_probability = 0.9,
-            )
+                classification_probability=0.8,
+                detection_probability=0.9,
+            ),
         ]
     )
 
-    saving_filter = saving_filters.ThresholdDetectionSavingRecordingFilter(saving_threshold=saving_threshold)
+    saving_filter = saving_filters.SavingThreshold(
+        saving_threshold=saving_threshold
+    )
     # Act
-    result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
+    result = saving_filter.should_save_recording(
+        recording, model_outputs=[model_output]
+    )
 
     # Check
     assert result is True
 
 
 def test_save_recording_if_onlydetprob_above_savingthreshold(
-        create_test_detection,
-        create_test_recording,
-        create_test_model_output,
+    create_test_detection,
+    create_test_recording,
+    create_test_model_output,
 ) -> None:
     """Test if the recording is saved if only detection probabilities are above the saving threshold."""
     # Setup
@@ -283,65 +356,80 @@ def test_save_recording_if_onlydetprob_above_savingthreshold(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability = 0.4,
-                detection_probability = 0.8,
+                classification_probability=0.4,
+                detection_probability=0.8,
             ),
             create_test_detection(
                 tag_value="species_2",
-                classification_probability = 0.3,
-                detection_probability = 0.7,
-            )
+                classification_probability=0.3,
+                detection_probability=0.7,
+            ),
         ]
     )
 
-    saving_filter = saving_filters.ThresholdDetectionSavingRecordingFilter(saving_threshold=saving_threshold)
+    saving_filter = saving_filters.SavingThreshold(
+        saving_threshold=saving_threshold
+    )
     # Act
-    result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
+    result = saving_filter.should_save_recording(
+        recording, model_outputs=[model_output]
+    )
 
     # Check
     assert result is True
 
 
 def test_delete_recording_if_detclassprob_below_savingthreshold(
-        create_test_model_output,
-        create_test_recording,
-        create_test_detection,
+    create_test_model_output,
+    create_test_recording,
+    create_test_detection,
 ) -> None:
     """Test if the recording is deleted if none of the probabilities are above the saving threshold."""
     # Setup
     saving_threshold = 0.6
+
+    with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
+        temp_path = tmpfile.name
+
     recording = create_test_recording(
         recording_time=datetime.datetime(2024, 8, 1, 20, 0, 0),
+        recording_path=Path(temp_path),
     )
     model_output = create_test_model_output(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability = 0.4,
-                detection_probability = 0.5,
+                classification_probability=0.4,
+                detection_probability=0.5,
             ),
             create_test_detection(
                 tag_value="species_2",
-                classification_probability = 0.3,
-                detection_probability = 0.4,
-            )
+                classification_probability=0.3,
+                detection_probability=0.4,
+            ),
         ]
     )
 
-    saving_filter = saving_filters.ThresholdDetectionSavingRecordingFilter(saving_threshold=saving_threshold)
+    saving_filter = saving_filters.SavingThreshold(
+        saving_threshold=saving_threshold
+    )
     # Act
-    result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
-    
-    # Check
-    assert result is False
+    result = saving_filter.should_save_recording(
+        recording, model_outputs=[model_output]
+    )
 
+    # Check
+    assert not result
+    assert not Path(temp_path).exists()
 
 
 """ TESTS - TAG VALUES - SAVING FILTERS """
+
+
 def test_save_recording_with_focus_tagvalues(
-        create_test_recording,
-        create_test_model_output,
-        create_test_detection,
+    create_test_recording,
+    create_test_model_output,
+    create_test_detection,
 ) -> None:
     """Test if the recording is saved if it contains a focus tag value (e.g., name of a species)."""
     # Setup
@@ -364,18 +452,20 @@ def test_save_recording_with_focus_tagvalues(
         ]
     )
 
-    saving_filter = saving_filters.FocusTagValueSavingRecordingFilter(values=focus_species)
+    saving_filter = saving_filters.DetectionTagValue(values=focus_species)
     # Act
-    result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
+    result = saving_filter.should_save_recording(
+        recording, model_outputs=[model_output]
+    )
 
     # Check
     assert result is True
 
 
 def test_delete_recording_ifnot_focus_tagvalues(
-        create_test_recording,
-        create_test_detection,
-        create_test_model_output,
+    create_test_recording,
+    create_test_detection,
+    create_test_model_output,
 ) -> None:
     """Test if the recording is saved if it contains the focus species."""
     # Setup
@@ -398,16 +488,14 @@ def test_delete_recording_ifnot_focus_tagvalues(
         ]
     )
 
-    saving_filter = saving_filters.FocusTagValueSavingRecordingFilter(values=focus_species)
+    saving_filter = saving_filters.DetectionTagValue(values=focus_species)
     # Act
-    result = saving_filter.should_save_recording(recording, model_outputs=[model_output])
+    result = saving_filter.should_save_recording(
+        recording, model_outputs=[model_output]
+    )
 
     # Check
     assert result is False
 
 
-
 """ TESTS - FOCUS TAGS - SAVING FILTERS """
-
-
-
