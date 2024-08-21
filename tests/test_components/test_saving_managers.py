@@ -158,7 +158,9 @@ def test_save_recording_with_confident_detections(
     )
 
     # Run
-    new_path = saving_manager.update_recording_path(recording, model_outputs=[model_output])
+    new_path = saving_manager.update_recording_path(
+        recording, model_outputs=[model_output]
+    )
 
     # assert
     assert not recording_file.exists()
@@ -186,7 +188,9 @@ def test_save_recording_with_unconfident_detections(
 
     recording_file = tmp_path / "test_recording.wav"
     recording_file.touch()
-    recording_file.write_text("test recording going to false_detections folder")
+    recording_file.write_text(
+        "test recording going to false_detections folder"
+    )
 
     recording = create_test_recording(
         recording_time=datetime.datetime(2020, 1, 1, 0, 0, 0),
@@ -211,14 +215,19 @@ def test_save_recording_with_unconfident_detections(
         saving_threshold=saving_threshold,
     )
 
-    # Run   
-    new_path = saving_manager.update_recording_path(recording, model_outputs=[model_output])
+    # Run
+    new_path = saving_manager.update_recording_path(
+        recording, model_outputs=[model_output]
+    )
 
-    #Assert
+    # Assert
     assert not recording_file.exists()
     assert new_path.exists()
     assert new_path.parent == saving_manager.dirpath_false
-    assert new_path.read_text() == "test recording going to false_detections folder"
+    assert (
+        new_path.read_text()
+        == "test recording going to false_detections folder"
+    )
 
 
 def test_delete_recordings(
@@ -266,10 +275,12 @@ def test_delete_recordings(
         saving_threshold=saving_threshold,
     )
 
-    # Run   
-    new_path = saving_manager.update_recording_path(recording, model_outputs=[model_output])
+    # Run
+    new_path = saving_manager.update_recording_path(
+        recording, model_outputs=[model_output]
+    )
 
-    #Assert
+    # Assert
     assert new_path == None
     assert not recording_file.exists()
 
@@ -284,7 +295,7 @@ def test_date_file_manager_save_recording(
     tmp_audio_dirpath.mkdir()
     recording_file = tmp_path / "test_recording.wav"
     recording_file.touch()
-    
+
     recording = create_test_recording(
         recording_time=datetime.datetime(2024, 8, 1, 20, 30, 0),
         recording_path=recording_file,
@@ -297,7 +308,7 @@ def test_date_file_manager_save_recording(
 
     # Run
     file_path = file_saving_manager.get_file_path(recording)
-    
-    # Assert 
+
+    # Assert
     assert tmp_audio_dirpath.exists()
     assert file_path == Path("2024") / "8" / "1" / f"203000_{recording.id}.wav"
