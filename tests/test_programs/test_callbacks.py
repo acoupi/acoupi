@@ -7,8 +7,9 @@ from celery import Celery
 from celery.contrib.testing.worker import TestWorkController
 from pydantic import BaseModel
 
-from acoupi.programs import AcoupiProgram, AcoupiWorker, WorkerConfig
-from acoupi.system.constants import CeleryConfig
+from acoupi.programs.custom.base import AcoupiProgram
+from acoupi.programs.custom.workers import AcoupiWorker, WorkerConfig
+from acoupi.system.configs import CeleryConfig
 
 
 class Config(BaseModel):
