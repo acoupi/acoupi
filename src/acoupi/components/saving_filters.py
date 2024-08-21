@@ -247,16 +247,16 @@ class SavingThreshold(types.RecordingSavingFilter):
         -------
             bool
         """
+        if model_outputs is None:
+            return False
 
         if any(
             self.has_confident_model_output(model_output)
             for model_output in model_outputs
         ):
-            print(f"Recording Saved: {recording.path}")
             return True
         else:
             if recording.path is not None:
-                print(f"Delete Recording: {recording.path}")
                 recording.path.unlink()
             return False
 
