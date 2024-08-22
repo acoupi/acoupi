@@ -219,17 +219,14 @@ class SavingThreshold(types.RecordingSavingFilter):
             tag.classification_probability >= self.saving_threshold
             for tag in model_output.tags
         ):
-            print("Classification Probability greater than saving_threshold")
             return True
 
         if any(
             detection.detection_probability >= self.saving_threshold
             for detection in model_output.detections
         ):
-            print("Detection Probability greater than saving_threshold")
             return True
 
-        print("ModelOutput not meeting criteria.")
         return False
 
     def should_save_recording(
@@ -250,15 +247,10 @@ class SavingThreshold(types.RecordingSavingFilter):
         if model_outputs is None:
             return False
 
-        if any(
+        return any(
             self.has_confident_model_output(model_output)
             for model_output in model_outputs
-        ):
-            return True
-        else:
-            if recording.path is not None:
-                recording.path.unlink()
-            return False
+        )
 
 
 class DetectionTagValue(types.RecordingSavingFilter):
