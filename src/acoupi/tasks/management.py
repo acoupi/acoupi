@@ -68,7 +68,6 @@ def generate_file_management_task(
                 )
                 recording.path.unlink()
                 continue
-
             else:
                 new_path = file_manager.saving_recording(
                     recording, model_outputs=model_outputs
