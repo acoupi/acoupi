@@ -154,6 +154,9 @@ class SaveRecordingManager(types.RecordingSavingManager):
         sdir = self.get_saving_recording_path(model_outputs)
         srec_filename = recording.datetime.strftime(self.timeformat)
 
+        if sdir is None:
+            raise ValueError("No directory to save recording.")
+
         # Move recording to the path it should be saved
         new_path = sdir / f"{srec_filename}.wav"
         shutil.move(str(recording.path), new_path)
