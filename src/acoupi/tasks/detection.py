@@ -42,8 +42,9 @@ def generate_detection_task(
             return
 
         # Detect events in recordings
-        logger.info("Running model on recording")
+        logger.info(f"Running model on recording: {recording.path}")
         model_output = model.run(recording)
+        logger.info(f"End processing file: {recording.path}")
 
         # Clean model output
         for cleaner in output_cleaners or []:
