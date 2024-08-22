@@ -40,10 +40,9 @@ def generate_file_management_task(
         recordings_and_outputs = store.get_recordings_by_path(
             paths=temp_wav_files
         )
-        logger.info(f"Recordings to manage: {recordings_and_outputs}")
 
         for recording, model_outputs in recordings_and_outputs:
-            logger.debug(f"Recording: {recording.path}")
+            logger.info(f"Recording: {recording.path}")
             logger.info(f"Model Outputs: {model_outputs}")
 
             if recording.path is None:
@@ -54,6 +53,7 @@ def generate_file_management_task(
                 continue
 
             if required - {model.name_model for model in model_outputs}:
+                logger.info(f"Check that file has been processed: {model_outputs.name_model}")
                 continue
 
             if file_filters and not all(
@@ -63,17 +63,18 @@ def generate_file_management_task(
                 logger.info(
                     f"Recording does not pass filters: {recording.path}"
                 )
-                recording.path.unlink()
+                #recording.path.unlink()
                 continue
 
-            new_path = file_manager.saving_recording(
-                recording, model_outputs=model_outputs
-            )
-            print(f"New Path to recordings: {new_path}")
-            if new_path is not None:
-                store.update_recording_path(recording, new_path)
-                logger.debug(f"Recording has been moved: {new_path}")
-            else:
-                logger.debug("Recording has not been deleted.")
+            else: 
+                new_path = file_manager.saving_recording(
+                    recording, model_outputs=model_outputs
+                )
+                logger.info(f"New Path to recordings: {new_path}")
+                if new_path is not None:
+                    store.update_recording_path(recording, new_path)
+                    logger.info(f"Recording has been moved: {new_path}")
+                else:
+                    logger.debug("Recording has not been deleted.")
 
     return file_management_task

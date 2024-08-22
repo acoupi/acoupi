@@ -64,7 +64,8 @@ def generate_detection_task(
             )
             if has_valid_tags:
                 message = message_factory.build_message(model_output)
-                logger.info("Storing message.")
+                logger.info(f"Valid Tags found: {has_valid_tags}.")
+                logger.info(f"Sending MQTT Message")
                 message_store.store_message(message)
             else:
                 logger.info("No valid tags found.")
