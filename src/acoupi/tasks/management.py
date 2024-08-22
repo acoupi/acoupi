@@ -50,6 +50,10 @@ def generate_file_management_task(
                 )
                 continue
 
+            if not model_outputs:
+                logger.info(f"File not processed. Skip")
+                continue
+
             if required - {model.name_model for model in model_outputs}:
                 continue
 
@@ -62,15 +66,16 @@ def generate_file_management_task(
                 )
                 recording.path.unlink()
                 continue
-
-            new_path = file_manager.saving_recording(
-                recording, model_outputs=model_outputs
-            )
-            if new_path is not None:
-                store.update_recording_path(recording, new_path)
-                logger.debug(f"Recording has been moved: {new_path}")
-
+    
             else:
-                logger.debug("Recording has not been deleted.")
+                new_path = file_manager.saving_recording(
+                    recording, model_outputs=model_outputs
+                )
+                if new_path is not None:
+                    store.update_recording_path(recording, new_path)
+                    logger.debug(f"Recording has been moved: {new_path}")
+
+                else:
+                    logger.debug("Recording has not been deleted.")
 
     return file_management_task
