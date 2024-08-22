@@ -8,6 +8,7 @@ from acoupi.files import TEMP_PATH, get_temp_files
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 def generate_file_management_task(
     store: types.Store,
     file_manager: types.RecordingSavingManager,
