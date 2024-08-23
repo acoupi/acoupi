@@ -6,7 +6,7 @@ from acoupi.components.types import ModelOutputCleaner
 from acoupi.data import Detection, ModelOutput, PredictedTag
 
 
-class ThresholdDetectionFilter(ModelOutputCleaner):
+class ThresholdDetectionCleaner(ModelOutputCleaner):
     """Keeps predictions with a probability higher than a threshold.
 
     This class implements a model output cleaner that removes any
