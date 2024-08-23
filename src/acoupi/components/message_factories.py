@@ -1,15 +1,75 @@
 """Message factories for acoupi."""
 
 import json
-from typing import Dict
+from typing import Dict, List
 
 from acoupi import data
 from acoupi.components import types
 
 __all__ = [
+    "DetectionThresholdMessageBuilder",
     "FullModelOutputMessageBuilder",
     "SummaryMessageBuilder",
 ]
+
+
+class DetectionThresholdMessageBuilder(types.MessageBuilder):
+    """A MessageBuilder that builds message from model outputs.
+
+    This message builder builds a message from a model output. The created
+    message will contain the full model output as a JSON string. This
+    includes information about:
+
+    - the model used.
+    - the recording processed, including deployment info.
+    - the detections and predicted tags that meet the threshold.
+    """
+
+    def __init__(self, detection_threshold: float):
+        """Initiatlise the message builder.
+
+        Args:
+            detection_threshold: the threshold that will be used to filter detections to be kept in the message.
+        """
+        self.detection_threshold = detection_threshold
+
+    def get_clean_detections(
+        self, detections: List[data.Detection]
+    ) -> List[data.Detection]:
+        """Remove detections with low probability."""
+        return [
+            self.clean_detection(detection)
+            for detection in detections
+            if detection.detection_probability >= self.detection_threshold
+        ]
+
+    def clean_detection(self, detection: data.Detection) -> data.Detection:
+        """Remove tags with low probability from detection."""
+        return data.Detection(
+            id=detection.id,
+            location=detection.location,
+            detection_probability=detection.detection_probability,
+            tags=detection.tags,
+        )
+
+    def build_message(self, model_output: data.ModelOutput) -> data.Message:
+        """Build a message with only detections meeting threshold.
+
+        Args:
+            model_output: The model output to build the message from.
+
+        Returns
+        -------
+            A message containing the model output with only detections meeting the threshold"
+        """
+        # Clean model output
+        model_output = data.ModelOutput(
+            model=model_output.model,
+            recording=model_output.recording,
+            predicted_tags=model_output.predicted_tags,
+            detections=self.get_clean_detections(model_output.detections),
+        )
+        return data.Message(content=model_output.model_dump_json())
 
 
 class FullModelOutputMessageBuilder(types.MessageBuilder):
