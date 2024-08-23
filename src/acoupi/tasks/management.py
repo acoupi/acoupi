@@ -3,7 +3,12 @@ from pathlib import Path
 from typing import Callable, List, Optional
 
 from acoupi.components import types
-from acoupi.files import TEMP_PATH, get_temp_files
+from acoupi.system.files import (
+    TEMP_PATH,
+    delete_recording,
+    get_temp_files,
+    move_recording,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -62,34 +67,54 @@ def generate_file_management_task(
                 )
                 continue
 
-            if not model_outputs:
-                logger.info("File not processed. Skip")
-                continue
-
-            if required - {model.name_model for model in model_outputs}:
+            # Is the recording ready to be managed?
+            if (not model_outputs) or (
+                required - {model.name_model for model in model_outputs}
+            ):
+                logger.debug(
+                    "Recording %s is not ready to be managed. Skipping.",
+                    recording,
+                )
                 continue
 
             # Which files should be saved?
-            if file_filters and not all(
-                file_filter.should_save_recording(recording, model_outputs)
-                for file_filter in file_filters
-            ):
-                logger.debug(
-                    f"Recording does not pass filters: {recording.path}"
-                )
-                recording.path.unlink()
+            for file_filter in file_filters or []:
+                if not file_filter.should_save_recording(
+                    recording,
+                    model_outputs=model_outputs,
+                ):
+                    logger.debug(
+                        "Recording %s does not pass filter: %s",
+                        recording,
+                        file_filter,
+                    )
+                    delete_recording(recording)
+                    break
+
+            # Has the file already been deleted?
+            if not recording.path.exists():
                 continue
 
             # Where should files be stored?
             for file_manager in file_managers:
                 new_path = file_manager.saving_recording(
-                    recording, model_outputs=model_outputs
+                    recording,
+                    model_outputs=model_outputs,
                 )
+
+                if new_path is None:
+                    continue
+
+                new_path = move_recording(recording, new_path)
+
                 if new_path is not None:
                     store.update_recording_path(recording, new_path)
-                    logger.debug(f"Recording has been moved: {new_path}")
 
-                else:
-                    logger.debug("Recording has not been deleted.")
+                break
+            else:
+                logger.warning(
+                    "No file manager was able to save recording %s",
+                    recording,
+                )
 
     return file_management_task

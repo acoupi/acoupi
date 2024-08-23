@@ -18,7 +18,6 @@ On top of these, it takes a clean list of detection to be saved.
 
 import logging
 import os
-import shutil
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional
@@ -159,7 +158,6 @@ class SaveRecordingManager(types.RecordingSavingManager):
 
         # Move recording to the path it should be saved
         new_path = sdir / f"{srec_filename}.wav"
-        shutil.move(str(recording.path), new_path)
         return new_path
 
 
@@ -213,7 +211,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
-    ) -> Path:
+    ) -> Optional[Path]:
         """Save a recording to a file.
 
         Args:
@@ -241,10 +239,6 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         # Create the directory if it does not exist
         if not os.path.exists(directory):
             os.makedirs(directory)
-
-        # Move the file to the new location
-        self.logger.warning(f"Moving {recording.path} to {full_path}")
-        shutil.move(str(recording.path), full_path)
 
         return full_path
 
