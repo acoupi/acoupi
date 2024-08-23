@@ -277,7 +277,7 @@ class MessageBuilder(ABC, Generic[P]):
         self,
         *args: P.args,
         **kwargs: P.kwargs,
-    ) -> Message:
+    ) -> Optional[Message]:
         """Build a message from the model output."""
 
 

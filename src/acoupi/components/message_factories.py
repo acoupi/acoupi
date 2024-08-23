@@ -1,7 +1,7 @@
 """Message factories for acoupi."""
 
 import json
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from acoupi import data
 from acoupi.components import types
@@ -33,7 +33,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         """
         self.detection_threshold = detection_threshold
 
-    def get_clean_detections(
+    def filter_detections(
         self, detections: List[data.Detection]
     ) -> List[data.Detection]:
         """Remove detections with low probability."""
@@ -52,7 +52,9 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
             tags=detection.tags,
         )
 
-    def build_message(self, model_output: data.ModelOutput) -> data.Message:
+    def build_message(
+        self, model_output: data.ModelOutput
+    ) -> Optional[data.Message]:
         """Build a message with only detections meeting threshold.
 
         Args:
@@ -62,14 +64,19 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         -------
             A message containing the model output with only detections meeting the threshold"
         """
+
+        filtered_detections = self.filter_detections(model_output.detections)
+        if not filtered_detections:
+            return None
+
         # Clean model output
-        model_output = data.ModelOutput(
+        filtered_model_output = data.ModelOutput(
             name_model=model_output.name_model,
             recording=model_output.recording,
             tags=model_output.tags,
-            detections=self.get_clean_detections(model_output.detections),
+            detections=filtered_detections,
         )
-        return data.Message(content=model_output.model_dump_json())
+        return data.Message(content=filtered_model_output.model_dump_json())
 
 
 class FullModelOutputMessageBuilder(types.MessageBuilder):
