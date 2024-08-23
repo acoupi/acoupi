@@ -45,17 +45,17 @@ def generate_send_data_task(
             logger.info(f"MESSAGE CONTENT: {message.content}")
 
             if message.content is None:
-                logger.info("MESSAGE IS EMPTY")
+                logger.debug("MESSAGE IS EMPTY")
                 continue
 
             if len(messengers) == 0:
                 logger.info("NO MESSENGER DEFINED")
-                continue
+                #continue
+                break
 
             for messenger in messengers:
-                logger.info(f"MESSENGER: {messenger}")
                 response = messenger.send_message(message)
-                logger.info(f"RESPONSE STATUS: {response.status}")
+                logger.info(f"Message Sent - Response Status: {response.status}")
                 message_store.store_response(response)
 
     return send_data_task

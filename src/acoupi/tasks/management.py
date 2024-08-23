@@ -46,7 +46,6 @@ def generate_file_management_task(
 
     def file_management_task() -> None:
         """Manage files."""
-        logger.info(" ----  START MANAGEMENT TASK ---- ")
         temp_wav_files = get_temp_files(path=temp_path)
 
         recordings_and_outputs = store.get_recordings_by_path(
@@ -55,7 +54,6 @@ def generate_file_management_task(
 
         for recording, model_outputs in recordings_and_outputs:
             logger.info(f"Recording: {recording.path}")
-            logger.info(f"Model Outputs: {model_outputs}")
 
             if recording.path is None:
                 logger.error(
@@ -65,7 +63,7 @@ def generate_file_management_task(
                 continue
 
             if not model_outputs:
-                logger.info("File not processed. Skip")
+                logger.info("File not processed. Skip.")
                 continue
 
             if required - {model.name_model for model in model_outputs}:
@@ -80,7 +78,7 @@ def generate_file_management_task(
                 for file_filter in file_filters
             ):
                 logger.info(
-                    f"Recording does not pass filters: {recording.path}"
+                    f"Recording does not pass filters. Delete: {recording.path}"
                 )
                 recording.path.unlink()
                 continue

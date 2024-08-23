@@ -38,21 +38,19 @@ def generate_detection_task(
             for filter in processing_filters or []
         ):
             # If recording should not be processed exit process
-            logger.info("Recording should not be processed, skipping")
+            logger.info("Recording should not be processed, skipping.")
             return
 
         # Detect events in recordings
         logger.info(f"Running model on recording: {recording.path}")
         model_output = model.run(recording)
-        logger.info(f"End processing file: {recording.path}")
 
         # Clean model output
         for cleaner in output_cleaners or []:
             model_output = cleaner.clean(model_output)
-            logger.info("Cleaned model output %s", model_output)
 
         # Store detections
-        logger.info("Storing model output")
+        logger.info("Storing model output.")
         store.store_model_output(model_output)
 
         # Create messages
@@ -65,8 +63,8 @@ def generate_detection_task(
             )
             if has_valid_tags:
                 message = message_factory.build_message(model_output)
-                logger.info(f"Valid Tags found: {has_valid_tags}.")
-                logger.info("Sending MQTT Message")
+                logger.info(f"Recording {recording.path} has valid tags: {has_valid_tags}.")
+                logger.info("Sending MQTT Message.")
                 message_store.store_message(message)
             else:
                 logger.info("No valid tags found.")
