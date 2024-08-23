@@ -164,11 +164,11 @@ class RecordingSavingManager(ABC):
     """The Recording SavingManager is responsible for saving recordings."""
 
     @abstractmethod
-    def save_recording(
+    def saving_recording(
         self,
         recording: Recording,
         model_outputs: Optional[List[ModelOutput]] = None,
-    ) -> Path:
+    ) -> Optional[Path]:
         """Save the recording locally.
 
         Args:

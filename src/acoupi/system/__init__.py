@@ -20,6 +20,12 @@ from acoupi.system.deployments import (
     get_current_deployment,
     start_deployment,
 )
+from acoupi.system.files import (
+    delete_recording,
+    get_temp_file_id,
+    get_temp_files,
+    move_recording,
+)
 from acoupi.system.lifecycle import setup_program, start_program, stop_program
 from acoupi.system.programs import (
     load_program,
@@ -38,6 +44,7 @@ from acoupi.system.state import is_configured
 
 __all__ = [
     "Settings",
+    "delete_recording",
     "disable_services",
     "dump_config",
     "enable_services",
@@ -45,10 +52,13 @@ __all__ = [
     "get_celery_app",
     "get_config_field",
     "get_current_deployment",
+    "get_temp_file_id",
+    "get_temp_files",
     "is_configured",
     "load_config",
     "load_program",
     "load_program_class",
+    "move_recording",
     "parse_config_from_args",
     "run_celery_command",
     "services_are_installed",

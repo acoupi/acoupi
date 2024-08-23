@@ -15,10 +15,11 @@ from acoupi.components.recording_schedulers import IntervalScheduler
 from acoupi.components.saving_filters import (
     After_DawnDuskTimeInterval,
     Before_DawnDuskTimeInterval,
-    FocusSpeciesRecordingFilter,
+    DetectionTags,
+    DetectionTagValue,
     FrequencySchedule,
     SaveIfInInterval,
-    ThresholdRecordingFilter,
+    SavingThreshold,
 )
 from acoupi.components.saving_managers import (
     DateFileManager,
@@ -35,7 +36,8 @@ __all__ = [
     "After_DawnDuskTimeInterval",
     "Before_DawnDuskTimeInterval",
     "DateFileManager",
-    "FocusSpeciesRecordingFilter",
+    "DetectionTags",
+    "DetectionTagValue",
     "FrequencySchedule",
     "FullModelOutputMessageBuilder",
     "IDFileManager",
@@ -54,5 +56,5 @@ __all__ = [
     "ThresholdsDetectionsSummariser",
     "SummaryMessageBuilder",
     "ThresholdDetectionFilter",
-    "ThresholdRecordingFilter",
+    "SavingThreshold",
 ]

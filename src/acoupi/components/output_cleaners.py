@@ -14,20 +14,20 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
     removing low confidence tags and detections.
     """
 
-    def __init__(self, threshold: float):
+    def __init__(self, detection_threshold: float):
         """Initiatlise the filter.
 
         Args:
-            threshold: The probability threshold to be used.
+            detection_threshold: The threshold to use to define when a detection is confident vs. unconfident.
         """
-        self.threshold = threshold
+        self.detection_threshold = detection_threshold
 
     def get_clean_tags(self, tags: List[PredictedTag]) -> List[PredictedTag]:
         """Remove tags with low probability."""
         return [
             tag
             for tag in tags
-            if tag.classification_probability >= self.threshold
+            if tag.classification_probability >= self.detection_threshold
         ]
 
     def get_clean_detections(
@@ -37,7 +37,7 @@ class ThresholdDetectionFilter(ModelOutputCleaner):
         return [
             self.clean_detection(detection)
             for detection in detections
-            if detection.detection_probability >= self.threshold
+            if detection.detection_probability >= self.detection_threshold
         ]
 
     def clean_detection(self, detection: Detection) -> Detection:

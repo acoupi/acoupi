@@ -18,7 +18,6 @@ On top of these, it takes a clean list of detection to be saved.
 
 import logging
 import os
-import shutil
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional
@@ -53,8 +52,11 @@ class SaveRecordingManager(types.RecordingSavingManager):
     timeformat: str
     """Datetime format to use to name the recording file path."""
 
-    threshold: float
-    """Threshold to use to determine if a recording contains detections."""
+    detection_threshold: float
+    """Threshold to use to determine if a recording contains confident detections."""
+
+    saving_threshold: float
+    """Threshold to use to save recordings with potential (not necessarily confident) detections."""
 
     def __init__(
         self,
@@ -62,7 +64,8 @@ class SaveRecordingManager(types.RecordingSavingManager):
         dirpath_true: Optional[Path] = None,
         dirpath_false: Optional[Path] = None,
         timeformat: str = "%Y%m%d_%H%M%S",
-        threshold: float = 0.1,
+        detection_threshold: float = 0.6,
+        saving_threshold: float = 0.3,
         logger: Optional[logging.Logger] = None,
     ):
         """Initiatilise the Recording SavingManager.
@@ -73,7 +76,8 @@ class SaveRecordingManager(types.RecordingSavingManager):
             dirpath_false: Directory path to save recordings if audio recording
                 contain no confident detections.
             timeformat: Datetime format to use to name the recording file path.
-            threshold: Threshold to use to determine if a recording contains
+            detection_threshold: Threshold to use to determine if a recording contains confident detections.
+            saving_threshold: Threshold to use to determine if and where the recording will be save.
         """
         if not dirpath.exists():
             dirpath.mkdir(parents=True)
@@ -92,58 +96,68 @@ class SaveRecordingManager(types.RecordingSavingManager):
         self.dirpath_false = dirpath_false
 
         self.timeformat = timeformat
-        self.threshold = threshold
+        self.detection_threshold = detection_threshold
+        self.saving_threshold = saving_threshold
 
         if logger is None:
             logger = get_task_logger(__name__)
         self.logger = logger
 
-    def has_confident_detections(
-        self,
-        model_outputs: List[data.ModelOutput],
-    ) -> bool:
-        """Determine if the model outputs contain confident detections."""
-        for model_output in model_outputs:
-            # Check if any tags or detectinos are confident
-            if any(
-                tag.classification_probability >= self.threshold
-                for tag in model_output.tags
-            ):
-                return True
-
-            if any(
-                detection.detection_probability >= self.threshold
-                for detection in model_output.detections
-            ):
-                return True
-
-        return False
-
-    def get_parent_dir(
+    def get_saving_recording_path(
         self,
         model_outputs: Optional[List[data.ModelOutput]],
-    ) -> Path:
+    ) -> Optional[Path]:
+        """Determine where the recording should be saved."""
         if not model_outputs:
             return self.dirpath
 
-        detection_bool = self.has_confident_detections(model_outputs)
-        return self.dirpath_true if detection_bool else self.dirpath_false
+        for model_output in model_outputs:
+            # Check if any tags or detectinos are confident
+            if any(
+                tag.classification_probability >= self.detection_threshold
+                for tag in model_output.tags
+            ):
+                return self.dirpath_true
 
-    def save_recording(
+            if any(
+                detection.detection_probability >= self.detection_threshold
+                for detection in model_output.detections
+            ):
+                return self.dirpath_true
+
+            if any(
+                tag.classification_probability >= self.saving_threshold
+                for tag in model_output.tags
+            ):
+                return self.dirpath_false
+
+            if any(
+                detection.detection_probability >= self.saving_threshold
+                for detection in model_output.detections
+            ):
+                return self.dirpath_false
+
+        return (
+            self.dirpath
+        )  # Default path if any of the above conditions are not met.
+
+    def saving_recording(
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
-    ) -> Path:
+    ) -> Optional[Path]:
         """Determine where the recording should be saved."""
         if recording.path is None:
             raise ValueError("Recording has no path")
 
-        sdir = self.get_parent_dir(model_outputs)
+        sdir = self.get_saving_recording_path(model_outputs)
         srec_filename = recording.datetime.strftime(self.timeformat)
+
+        if sdir is None:
+            raise ValueError("No directory to save recording.")
 
         # Move recording to the path it should be saved
         new_path = sdir / f"{srec_filename}.wav"
-        shutil.move(str(recording.path), new_path)
         return new_path
 
 
@@ -193,11 +207,11 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         """
         raise NotImplementedError
 
-    def save_recording(
+    def saving_recording(
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
-    ) -> Path:
+    ) -> Optional[Path]:
         """Save a recording to a file.
 
         Args:
@@ -225,10 +239,6 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         # Create the directory if it does not exist
         if not os.path.exists(directory):
             os.makedirs(directory)
-
-        # Move the file to the new location
-        self.logger.warning(f"Moving {recording.path} to {full_path}")
-        shutil.move(str(recording.path), full_path)
 
         return full_path
 
