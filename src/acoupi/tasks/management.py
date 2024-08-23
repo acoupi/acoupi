@@ -34,7 +34,8 @@ def generate_file_management_task(
         required_models: Optional list of models that must be present in the outputs.
         temp_path: The path where temporary files are stored.
 
-    Returns:
+    Returns
+    -------
         A callable that executes the file management task.
     """
     if required_models is None:
@@ -62,7 +63,7 @@ def generate_file_management_task(
                 continue
 
             if not model_outputs:
-                logger.info(f"File not processed. Skip")
+                logger.info("File not processed. Skip")
                 continue
 
             if required - {model.name_model for model in model_outputs}:
