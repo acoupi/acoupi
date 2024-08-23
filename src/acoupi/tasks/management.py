@@ -13,6 +13,7 @@ from acoupi.system.files import (
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 def generate_file_management_task(
     store: types.Store,
     file_managers: List[types.RecordingSavingManager],
