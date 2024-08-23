@@ -82,7 +82,7 @@ def generate_file_management_task(
                 logger.info(
                     f"Recording does not pass filters: {recording.path}"
                 )
-                #recording.path.unlink()
+                recording.path.unlink()
                 continue
 
             # Where should files be stored?
