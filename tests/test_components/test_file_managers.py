@@ -61,8 +61,9 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
         recording, model_outputs=[model_output]
     )
 
-    assert new_path.is_relative_to(audio_dir)
-    assert new_path.is_relative_to(audio_dir / "true_detections")
+    assert new_path is not None
+    assert new_path.parent.parent == audio_dir
+    assert new_path.parent == audio_dir / "true_detections"
 
 
 def test_save_recording_with_unconfident_tags(tmp_path: Path):
@@ -103,8 +104,9 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
         recording, model_outputs=[model_output]
     )
 
-    assert new_path.is_relative_to(audio_dir)
-    assert new_path.is_relative_to(audio_dir / "false_detections")
+    assert new_path is not None
+    assert new_path.parent.parent == audio_dir
+    assert new_path.parent == audio_dir / "false_detections"
 
 
 def test_date_file_manager_save_recording(
