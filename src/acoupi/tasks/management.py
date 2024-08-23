@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def generate_file_management_task(
     store: types.Store,
-    file_manager: types.RecordingSavingManager,
+    file_managers: List[types.RecordingSavingManager],
     logger: logging.Logger = logger,
     file_filters: Optional[List[types.RecordingSavingFilter]] = None,
     required_models: Optional[List[str]] = None,
@@ -25,6 +25,17 @@ def generate_file_management_task(
     Recordings are temporarily stored on the memory to reduce the number of
     writes to the disk. This process will move recordings from the memory to
     the disk, and remove recordings that are no longer needed.
+
+    Args:
+        store: The store containing recordings and their associated outputs.
+        file_managers: A list of file managers responsible for saving recordings.
+        logger: The logger used for logging information and errors.
+        file_filters: Optional list of filters to determine whether a recording should be saved.
+        required_models: Optional list of models that must be present in the outputs.
+        temp_path: The path where temporary files are stored.
+
+    Returns:
+        A callable that executes the file management task.
     """
     if required_models is None:
         required_models = []
@@ -57,6 +68,7 @@ def generate_file_management_task(
             if required - {model.name_model for model in model_outputs}:
                 continue
 
+            # Which files should be saved?
             if file_filters and not all(
                 file_filter.should_save_recording(recording, model_outputs)
                 for file_filter in file_filters
@@ -66,8 +78,9 @@ def generate_file_management_task(
                 )
                 recording.path.unlink()
                 continue
-    
-            else:
+
+            # Where should files be stored?
+            for file_manager in file_managers:
                 new_path = file_manager.saving_recording(
                     recording, model_outputs=model_outputs
                 )

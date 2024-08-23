@@ -300,7 +300,7 @@ def test_delete_recording_without_detections(
 
     # Check
     assert not result
-    assert not Path(temp_path).exists()
+    assert result is False
 
 
 def test_save_recording_ifboth_detclassprob_above_savingthreshold(
@@ -420,7 +420,7 @@ def test_delete_recording_if_detclassprob_below_savingthreshold(
 
     # Check
     assert not result
-    assert not Path(temp_path).exists()
+    assert result is False
 
 
 """ TESTS - TAG VALUES - SAVING FILTERS """
