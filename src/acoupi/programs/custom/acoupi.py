@@ -134,7 +134,7 @@ class Program(AcoupiProgram):
         file_management_task = tasks.generate_file_management_task(
             store=self.store,
             logger=self.logger.getChild("file_management"),
-            file_manager=self.file_manager,
+            file_managers=[self.file_manager],
             file_filters=self.create_file_filters(config),
         )
 
