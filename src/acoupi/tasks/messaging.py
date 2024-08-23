@@ -51,11 +51,13 @@ def generate_send_data_task(
             if len(messengers) == 0:
                 logger.info("NO MESSENGER DEFINED")
                 continue
-                #break
+                # break
 
             for messenger in messengers:
                 response = messenger.send_message(message)
-                logger.info(f"Message Sent - Response Status: {response.status}")
+                logger.info(
+                    f"Message Sent - Response Status: {response.status}"
+                )
                 message_store.store_response(response)
 
     return send_data_task

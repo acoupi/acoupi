@@ -65,7 +65,9 @@ def generate_detection_task(
             logger.info(f"Valid Tags: {has_valid_tags}")
             if has_valid_tags:
                 message = message_factory.build_message(model_output)
-                logger.info(f"Recording {recording.path} has valid tags: {has_valid_tags}.")
+                logger.info(
+                    f"Recording {recording.path} has valid tags: {has_valid_tags}."
+                )
                 logger.info("Create Message.")
                 message_store.store_message(message)
             else:

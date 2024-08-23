@@ -19,7 +19,7 @@ def generate_recording_task(
     recording_conditions: Optional[List[T]] = None,
 ) -> Callable[[], Optional[data.Recording]]:
     """Generate a recording task."""
-    
+
     def recording_task() -> Optional[data.Recording]:
         """Record audio."""
         now = datetime.datetime.now()
