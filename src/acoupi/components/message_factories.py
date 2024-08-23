@@ -64,9 +64,9 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         """
         # Clean model output
         model_output = data.ModelOutput(
-            model=model_output.model,
+            name_model=model_output.name_model,
             recording=model_output.recording,
-            predicted_tags=model_output.predicted_tags,
+            tags=model_output.tags,
             detections=self.get_clean_detections(model_output.detections),
         )
         return data.Message(content=model_output.model_dump_json())
