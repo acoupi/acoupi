@@ -50,8 +50,8 @@ def generate_send_data_task(
 
             if len(messengers) == 0:
                 logger.info("NO MESSENGER DEFINED")
-                #continue
-                break
+                continue
+                #break
 
             for messenger in messengers:
                 response = messenger.send_message(message)
