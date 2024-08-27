@@ -56,7 +56,9 @@ def generate_detection_task(
         # Create messages
         for message_factory in message_factories or []:
             message = message_factory.build_message(model_output)
-            logger.info("Storing message.")
-            message_store.store_message(message)
+
+            if message is not None:
+                logger.info("Storing message.")
+                message_store.store_message(message)
 
     return detection_task
