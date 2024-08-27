@@ -1,4 +1,3 @@
-@@ -1,10 +0,0 @@
 from acoupi.programs.custom.base import AcoupiProgram, NoUserPrompt, ProgramConfig
 from acoupi.programs.custom.workers import AcoupiWorker, WorkerConfig
 
