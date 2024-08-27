@@ -2,7 +2,7 @@
 
 import os
 
-from acoupi.programs.custom.workers import AcoupiWorker, WorkerConfig
+from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
 from acoupi.system import Settings
 from acoupi.system.scripts import write_workers_start_script
 

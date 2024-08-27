@@ -1,9 +1,9 @@
-from acoupi.programs.custom.base import (
+from acoupi.programs.core.base import (
     AcoupiProgram,
     NoUserPrompt,
     ProgramConfig,
 )
-from acoupi.programs.custom.workers import AcoupiWorker, WorkerConfig
+from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
 
 __all__ = [
     "AcoupiProgram",
