@@ -79,7 +79,7 @@ def generate_file_management_task(
                     recording,
                 )
                 continue
-
+            
             # Which files should be saved?
             for file_filter in file_filters or []:
                 if not file_filter.should_save_recording(
