@@ -55,22 +55,8 @@ def generate_detection_task(
 
         # Create messages
         for message_factory in message_factories or []:
-            logger.info(f"Meesage_Factory: {message_factory}")
-            # Check if there are any tags in the model output
-            has_valid_tags = any(
-                tag
-                for detection in model_output.detections
-                for tag in detection.tags
-            )
-            logger.info(f"Valid Tags: {has_valid_tags}")
-            if has_valid_tags:
-                message = message_factory.build_message(model_output)
-                logger.info(
-                    f"Recording {recording.path} has valid tags: {has_valid_tags}."
-                )
-                logger.info("Create Message.")
-                message_store.store_message(message)
-            else:
-                logger.info("No valid tags found.")
+            message = message_factory.build_message(model_output)
+            logger.info("Storing message.")
+            message_store.store_message(message)
 
     return detection_task

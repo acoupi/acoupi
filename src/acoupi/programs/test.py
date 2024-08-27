@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel
 
-from acoupi.programs.custom.base import AcoupiProgram
+from acoupi.programs.core.base import AcoupiProgram
 from acoupi.system.exceptions import HealthCheckError
 
 

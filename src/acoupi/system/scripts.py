@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from acoupi.programs.custom.workers import WorkerConfig
+from acoupi.programs.core.workers import WorkerConfig
 from acoupi.system.constants import Settings
 from acoupi.system.templates import render_template
 

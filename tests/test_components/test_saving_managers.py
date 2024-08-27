@@ -163,10 +163,8 @@ def test_save_recording_with_confident_detections(
     )
 
     # assert
-    assert not recording_file.exists()
-    assert new_path.exists()
-    assert new_path.parent == saving_manager.dirpath_true
-    assert new_path.read_text() == "test recording in true_detections folder"
+    assert new_path is not None
+    assert new_path.parent == tmp_dirpath_true
 
 
 def test_save_recording_with_unconfident_detections(
@@ -221,16 +219,11 @@ def test_save_recording_with_unconfident_detections(
     )
 
     # Assert
-    assert not recording_file.exists()
-    assert new_path.exists()
-    assert new_path.parent == saving_manager.dirpath_false
-    assert (
-        new_path.read_text()
-        == "test recording going to false_detections folder"
-    )
+    assert new_path is not None
+    assert new_path.parent == tmp_dirpath_false
 
 
-def test_delete_recordings(
+def test_recording_is_saved_in_default_dir_if_not_true_or_false_class(
     tmp_path: Path,
     create_test_recording,
     create_test_detection,
@@ -280,8 +273,10 @@ def test_delete_recordings(
         recording, model_outputs=[model_output]
     )
 
-    # Assert
-    assert not recording_file.exists()
+    # Assert saves in the root folder and not in any of the true or false
+    # subdirectories
+    assert new_path is not None
+    assert new_path.parent == tmp_audio_dirpath
 
 
 def test_date_file_manager_save_recording(

@@ -72,7 +72,7 @@ class DummyRecordingManager(RecordingSavingManager):
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
-    ) -> Path:
+    ) -> Optional[Path]:
         if recording.path is None:
             raise ValueError("Recording has no path")
 
