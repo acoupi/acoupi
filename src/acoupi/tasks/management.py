@@ -77,10 +77,9 @@ def generate_file_management_task(
                 logger.debug(
                     "Recording %s is not ready to be managed. Skipping.",
                     recording,
-
                 )
                 continue
-            
+
             # Which files should be saved?
             for file_filter in file_filters or []:
                 if not file_filter.should_save_recording(
