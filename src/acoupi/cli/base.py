@@ -34,7 +34,7 @@ def acoupi(ctx):
         ignore_unknown_options=True,
     )
 )
-@click.option("--program", type=str, default="acoupi.programs.custom.test")
+@click.option("--program", type=str, default="acoupi.programs.test")
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
 @click.pass_context
 def setup(ctx, program: str, args: List[str]):
