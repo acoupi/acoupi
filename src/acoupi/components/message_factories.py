@@ -40,7 +40,8 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         return [
             self.clean_detection(detection)
             for detection in detections
-            if detection.detection_probability >= self.detection_threshold and detection.tags != []
+            if detection.detection_probability >= self.detection_threshold
+            and detection.tags != []
         ]
 
     def clean_detection(self, detection: data.Detection) -> data.Detection:

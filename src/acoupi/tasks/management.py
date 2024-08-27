@@ -62,7 +62,6 @@ def generate_file_management_task(
         for recording, model_outputs in recordings_and_outputs:
             logger.info(f"Recording: {recording.path}")
 
-
             if recording.path is None:
                 logger.error(
                     "Temporary recording %s has no path",
