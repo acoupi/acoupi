@@ -12,7 +12,7 @@ from celery.utils.log import get_task_logger
 from pydantic import BaseModel
 
 from acoupi import data
-from acoupi.programs.workers import AcoupiWorker, WorkerConfig
+from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
 
 __all__ = [
     "NoUserPrompt",

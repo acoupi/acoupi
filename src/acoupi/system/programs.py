@@ -4,7 +4,7 @@ import inspect
 from importlib import import_module
 from typing import Type
 
-from acoupi import programs
+from acoupi.programs.core import base as programs
 from acoupi.system import exceptions
 from acoupi.system.config import load_config
 from acoupi.system.constants import CeleryConfig, Settings
