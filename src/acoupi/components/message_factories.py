@@ -40,7 +40,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         return [
             self.clean_detection(detection)
             for detection in detections
-            if detection.detection_probability >= self.detection_threshold
+            if detection.detection_probability >= self.detection_threshold and detection.tags != []
         ]
 
     def clean_detection(self, detection: data.Detection) -> data.Detection:
@@ -64,7 +64,6 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         -------
             A message containing the model output with only detections meeting the threshold"
         """
-
         filtered_detections = self.filter_detections(model_output.detections)
         if not filtered_detections:
             return None
