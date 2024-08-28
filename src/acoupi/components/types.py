@@ -270,7 +270,21 @@ P = ParamSpec("P")
 
 
 class MessageBuilder(ABC, Generic[P]):
-    """Build a message from the model output."""
+    """Build a message from various inputs, typically model outputs.
+
+    Messages are intended to be sent to remote servers using communication
+    protocols (e.g., MQTT, HTTP) for further processing, storage, or analysis.
+
+    The build_message method is responsible to convert input data into a message.
+    Depending on the implementation and input data, the method may return None.
+    This is relevant in cases where the input data doesn't meet certain criteria,
+    such as detection thresholds.
+
+    Example Subclasses:
+        - DetectionThresholdMessageBuilder: Filters detections by a probability threshold; returns None if no valid detections.
+        - FullModelOutputMessageBuilder: Sends the entire model output without filtering.
+        - SummaryMessageBuilder: Builds messages from summary data for specified time intervals.
+    """
 
     @abstractmethod
     def build_message(
@@ -278,7 +292,7 @@ class MessageBuilder(ABC, Generic[P]):
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> Optional[Message]:
-        """Build a message from the model output."""
+        """Will build a message or return None depending on the input data."""
 
 
 class Summariser(ABC):
