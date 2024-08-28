@@ -38,26 +38,27 @@ def generate_detection_task(
             for filter in processing_filters or []
         ):
             # If recording should not be processed exit process
-            logger.info("Recording should not be processed, skipping")
+            logger.info("Recording should not be processed, skipping.")
             return
 
         # Detect events in recordings
-        logger.info("Running model on recording")
+        logger.info(f"Running model on recording: {recording.path}")
         model_output = model.run(recording)
 
         # Clean model output
         for cleaner in output_cleaners or []:
             model_output = cleaner.clean(model_output)
-            logger.info("Cleaned model output %s", model_output)
 
         # Store detections
-        logger.info("Storing model output")
+        logger.info("Storing model output.")
         store.store_model_output(model_output)
 
         # Create messages
         for message_factory in message_factories or []:
             message = message_factory.build_message(model_output)
-            logger.info("Storing message.")
-            message_store.store_message(message)
+
+            if message is not None:
+                logger.info("Storing message.")
+                message_store.store_message(message)
 
     return detection_task

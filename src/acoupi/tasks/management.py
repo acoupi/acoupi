@@ -60,8 +60,7 @@ def generate_file_management_task(
         logger.info(f"Recordings to manage: {recordings_and_outputs}")
 
         for recording, model_outputs in recordings_and_outputs:
-            logger.debug(f"Recording: {recording.path}")
-            logger.info(f"Model Outputs: {model_outputs}")
+            logger.info(f"Recording: {recording.path}")
 
             if recording.path is None:
                 logger.error(
