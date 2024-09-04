@@ -17,7 +17,6 @@ nav:
       - Tasks: developer_guide/tasks.md
       - Programs: developer_guide/programs.md
       - Inner Workings: developer_guide/inner_workings.md
-      - Command Line Interface: developer_guide/cli.md
   - Reference:
       - Data: reference/data.md
       - Components: reference/components.md

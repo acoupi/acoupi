@@ -1,5 +1,5 @@
 # Programs
 
-::: acoupi.programs.workers
+::: acoupi.programs.custom.workers
 
 ::: acoupi.programs
