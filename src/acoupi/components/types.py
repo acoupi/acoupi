@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Generic, List, Optional, Tuple
 from uuid import UUID
 
-from acoupi.data import Deployment, Message, ModelOutput, Recording, Response
+from acoupi import data
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
@@ -20,6 +20,11 @@ class RecordingScheduler(ABC):
 
     The RecordingScheduler is responsible for determining the interval between
     recordings.
+
+    See Also
+    --------
+    `IntervalScheduler` in acoupi.compoments.recording_scheduler for
+    a concrete implementation of the RecordingScheduler.
     """
 
     @abstractmethod
@@ -27,50 +32,34 @@ class RecordingScheduler(ABC):
         self,
         time: Optional[datetime.datetime] = None,
     ) -> float:
-        """Return the number of seconds until the next recording.
+        """Provide the number of seconds until the next recording.
 
-        This should return 0 if a recording should be made immediately.
+        Parameters
+        ----------
+        time : Optional[datetime.datetime], optional
+            The time to use for determining the next recording, by default None.
 
-        Args:
-            time: The time to use for determining the next recording.
-                Defaults to None.
-        """
-
-
-class Scheduler(ABC):
-    """Manage time between repetitive actions.
-
-    The Scheduler responsible for determining the interval between
-    two actions such as the time between recordings, or the time between
-    creating messages to be sent to a remote server.
-    """
-
-    @abstractmethod
-    def waiting_time(
-        self,
-        time: Optional[datetime.datetime] = None,
-    ) -> float:
-        """Return the number of seconds until the next action.
-
-        This should return 0 if something should be done immediately.
-
-        Args:
-            time: The time to use for determining the next repetitive action.
-                Defaults to None.
+        Returns
+        -------
+        float
+            The number of seconds until the next recording.
+            Will return 0 if a recording should be made immediately.
         """
 
 
 class RecordingCondition(ABC):
     """Decide if a recording should be made.
 
-    Only do a recording if the RecordingCondition is met.
+    Will only do a recording if the RecordingCondition is met.
 
-    The RecordingCondition is responsible for deciding if a recording
-    should be made.
+    See Also
+    --------
+    IsInInterval in acoupi.components.recording_condition for
+    a concrete implementation of the RecordingCondition.
     """
 
     @abstractmethod
-    def should_record(self, time: datetime.datetime) -> bool:
+    def should_record(self) -> bool:
         """Determine if a recording should be made."""
 
 
@@ -82,14 +71,24 @@ class AudioRecorder(ABC):
     """
 
     @abstractmethod
-    def record(self, deployment: Deployment) -> Recording:
+    def record(self, deployment: data.Deployment) -> data.Recording:
         """Record audio from the microphone and return the recording.
 
-        The recording should be saved to a temporary file and the path
-        to the file should be returned, along with the datetime, duration,
-        and samplerate of the recording.
+        Parameters
+        ----------
+        deployment : data.Deployment
+            The deployment to use for recording the audio.
 
-        The temporary file should be placed in memory.
+        Returns
+        -------
+        data.Recording
+            The recording that was made. Object containing a temporary recording path,
+            along with recording details such as datetime, duration, and samplerate.
+
+        Notes
+        -----
+        The recording path should be saved in temporary memory until it gets processed.
+        The path will be updated after the recording has been processed.
         """
 
 
@@ -101,7 +100,7 @@ class ProcessingFilter(ABC):
     """
 
     @abstractmethod
-    def should_process_recording(self, recording: Recording) -> bool:
+    def should_process_recording(self, recording: data.Recording) -> bool:
         """Determine if the recording should be processed by the model."""
 
 
@@ -117,8 +116,8 @@ class Model(ABC):
     @abstractmethod
     def run(
         self,
-        recording: Recording,
-    ) -> ModelOutput:
+        recording: data.Recording,
+    ) -> data.ModelOutput:
         """Run the model on the audio file and return the result.
 
         Can optionally use deployment info to enhance predictions.
@@ -134,7 +133,7 @@ class ModelOutputCleaner(ABC):
     """
 
     @abstractmethod
-    def clean(self, model_output: ModelOutput) -> ModelOutput:
+    def clean(self, model_output: data.ModelOutput) -> data.ModelOutput:
         """Clean the model output."""
 
 
@@ -148,8 +147,8 @@ class RecordingSavingFilter(ABC):
     @abstractmethod
     def should_save_recording(
         self,
-        recording: Recording,
-        model_outputs: Optional[List[ModelOutput]] = None,
+        recording: data.Recording,
+        model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be saved.
 
@@ -166,8 +165,8 @@ class RecordingSavingManager(ABC):
     @abstractmethod
     def saving_recording(
         self,
-        recording: Recording,
-        model_outputs: Optional[List[ModelOutput]] = None,
+        recording: data.Recording,
+        model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> Optional[Path]:
         """Save the recording locally.
 
@@ -190,22 +189,22 @@ class Store(ABC):
     """
 
     @abstractmethod
-    def get_current_deployment(self) -> Deployment:
+    def get_current_deployment(self) -> data.Deployment:
         """Get the current deployment from the local filesystem."""
 
     @abstractmethod
-    def store_deployment(self, deployment: Deployment) -> None:
+    def store_deployment(self, deployment: data.Deployment) -> None:
         """Store the deployment locally."""
 
     @abstractmethod
-    def update_deployment(self, deployment: Deployment) -> None:
+    def update_deployment(self, deployment: data.Deployment) -> None:
         """Update the deployment."""
 
     @abstractmethod
     def store_recording(
         self,
-        recording: Recording,
-        deployment: Optional[Deployment] = None,
+        recording: data.Recording,
+        deployment: Optional[data.Deployment] = None,
     ) -> None:
         """Store the recording locally.
 
@@ -243,7 +242,7 @@ class Store(ABC):
     def get_recordings_by_path(
         self,
         paths: List[Path],
-    ) -> List[Tuple[Recording, List[ModelOutput]]]:
+    ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
         """Get a list recordings from the store by their paths.
 
         Each recording is returned with the full list of model outputs
@@ -260,9 +259,9 @@ class Store(ABC):
     @abstractmethod
     def update_recording_path(
         self,
-        recording: Recording,
+        recording: data.Recording,
         path: Path,
-    ) -> Recording:
+    ) -> data.Recording:
         """Update the path of the recording."""
 
 
@@ -270,20 +269,24 @@ P = ParamSpec("P")
 
 
 class MessageBuilder(ABC, Generic[P]):
-    """Build a message from various inputs, typically model outputs.
+    """Create messages from input data.
 
-    Messages are intended to be sent to remote servers using communication
-    protocols (e.g., MQTT, HTTP) for further processing, storage, or analysis.
+    Returns
+    -------
+        A message containing the model output or None if no valid detections
 
-    The build_message method is responsible to convert input data into a message.
-    Depending on the implementation and input data, the method may return None.
-    This is relevant in cases where the input data doesn't meet certain criteria,
-    such as detection thresholds.
+    See Also
+    --------
+    acoupi.components.message_factories for concrete implementations of the MessageBuilder.
 
-    Example Subclasses:
-        - DetectionThresholdMessageBuilder: Filters detections by a probability threshold; returns None if no valid detections.
-        - FullModelOutputMessageBuilder: Sends the entire model output without filtering.
-        - SummaryMessageBuilder: Builds messages from summary data for specified time intervals.
+    DetectionThresholdMessageBuilder
+        Filters detections by a probability threshold.
+
+    FullModelOutputMessageBuilder
+        No filtering. Format the entire model output.
+
+    SummaryMessageBuilder
+        Summarise data into a message according to a specified time interval.
     """
 
     @abstractmethod
@@ -291,7 +294,7 @@ class MessageBuilder(ABC, Generic[P]):
         self,
         *args: P.args,
         **kwargs: P.kwargs,
-    ) -> Optional[Message]:
+    ) -> Optional[data.Message]:
         """Will build a message or return None depending on the input data."""
 
 
@@ -306,7 +309,7 @@ class Summariser(ABC):
     def build_summary(
         self,
         now: datetime.datetime,
-    ) -> Message:
+    ) -> data.Message:
         """Send the message to a remote server."""
 
 
@@ -318,7 +321,7 @@ class Messenger(ABC):
     """
 
     @abstractmethod
-    def send_message(self, message: Message) -> Response:
+    def send_message(self, message: data.Message) -> data.Response:
         """Send the message to a remote server."""
 
 
@@ -326,19 +329,19 @@ class MessageStore(ABC):
     """Keeps track of messages that have been sent."""
 
     @abstractmethod
-    def get_unsent_messages(self) -> List[Message]:
+    def get_unsent_messages(self) -> List[data.Message]:
         """Get the recordings that have not been synced to the server."""
 
     @abstractmethod
     def store_message(
         self,
-        message: Message,
+        message: data.Message,
     ) -> None:
         """Register a message with the store."""
 
     @abstractmethod
     def store_response(
         self,
-        response: Response,
+        response: data.Response,
     ) -> None:
         """Register a message response with the store."""
