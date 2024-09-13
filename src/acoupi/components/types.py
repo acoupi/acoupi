@@ -216,7 +216,7 @@ class Store(ABC):
     @abstractmethod
     def store_model_output(
         self,
-        model_output: ModelOutput,
+        model_output: data.ModelOutput,
     ) -> None:
         """Store the model output locally."""
 
@@ -224,7 +224,7 @@ class Store(ABC):
     def get_recordings(
         self,
         ids: List[UUID],
-    ) -> List[Tuple[Recording, List[ModelOutput]]]:
+    ) -> List[Tuple[Recording, List[data.ModelOutput]]]:
         """Get a list recordings from the store by their ids.
 
         Each recording is returned with the full list of model outputs
