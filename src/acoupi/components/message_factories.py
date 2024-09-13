@@ -7,8 +7,7 @@ protocols (e.g., MQTT, HTTP) for further processing, storage, or analysis.
 The message factories are useful to filter outputs from the model according
 to various criteria, avoiding sending unnecessary information to a server,
 when connectivity is limited. For example, message factories
-can be used to filter detections with low probability,
-or to create a summary of model outputs for a specific time interval.
+can be used to filter detections with low probability.
 
 Message factories are implemented as classes that inherit from MessageBuilder. The class should
 implement the build_message method, which takes a model output and returns a message. The message
@@ -24,7 +23,6 @@ from acoupi.components import types
 __all__ = [
     "DetectionThresholdMessageBuilder",
     "FullModelOutputMessageBuilder",
-    "SummaryMessageBuilder",
 ]
 
 
@@ -128,40 +126,19 @@ class FullModelOutputMessageBuilder(types.MessageBuilder):
     """A MessageBuilder that builds message from model outputs.
 
     This message builder builds a message from a model output. The created
-    message will contain the full model output as a JSON string. This
-    includes information about:
-
-    - the model used.
-    - the recording processed, including deployment info.
-    - the predicted tags at the recording level.
-    - predicted detections with their tags and confidence scores.
+    message will contain the full model output as a JSON string.
     """
 
     def build_message(self, model_output: data.ModelOutput) -> data.Message:
-        """Build a message from a recording and model outputs."""
+        """Build a message from a recording and model outputs.
+
+        Parameters
+        ----------
+        model_output: data.ModelOutput
+            The model output to build the message from.
+
+        Returns
+        -------
+            A message containing the full model output.
+        """
         return data.Message(content=model_output.model_dump_json())
-
-
-class SummaryMessageBuilder(types.MessageBuilder):
-    """A SummaryMessageBuilder that builds message from summariser outputs.
-
-    This mesage builder builds a message from a summary. The created
-    message will contain the summary as a JSON string. This includes
-    information about:
-
-    - the summary content.
-    - the summary timeinterval with starttime and endtime.
-    """
-
-    def build_message(
-        self, timeinterval: Dict, summary_content: Dict
-    ) -> data.Message:
-        """Build a message from a recording and model outputs."""
-        return data.Message(
-            content=json.dumps(
-                {
-                    "timeinterval": timeinterval,
-                    "summary_content": summary_content,
-                }
-            )
-        )

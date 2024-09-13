@@ -284,9 +284,6 @@ class MessageBuilder(ABC, Generic[P]):
 
     FullModelOutputMessageBuilder
         No filtering. Format the entire model output.
-
-    SummaryMessageBuilder
-        Summarise data into a message according to a specified time interval.
     """
 
     @abstractmethod
