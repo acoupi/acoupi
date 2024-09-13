@@ -224,7 +224,7 @@ class Store(ABC):
     def get_recordings(
         self,
         ids: List[UUID],
-    ) -> List[Tuple[Recording, List[data.ModelOutput]]]:
+    ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
         """Get a list recordings from the store by their ids.
 
         Each recording is returned with the full list of model outputs
