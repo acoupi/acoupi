@@ -15,7 +15,7 @@ import datetime
 from typing import List
 
 from acoupi import data
-from acoupi.components.types import types
+from acoupi.components import types
 
 __all__ = [
     "IsInInterval",
@@ -93,7 +93,7 @@ class IsInIntervals(types.RecordingCondition):
     """A RecordManager that records during multiple intervals of time."""
 
     def __init__(
-        self, intervals: List[data.TimeInterval], timezone: datetime.tzinfo
+        self, intervals: List[data.TimeInterval], timezone: datetime.tzinfo, time: datetime.datetime, 
     ):
         """Initialize the MultiIntervalRecordingManager.
 

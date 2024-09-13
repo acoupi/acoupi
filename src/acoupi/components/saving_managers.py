@@ -259,7 +259,7 @@ class DateFileManager(BaseFileManager):
     the constructor.
     """
 
-    def get_file_path(self, recording: types.Recording) -> Path:
+    def get_file_path(self, recording: data.Recording) -> Path:
         """Get the path where the file of a recording should be stored.
 
         Args:
@@ -287,7 +287,7 @@ class IDFileManager(BaseFileManager):
     ID.wav
     """
 
-    def get_file_path(self, recording: types.Recording) -> Path:
+    def get_file_path(self, recording: data.Recording) -> Path:
         """Get the the path where the file of a recording should be stored.
 
         Args:
