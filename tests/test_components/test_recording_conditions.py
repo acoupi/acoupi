@@ -22,7 +22,7 @@ def test_single_interval_recording_manager():
     recording_manager = components.IsInInterval(
         interval,
         timezone=datetime.timezone.utc,
-        time=now.replace(hour=9, minute=59)
+        time=now.replace(hour=9, minute=59),
     )
 
     recording_manager.time = now.replace(hour=10, minute=0)
@@ -30,7 +30,7 @@ def test_single_interval_recording_manager():
 
     recording_manager.time = now.replace(hour=9, minute=59)
     assert recording_manager.should_record() is False
-    
+
     recording_manager.time = now.replace(hour=10, minute=30)
     assert recording_manager.should_record() is True
 

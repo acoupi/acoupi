@@ -93,7 +93,10 @@ class IsInIntervals(types.RecordingCondition):
     """A RecordManager that records during multiple intervals of time."""
 
     def __init__(
-        self, intervals: List[data.TimeInterval], timezone: datetime.tzinfo, time: datetime.datetime, 
+        self,
+        intervals: List[data.TimeInterval],
+        timezone: datetime.tzinfo,
+        time: datetime.datetime,
     ):
         """Initialize the MultiIntervalRecordingManager.
 
