@@ -109,7 +109,7 @@ def test_save_recording_manager_fails_if_recording_has_no_path(
         recording_time=datetime.datetime(2020, 1, 1, 0, 0, 0),
     )
     with pytest.raises(ValueError):
-        saving_manager.saving_recording(recording)
+        saving_manager.save_recording(recording)
 
 
 def test_save_recording_with_confident_detections(
@@ -158,7 +158,7 @@ def test_save_recording_with_confident_detections(
     )
 
     # Run
-    new_path = saving_manager.saving_recording(
+    new_path = saving_manager.save_recording(
         recording, model_outputs=[model_output]
     )
 
@@ -214,7 +214,7 @@ def test_save_recording_with_unconfident_detections(
     )
 
     # Run
-    new_path = saving_manager.saving_recording(
+    new_path = saving_manager.save_recording(
         recording, model_outputs=[model_output]
     )
 
@@ -269,7 +269,7 @@ def test_recording_is_saved_in_default_dir_if_not_true_or_false_class(
     )
 
     # Run
-    new_path = saving_manager.saving_recording(
+    new_path = saving_manager.save_recording(
         recording, model_outputs=[model_output]
     )
 
@@ -283,7 +283,7 @@ def test_date_file_manager_save_recording(
     tmp_path: Path,
     create_test_recording,
 ):
-    """Test DateFileManager.saving_recording."""
+    """Test DateFileManager.save_recording."""
     # Setup
     tmp_audio_dirpath = tmp_path / "audio"
     tmp_audio_dirpath.mkdir()
