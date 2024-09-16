@@ -163,12 +163,13 @@ class ModelOutputCleaner(ABC):
 
 
 class RecordingSavingFilter(ABC):
-    """Determine if a recording should be saved.
+    """ "The Recording Saving Filter is reponsible for determining if a recording should be saved.
 
     Notes
     -----
-    The boolean output of the RecordingSavingFilter method `should_save_recording()` will be used
-    by the RecordingSavingManager to decide whether and where to save the recordings.
+    The RecordingSavingFilter is responsible for determining if a recording should be saved.
+    The RecordingSavingFilter is used by the management task. If the boolean value returned
+    is True, the recording will be saved. If False, the recording will be deleted.
 
     See Also
     --------
@@ -211,23 +212,43 @@ class RecordingSavingFilter(ABC):
 
 
 class RecordingSavingManager(ABC):
-    """The Recording SavingManager is responsible for saving recordings."""
+    """The Recording SavingManager is responsible for saving recordings.
+
+    Notes
+    -----
+    The RecordingSavingManager is responsible for saving recordings. The RecordingSavingManager
+    is used by the management task. The RecordingSavingManager is used to save recordings to the
+    correct path.
+
+    See Also
+    --------
+    acoupi.components.saving_managers for concrete implementations of the RecordingSavingManager.
+
+    SaveRecordingManager
+        Save recordings to a specified directory according to the model outputs.
+    DateFileManager
+        Save recordings to directories based on the date of the recording.
+    """
 
     @abstractmethod
-    def saving_recording(
+    def save_recording(
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
-    ) -> Optional[Path]:
-        """Save the recording locally.
+    ) -> Path:
+        """Save the recording.
 
-        Args:
-            recording: The recording to save.
-            model_outputs: Optionally use the model outputs to determine where
-                to save the recording.
+        Parameters
+        ----------
+        recording : data.Recording
+            The recording to save.
+        model_outputs : Optional[List[data.ModelOutput]], optional
+            The model outputs associated to the recording. Used to determined
+            where and how to save the recording.
 
         Returns
         -------
+        Path
             The path to the saved recording.
         """
 

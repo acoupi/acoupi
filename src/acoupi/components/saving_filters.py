@@ -1,16 +1,19 @@
-"""Recording Saving Filters.
+"""Recording Saving Filters for acoupi.
 
-There are various options availble for saving recordings files.
+RecordingSavingFilters are used to determine if a recording should be saved based on
+specific criteria. These filters can be used to save recordings based on time intervals,
+detection probabilities, classification probabilities, classification tag values, and more.
 
-    1. Save recordings based on a specific time interval. Both parameters
-       starttime_saving_recording and endtime_saving_recording need to be configured.
-    2. Save recordings for x minutes before or after dawn and dusk time. Configure parameters
-       before_dawndusk_duration and/or after_dawndusk_duration.
-    3. Save recordings for a specific duration (i.e., x minutes)
-       and with a repetitive frequency interval (i.e,  x minutes).
-       Configure both parameters saving_frequency_duration and saving_frequency_interval.
+The Recording SavingFilters are implemented as classes that inherit from the RecordingSavingFilter
+Implementation of the RecordingSavingFilters should implement the should_save_recording method,
+which takes a recording object and a list of model outputs, and returns a boolean value.
 
-Ignore all of these settings if no recordings should be saved.
+The RecordingSavingFilters are used in the acoupi.tasks.management module to determine
+if a recording should be saved based on the output of the models and the filters provided.
+If a recording pass filters, it will be kept and stored in a directory specified by the
+RecordingSavingManager. If a recording does not pass the filters, it is deleted.
+
+The RecordingSavingFilters are optional and can be ignored if no recordings should be saved.
 """
 
 import datetime
@@ -34,7 +37,7 @@ __all__ = [
 
 
 class SaveIfInInterval(types.RecordingSavingFilter):
-    """A time interval SavingFilter."""
+    """A time interval RecordingSavingFilter."""
 
     interval: data.TimeInterval
     """The interval of time where recordings will be saved."""
@@ -43,7 +46,7 @@ class SaveIfInInterval(types.RecordingSavingFilter):
     """The timezone to use when determining if recording should be saved."""
 
     def __init__(self, interval: data.TimeInterval, timezone: datetime.tzinfo):
-        """Initialise the SaveIfInterval SavingFilter."""
+        """Initialise the SaveIfInterval RecordingSavingFilter."""
         self.interval = interval
         self.timezone = timezone
 
@@ -52,7 +55,7 @@ class SaveIfInInterval(types.RecordingSavingFilter):
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-        """Determine if a recording falls within the interval.
+        """Save a recording if it falls within the specified interval.
 
         Examples
         --------
@@ -77,7 +80,7 @@ class SaveIfInInterval(types.RecordingSavingFilter):
 
 
 class FrequencySchedule(types.RecordingSavingFilter):
-    """A frequency schedule SavingFilter."""
+    """A frequency schedule RecordingSavingFilter."""
 
     duration: float
     """The duration of time (in minutes) where recordings will be saved."""
@@ -86,7 +89,7 @@ class FrequencySchedule(types.RecordingSavingFilter):
     """The frequency of time (in minutes) where recordings will be saved."""
 
     def __init__(self, duration: float, frequency: float):
-        """Initialise the FrequencySchedule SavingFilter."""
+        """Initialise the FrequencySchedule RecordingSavingFilter."""
         self.duration = duration
         self.frequency = frequency
 
@@ -102,10 +105,10 @@ class FrequencySchedule(types.RecordingSavingFilter):
 
 
 class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
-    """A before dawn and dusk time SavingFilter."""
+    """A before dawn and dusk time RecordingSavingFilter."""
 
     def __init__(self, duration: float, timezone: datetime.tzinfo):
-        """Initiatlise the Before Dawn & Dusk SavingFilter."""
+        """Initiatlise the Before Dawn & Dusk RecordingSavingFilter."""
         self.duration = duration
         self.timezone = timezone
 
@@ -114,7 +117,7 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-        """Determine if a recording falls within the specified interval, before dawn and dusk.
+        """Save a recording if it falls within the specified interval, before dawn and dusk.
 
         Notes
         -----
@@ -173,7 +176,7 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
 
 
 class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
-    """An after dawn and dusk time SavingFilter."""
+    """An after dawn and dusk time RecordingSavingFilter."""
 
     duration: float
     """The duration (in minutes) before dawn and dusk where recordings will be saved."""
@@ -182,7 +185,7 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
     """The timezone to use when determining dawntime and dusktime."""
 
     def __init__(self, duration: float, timezone: datetime.tzinfo):
-        """Initiatlise the Before Dawn & Dusk SavingFilter."""
+        """Initiatlise the Before Dawn & Dusk RecordingSavingFilter."""
         self.duration = duration
         self.timezone = timezone
 
@@ -191,7 +194,7 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-        """Determine if a recording falls within the specified interval, after dawn and dusk.
+        """Save a recording if it falls within the specified interval, after dawn and dusk.
 
         Notes
         -----
@@ -253,13 +256,13 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
 
 
 class SavingThreshold(types.RecordingSavingFilter):
-    """A SavingTreshold filter."""
+    """A SavingTreshold RecordingSavingFilter."""
 
     saving_threshold: float
     """The probability threshold to use."""
 
     def __init__(self, saving_threshold: float):
-        """Initialize the SavingFilter."""
+        """Initialize the RecordingSavingFilter."""
         self.saving_threshold = saving_threshold
 
     def has_confident_model_output(
@@ -300,7 +303,7 @@ class SavingThreshold(types.RecordingSavingFilter):
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-        """Determine if a recording contains any detections or classification probabilities above the saving threshold."""
+        """Save a recording if it contains any confident detections or tags."""
         if model_outputs is None:
             return False
 
@@ -311,13 +314,13 @@ class SavingThreshold(types.RecordingSavingFilter):
 
 
 class DetectionTagValue(types.RecordingSavingFilter):
-    """A RecordingFilter that keeps recordings with specific tag values."""
+    """A RecordingSavingFilter that keeps recordings with specific tag values."""
 
     values: List[str]
     """The tag values to focus on."""
 
     def __init__(self, values: List[str]):
-        """Initialize the SavingFilter."""
+        """Initialize the RecordingSavingFilter."""
         self.values = values
 
     def has_confident_tagvalues(self, model_output: data.ModelOutput) -> bool:
@@ -346,7 +349,7 @@ class DetectionTagValue(types.RecordingSavingFilter):
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-        """Determine if the model output of a recording contains any confident tag values."""
+        """Save a recording if it contains any confident tag values."""
         if model_outputs is None:
             return False
 
@@ -357,7 +360,7 @@ class DetectionTagValue(types.RecordingSavingFilter):
 
 
 class DetectionTags(types.RecordingSavingFilter):
-    """A RecordingFilter that keeps recordings with selected tags.
+    """A RecordingSavingFilter that keeps recordings with selected tags.
 
     This filter will keep recordings that contain confident tag
     predictions that are in the tags list.
@@ -370,7 +373,7 @@ class DetectionTags(types.RecordingSavingFilter):
     """The probability threshold to use."""
 
     def __init__(self, tags: List[data.Tag], saving_threshold: float = 0.5):
-        """Initialize the SavingFilter."""
+        """Initialize the RecordingSavingFilter."""
         self.tags = tags
         self.saving_threshold = saving_threshold
 
@@ -414,7 +417,7 @@ class DetectionTags(types.RecordingSavingFilter):
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-        """Determine if the model output of a recording contains any confident tags or detection probabilities above a threshold."""
+        """Save a recording if it contains any confident tags or detections."""
         if model_outputs is None:
             return False
 

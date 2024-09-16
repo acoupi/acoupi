@@ -2,18 +2,20 @@
 
 Saving managers are used to determine where and how the recordings and
 detections of an audio file should be saved. This is helpful to handle
-recordings files and detections outputs, such as recording and
-detections outputs can be saved into a specific format (i.e, .wav files,
-.csv files) and at a specific location (i.e, rpi memory, external
-hardrive, folder XX/YY).
+recordings files and detections outputs. Recordings and detections outputs
+can be saved into a specific format (i.e, .wav files, .csv files) and at a
+specific location (i.e, rpi memory, external hardrive, folder XX/YY).
 
-Saving managers (SavingRecording and SavingDetection) are implemented as
-classes that inherit from RecordingSavingManager and
-DetectionSavingManager. The classes should implement the save_recording
-and save_detections methods. The save_recording method takes the
-recording object, and the recording filter output. The save_detection
-methods also takes a recording object and the detection filter output.
-On top of these, it takes a clean list of detection to be saved.
+The SavingManagers are implemented as class that inherit from RecordingSavingManager.
+The classes should implement the save_recording method. The save_recording method
+takes a recording object and a list of model outputs as input and returns the path where
+the recording should be saved.
+
+The save_recording method is called by the file management task to determine where the
+recording should be saved. The file management task is responsible for moving recordings
+from the memory to the disk, and remove recordings that are no longer needed.
+
+The SavingManagers are optional and can be ingored if the no recordings are saved.
 """
 
 import logging
@@ -38,25 +40,25 @@ class SaveRecordingManager(types.RecordingSavingManager):
     """A Recording SavingManager that save audio recordings."""
 
     dirpath: Path
-    """Directory path to save recordings if audio recording contains
-    detections."""
+    """Directory path to save recordings."""
 
     dirpath_true: Path
-    """Directory path to save recordings if audio recording contains
-    detections."""
+    """Directory path to save recordings if audio recording contains confident detections
+    (i.e., above the detection threshold)."""
 
     dirpath_false: Path
-    """Directory path to save recordings if audio recording contain no
-    detections."""
+    """Directory path to save recordings if audio recording contain no confident detections
+    (i.e., below the detection threshold)."""
 
     timeformat: str
     """Datetime format to use to name the recording file path."""
 
     detection_threshold: float
-    """Threshold to use to determine if a recording contains confident detections."""
+    """Threshold determining if a recording contains confident detections."""
 
     saving_threshold: float
-    """Threshold to use to save recordings with potential (not necessarily confident) detections."""
+    """Threshold determining if recordings should be saved (i.e., regardless of confident
+    or unconfident detections)."""
 
     def __init__(
         self,
@@ -68,17 +70,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
         saving_threshold: float = 0.3,
         logger: Optional[logging.Logger] = None,
     ):
-        """Initiatilise the Recording SavingManager.
-
-        Args:
-            dirpath_true: Directory path to save recordings if audio recording
-                contains confident detections.
-            dirpath_false: Directory path to save recordings if audio recording
-                contain no confident detections.
-            timeformat: Datetime format to use to name the recording file path.
-            detection_threshold: Threshold to use to determine if a recording contains confident detections.
-            saving_threshold: Threshold to use to determine if and where the recording will be save.
-        """
+        """Initiatilise the Recording SavingManager."""
         if not dirpath.exists():
             dirpath.mkdir(parents=True)
         self.dirpath = dirpath
@@ -106,8 +98,19 @@ class SaveRecordingManager(types.RecordingSavingManager):
     def get_saving_recording_path(
         self,
         model_outputs: Optional[List[data.ModelOutput]],
-    ) -> Optional[Path]:
-        """Determine where the recording should be saved."""
+    ) -> Path:
+        """Determine where the recording should be saved.
+
+        Parameters
+        ----------
+        model_outputs : Optional[List[data.ModelOutput]]
+            List of model outputs containing detections and tags.
+
+        Returns
+        -------
+        Path
+            Path where the recording should be saved.
+        """
         if not model_outputs:
             return self.dirpath
 
@@ -141,12 +144,36 @@ class SaveRecordingManager(types.RecordingSavingManager):
             self.dirpath
         )  # Default path if any of the above conditions are not met.
 
-    def saving_recording(
+    def save_recording(
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
-    ) -> Optional[Path]:
-        """Determine where the recording should be saved."""
+    ) -> Path:
+        """Save a recording to a file.
+
+        Examples
+        --------
+        dirpath = Path("path/to/save")
+        dirpath_true = Path("path/to/save/confident_detections")
+        dirpath_false = Path("path/to/save/unconfident_detections")
+        detection_threshold = 0.8
+        saving_threshold = 0.3
+
+        >>> model_outputs = [
+        ...     data.ModelOutput(
+        ...         tags=[data.Tag(classification_probability=0.7)]
+        ...     ),
+        ...     data.ModelOutput(
+        ...         detections=[
+        ...             data.Detection(detection_probability=0.6)
+        ...         ]
+        ...     ),
+        ... ]
+        >>> saving_directory = self.get_saving_recording_path(
+        ...     model_outputs
+        ... )
+        >>> saving_directory == dirpath_false
+        """
         if recording.path is None:
             raise ValueError("Recording has no path")
 
@@ -178,11 +205,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
     def __init__(
         self, directory: Path, logger: Optional[logging.Logger] = None
     ):
-        """Create a new BaseFileManager.
-
-        Args:
-            directory: Directory where the files are stored.
-        """
+        """Create a new BaseFileManager."""
         if logger is None:
             logger = get_task_logger(__name__)
         self.logger = logger
@@ -198,8 +221,10 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         The path must be relative to the directory specified in the
         constructor.
 
-        Args:
-            recording: Recording to get the path for.
+        Parameters
+        ----------
+        recording: data.Recording
+            Recording to get the path for.
 
         Returns
         -------
@@ -207,15 +232,17 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         """
         raise NotImplementedError
 
-    def saving_recording(
+    def save_recording(
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
-    ) -> Optional[Path]:
+    ) -> Path:
         """Save a recording to a file.
 
-        Args:
-            recording: Recording to save.
+        Parameters
+        ----------
+        recording: data.Recording
+            Recording to save.
 
         Returns
         -------
@@ -260,15 +287,7 @@ class DateFileManager(BaseFileManager):
     """
 
     def get_file_path(self, recording: data.Recording) -> Path:
-        """Get the path where the file of a recording should be stored.
-
-        Args:
-            recording: Recording to get the path for.
-
-        Returns
-        -------
-            Path of the file.
-        """
+        """Get the path where the file of a recording should be stored."""
         date = recording.datetime
         directory = (
             Path(str(date.year)) / Path(str(date.month)) / Path(str(date.day))
@@ -288,13 +307,5 @@ class IDFileManager(BaseFileManager):
     """
 
     def get_file_path(self, recording: data.Recording) -> Path:
-        """Get the the path where the file of a recording should be stored.
-
-        Args:
-            recording: Recording to get the path for.
-
-        Returns
-        -------
-            Path of the file.
-        """
+        """Get the the path where the file of a recording should be stored."""
         return Path(f"{recording.id}.wav")
