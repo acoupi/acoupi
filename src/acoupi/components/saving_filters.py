@@ -56,10 +56,16 @@ class SaveIfInInterval(types.RecordingSavingFilter):
 
         Examples
         --------
-        >>> interval = data.TimeInterval(start=datetime.time(21, 30), end=datetime.time(23, 00))
+        >>> interval = data.TimeInterval(
+        ...     start=datetime.time(21, 30), end=datetime.time(23, 00)
+        ... )
         >>> timezone = datetime.timezone.utc
         >>> filter = SaveIfInInterval(interval, timezone)
-        >>> recording = data.Recording(datetime=datetime.datetime(2024, 1, 1, 22, 0, 0, tzinfo=timezone))
+        >>> recording = data.Recording(
+        ...     datetime=datetime.datetime(
+        ...         2024, 1, 1, 22, 0, 0, tzinfo=timezone
+        ...     )
+        ... )
         >>> filter.should_save_recording(recording)
         True
         """
@@ -112,7 +118,7 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
 
         Notes
         -----
-        The dawn and dusk times are calculated using the `astral` library. The 
+        The dawn and dusk times are calculated using the `astral` library. The
         `sun` function returns the dawn and dusk times for a specific location, datetime
         and timezone. This information is used to determine the interval before dawn and dusk
         dusk, and whether the current recording falls within this interval.
@@ -120,15 +126,27 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
         DuskTime GMT: 2024-01-01 16:42:00+00:00
         >>> duration = 30
         >>> timezone = "Europe/London"
-        >>> saving_filter = Before_DawnDuskTimeInterval(duration, timezone)  
-        >>> recording = data.Recording(datetime=datetime.datetime(2024, 1, 1, 7, 0, 0, tzinfo=timezone))
+        >>> saving_filter = Before_DawnDuskTimeInterval(
+        ...     duration, timezone
+        ... )
+        >>> recording = data.Recording(
+        ...     datetime=datetime.datetime(
+        ...         2024, 1, 1, 7, 0, 0, tzinfo=timezone
+        ...     )
+        ... )
         >>> saving_filter.should_save_recording(recording)
         True
 
         >>> duration = 30
         >>> timezone = "Europe/London"
-        >>> saving_filter = Before_DawnDuskTimeInterval(duration, timezone)
-        >>> recording = data.Recording(datetime=datetime.datetime(2024, 1, 1, 17, 0, 0, tzinfo=timezone))
+        >>> saving_filter = Before_DawnDuskTimeInterval(
+        ...     duration, timezone
+        ... )
+        >>> recording = data.Recording(
+        ...     datetime=datetime.datetime(
+        ...         2024, 1, 1, 17, 0, 0, tzinfo=timezone
+        ...     )
+        ... )
         >>> saving_filter.should_save_recording(recording)
         False
         """
@@ -177,7 +195,7 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
 
         Notes
         -----
-        The dawn and dusk times are calculated using the `astral` library. The 
+        The dawn and dusk times are calculated using the `astral` library. The
         `sun` function returns the dawn and dusk times for a specific location, datetime
         and timezone. This information is used to determine the interval after dawn and dusk
         dusk, and whether the current recording falls within this interval.
@@ -188,15 +206,27 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         DuskTime GMT: 2024-01-01 16:42:00+00:00
         >>> duration = 30
         >>> timezone = "Europe/London"
-        >>> saving_filter = After_DawnDuskTimeInterval(duration, timezone)  
-        >>> recording = data.Recording(datetime=datetime.datetime(2024, 1, 1, 7, 0, 0, tzinfo=timezone))
+        >>> saving_filter = After_DawnDuskTimeInterval(
+        ...     duration, timezone
+        ... )
+        >>> recording = data.Recording(
+        ...     datetime=datetime.datetime(
+        ...         2024, 1, 1, 7, 0, 0, tzinfo=timezone
+        ...     )
+        ... )
         >>> saving_filter.should_save_recording(recording)
         False
 
         >>> duration = 30
         >>> timezone = "Europe/London"
-        >>> saving_filter = After_DawnDuskTimeInterval(duration, timezone)
-        >>> recording = data.Recording(datetime=datetime.datetime(2024, 1, 1, 17, 0, 0, tzinfo=timezone))
+        >>> saving_filter = After_DawnDuskTimeInterval(
+        ...     duration, timezone
+        ... )
+        >>> recording = data.Recording(
+        ...     datetime=datetime.datetime(
+        ...         2024, 1, 1, 17, 0, 0, tzinfo=timezone
+        ...     )
+        ... )
         >>> saving_filter.should_save_recording(recording)
         True
         """
@@ -244,12 +274,12 @@ class SavingThreshold(types.RecordingSavingFilter):
         ----------
         model_output : data.ModelOutput
             The model output of the recording containing detections and tags.
-        
+
         Returns
         -------
         bool
             True if any detection or classification probability is above the saving threshold.
-            False if no detection or classification probability is above the saving threshold. 
+            False if no detection or classification probability is above the saving threshold.
         """
         if any(
             tag.classification_probability >= self.saving_threshold
@@ -350,7 +380,7 @@ class DetectionTags(types.RecordingSavingFilter):
         An output is considered confident if any of its tags or detections
         have a probability greater than or equal to the threshold.
 
-        Parameters: 
+        Parameters:
         ----------
         model_output : data.ModelOutput
             The model output of the recording containing detections and tags.

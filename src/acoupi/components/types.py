@@ -154,7 +154,7 @@ class ModelOutputCleaner(ABC):
         ----------
         model_output : data.ModelOutput
             The model output to clean.
-        
+
         Returns
         -------
         data.ModelOutput
@@ -167,7 +167,7 @@ class RecordingSavingFilter(ABC):
 
     Notes
     -----
-    The boolean output of the RecordingSavingFilter method `should_save_recording()` will be used 
+    The boolean output of the RecordingSavingFilter method `should_save_recording()` will be used
     by the RecordingSavingManager to decide whether and where to save the recordings.
 
     See Also
@@ -175,10 +175,10 @@ class RecordingSavingFilter(ABC):
     acoupi.components.recording_saving_filters for concrete implementations of the RecordingSavingFilter.
 
     After_DawnDuskTimeInterval / Before_DawnDuskTimeInterval
-        Save recordings if they falls withing a specified time interval 
+        Save recordings if they falls withing a specified time interval
         happening after or before astronomical dawn and dusk.
     SavingThreshold
-        Save recordings if any of the detection and classification tag probability associated to 
+        Save recordings if any of the detection and classification tag probability associated to
         the recording model output is higher or equal than a specified threshold.
     SaveIfInInterval
         Save recordings if the recording falls within a specified interval.
@@ -192,14 +192,14 @@ class RecordingSavingFilter(ABC):
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-         """Determine if a recording should be saved.
+        """Determine if a recording should be saved.
 
         Parameters
         ----------
         recording : data.Recording
             The recording to check.
         model_outputs : Optional[List[data.ModelOutput]], optional
-            The model outputs associated to the recording. Used in 
+            The model outputs associated to the recording. Used in
             some implementations when the decision to save a recording
             depends on the model outputs, rather the recording itself.
 
@@ -208,6 +208,7 @@ class RecordingSavingFilter(ABC):
         bool
             True if the recording should be saved, False otherwise.
         """
+
 
 class RecordingSavingManager(ABC):
     """The Recording SavingManager is responsible for saving recordings."""
@@ -357,7 +358,7 @@ class Summariser(ABC):
 
     StatisticsDetectionsSummariser
         Summarises detections by calculating the mean, min, max, and count of classification probabilities for each species.
-    
+
     ThresholdsDetectionsSummariser
         Count the number of detections for each species that falls into three thresholds different bands: low, medium, and high.
     """
@@ -368,17 +369,18 @@ class Summariser(ABC):
         now: datetime.datetime,
     ) -> data.Message:
         """Build a summary.
-        
+
         Parameters
         ----------
         now : datetime.datetime
             The time of the summary.
-        
+
         Returns
         -------
         data.Message
             The summary as a data.Message object. The message should be in JSON format.
         """
+
 
 class Messenger(ABC):
     """Send messages.
@@ -392,7 +394,7 @@ class Messenger(ABC):
 
     MQTTMessenger
         Send messages using the MQTT protocol.
-    
+
     HttpMessenger
         Send messages using the HTTP POST Request.
     """

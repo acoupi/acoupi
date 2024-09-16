@@ -4,7 +4,7 @@ Messengers are responsible for sending messages to external services. The messen
 illustrating how to send messages using different communication protocols (e.g., MQTT, HTTP).
 
 The messengers are implemented as classes that inherit from Messenger. The class should implement
-the send_message method, which takes a message and sends it to the external service. The class 
+the send_message method, which takes a message and sends it to the external service. The class
 should also implement the check method, which checks the connection status of the messenger.
 
 The MQTTMessenger sends messages using the MQTT protocol. The HTTPMessenger sends messages using
@@ -113,11 +113,18 @@ class MQTTMessenger(types.Messenger):
         -------
         data.Response
             A response containing the message, status, content, and received time.
-        
+
         Examples
         --------
-        >>> message = data.Message(content='{"name_model": "TestModel", "recording": {"path": "recording.wav", "deployment": {}, "tags": [], "detections": [{"detection_probability": 0.9, "location": {}, "tags": [{"tag": {"key": "species", "value": "species_1"}, "classification_probability": 0.9}]}]}')
-        >>> messenger = MQTTMessenger(host="mqtt.localhost.org", username="mqttusername", topic="org/survey/device_00", clientid="org/survey/device_00")
+        >>> message = data.Message(
+        ...     content='{"name_model": "TestModel", "recording": {"path": "recording.wav", "deployment": {}, "tags": [], "detections": [{"detection_probability": 0.9, "location": {}, "tags": [{"tag": {"key": "species", "value": "species_1"}, "classification_probability": 0.9}]}]}'
+        ... )
+        >>> messenger = MQTTMessenger(
+        ...     host="mqtt.localhost.org",
+        ...     username="mqttusername",
+        ...     topic="org/survey/device_00",
+        ...     clientid="org/survey/device_00",
+        ... )
         >>> messenger.send_message(message)
         Response(message=Message(content=''), status=ResponseStatus.SUCCESS, content='MQTT_ERR_SUCCESS', received_on=datetime.datetime())
         """

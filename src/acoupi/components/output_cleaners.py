@@ -10,7 +10,7 @@ should implement the clean method, which takes a data.ModelOutput object and ret
 a cleaned data.ModelOutput object. The modeloutput that does not meet the criteria are removed.
 
 The ModelOutputCleaner is used in the detection task to clean the outputs of the model BEFORE storing
-them in the store. The ModelOutputCleaner is passed to the detection task as a list of ModelOutputCleaner 
+them in the store. The ModelOutputCleaner is passed to the detection task as a list of ModelOutputCleaner
 objects. This allows to use multiple ModelOutputCleaners to clean the model output.
 """
 
@@ -18,6 +18,7 @@ from typing import List
 
 from acoupi import data
 from acoupi.components import types
+
 
 class ThresholdDetectionCleaner(types.ModelOutputCleaner):
     """Keeps predictions with a probability higher than a threshold.
@@ -34,7 +35,9 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         """Initiatlise the filter."""
         self.detection_threshold = detection_threshold
 
-    def get_clean_tags(self, tags: List[data.PredictedTag]) -> List[data.PredictedTag]:
+    def get_clean_tags(
+        self, tags: List[data.PredictedTag]
+    ) -> List[data.PredictedTag]:
         """Remove tags with low probability."""
         return [
             tag
@@ -68,7 +71,7 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         ----------
         model_output : data.ModelOutput
             The model output to clean.
-        
+
         Returns
         -------
         data.ModelOutput
@@ -116,7 +119,7 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         ...         )
         ...     ]
         ... )
-        """        """
+        """
         return data.ModelOutput(
             name_model=model_output.name_model,
             recording=model_output.recording,
