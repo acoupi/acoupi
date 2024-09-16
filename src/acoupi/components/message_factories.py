@@ -14,8 +14,7 @@ implement the build_message method, which takes a model output and returns a mes
 should be a JSON string containing the information to be sent to the remote server.
 """
 
-import json
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from acoupi import data
 from acoupi.components import types

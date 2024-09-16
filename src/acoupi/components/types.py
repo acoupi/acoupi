@@ -23,8 +23,10 @@ class RecordingScheduler(ABC):
 
     See Also
     --------
-    `IntervalScheduler` in acoupi.compoments.recording_scheduler for
-    a concrete implementation of the RecordingScheduler.
+    acoupi.compoments.recording_scheduler for a concrete implementation of the RecordingScheduler.
+
+    IntervalScheduler
+        Record at a fixed interval.
     """
 
     @abstractmethod
@@ -54,8 +56,10 @@ class RecordingCondition(ABC):
 
     See Also
     --------
-    IsInInterval in acoupi.components.recording_condition for
-    a concrete implementation of the RecordingCondition.
+    acoupi.components.recording_condition for concrete implementations of the RecordingCondition.
+
+    IsInInterval
+        Record if the current time is within a specified interval.
     """
 
     @abstractmethod
@@ -130,18 +134,56 @@ class ModelOutputCleaner(ABC):
     The ModelOutputCleaner is responsible for cleaning the model output.
     This can include removing detections that are too short, too long,
     have a specific label or low confidence.
+
+    See Also
+    --------
+    acoupi.components.output_cleaners for a concrete implementation of the ModelOutputCleaner.
+
+    ThresholdDetectionCleaner
+        Keeps only the classifcations and dectections that are equal or higher than a threshold.
     """
 
     @abstractmethod
     def clean(self, model_output: data.ModelOutput) -> data.ModelOutput:
-        """Clean the model output."""
+        """Clean the model output.
+
+        This method will remove any predicted tag or detection that does not meet the
+        specified criteria.
+
+        Parameters
+        ----------
+        model_output : data.ModelOutput
+            The model output to clean.
+        
+        Returns
+        -------
+        data.ModelOutput
+            The cleaned model output.
+        """
 
 
 class RecordingSavingFilter(ABC):
     """Determine if a recording should be saved.
 
-    The Recording SavingFilter is responsible for deciding if recording should
-    be saved.
+    Notes
+    -----
+    The boolean output of the RecordingSavingFilter method `should_save_recording()` will be used 
+    by the RecordingSavingManager to decide whether and where to save the recordings.
+
+    See Also
+    --------
+    acoupi.components.recording_saving_filters for concrete implementations of the RecordingSavingFilter.
+
+    After_DawnDuskTimeInterval / Before_DawnDuskTimeInterval
+        Save recordings if they falls withing a specified time interval 
+        happening after or before astronomical dawn and dusk.
+    SavingThreshold
+        Save recordings if any of the detection and classification tag probability associated to 
+        the recording model output is higher or equal than a specified threshold.
+    SaveIfInInterval
+        Save recordings if the recording falls within a specified interval.
+    FrequencySchedule
+        Save recordings if the recording falls within the specified frequency schedule.
     """
 
     @abstractmethod
@@ -150,14 +192,22 @@ class RecordingSavingFilter(ABC):
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-        """Determine if a recording should be saved.
+         """Determine if a recording should be saved.
 
-        Args:
-            recording: The recording to save.
-            model_outputs: Optionally use the model outputs to determine if
-                the recording should be saved.
+        Parameters
+        ----------
+        recording : data.Recording
+            The recording to check.
+        model_outputs : Optional[List[data.ModelOutput]], optional
+            The model outputs associated to the recording. Used in 
+            some implementations when the decision to save a recording
+            depends on the model outputs, rather the recording itself.
+
+        Returns
+        -------
+        bool
+            True if the recording should be saved, False otherwise.
         """
-
 
 class RecordingSavingManager(ABC):
     """The Recording SavingManager is responsible for saving recordings."""
@@ -300,6 +350,16 @@ class Summariser(ABC):
 
     The Summariser is responsible for summarising model outputs (i.e., detections)
     into a message.
+
+    See Also
+    --------
+    acoupi.components.summariser for concrete implementations of the Summariser.
+
+    StatisticsDetectionsSummariser
+        Summarises detections by calculating the mean, min, max, and count of classification probabilities for each species.
+    
+    ThresholdsDetectionsSummariser
+        Count the number of detections for each species that falls into three thresholds different bands: low, medium, and high.
     """
 
     @abstractmethod
@@ -307,19 +367,50 @@ class Summariser(ABC):
         self,
         now: datetime.datetime,
     ) -> data.Message:
-        """Send the message to a remote server."""
-
+        """Build a summary.
+        
+        Parameters
+        ----------
+        now : datetime.datetime
+            The time of the summary.
+        
+        Returns
+        -------
+        data.Message
+            The summary as a data.Message object. The message should be in JSON format.
+        """
 
 class Messenger(ABC):
-    """Send messages to a remote server.
+    """Send messages.
 
-    The Messenger is responsible for sending messages to
-    a remote server
+    The Messenger is responsible for sending messages to a remote server
+    according to communication protocol.
+
+    See Also
+    --------
+    acoupi.components.messenger for concrete implementations of the Messenger.
+
+    MQTTMessenger
+        Send messages using the MQTT protocol.
+    
+    HttpMessenger
+        Send messages using the HTTP POST Request.
     """
 
     @abstractmethod
     def send_message(self, message: data.Message) -> data.Response:
-        """Send the message to a remote server."""
+        """Send the message to a remote server.
+
+        Parameters
+        ----------
+        message : data.Message
+            The message to send.
+
+        Returns
+        -------
+        data.Response
+            A response containing the message, status, content, and received time.
+        """
 
 
 class MessageStore(ABC):
