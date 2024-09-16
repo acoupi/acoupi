@@ -280,9 +280,12 @@ class Store(ABC):
     ) -> None:
         """Store the recording locally.
 
-        Args:
-            recording: The recording to store.
-            deployment: The deployment to store the recording under.
+        Parameters
+        ----------
+        recording : data.Recording
+            The recording to store.
+        deployment : Optional[data.Deployment], optional
+            The deployment associated with the recording, by default None.
         """
 
     @abstractmethod
@@ -302,8 +305,10 @@ class Store(ABC):
         Each recording is returned with the full list of model outputs
         registered.
 
-        Args:
-            ids: The ids of the recordings to get.
+        Parameters
+        ----------
+        ids : List[UUID]
+            The ids of the recordings to get.
 
         Returns
         -------
@@ -320,8 +325,10 @@ class Store(ABC):
         Each recording is returned with the full list of model outputs
         registered.
 
-        Args:
-            paths: The paths of the recordings to get.
+        Parameters
+        ----------
+        paths : List[Path]
+            The paths of the recordings to get.
 
         Returns
         -------
