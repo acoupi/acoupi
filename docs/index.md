@@ -1,110 +1,141 @@
 # acoupi
 
-#### Readme Content
-- [What is acoupi?](#what-is-acoupi)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Acoupi software architecture](#acoupi-software-architecture)
-    - [Framework](#acoupi-framework)
-    - [Application](#acoupi-application)
-- [Pre-built AI Classifiers](#pre-built-ai-bioacoustics-classifiers)
-- [Features](#features)
+## What is acoupi?
 
-## What is acoupi? 
-**acoupi** is an open-source Python software package to facilitate the deployment of bioacoustic classifiers on edge devices like the Raspberry Pi. It includes individual components for audio recordings, audio processing, audio classifications and detections, results communication, and audio files and results management. **acoupi** integrates and standardises the entire workflow of biacoustic monitoring, combining both autonomous recording and classification units. The figure below illustrates how **acoupi** software fits in the toolbox of bioacoustic researchers. 
+**acoupi** is an open-source Python package that streamlines bioacoustic classifier deployment on edge devices like the Raspberry Pi.
+It integrates and standardizes the entire bioacoustic monitoring workflow, from recording to classification.
+With various components and templates, **acoupi** simplifies the creation of custom sensors, handling audio recordings, processing, classifications, detections, communication, and data management.
 
-![Figure 1: Overview of where the acoupi software package fits in the toolbox of bioacoustics research](img/acoupi_software_overview.png)
-*Figure 1: Overview of where the acoupi software package fits in the toolbox 
-of bioacoustics research.*
+<figure markdown="span">
+    ![Figure 1: Overview of where the acoupi software package fits in the toolbox of bioacoustics research](img/acoupi_software_overview.jpeg){ width="50%" }
+    <figcaption><b>An overview of acoupi software.</b> Input your recording settings and deep learning model of choice, and acoupi handles the rest, sending detections where you need them.
+</figure>
 
 ## Requirements
-Acoupi has been designed to run on single-board computer devices like the RPi. The software has been extensively developed and tested with the RPi 4B. We advise users to select the RPi 4B or a device featuring similar specifications. 
 
-Users should be able to download and test acoupi software on any Linux-based machines with Python version >=3.8,<3.12 installed. 
+Acoupi has been designed to run on single-board computer devices like the [Raspberry Pi](https://www.raspberrypi.org/) (RPi).
+Users should be able to download and test acoupi software on any Linux-based machines with Python version >=3.8,<3.12 installed.
 
-- A Linux-based single board computer such as the Raspberry Pi 4B. 
+- A Linux-based single board computer such as the Raspberry Pi 4B.
 - A SD Card with 64-bit Lite OS version installed.
-- A USB Microphone such as an AudioMoth, a µMoth, an Ultramic 192K/250K.
+- A USB Microphone such as an [AudioMoth USB Microphone](https://www.openacousticdevices.info/audiomoth) or an Ultramic 192K/250K.
+
+??? tip "Recommended Hardware"
+
+    The software has been extensively developed and tested with the RPi 4B.
+    We advise users to select the RPi 4B or a device featuring similar specifications.
 
 ## Installation
-> [!IMPORTANT]
-> To install one of the acoupi pre-built programs containing either the **BatDetect2** or the **BirdNET-Lite** bioacoustics classifiers, refer to the information in the below section: [Pre-built AI bioacoustics classifiers](#pre-built-ai-bioacoustics-classifiers).
 
-To install and use the bare-bone framework of acoupi on your embedded device follow these steps: 
+To install and use the bare-bone framework of acoupi on your embedded device follow these steps:
 
 **Step 1:** Install acoupi and its dependencies
-```
-pip install acoupi
-```
-**Step 2:** Configure acoupi default program. 
 
-(*Note: acoupi comes with a test and a default program. The default program is only recording and saving audio files based on the users' settings. Think like something similar to the setup of an AudioMoth*). 
+```
+curl -sSL https://github.com/acoupi/acoupi/raw/main/scripts/setup.sh | bash
+```
+
+**Step 2:** Configure an acoupi program.
+
 ```
 acoupi setup --program `program-name`
 ```
-For acoupi  program, enter this command: 
+
+`acoupi` includes a default program for recording and saving audio files based on your settings, similar to an AudioMoth setup.
+To start using it, simply enter the following command:
+
 ```
-acoupi setup --program acoupi.custom.acoupi
+acoupi setup --program acoupi.programs.default
 ```
-**Step 3:** To start acoupi run the command: 
+
+**Step 3:** To start a deployment of `acoupi` with the configured program run the command:
+
 ```
 acoupi deployment start
 ```
 
-> [!TIP]
-> To check what are the available commands for acoupi, enter `acoupi --help`.
+??? tip "Using acoupi from the command line"
 
-## Pre-built AI Bioacoustics Classifiers
+    To check what are the available commands for acoupi, enter `acoupi --help`. Also look at the [CLI documentation](user_guide/cli.md) for further info.
 
-With acoupi, we aim to facilitate the use and implementation of open-source AI bioacoustics models. We currently provide the configuration for two bioacoustics classifers; the [**BatDetect2**](https://github.com/macaodha/batdetect2) developed by [@macodha and al.](https://doi.org/10.1101/2022.12.14.520490) and the [**BirdNET-Lite**](https://github.com/kahst/BirdNET-Lite) developed by [@kahst and al.](https://github.com/kahst).
+## Ready to use AI Bioacoustics Classifiers 🚀
 
-### BatDetect2
+`acoupi` simplifies the use and implementation of open-source AI bioacoustics models.
+Currently, it supports two classifiers: BatDetect2, developed by [@macodha and al.](https://doi.org/10.1101/2022.12.14.520490), and BirdNET-Lite, developed by [@kahst and al.](https://github.com/kahst).
 
-The BatDetect2 bioacoustics DL model has been trained to detect and classify UK bats species. The [**acoupi_batdetect2**](https://github.com/acoupi/acoupi_batdetect2) repository provides users with a pre-build acoupi program that can be configured and tailored to their use cases of UK Bats monitoring. 
+??? warning "Licenses and Usage"
 
-The program can directly be installed and configured by typing these two commands in a CLI: 
+    Before using a pre-trained AI bioacoustic classifier, review its license to ensure it aligns with your intended use.
+    `acoupi` programs built with these models inherit the corresponding model licenses.
+    For further licensing details, refer to the [FAQ](user_guide/faq.md#licensing) section.
+
+??? warning "Model Output Reliability"
+
+    Please note that `acoupi` is not responsible for the accuracy or reliability of model predictions.
+    It is crucial to understand the performance and limitations of each model before using it in your project.
+
+### BatDetect2 🦇
+
+The BatDetect2 bioacoustics DL model has been trained to detect and classify UK bats species.
+The [**acoupi_batdetect2**](https://github.com/acoupi/acoupi_batdetect2) repository provides users with a pre-built acoupi program that can be configured and tailored to their use cases.
+
+The program can directly be installed with the following command:
+
 ```
 pip install acoupi_batdetect2
+```
+
+And to set up and configure the `acoupi_batdetect2` program, run the command:
+
+```{bash}
 acoupi setup --program acoupi_batdetect2.program
 ```
 
-### BirdNET-Lite
+### BirdNET-Lite 🦜
 
-The BirdNET-Lite bioacoustics DL model has been trained to detect and classify a large number of bird species. The [**acoupi_birdnet**](https://github.com/acoupi/acoupi_birdnet) repository provides users with a pre-build acoupi program that can be configured and tailored to their use cases of birds monitoring. 
+The BirdNET-Lite bioacoustics DL model has been trained to detect and classify a large number of bird species.
+The [**acoupi_birdnet**](https://github.com/acoupi/acoupi_birdnet) repository provides users with a pre-build acoupi program that can be configured and tailored to their use cases of birds monitoring.
 
-The program can directly be installed and configured by typing these two commands in a CLI: 
-```
+To install the `acoupi_birdnet` program run:
+
+```{bash}
 pip install acoupi_birdnet
+```
+
+And to setup and configure it run:
+
+```
 acoupi setup --program acoupi_birdnet.program
 ```
 
+## Next steps 📖
 
-## Acoupi Software Architecture
-Acoupi software is divided into two parts; the code base framework and the running application. The ***acoupi framework*** is organised into a layered architecture that ensures standardisation of data while providing flexibility of configuration. The ***acoupi application*** provides a simple
-command line interface (CLI) allowing users to configure the acoupi framework for deployment. 
+Get to know acoupi better by exploring this documentation.
 
-### Acoupi Framework
-The **acoupi** framework has been designed to provide maximum flexibility and keep away the internal complexity from a user. The framework is made of four intricate elements, which we call the data schema, components, tasks, and programs. 
+<table>
+    <tr>
+        <td>
+            <a href="tutorials">Tutorials</a>
+            <p>Get started with a step by step guide on how to install, configure and deploy acoupi for new users.</p>
+        </td>
+        <td>
+            <a href="how_to_guide">How-to Guides</a>
+            <p>Hands-on guides covering how to customise key elements of acoupi.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="explanation">Explanation</a>
+            <p>Understand key elements of acoupi to gain insights on how they work under the hood.</p>
+        </td>
+        <td>
+            <a href="reference">Reference</a>
+            <p>Technical information.</p>
+        </td>
+    </tr>
+</table>
 
-The figure below provides a simplified example of an acoupi program. This program illustrates some of the most important data schema, components, and tasks.
 
-![Figure 2: Example of a simplified acoupi program.](img/acoupi_program_simplified.png)
-*Figure 2: Example of a simplified acoupi program.*
-
-Refer to the [**Developer Guide**](docs/developer_guide/index.md) section of the documentation for full details on each of these elements.
-
-### Acoupi Application
-An acoupi application consists of the full set of code that runs at the deployment stage. This includes a set of scripts made of an acoupi program with user configurations, celery files to organise queues and workers, and bash scripts to start, stop, and reboot the application processes. An acoupi application requires the acoupi package and related dependencies to be installed before a user can configure and run it. The figure below gives an overview of key stages related to the installation, configuration and runtime of an acoupi application.
-
-![Figure 3: Overview of steps to follow to install, configure, and start an acoupi application.](img/acoupi_installation_steps.png)
-*Figure 3: Overview of steps to follow to install, configure, and start an acoupi application.*
-
-## Features and development
-**acoupi** builds on other Python packages. The list of the most important packages and their functions is summarised below. For more information about each of them, make sure to check their respective documentation. 
-- [PDM](https://pdm-project.org/2.10/) to manage package dependencies. 
-- [Pydantic](https://docs.pydantic.dev/dev/) for data validation. 
-- [Pytest](https://docs.pytest.org/en/7.4.x/) as a testing framework.
-- [Pony-ORM](https://ponyorm.org/) for databse queries. 
-- [Celery](https://docs.celeryq.dev/en/stable/getting-started/introduction.html) to manage the processing of tasks. 
-- [Jinja](#jinja) for text templating. 
-
+*[CLI]: Command Line Interface
+*[DL]: Deep Learning
+*[RPi]: Raspberry Pi

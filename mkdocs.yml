@@ -2,6 +2,9 @@ site_name: acoupi
 site_url: https://acoupi.github.io/acoupi/
 nav:
   - Home: index.md
+  - Tutorial: tutorials.md
+  - How-to Guides: how_to_guides.md
+  - Explanation: explanation.md
   - User Guide:
       - user_guide/index.md
       - Installation: user_guide/installation.md
@@ -18,6 +21,7 @@ nav:
       - Programs: developer_guide/programs.md
       - Inner Workings: developer_guide/inner_workings.md
   - Reference:
+      - reference/index.md
       - Data: reference/data.md
       - Components: reference/components.md
       - Programs: reference/programs.md
@@ -92,6 +96,7 @@ markdown_extensions:
   - pymdownx.keys
   - pymdownx.details
   - mkdocs-click
+  - md_in_html
   - pymdownx.superfences:
       preserve_tabs: true
       custom_fences:

@@ -29,6 +29,9 @@ Yes, acoupi is free and is licensed under the [GNU GPL-3.0](license.md). This me
 
 - **I don't have access to WiFi.** Acoupi does not require access to WiFi or any other wireless network. You can use acoupi as a standalone device, the audio recordings and audio classification results will be saved on the device's internal storage (i.e., the SD card). 
 
+## Licensing
+...
+
 ## Contributing
 
 ### Does acoupi accept outside contributions? 
