@@ -111,7 +111,7 @@ def generate_file_management_task(
 
             # Where should files be stored?
             for file_manager in file_managers:
-                new_path = file_manager.saving_recording(
+                new_path = file_manager.save_recording(
                     recording,
                     model_outputs=model_outputs,
                 )
