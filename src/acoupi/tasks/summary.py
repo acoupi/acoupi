@@ -1,3 +1,14 @@
+"""Summary Task Module.
+
+This module contains the function to generate summariser task.
+The summary task is a function that generates a summary message
+to be sent to a remote server. The summary process contains the
+following steps:
+
+    1. Generate a summary message.
+    2. Store the summary message in the message store.
+"""
+
 import datetime
 import logging
 from typing import Callable, List
@@ -16,6 +27,19 @@ def generate_summariser_task(
     """Generate a summariser task."""
 
     def summary_task() -> None:
+        """Create a summary message.
+
+        Notes
+        -----
+        The summary process calls the following methods:
+
+        summariser.build_summary(now) -> data.Message
+            Generate a summary message.
+            See acoupi.components.summarisers for implementations of types.Summariser.
+        message_store.store_message(message) -> None
+            Store the summary message in the message store.
+            See acoupi.components.message_stores.sqlite.store for implementation of types.MessageStore.
+        """
         now = datetime.datetime.now()
 
         for summariser in summarisers:

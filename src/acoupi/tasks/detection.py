@@ -1,3 +1,17 @@
+"""Detection task module.
+
+This module contains the function to generate a detection task.
+The detection task is a function that takes a recording as input and
+runs the detection process on the recording. The detection process
+contains the following steps:
+
+    1. Check if the recording should be processed by the model.
+    2. Run the model on the recording.
+    3. Clean the outputs of the model based on the output cleaners.
+    4. Store the cleaned outputs of the model in the store.
+    5. Create messages to be sent using the Messenger.
+"""
+
 import logging
 from typing import Callable, List, Optional
 
@@ -20,15 +34,35 @@ def generate_detection_task(
     """Generate a detection task."""
 
     def detection_task(recording: data.Recording) -> None:
-        """
-        Detect events in an audio recording.
+        """Run the detection process on a recording.
 
-        The detection task contains the following steps:
-        1. Check if the recording should be processed by the model.
-        2. Run the model on the recording.
-        3. Clean the outputs of the model based on the output cleaners (e.g., remove detections not meeting a user defined threshold (ThresholdDetectionFilter).)
-        4. Store the cleaned outputs of the model.
-        5. Create messages to be sent using the Messenger. Only create messages if outputs of the model contains valid tags (i.e., species name and associated classification probability).
+        Parameters
+        ----------
+        recording : data.Recording
+            The recording to process.
+
+        Notes
+        -----
+        The detection process calls the following methods:
+
+        filter.should_process_recording(recording) -> bool
+            Check if the recording should be processed by the model.
+            See acoupi.components.processing_filters for implementations of types.ProcessingFilter.
+        model.run(recording) -> data.ModelOutput
+            Run the model on the recording and return the output.
+            See acoupi.components.model_template for implementation of types.Model.
+        cleaner.clean(model_output) -> data.ModelOutput
+            Clean the outputs of the model based on the output cleaners.
+            See acoupi.components.output_cleaners for implementations of types.ModelOutputCleaner.
+        store.store_model_output(model_output) -> None
+            Store the cleaned outputs of the model in the store.
+            See acoupi.components.stores.sqlite.store for implementation of types.Store.
+        message_factory.build_message(model_output) -> data.Message
+            Create messages to be sent using the Messenger.
+            See acoupi.components.message_factories for implementations of types.MessageBuilder.
+        message_store.store_message(message) -> None
+            Store the message in the message store.
+            See acoupi.components.message_stores.sqlite.store for implementation of types.MessageStore.
         """
         logger.info("Starting detection process on recording %s", recording)
 
