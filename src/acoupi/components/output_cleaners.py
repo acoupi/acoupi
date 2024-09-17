@@ -104,7 +104,7 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         ... )
         >>> cleaner = ThresholdDetectionCleaner(detection_threshold=0.6)
         >>> model_output = cleaner.clean(model_output)
-        model_output = data.ModelOutput(
+        >>> assert model_output == data.ModelOutput(
         ...     detections=[
         ...         data.Detection(
         ...             detection_probability=0.8,

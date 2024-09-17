@@ -18,14 +18,16 @@ else:
 class RecordingScheduler(ABC):
     """Manage time between recordings.
 
-    The RecordingScheduler is responsible for determining the interval between
-    recordings.
+    The RecordingScheduler is responsible for determining the when recording
+    should be made.
 
     See Also
     --------
-    acoupi.compoments.recording_scheduler for a concrete implementation of the RecordingScheduler.
+    See the module
+    [recording_schedulers][acoupi.components.recording_schedulers] for a
+    concrete implementation of the RecordingScheduler.
 
-    IntervalScheduler
+    * [IntervalScheduler][acoupi.components.recording_schedulers.IntervalScheduler]:
         Record at a fixed interval.
     """
 
@@ -56,23 +58,27 @@ class RecordingCondition(ABC):
 
     See Also
     --------
-    acoupi.components.recording_condition for concrete implementations of the RecordingCondition.
+    See the module
+    [recording_conditions][acoupi.components.recording_conditions] for concrete
+    implementations of the RecordingCondition.
 
-    IsInInterval
+    * [IsInInterval][acoupi.components.recording_conditions.IsInInterval]:
         Record if the current time is within a specified interval.
     """
 
     @abstractmethod
     def should_record(self) -> bool:
-        """Determine if a recording should be made."""
+        """Determine if a recording should be made.
+
+        Returns
+        -------
+        bool
+            True if a recording should be made, False otherwise.
+        """
 
 
 class AudioRecorder(ABC):
-    """Record audio from the microphone.
-
-    The AudioRecorder is responsible for recording audio from the
-    microphone.
-    """
+    """Record audio from the microphone."""
 
     @abstractmethod
     def record(self, deployment: data.Deployment) -> data.Recording:
@@ -97,7 +103,7 @@ class AudioRecorder(ABC):
 
 
 class ProcessingFilter(ABC):
-    """Determine if a recording should be processed by the model.
+    """Determine if a recording should be processed by a model.
 
     The ProcessingFilter is responsible for determining if a recording
     should be processed by the model.
@@ -105,7 +111,18 @@ class ProcessingFilter(ABC):
 
     @abstractmethod
     def should_process_recording(self, recording: data.Recording) -> bool:
-        """Determine if the recording should be processed by the model."""
+        """Determine if the recording should be processed by the model.
+
+        Parameters
+        ----------
+        recording
+            The recording to check.
+
+        Returns
+        -------
+        should_process
+             True if the recording should be processed, False otherwise.
+        """
 
 
 class Model(ABC):
@@ -125,6 +142,16 @@ class Model(ABC):
         """Run the model on the audio file and return the result.
 
         Can optionally use deployment info to enhance predictions.
+
+        Parameters
+        ----------
+        recording
+            The recording to process.
+
+        Returns
+        -------
+        model_output
+            The model output containing the detections.
         """
 
 
@@ -135,11 +162,18 @@ class ModelOutputCleaner(ABC):
     This can include removing detections that are too short, too long,
     have a specific label or low confidence.
 
+    Notes
+    -----
+    Model output cleaners are particularly useful when using a pre-trained
+    model that produces irrelevant predictions. This component helps prune
+    those predictions to make them more relevant to the task at hand.
+
     See Also
     --------
-    acoupi.components.output_cleaners for a concrete implementation of the ModelOutputCleaner.
+    See the module [output_cleaners][acoupi.components.output_cleaners] for a
+    concrete implementation of the ModelOutputCleaner.
 
-    ThresholdDetectionCleaner
+    * [ThresholdDetectionCleaner][acoupi.components.output_cleaners.ThresholdDetectionCleaner]:
         Keeps only the classifcations and dectections that are equal or higher than a threshold.
     """
 
@@ -167,23 +201,25 @@ class RecordingSavingFilter(ABC):
 
     Notes
     -----
-    The RecordingSavingFilter is responsible for determining if a recording should be saved.
-    The RecordingSavingFilter is used by the management task. If the boolean value returned
-    is True, the recording will be saved. If False, the recording will be deleted.
+    The RecordingSavingFilter is responsible for determining if a recording
+    should be saved. The RecordingSavingFilter is used by the management task.
+    If the boolean value returned is True, the recording will be saved. If
+    False, the recording will be deleted.
 
     See Also
     --------
-    acoupi.components.recording_saving_filters for concrete implementations of the RecordingSavingFilter.
+    See [saving_filters][acoupi.components.saving_filters]
+    for concrete implementations of the RecordingSavingFilter.
 
-    After_DawnDuskTimeInterval / Before_DawnDuskTimeInterval
+    * [After_DawnDuskTimeInterval][acoupi.components.saving_filters.After_DawnDuskTimeInterval] / [Before_DawnDuskTimeInterval][acoupi.components.saving_filters.Before_DawnDuskTimeInterval]:
         Save recordings if they falls withing a specified time interval
         happening after or before astronomical dawn and dusk.
-    SavingThreshold
+    * [SavingThreshold][acoupi.components.saving_filters.SavingThreshold]:
         Save recordings if any of the detection and classification tag probability associated to
         the recording model output is higher or equal than a specified threshold.
-    SaveIfInInterval
+    * [SaveIfInInterval][acoupi.components.saving_filters.SaveIfInInterval]:
         Save recordings if the recording falls within a specified interval.
-    FrequencySchedule
+    * [FrequencySchedule][acoupi.components.saving_filters.FrequencySchedule]:
         Save recordings if the recording falls within the specified frequency schedule.
     """
 
@@ -216,17 +252,18 @@ class RecordingSavingManager(ABC):
 
     Notes
     -----
-    The RecordingSavingManager is responsible for saving recordings. The RecordingSavingManager
-    is used by the management task. The RecordingSavingManager is used to save recordings to the
-    correct path.
+    The RecordingSavingManager is responsible for saving recordings. The
+    RecordingSavingManager is used by the management task. The
+    RecordingSavingManager is used to save recordings to the correct path.
 
     See Also
     --------
-    acoupi.components.saving_managers for concrete implementations of the RecordingSavingManager.
+    See the module [saving_managers][acoupi.components.saving_managers] for
+    concrete implementations of the RecordingSavingManager.
 
-    SaveRecordingManager
+    * [SaveRecordingManager][acoupi.components.saving_managers.SaveRecordingManager]:
         Save recordings to a specified directory according to the model outputs.
-    DateFileManager
+    * [DateFileManager][acoupi.components.saving_managers.DateFileManager]:
         Save recordings to directories based on the date of the recording.
     """
 
@@ -350,18 +387,15 @@ P = ParamSpec("P")
 class MessageBuilder(ABC, Generic[P]):
     """Create messages from input data.
 
-    Returns
-    -------
-        A message containing the model output or None if no valid detections
-
     See Also
     --------
-    acoupi.components.message_factories for concrete implementations of the MessageBuilder.
+    See the module [message_factories][acoupi.components.message_factories] for
+    concrete implementations of the MessageBuilder.
 
-    DetectionThresholdMessageBuilder
+    * [DetectionThresholdMessageBuilder][acoupi.components.message_factories.DetectionThresholdMessageBuilder]:
         Filters detections by a probability threshold.
 
-    FullModelOutputMessageBuilder
+    * [FullModelOutputMessageBuilder][acoupi.components.message_factories.FullModelOutputMessageBuilder]:
         No filtering. Format the entire model output.
     """
 
@@ -371,24 +405,34 @@ class MessageBuilder(ABC, Generic[P]):
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> Optional[data.Message]:
-        """Will build a message or return None depending on the input data."""
+        """Will build a message or return None depending on the input data.
+
+        Returns
+        -------
+        Optional[data.Message]
+            The assembled message or None if the input data is not suitable.
+
+        """
 
 
 class Summariser(ABC):
     """Summarise model outputs.
 
-    The Summariser is responsible for summarising model outputs (i.e., detections)
-    into a message.
+    The Summariser is responsible for summarising model outputs
+    (i.e., detections) into a message.
 
     See Also
     --------
-    acoupi.components.summariser for concrete implementations of the Summariser.
+    See the module [summarisers][acoupi.components.summariser] for concrete
+    implementations of the Summariser.
 
-    StatisticsDetectionsSummariser
-        Summarises detections by calculating the mean, min, max, and count of classification probabilities for each species.
+    * [StatisticsDetectionsSummariser][acoupi.components.summariser.StatisticsDetectionsSummariser]:
+        Summarises detections by calculating the mean, min, max, and count of
+        classification probabilities for each species.
 
-    ThresholdsDetectionsSummariser
-        Count the number of detections for each species that falls into three thresholds different bands: low, medium, and high.
+    * [ThresholdsDetectionsSummariser][acoupi.components.summariser.ThresholdsDetectionsSummariser]:
+        Count the number of detections for each species that falls into three
+        thresholds different bands: low, medium, and high.
     """
 
     @abstractmethod
@@ -418,12 +462,13 @@ class Messenger(ABC):
 
     See Also
     --------
-    acoupi.components.messenger for concrete implementations of the Messenger.
+    See the module [messenger][acoupi.components.messengers] for concrete
+    implementations of the Messenger.
 
-    MQTTMessenger
+    * [MQTTMessenger][acoupi.components.messengers.MQTTMessenger]:
         Send messages using the MQTT protocol.
 
-    HttpMessenger
+    * [HTTPMessenger][acoupi.components.messengers.HTTPMessenger]:
         Send messages using the HTTP POST Request.
     """
 
@@ -444,22 +489,40 @@ class Messenger(ABC):
 
 
 class MessageStore(ABC):
-    """Keeps track of messages that have been sent."""
+    """Keeps track of messages that have been produced and sent."""
 
     @abstractmethod
     def get_unsent_messages(self) -> List[data.Message]:
-        """Get the recordings that have not been synced to the server."""
+        """Get the recordings that have not been synced to the server.
+
+        Returns
+        -------
+        List[data.Message]
+            A list of unsent messages.
+        """
 
     @abstractmethod
     def store_message(
         self,
         message: data.Message,
     ) -> None:
-        """Register a message with the store."""
+        """Register a message with the store.
+
+        Parameters
+        ----------
+        message
+            Store a message.
+        """
 
     @abstractmethod
     def store_response(
         self,
         response: data.Response,
     ) -> None:
-        """Register a message response with the store."""
+        """Register a message response with the store.
+
+        Parameters
+        ----------
+        response
+            Store the server response.
+        """
