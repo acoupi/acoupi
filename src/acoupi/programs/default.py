@@ -167,6 +167,7 @@ class Program(AcoupiProgram):
 
     def create_recording_conditions(self, config: ConfigSchema):
         timezone = pytz.timezone(config.timezone)
+        time_now = datetime.datetime.now(timezone).time()
         return [
             components.IsInIntervals(
                 intervals=[
@@ -184,6 +185,9 @@ class Program(AcoupiProgram):
                     ),
                 ],
                 timezone=timezone,
+                time=datetime.datetime.combine(
+                    datetime.date.today(), time_now
+                ),
             )
         ]
 

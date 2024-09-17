@@ -57,12 +57,11 @@ def generate_recording_task(
             Store the recording metadata in the store.
             See acoupi.components.stores.sqlite.store for implementation of types.Store.
         """
-        now = datetime.datetime.now()
         logger.info("Starting recording process.")
 
         # Check if recording conditions are met
         if not all(
-            condition.should_record(now)
+            condition.should_record()
             for condition in recording_conditions or []
         ):
             # If conditions are not met exit process
