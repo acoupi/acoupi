@@ -159,7 +159,12 @@ def parse_pydantic_model_field_from_args(
 
     setup = getattr(model, "setup", None)
     if setup is not None and callable(setup):
-        return setup(args, prompt=prompt, prefix=prefix)
+        config = setup(args, prompt=prompt, prefix=prefix)
+
+        if config is not None and not isinstance(config, BaseModel):
+            raise RuntimeError("Setup function must return a BaseModel.")
+
+        return config
 
     if not field.is_required():
         has_some_arg = any(arg.startswith(f"--{prefix}") for arg in args)
