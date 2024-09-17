@@ -383,7 +383,7 @@ class DetectionTags(types.RecordingSavingFilter):
         An output is considered confident if any of its tags or detections
         have a probability greater than or equal to the threshold.
 
-        Parameters:
+        Parameters
         ----------
         model_output : data.ModelOutput
             The model output of the recording containing detections and tags.
