@@ -109,7 +109,7 @@ class IsInIntervals(types.RecordingCondition):
         """
         self.intervals = intervals
         self.timezone = timezone
-        self.time = datetime.datetime
+        self.time = time
 
     def should_record(self) -> bool:
         """Determine if a recording should be made."""
