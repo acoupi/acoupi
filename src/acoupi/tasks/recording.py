@@ -10,7 +10,6 @@ The recording process contains the following steps:
     4. Store the recording metadata in the store.
 """
 
-import datetime
 import logging
 from typing import Callable, List, Optional, TypeVar
 
