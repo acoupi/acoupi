@@ -73,7 +73,23 @@ class StatisticsDetectionsSummariser(types.Summariser):
         >>> summariser = StatisticsDetectionsSummariser(store)
         >>> now = datetime.datetime.now()
         >>> summariser.build_summary(now)
-        Message(content='{"species_1": {"mean": 0.5, "min": 0.1, "max": 0.9, "count": 10}, "species_2": {"mean": 0.6, "min": 0.2, "max": 0.8, "count": 20}, "timeinterval": {"starttime": "2021-01-01T00:00:00", "endtime": "2021-01-01T00:10:00"}}')
+        ... summary_message = data.Message(
+        ...     content='{
+        ...         "species_1": {
+        ...             "mean": 0.5,
+        ...             "min": 0.1,
+        ...             "max": 0.9,
+        ...             "count": 10},
+        ...         "species_2": {
+        ...             "mean": 0.6,
+        ...             "min": 0.2,
+        ...             "max": 0.8,
+        ...             "count": 20},
+        ...         "timeinterval": {
+        ...             "starttime": "2021-01-01T00:00:00",
+        ...             "endtime": "2021-01-01T00:10:00"}
+        ...     }'
+        ... )
         """
         predicted_tags = self.store.get_predicted_tags(
             before=now,
@@ -169,7 +185,19 @@ class ThresholdsDetectionsSummariser(types.Summariser):
         >>> summariser = ThresholdsDetectionsSummariser(store)
         >>> now = datetime.datetime.now()
         >>> summariser.build_summary(now)
-        Message(content='{"species_1": {"count_low_threshold": 10, "count_mid_threshold": 20, "count_high_threshold": 30, "mean_low_threshold": 0.1, "mean_mid_threshold": 0.5, "mean_high_threshold": 0.9}, "species_2": {"count_low_threshold": 15, "count_mid_threshold": 25, "count_high_threshold": 35, "mean_low_threshold": 0.2, "mean_mid_threshold": 0.6, "mean_high_threshold": 0.8}, "timeinterval": {"starttime": "2021-01-01T00:00:00", "endtime": "2021-01-01T00:10:00"}}')
+        ... summary_message = data.Message(
+        ...     content='{
+        ...         "species_1": {
+        ...             "count_low_threshold": 10, "count_mid_threshold": 20, "count_high_threshold": 30,
+        ...             "mean_low_threshold": 0.1, "mean_mid_threshold": 0.5, "mean_high_threshold": 0.9},
+        ...         "species_2": {
+        ...             "count_low_threshold": 15, "count_mid_threshold": 25, "count_high_threshold": 35,
+        ...             "mean_low_threshold": 0.2, "mean_mid_threshold": 0.6, "mean_high_threshold": 0.8},
+        ...         "timeinterval": {
+        ...             "starttime": "2021-01-01T00:00:00",
+        ...             "endtime": "2021-01-01T00:10:00"}
+        ...    }'
+        ... )
         """
         predicted_tags = self.store.get_predicted_tags(
             before=now,
@@ -188,27 +216,17 @@ class ThresholdsDetectionsSummariser(types.Summariser):
 
             stats = {
                 "count_low_threshold": len(
-                    [
-                        d
-                        for d in species_probabilities
-                        if d <= self.low_band_threshold
-                    ]
+                    [d for d in species_probabilities if d <= self.low_band_threshold]
                 ),
                 "count_mid_threshold": len(
                     [
                         d
                         for d in species_probabilities
-                        if self.low_band_threshold
-                        < d
-                        <= self.mid_band_threshold
+                        if self.low_band_threshold < d <= self.mid_band_threshold
                     ]
                 ),
                 "count_high_threshold": len(
-                    [
-                        d
-                        for d in species_probabilities
-                        if self.mid_band_threshold < d
-                    ]
+                    [d for d in species_probabilities if self.mid_band_threshold < d]
                 ),
                 "mean_low_threshold": round(
                     mean(
@@ -225,9 +243,7 @@ class ThresholdsDetectionsSummariser(types.Summariser):
                         [
                             d
                             for d in species_probabilities
-                            if self.low_band_threshold
-                            < d
-                            <= self.mid_band_threshold
+                            if self.low_band_threshold < d <= self.mid_band_threshold
                         ]
                     ),
                     3,

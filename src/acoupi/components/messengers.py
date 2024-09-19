@@ -126,7 +126,12 @@ class MQTTMessenger(types.Messenger):
         ...     clientid="org/survey/device_00",
         ... )
         >>> messenger.send_message(message)
-        Response(message=Message(content=''), status=ResponseStatus.SUCCESS, content='MQTT_ERR_SUCCESS', received_on=datetime.datetime())
+        >>> data.Response(
+        ...     message=data.Message(content='{}'),
+        ...         status=ResponseStatus.SUCCESS,
+        ...         content='MQTT_ERR_SUCCESS',
+        ...         received_on=datetime.datetime()
+        ... )
         """
         mqtt_status = self.check_connection()
 
@@ -154,9 +159,7 @@ class MQTTMessenger(types.Messenger):
             logging.debug(f"Message not sent: {message.content}. Error: {e}")
 
         if response.rc != MQTTErrorCode.MQTT_ERR_SUCCESS:
-            logging.debug(
-                f"Message not sent: {message.content}. Error: {response.rc}"
-            )
+            logging.debug(f"Message not sent: {message.content}. Error: {response.rc}")
             status = data.ResponseStatus.ERROR
 
         received_on = datetime.datetime.now()
@@ -337,10 +340,7 @@ class HTTPMessenger(types.Messenger):
                 "temporarily unavailable or experiencing issues."
             )
 
-        if (
-            "Allow" in response.headers
-            and "POST" not in response.headers["Allow"]
-        ):
+        if "Allow" in response.headers and "POST" not in response.headers["Allow"]:
             raise HealthCheckError(
                 f"Could connect to {self.base_url} but POST method is "
                 "not allowed. Check the server configuration."

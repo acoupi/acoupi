@@ -125,10 +125,14 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
         `sun` function returns the dawn and dusk times for a specific location, datetime
         and timezone. This information is used to determine the interval before dawn and dusk
         dusk, and whether the current recording falls within this interval.
-        DawnTime GMT: 2024-01-01 07:26:00+00:00
-        DuskTime GMT: 2024-01-01 16:42:00+00:00
+
+        Examples
+        --------
+        >>> DawnTime GMT: 2024-01-01 07:26:00+00:00
+        >>> DuskTime GMT: 2024-01-01 16:42:00+00:00
         >>> duration = 30
         >>> timezone = "Europe/London"
+
         >>> saving_filter = Before_DawnDuskTimeInterval(
         ...     duration, timezone
         ... )
@@ -137,11 +141,9 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
         ...         2024, 1, 1, 7, 0, 0, tzinfo=timezone
         ...     )
         ... )
-        >>> saving_filter.should_save_recording(recording)
+        >>> assert saving_filter.should_save_recording(recording)
         True
 
-        >>> duration = 30
-        >>> timezone = "Europe/London"
         >>> saving_filter = Before_DawnDuskTimeInterval(
         ...     duration, timezone
         ... )
@@ -150,7 +152,7 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
         ...         2024, 1, 1, 17, 0, 0, tzinfo=timezone
         ...     )
         ... )
-        >>> saving_filter.should_save_recording(recording)
+        >>> assert saving_filter.should_save_recording(recording)
         False
         """
         recording_time = recording.datetime.astimezone(self.timezone)
@@ -163,12 +165,8 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
         dawntime = sun_info["dawn"]
         dusktime = sun_info["dusk"]
 
-        dawntime_interval = dawntime - datetime.timedelta(
-            minutes=self.duration
-        )
-        dusktime_interval = dusktime - datetime.timedelta(
-            minutes=self.duration
-        )
+        dawntime_interval = dawntime - datetime.timedelta(minutes=self.duration)
+        dusktime_interval = dusktime - datetime.timedelta(minutes=self.duration)
 
         return (dawntime_interval <= recording_time <= dawntime) or (
             dusktime_interval <= recording_time <= dusktime
@@ -205,10 +203,11 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
 
         Examples
         --------
-        DawnTime GMT: 2024-01-01 07:26:00+00:00
-        DuskTime GMT: 2024-01-01 16:42:00+00:00
+        >>> DawnTime GMT: 2024-01-01 07:26:00+00:00
+        >>> DuskTime GMT: 2024-01-01 16:42:00+00:00
         >>> duration = 30
         >>> timezone = "Europe/London"
+
         >>> saving_filter = After_DawnDuskTimeInterval(
         ...     duration, timezone
         ... )
@@ -217,11 +216,9 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         ...         2024, 1, 1, 7, 0, 0, tzinfo=timezone
         ...     )
         ... )
-        >>> saving_filter.should_save_recording(recording)
+        >>> assert saving_filter.should_save_recording(recording)
         False
 
-        >>> duration = 30
-        >>> timezone = "Europe/London"
         >>> saving_filter = After_DawnDuskTimeInterval(
         ...     duration, timezone
         ... )
@@ -230,7 +227,7 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         ...         2024, 1, 1, 17, 0, 0, tzinfo=timezone
         ...     )
         ... )
-        >>> saving_filter.should_save_recording(recording)
+        >>> assert saving_filter.should_save_recording(recording)
         True
         """
         recording_time = recording.datetime.astimezone(self.timezone)
@@ -243,12 +240,8 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         dawntime = sun_info["dawn"]
         dusktime = sun_info["dusk"]
 
-        dawntime_interval = dawntime + datetime.timedelta(
-            minutes=self.duration
-        )
-        dusktime_interval = dusktime + datetime.timedelta(
-            minutes=self.duration
-        )
+        dawntime_interval = dawntime + datetime.timedelta(minutes=self.duration)
+        dusktime_interval = dusktime + datetime.timedelta(minutes=self.duration)
 
         return (dawntime <= recording_time <= dawntime_interval) or (
             dusktime <= recording_time <= dusktime_interval
@@ -265,9 +258,7 @@ class SavingThreshold(types.RecordingSavingFilter):
         """Initialize the RecordingSavingFilter."""
         self.saving_threshold = saving_threshold
 
-    def has_confident_model_output(
-        self, model_output: data.ModelOutput
-    ) -> bool:
+    def has_confident_model_output(self, model_output: data.ModelOutput) -> bool:
         """Determine if a model output has confident detections or tags.
 
         An output is considered confident if any of its detection probability
@@ -354,8 +345,7 @@ class DetectionTagValue(types.RecordingSavingFilter):
             return False
 
         return any(
-            self.has_confident_tagvalues(model_output)
-            for model_output in model_outputs
+            self.has_confident_tagvalues(model_output) for model_output in model_outputs
         )
 
 
@@ -422,6 +412,5 @@ class DetectionTags(types.RecordingSavingFilter):
             return False
 
         return any(
-            self.has_confident_tag(model_output)
-            for model_output in model_outputs
+            self.has_confident_tag(model_output) for model_output in model_outputs
         )
