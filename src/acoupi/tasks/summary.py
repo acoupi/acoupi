@@ -1,12 +1,12 @@
-"""Summary Task Module.
+"""Summary Task.
 
 This module contains the function to generate summariser task.
 The summary task is a function that generates a summary message
 to be sent to a remote server. The summary process contains the
 following steps:
 
-    1. Generate a summary message.
-    2. Store the summary message in the message store.
+1. Generate a summary message.
+2. Store the summary message in the message store.
 """
 
 import datetime
@@ -24,22 +24,32 @@ def generate_summariser_task(
     message_store: types.MessageStore,
     logger: logging.Logger = logger,
 ) -> Callable[[], None]:
-    """Generate a summariser task."""
+    """Generate a summariser task.
+
+    Parameters
+    ----------
+    summarisers : List[types.Summariser]
+        The summarisers to generate the summary message.
+    message_store : types.MessageStore
+        The message store to store the summary message.
+    logger : logging.Logger, optional
+        The logger to log messages, by default logger.
+
+
+    Notes
+    -----
+    The summary process calls the following methods:
+
+    1. **summariser.build_summary(now)** -> data.Message
+        - Generate a summary message.
+        - See [components.summarisers][acoupi.components.summarisers] for implementations of [types.Summariser][acoupi.components.types.Summariser].
+    2. **message_store.store_message(message)** -> None
+        - Store the summary message in the message store.
+        - See [components.stores][acoupi.components.stores] for implementation of [types.Store][acoupi.components.types.Store].
+    """
 
     def summary_task() -> None:
-        """Create a summary message.
-
-        Notes
-        -----
-        The summary process calls the following methods:
-
-        summariser.build_summary(now) -> data.Message
-            Generate a summary message.
-            See acoupi.components.summarisers for implementations of types.Summariser.
-        message_store.store_message(message) -> None
-            Store the summary message in the message store.
-            See acoupi.components.message_stores.sqlite.store for implementation of types.MessageStore.
-        """
+        """Create a summary message."""
         now = datetime.datetime.now()
 
         for summariser in summarisers:

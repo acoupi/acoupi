@@ -1,15 +1,15 @@
-"""Management tasks for recordings.
+"""Management Task for recordings.
 
 This module contains the function to manage audio recordings. The file
 management task is a function that moves recordings from temporary storage
 to permanent storage and deletes recordings that are no longer needed. The
 file management process contains the following steps:
 
-    1. Get the recordings that need to be managed.
-    2. Check if the recordings should be saved.
-    3. Move the recordings that should be saved outside of the temporary file system
-    to a permanent storage location (e.g., the sd card storage, an external hard drive).
-    4. Update the store with the new paths of the recordings.
+1. Get the recordings that need to be managed.
+2. Check if the recordings should be saved.
+3. Move the recordings that should be saved outside of the temporary file system
+to a permanent storage location (e.g., the sd card storage, an external hard drive).
+4. Update the store with the new paths of the recordings.
 """
 
 import logging
@@ -36,39 +36,52 @@ def generate_file_management_task(
     required_models: Optional[List[str]] = None,
     temp_path: Path = TEMP_PATH,
 ) -> Callable[[], None]:
-    """Generate a file management task."""
+    """Generate a file management task.
+
+    Parameters
+    ----------
+    store : types.Store
+        The store to get and update recordings.
+    file_managers : List[types.RecordingSavingManager]
+        The file managers to save recordings.
+    logger : logging.Logger, optional
+        The logger to log messages, by default logger.
+    file_filters : Optional[List[types.RecordingSavingFilter]], optional
+        The file filters to determine if recordings should be saved, by default None.
+    required_models : Optional[List[str]], optional
+        The required models that need to be saved, by default None.
+    temp_path : Path, optional
+        The path where recordings are saved temporarily, by default TEMP_PATH.
+
+    Notes
+    -----
+    The file management task calls the following methods:
+
+    1. **store.get_recordings_by_path(paths)** -> List[Tuple[data.Recording, List[data.ModelOutput]]]
+        - Get the recordings that need to be managed.
+        - See [components.stores][acoupi.components.stores] for implementation of [types.Store][acoupi.components.types.Store].
+    2. **filter.should_save_recording(recording, model_outputs)** -> bool
+        - Determine if the recordings should be saved.
+        - See [components.saving_filters][acoupi.components.saving_filters] for implementations of [types.RecordingSavingFilter][acoupi.components.types.RecordingSavingFilter].
+    3. **manager.save_recording(recording, model_outputs)** -> Path
+        - Move the recordings that should be saved outside of the temporary file system
+        to a permanent storage location.
+        - See [components.saving_managers][acoupi.components.saving_managers] for implementations of [types.RecordingSavingManager][acoupi.components.types.RecordingSavingManager].
+    4. **store.update_recording_path(recording, new_path)** -> None
+        - Update the store with the new paths of the recordings.
+        - See [components.stores][acoupi.components.stores] for implementation of [types.Store][acoupi.components.types.Store].
+    """
     if required_models is None:
         required_models = []
 
     required = set(required_models)
 
     def file_management_task() -> None:
-        """Manage files.
-
-        Notes
-        -----
-        The file management process calls the following methods:
-
-        store.get_recordings_by_path(paths) -> List[Tuple[data.Recording, List[data.ModelOutput]]]
-            Get the recordings that need to be managed.
-            See acoupi.components.stores.sqlite.store for implementation of types.Store.
-        filter.should_save_recording(recording, model_outputs) -> bool
-            Determine if the recordings should be saved.
-            See acoupi.components.saving_filters for implementations of types.RecordingSavingFilter.
-        manager.save_recording(recording, model_outputs) -> Path
-            Move the recordings that should be saved outside of the temporary file system
-            to a permanent storage location.
-            See acoupi.components.saving_managers for implementations of types.RecordingSavingManager.
-        store.update_recording_path(recording, new_path) -> None
-            Update the store with the new paths of the recordings.
-            See acoupi.components.stores.sqlite.store for implementation of types.Store.
-        """
+        """Manage files."""
         logger.info("Starting file management process.")
         temp_wav_files = get_temp_files(path=temp_path)
 
-        recordings_and_outputs = store.get_recordings_by_path(
-            paths=temp_wav_files
-        )
+        recordings_and_outputs = store.get_recordings_by_path(paths=temp_wav_files)
         logger.info(f"Recordings to manage: {recordings_and_outputs}")
 
         for recording, model_outputs in recordings_and_outputs:

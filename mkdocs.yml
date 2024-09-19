@@ -24,6 +24,7 @@ nav:
       - reference/index.md
       - Data: reference/data.md
       - Components: reference/components.md
+      - Tasks: reference/tasks.md
       - Programs: reference/programs.md
       - System: reference/system.md
       - CLI: reference/cli.md
