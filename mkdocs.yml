@@ -2,9 +2,17 @@ site_name: acoupi
 site_url: https://acoupi.github.io/acoupi/
 nav:
   - Home: index.md
-  - Tutorial: tutorials.md
-  - How-to Guides: how_to_guides.md
-  - Explanation: explanation.md
+  - Tutorials: 
+    - tutorials/index.md
+  - How-to Guides: 
+    - how_to_guides/index.md
+  - Explaination: 
+    - explaination/index.md
+    - Architecture: explaination/architecture.md
+    - Data Schema: explaination/data_schema.md
+    - Components: explaination/components.md
+    - Tasks: explaination/tasks.md
+    - Programs: explaination/programs.md
   - User Guide:
       - user_guide/index.md
       - Installation: user_guide/installation.md

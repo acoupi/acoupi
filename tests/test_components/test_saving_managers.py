@@ -50,7 +50,7 @@ def create_test_detection():
     def factory(
         tag_value: str,
         tag_key: str = "species",
-        classification_probability: float = 0.4,
+        confidence_score: float = 0.4,
         detection_probability: float = 0.8,
     ) -> data.Detection:
         """Return a random detection."""
@@ -62,7 +62,7 @@ def create_test_detection():
                         value=tag_value,
                         key=tag_key,
                     ),
-                    classification_probability=classification_probability,
+                    confidence_score=confidence_score,
                 ),
             ],
         )
@@ -142,7 +142,7 @@ def test_save_recording_with_confident_detections(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability=0.6,
+                confidence_score=0.6,
                 detection_probability=0.8,
             ),
         ]
@@ -158,9 +158,7 @@ def test_save_recording_with_confident_detections(
     )
 
     # Run
-    new_path = saving_manager.save_recording(
-        recording, model_outputs=[model_output]
-    )
+    new_path = saving_manager.save_recording(recording, model_outputs=[model_output])
 
     # assert
     assert new_path is not None
@@ -186,9 +184,7 @@ def test_save_recording_with_unconfident_detections(
 
     recording_file = tmp_path / "test_recording.wav"
     recording_file.touch()
-    recording_file.write_text(
-        "test recording going to false_detections folder"
-    )
+    recording_file.write_text("test recording going to false_detections folder")
 
     recording = create_test_recording(
         recording_time=datetime.datetime(2020, 1, 1, 0, 0, 0),
@@ -198,7 +194,7 @@ def test_save_recording_with_unconfident_detections(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability=0.5,
+                confidence_score=0.5,
                 detection_probability=0.6,
             ),
         ]
@@ -214,9 +210,7 @@ def test_save_recording_with_unconfident_detections(
     )
 
     # Run
-    new_path = saving_manager.save_recording(
-        recording, model_outputs=[model_output]
-    )
+    new_path = saving_manager.save_recording(recording, model_outputs=[model_output])
 
     # Assert
     assert new_path is not None
@@ -253,7 +247,7 @@ def test_recording_is_saved_in_default_dir_if_not_true_or_false_class(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability=0.2,
+                confidence_score=0.2,
                 detection_probability=0.3,
             ),
         ]
@@ -269,9 +263,7 @@ def test_recording_is_saved_in_default_dir_if_not_true_or_false_class(
     )
 
     # Run
-    new_path = saving_manager.save_recording(
-        recording, model_outputs=[model_output]
-    )
+    new_path = saving_manager.save_recording(recording, model_outputs=[model_output])
 
     # Assert saves in the root folder and not in any of the true or false
     # subdirectories

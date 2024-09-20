@@ -101,7 +101,7 @@ class StatisticsDetectionsSummariser(types.Summariser):
 
         for species_name in db_species_name:
             species_probabilities = [
-                t.classification_probability
+                t.confidence_score
                 for t in predicted_tags
                 if t.tag.value == species_name
             ]
@@ -209,7 +209,7 @@ class ThresholdsDetectionsSummariser(types.Summariser):
 
         for species_name in db_species_name:
             species_probabilities = [
-                t.classification_probability
+                t.confidence_score
                 for t in predicted_tags
                 if t.tag.value == species_name
             ]

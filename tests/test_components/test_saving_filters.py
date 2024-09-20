@@ -54,7 +54,7 @@ def create_test_detection():
     def factory(
         tag_value: str,
         tag_key: str = "species",
-        classification_probability: float = 0.4,
+        confidence_score: float = 0.4,
         detection_probability: float = 0.8,
     ) -> data.Detection:
         """Return a random detection."""
@@ -66,7 +66,7 @@ def create_test_detection():
                         value=tag_value,
                         key=tag_key,
                     ),
-                    classification_probability=classification_probability,
+                    confidence_score=confidence_score,
                 ),
             ],
         )
@@ -179,37 +179,25 @@ def test_before_dawndusk_time_interval(
     recording_inside_duskinterval = create_test_recording(
         dusktime - datetime.timedelta(minutes=10)
     )
-    assert (
-        saving_filter.should_save_recording(recording_inside_duskinterval)
-        is True
-    )
+    assert saving_filter.should_save_recording(recording_inside_duskinterval) is True
 
     # Case 2: Recording outside the interval before dusk
     recording_outside_duskinterval = create_test_recording(
         dusktime - datetime.timedelta(minutes=40)
     )
-    assert (
-        saving_filter.should_save_recording(recording_outside_duskinterval)
-        is False
-    )
+    assert saving_filter.should_save_recording(recording_outside_duskinterval) is False
 
     # Case 3: Recording within the interval before dawn
     recording_inside_dawninterval = create_test_recording(
         dawntime - datetime.timedelta(minutes=10)
     )
-    assert (
-        saving_filter.should_save_recording(recording_inside_dawninterval)
-        is True
-    )
+    assert saving_filter.should_save_recording(recording_inside_dawninterval) is True
 
     # Case 4: Recording outside the interval before dawn
     recording_outside_dawninterval = create_test_recording(
         dawntime - datetime.timedelta(minutes=40)
     )
-    assert (
-        saving_filter.should_save_recording(recording_outside_dawninterval)
-        is False
-    )
+    assert saving_filter.should_save_recording(recording_outside_dawninterval) is False
 
 
 def test_after_dawndusk_time_interval(
@@ -236,37 +224,25 @@ def test_after_dawndusk_time_interval(
     recording_inside_duskinterval = create_test_recording(
         dusktime + datetime.timedelta(minutes=10)
     )
-    assert (
-        saving_filter.should_save_recording(recording_inside_duskinterval)
-        is True
-    )
+    assert saving_filter.should_save_recording(recording_inside_duskinterval) is True
 
     # Case 2: Recording outside the interval before dusk
     recording_outside_duskinterval = create_test_recording(
         dusktime + datetime.timedelta(minutes=40)
     )
-    assert (
-        saving_filter.should_save_recording(recording_outside_duskinterval)
-        is False
-    )
+    assert saving_filter.should_save_recording(recording_outside_duskinterval) is False
 
     # Case 3: Recording within the interval before dawn
     recording_inside_dawninterval = create_test_recording(
         dawntime + datetime.timedelta(minutes=10)
     )
-    assert (
-        saving_filter.should_save_recording(recording_inside_dawninterval)
-        is True
-    )
+    assert saving_filter.should_save_recording(recording_inside_dawninterval) is True
 
     # Case 4: Recording outside the interval before dawn
     recording_outside_dawninterval = create_test_recording(
         dawntime + datetime.timedelta(minutes=40)
     )
-    assert (
-        saving_filter.should_save_recording(recording_outside_dawninterval)
-        is False
-    )
+    assert saving_filter.should_save_recording(recording_outside_dawninterval) is False
 
 
 """ TESTS - THRESHOLD DETECTIONS - SAVING FILTERS """
@@ -290,9 +266,7 @@ def test_delete_recording_without_detections(
 
     model_output = create_test_model_output(detections=[])
 
-    saving_filter = saving_filters.SavingThreshold(
-        saving_threshold=saving_threshold
-    )
+    saving_filter = saving_filters.SavingThreshold(saving_threshold=saving_threshold)
     # Act
     result = saving_filter.should_save_recording(
         recording, model_outputs=[model_output]
@@ -318,20 +292,18 @@ def test_save_recording_ifboth_detclassprob_above_savingthreshold(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability=0.7,
+                confidence_score=0.7,
                 detection_probability=0.8,
             ),
             create_test_detection(
                 tag_value="species_2",
-                classification_probability=0.8,
+                confidence_score=0.8,
                 detection_probability=0.9,
             ),
         ]
     )
 
-    saving_filter = saving_filters.SavingThreshold(
-        saving_threshold=saving_threshold
-    )
+    saving_filter = saving_filters.SavingThreshold(saving_threshold=saving_threshold)
     # Act
     result = saving_filter.should_save_recording(
         recording, model_outputs=[model_output]
@@ -356,20 +328,18 @@ def test_save_recording_if_onlydetprob_above_savingthreshold(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability=0.4,
+                confidence_score=0.4,
                 detection_probability=0.8,
             ),
             create_test_detection(
                 tag_value="species_2",
-                classification_probability=0.3,
+                confidence_score=0.3,
                 detection_probability=0.7,
             ),
         ]
     )
 
-    saving_filter = saving_filters.SavingThreshold(
-        saving_threshold=saving_threshold
-    )
+    saving_filter = saving_filters.SavingThreshold(saving_threshold=saving_threshold)
     # Act
     result = saving_filter.should_save_recording(
         recording, model_outputs=[model_output]
@@ -399,20 +369,18 @@ def test_delete_recording_if_detclassprob_below_savingthreshold(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability=0.4,
+                confidence_score=0.4,
                 detection_probability=0.5,
             ),
             create_test_detection(
                 tag_value="species_2",
-                classification_probability=0.3,
+                confidence_score=0.3,
                 detection_probability=0.4,
             ),
         ]
     )
 
-    saving_filter = saving_filters.SavingThreshold(
-        saving_threshold=saving_threshold
-    )
+    saving_filter = saving_filters.SavingThreshold(saving_threshold=saving_threshold)
     # Act
     result = saving_filter.should_save_recording(
         recording, model_outputs=[model_output]
@@ -441,12 +409,12 @@ def test_save_recording_with_focus_tagvalues(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability=0.4,
+                confidence_score=0.4,
                 detection_probability=0.8,
             ),
             create_test_detection(
                 tag_value="species_2",
-                classification_probability=0.3,
+                confidence_score=0.3,
                 detection_probability=0.7,
             ),
         ]
@@ -477,12 +445,12 @@ def test_delete_recording_ifnot_focus_tagvalues(
         detections=[
             create_test_detection(
                 tag_value="species_3",
-                classification_probability=0.4,
+                confidence_score=0.4,
                 detection_probability=0.8,
             ),
             create_test_detection(
                 tag_value="species_4",
-                classification_probability=0.3,
+                confidence_score=0.3,
                 detection_probability=0.7,
             ),
         ]

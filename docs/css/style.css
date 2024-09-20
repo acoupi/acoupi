@@ -21,3 +21,13 @@ div.doc-contents:not(.first) {
 .doc-md-description {
   font-size: 0.62rem;
 }
+
+.doc-md-table {
+  border: 0;
+  border-collapse: collapse;
+  caption-side: bottom;
+  line-height: 1.5rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  width: 100%;
+}

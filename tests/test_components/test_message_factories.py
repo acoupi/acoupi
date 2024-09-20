@@ -21,7 +21,7 @@ def create_test_detection():
         detection_probability: float = 0.8,
         tag_key: str = "species",
         tag_value: str = "Myotis myotis",
-        classification_probability: float = 0.6,
+        confidence_score: float = 0.6,
     ) -> data.Detection:
         """Return a random detection."""
         return data.Detection(
@@ -35,7 +35,7 @@ def create_test_detection():
                         key=tag_key,
                         value=tag_value,
                     ),
-                    classification_probability=classification_probability,
+                    confidence_score=confidence_score,
                 )
             ],
         )
@@ -91,7 +91,7 @@ def test_message_builder_detections_below_threshold(
                 detection_probability=0.5,
                 tag_key="species",
                 tag_value="species_1",
-                classification_probability=0.4,
+                confidence_score=0.4,
             ),
         ]
     )
@@ -117,19 +117,17 @@ def test_message_builder_detections_with_mixthreshold(
                 detection_probability=0.5,
                 tag_key="species",
                 tag_value="species_1",
-                classification_probability=0.4,
+                confidence_score=0.4,
             ),
             create_test_detection(
                 detection_probability=0.7,
                 tag_key="species",
                 tag_value="species_2",
-                classification_probability=0.6,
+                confidence_score=0.6,
             ),
         ]
     )
-    clean_detections = message_builder.filter_detections(
-        model_output.detections
-    )
+    clean_detections = message_builder.filter_detections(model_output.detections)
     assert len(clean_detections) == 1
 
     message = message_builder.build_message(model_output)

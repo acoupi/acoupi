@@ -81,7 +81,7 @@ def create_base_models(database: orm.Database) -> BaseModels:
         value = orm.Required(str)
         """Value of the predicted tag"""
 
-        classification_probability = orm.Required(float)
+        confidence_score = orm.Required(float)
         """Probability of the predicted tag"""
 
         detection = orm.Optional("Detection", column="detection_id")

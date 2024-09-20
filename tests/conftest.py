@@ -98,11 +98,11 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
         tags=[
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value1"),
-                classification_probability=0.8,
+                confidence_score=0.8,
             ),
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value2"),
-                classification_probability=0.8,
+                confidence_score=0.8,
             ),
         ],
         detections=[
@@ -112,11 +112,11 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="test2", value="value3"),
-                        classification_probability=0.3,
+                        confidence_score=0.3,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="test", value="value1"),
-                        classification_probability=0.2,
+                        confidence_score=0.2,
                     ),
                 ],
             )

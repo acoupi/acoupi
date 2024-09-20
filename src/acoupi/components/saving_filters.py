@@ -276,8 +276,7 @@ class SavingThreshold(types.RecordingSavingFilter):
             False if no detection or classification probability is above the saving threshold.
         """
         if any(
-            tag.classification_probability >= self.saving_threshold
-            for tag in model_output.tags
+            tag.confidence_score >= self.saving_threshold for tag in model_output.tags
         ):
             return True
 
@@ -383,8 +382,7 @@ class DetectionTags(types.RecordingSavingFilter):
             bool
         """
         if any(
-            tag.tag in self.tags
-            and tag.classification_probability >= self.saving_threshold
+            tag.tag in self.tags and tag.confidence_score >= self.saving_threshold
             for tag in model_output.tags
         ):
             return True
@@ -397,7 +395,7 @@ class DetectionTags(types.RecordingSavingFilter):
                 if tag.tag not in self.tags:
                     continue
 
-                if tag.classification_probability >= self.saving_threshold:
+                if tag.confidence_score >= self.saving_threshold:
                     return True
 
         return False

@@ -49,9 +49,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
             and detection.tags != []
         ]
 
-    def build_message(
-        self, model_output: data.ModelOutput
-    ) -> Optional[data.Message]:
+    def build_message(self, model_output: data.ModelOutput) -> Optional[data.Message]:
         """Build a message with only detections meeting threshold.
 
         Parameters
@@ -77,7 +75,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         ...                 tag=data.Tag(
         ...                     key="species", value="species_1"
         ...                 ),
-        ...                 classification_probability=0.4,
+        ...                 confidence_score=0.4,
         ...             )
         ...         ],
         ...     )
@@ -96,7 +94,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         ...                 tag=data.Tag(
         ...                     key="species", value="species_1"
         ...                 ),
-        ...                 classification_probability=0.9,
+        ...                 confidence_score=0.9,
         ...             )
         ...         ],
         ...     )
@@ -105,7 +103,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         ...     detection_threshold=0.6
         ... )
         >>> message_builder.build_message(model_output)
-        Message(content='{"name_model": "TestModel", "recording": {"path": "recording.wav", "deployment": {}, "tags": [], "detections": [{"detection_probability": 0.9, "location": {}, "tags": [{"tag": {"key": "species", "value": "species_1"}, "classification_probability": 0.9}]}]}')
+        Message(content='{"name_model": "TestModel", "recording": {"path": "recording.wav", "deployment": {}, "tags": [], "detections": [{"detection_probability": 0.9, "location": {}, "tags": [{"tag": {"key": "species", "value": "species_1"}, "confidence_score": 0.9}]}]}')
         """
         filtered_detections = self.filter_detections(model_output.detections)
         if not filtered_detections:

@@ -77,7 +77,7 @@ class PredictedTag(core.EntityMeta):
     value: str
     """Value of the predicted tag"""
 
-    classification_probability: float
+    confidence_score: float
     """Probability of the predicted tag"""
 
     detection: Optional["Detection"]

@@ -45,11 +45,11 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
         tags=[
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value1"),
-                classification_probability=0.6,
+                confidence_score=0.6,
             ),
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value2"),
-                classification_probability=0.3,
+                confidence_score=0.3,
             ),
         ],
     )
@@ -84,11 +84,11 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
         tags=[
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value1"),
-                classification_probability=0.4,
+                confidence_score=0.4,
             ),
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value2"),
-                classification_probability=0.3,
+                confidence_score=0.3,
             ),
         ],
     )
@@ -139,9 +139,7 @@ def test_date_file_manager_save_recording(
 
     # Assert
     assert directory.exists()
-    assert file_path == (
-        directory / "2023" / "4" / "15" / f"180930_{recording.id}.wav"
-    )
+    assert file_path == (directory / "2023" / "4" / "15" / f"180930_{recording.id}.wav")
 
 
 def test_date_file_manager_fails_if_recording_has_no_path(
@@ -213,9 +211,7 @@ def test_date_file_manager_fails_if_recording_file_does_not_exist(
         file_manager.save_recording(recording)
 
 
-def test_id_file_manager_save_recording(
-    tmp_path: Path, deployment: data.Deployment
-):
+def test_id_file_manager_save_recording(tmp_path: Path, deployment: data.Deployment):
     """Test IDFileManager.save_recording."""
     # Arrange
     path = tmp_path / "test.wav"

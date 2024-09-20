@@ -117,7 +117,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
         for model_output in model_outputs:
             # Check if any tags or detectinos are confident
             if any(
-                tag.classification_probability >= self.detection_threshold
+                tag.confidence_score >= self.detection_threshold
                 for tag in model_output.tags
             ):
                 return self.dirpath_true
@@ -129,7 +129,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
                 return self.dirpath_true
 
             if any(
-                tag.classification_probability >= self.saving_threshold
+                tag.confidence_score >= self.saving_threshold
                 for tag in model_output.tags
             ):
                 return self.dirpath_false
@@ -159,7 +159,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
 
         >>> model_outputs = [
         ...     data.ModelOutput(
-        ...         tags=[data.Tag(classification_probability=0.7)]
+        ...         tags=[data.Tag(confidence_score=0.7)]
         ...     ),
         ...     data.ModelOutput(
         ...         detections=[

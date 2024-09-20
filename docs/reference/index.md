@@ -15,7 +15,7 @@ you will find more about the available acoupi functions.
 
 - [Programs](programs): Illustrate the complete set of tasks, components, and data schema. 
 
-- [System](system): Detailed the system functions. 
+- [System](system): Detailed functions used to manage running acoupi application. 
 
 
 <table>

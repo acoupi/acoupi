@@ -61,7 +61,7 @@ def create_test_detection():
                         value=tag_value,
                         key=tag_key,
                     ),
-                    classification_probability=tag_probability,
+                    confidence_score=tag_probability,
                 ),
             ],
         )

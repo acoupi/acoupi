@@ -22,15 +22,15 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
     tags=[
         data.PredictedTag(
             tag=data.Tag(key="species", value="Myotis myotis"),
-            classification_probability=0.9,
+            confidence_score=0.9,
         ),
         data.PredictedTag(
             tag=data.Tag(key="species", value="Eptesicus serotinus"),
-            classification_probability=0.7,
+            confidence_score=0.7,
         ),
         data.PredictedTag(
             tag=data.Tag(key="antropophony", value="Human voice"),
-            classification_probability=0.4,
+            confidence_score=0.4,
         ),
     ],
     detections=[
@@ -42,11 +42,11 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Myotis myotis"),
-                    classification_probability=0.6,
+                    confidence_score=0.6,
                 ),
                 data.PredictedTag(
                     tag=data.Tag(key="event", value="Echolocation"),
-                    classification_probability=0.8,
+                    confidence_score=0.8,
                 ),
             ],
         ),
@@ -58,11 +58,11 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Myotis myotis"),
-                    classification_probability=0.5,
+                    confidence_score=0.5,
                 ),
                 data.PredictedTag(
                     tag=data.Tag(key="event", value="Feeding buzz"),
-                    classification_probability=0.4,
+                    confidence_score=0.4,
                 ),
             ],
         ),
@@ -74,7 +74,7 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Eptesicus serotinus"),
-                    classification_probability=0.7,
+                    confidence_score=0.7,
                 ),
             ],
         ),
