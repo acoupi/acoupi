@@ -1,13 +1,13 @@
-# Acoupi Explaination
+# Acoupi Explanation
 
-Welcome to the explaination guide of **acoupi** Python software package.This section of the documentation is intended for users who wish to better understand how acoupi code has been designed and architected. The various explaination guide will enable you to get a deep understanding of the different layers of code forming acoupi, the distinction between an acoupi bare-bone framework and an acoupi running application. 
+Welcome to the explanation guide of **acoupi** Python software package.This section of the documentation is intended for users who wish to better understand how acoupi code has been designed and architected. The various explanation guide will enable you to get a deep understanding of the different layers of code forming acoupi, the distinction between an acoupi bare-bone framework and an acoupi running application. 
 
 <div class="md-table">
     <table>
         <thead>
             <tr>
                 <th>
-                    <strong>Explaination Section</strong>
+                    <strong>Explanation Section</strong>
                 </th>
                 <th>What it is?</th>
             </tr>

@@ -6,14 +6,14 @@ nav:
     - tutorials/index.md
   - How-to Guides: 
     - how_to_guides/index.md
-    Data Schema: how_to_guides/index.md
-  - Explaination: 
-    - explaination/index.md
-    - Architecture: explaination/architecture.md
-    - Data Schema: explaination/data_schema.md
-    - Components: explaination/components.md
-    - Tasks: explaination/tasks.md
-    - Programs: explaination/programs.md
+    - Data Schema: how_to_guides/index.md
+  - Explanation: 
+    - explanation/index.md
+    - Architecture: explanation/architecture.md
+    - Data Schema: explanation/data_schema.md
+    - Components: explanation/components.md
+    - Tasks: explanation/tasks.md
+    - Programs: explanation/programs.md
   - User Guide:
       - user_guide/index.md
       - Installation: user_guide/installation.md
