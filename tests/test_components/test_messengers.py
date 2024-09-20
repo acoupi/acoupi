@@ -133,7 +133,7 @@ def test_http_messenger_with_complex_message():
                     location=data.BoundingBox(
                         coordinates=(0, 0, 1, 1),
                     ),
-                    detection_probability=0.5,
+                    detection_score=0.5,
                     tags=[
                         data.PredictedTag(
                             tag=data.Tag(

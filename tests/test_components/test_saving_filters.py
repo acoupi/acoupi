@@ -55,11 +55,11 @@ def create_test_detection():
         tag_value: str,
         tag_key: str = "species",
         confidence_score: float = 0.4,
-        detection_probability: float = 0.8,
+        detection_score: float = 0.8,
     ) -> data.Detection:
         """Return a random detection."""
         return data.Detection(
-            detection_probability=detection_probability,
+            detection_score=detection_score,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(
@@ -293,12 +293,12 @@ def test_save_recording_ifboth_detclassprob_above_savingthreshold(
             create_test_detection(
                 tag_value="species_1",
                 confidence_score=0.7,
-                detection_probability=0.8,
+                detection_score=0.8,
             ),
             create_test_detection(
                 tag_value="species_2",
                 confidence_score=0.8,
-                detection_probability=0.9,
+                detection_score=0.9,
             ),
         ]
     )
@@ -329,12 +329,12 @@ def test_save_recording_if_onlydetprob_above_savingthreshold(
             create_test_detection(
                 tag_value="species_1",
                 confidence_score=0.4,
-                detection_probability=0.8,
+                detection_score=0.8,
             ),
             create_test_detection(
                 tag_value="species_2",
                 confidence_score=0.3,
-                detection_probability=0.7,
+                detection_score=0.7,
             ),
         ]
     )
@@ -370,12 +370,12 @@ def test_delete_recording_if_detclassprob_below_savingthreshold(
             create_test_detection(
                 tag_value="species_1",
                 confidence_score=0.4,
-                detection_probability=0.5,
+                detection_score=0.5,
             ),
             create_test_detection(
                 tag_value="species_2",
                 confidence_score=0.3,
-                detection_probability=0.4,
+                detection_score=0.4,
             ),
         ]
     )
@@ -410,12 +410,12 @@ def test_save_recording_with_focus_tagvalues(
             create_test_detection(
                 tag_value="species_1",
                 confidence_score=0.4,
-                detection_probability=0.8,
+                detection_score=0.8,
             ),
             create_test_detection(
                 tag_value="species_2",
                 confidence_score=0.3,
-                detection_probability=0.7,
+                detection_score=0.7,
             ),
         ]
     )
@@ -446,12 +446,12 @@ def test_delete_recording_ifnot_focus_tagvalues(
             create_test_detection(
                 tag_value="species_3",
                 confidence_score=0.4,
-                detection_probability=0.8,
+                detection_score=0.8,
             ),
             create_test_detection(
                 tag_value="species_4",
                 confidence_score=0.3,
-                detection_probability=0.7,
+                detection_score=0.7,
             ),
         ]
     )

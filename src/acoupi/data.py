@@ -157,10 +157,10 @@ class PredictedTag(BaseModel):
     """The confidence score of the predicted tag."""
 
     @field_validator("confidence_score")
-    def validate_probability(cls, value):
-        """Validate that the probability is between 0 and 1."""
+    def validate_score(cls, value):
+        """Validate that the score is between 0 and 1."""
         if value < 0 or value > 1:
-            raise ValueError("probability must be between 0 and 1")
+            raise ValueError("score must be between 0 and 1")
         return value
 
 
@@ -210,17 +210,17 @@ class Detection(BaseModel):
     location: Optional[BoundingBox] = None
     """The location of the detection in the recording."""
 
-    detection_probability: float = 1
-    """The probability of the detection."""
+    detection_score: float = 1
+    """The score of the detection."""
 
     tags: List[PredictedTag] = Field(default_factory=list)
     """The tags predicted by the model for the detection."""
 
-    @field_validator("detection_probability")
-    def validate_probability(cls, value):
-        """Validate that the probability is between 0 and 1."""
+    @field_validator("detection_score")
+    def validate_score(cls, value):
+        """Validate that the score is between 0 and 1."""
         if value < 0 or value > 1:
-            raise ValueError("probability must be between 0 and 1")
+            raise ValueError("score must be between 0 and 1")
         return value
 
     @field_validator("tags")

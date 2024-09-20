@@ -215,7 +215,7 @@ class RecordingSavingFilter(ABC):
         Save recordings if they falls withing a specified time interval
         happening after or before astronomical dawn and dusk.
     * [SavingThreshold][acoupi.components.saving_filters.SavingThreshold]:
-        Save recordings if any of the detection and classification tag probability associated to
+        Save recordings if any of the detection and classification tag score associated to
         the recording model output is higher or equal than a specified threshold.
     * [SaveIfInInterval][acoupi.components.saving_filters.SaveIfInInterval]:
         Save recordings if the recording falls within a specified interval.
@@ -393,7 +393,7 @@ class MessageBuilder(ABC, Generic[P]):
     concrete implementations of the MessageBuilder.
 
     * [DetectionThresholdMessageBuilder][acoupi.components.message_factories.DetectionThresholdMessageBuilder]:
-        Filters detections by a probability threshold.
+        Filters detections by a score threshold.
 
     * [FullModelOutputMessageBuilder][acoupi.components.message_factories.FullModelOutputMessageBuilder]:
         No filtering. Format the entire model output.

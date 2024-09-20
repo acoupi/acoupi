@@ -108,7 +108,7 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
         detections=[
             data.Detection(
                 location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
-                detection_probability=0.6,
+                detection_score=0.6,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="test2", value="value3"),

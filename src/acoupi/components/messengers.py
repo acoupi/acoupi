@@ -117,7 +117,7 @@ class MQTTMessenger(types.Messenger):
         Examples
         --------
         >>> message = data.Message(
-        ...     content='{"name_model": "TestModel", "recording": {"path": "recording.wav", "deployment": {}, "tags": [], "detections": [{"detection_probability": 0.9, "location": {}, "tags": [{"tag": {"key": "species", "value": "species_1"}, "confidence_score": 0.9}]}]}'
+        ...     content='{"name_model": "TestModel", "recording": {"path": "recording.wav", "deployment": {}, "tags": [], "detections": [{"detection_score": 0.9, "location": {}, "tags": [{"tag": {"key": "species", "value": "species_1"}, "confidence_score": 0.9}]}]}'
         ... )
         >>> messenger = MQTTMessenger(
         ...     host="mqtt.localhost.org",

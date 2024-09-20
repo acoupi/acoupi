@@ -18,7 +18,7 @@ def create_test_detection():
     """
 
     def factory(
-        detection_probability: float = 0.8,
+        detection_score: float = 0.8,
         tag_key: str = "species",
         tag_value: str = "Myotis myotis",
         confidence_score: float = 0.6,
@@ -28,7 +28,7 @@ def create_test_detection():
             location=data.BoundingBox(
                 coordinates=(0.1, 0.2, 0.3, 0.4),
             ),
-            detection_probability=detection_probability,
+            detection_score=detection_score,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(
@@ -88,7 +88,7 @@ def test_message_builder_detections_below_threshold(
     model_output = create_test_model_output(
         detections=[
             create_test_detection(
-                detection_probability=0.5,
+                detection_score=0.5,
                 tag_key="species",
                 tag_value="species_1",
                 confidence_score=0.4,
@@ -114,13 +114,13 @@ def test_message_builder_detections_with_mixthreshold(
     model_output = create_test_model_output(
         detections=[
             create_test_detection(
-                detection_probability=0.5,
+                detection_score=0.5,
                 tag_key="species",
                 tag_value="species_1",
                 confidence_score=0.4,
             ),
             create_test_detection(
-                detection_probability=0.7,
+                detection_score=0.7,
                 tag_key="species",
                 tag_value="species_2",
                 confidence_score=0.6,

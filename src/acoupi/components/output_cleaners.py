@@ -3,7 +3,7 @@
 ModelOutput Cleaners are responsible for cleaning the outputs of a model (i.e., detections) that
 does not meet certain criteria. This can include removing low confidence tags and detections, or
 detections and tags that have a specific labels. The ThresholdDetectionCleaner removes any predictions
-(i.e., detections and tags) with a probability below a threshold.
+(i.e., detections and tags) with a score below a threshold.
 
 The ModelOutputCleaner is implemented as a class that inherits from ModelOutputCleaner. The class
 should implement the clean method, which takes a data.ModelOutput object and returns
@@ -21,10 +21,10 @@ from acoupi.components import types
 
 
 class ThresholdDetectionCleaner(types.ModelOutputCleaner):
-    """Keeps predictions with a probability higher than a threshold.
+    """Keeps predictions with a score higher than a threshold.
 
     This class implements a model output cleaner that removes any
-    predictions with a probability below a threshold. This includes
+    predictions with a score below a threshold. This includes
     removing low confidence tags and detections.
     """
 
@@ -36,25 +36,25 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         self.detection_threshold = detection_threshold
 
     def get_clean_tags(self, tags: List[data.PredictedTag]) -> List[data.PredictedTag]:
-        """Remove tags with low probability."""
+        """Remove tags with low score."""
         return [tag for tag in tags if tag.confidence_score >= self.detection_threshold]
 
     def get_clean_detections(
         self, detections: List[data.Detection]
     ) -> List[data.Detection]:
-        """Remove detections with low probability."""
+        """Remove detections with low score."""
         return [
             self.clean_detection(detection)
             for detection in detections
-            if detection.detection_probability >= self.detection_threshold
+            if detection.detection_score >= self.detection_threshold
         ]
 
     def clean_detection(self, detection: data.Detection) -> data.Detection:
-        """Remove tags with low probability from detection."""
+        """Remove tags with low score from detection."""
         return data.Detection(
             id=detection.id,
             location=detection.location,
-            detection_probability=detection.detection_probability,
+            detection_score=detection.detection_score,
             tags=self.get_clean_tags(detection.tags),
         )
 
@@ -76,7 +76,7 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         >>> model_output = data.ModelOutput(
         ...     detections=[
         ...         data.Detection(
-        ...             detection_probability=0.8,
+        ...             detection_score=0.8,
         ...             tags=[
         ...                 data.PredictedTag(
         ...                     tag=data.Tag(
@@ -101,7 +101,7 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         >>> assert model_output == data.ModelOutput(
         ...     detections=[
         ...         data.Detection(
-        ...             detection_probability=0.8,
+        ...             detection_score=0.8,
         ...             tags=[
         ...                 data.PredictedTag(
         ...                     tag=data.Tag(

@@ -252,7 +252,7 @@ class SavingThreshold(types.RecordingSavingFilter):
     """A SavingTreshold RecordingSavingFilter."""
 
     saving_threshold: float
-    """The probability threshold to use."""
+    """The score threshold to use."""
 
     def __init__(self, saving_threshold: float):
         """Initialize the RecordingSavingFilter."""
@@ -261,8 +261,8 @@ class SavingThreshold(types.RecordingSavingFilter):
     def has_confident_model_output(self, model_output: data.ModelOutput) -> bool:
         """Determine if a model output has confident detections or tags.
 
-        An output is considered confident if any of its detection probability
-        or classification tag probability is greater than or equal to the threshold.
+        An output is considered confident if any of its detection score
+        or classification tag score is greater than or equal to the threshold.
 
         Parameters
         ----------
@@ -272,8 +272,8 @@ class SavingThreshold(types.RecordingSavingFilter):
         Returns
         -------
         bool
-            True if any detection or classification probability is above the saving threshold.
-            False if no detection or classification probability is above the saving threshold.
+            True if any detection or classification score is above the saving threshold.
+            False if no detection or classification score is above the saving threshold.
         """
         if any(
             tag.confidence_score >= self.saving_threshold for tag in model_output.tags
@@ -281,7 +281,7 @@ class SavingThreshold(types.RecordingSavingFilter):
             return True
 
         if any(
-            detection.detection_probability >= self.saving_threshold
+            detection.detection_score >= self.saving_threshold
             for detection in model_output.detections
         ):
             return True
@@ -359,7 +359,7 @@ class DetectionTags(types.RecordingSavingFilter):
     """The tags to focus on."""
 
     saving_threshold: float
-    """The probability threshold to use."""
+    """The score threshold to use."""
 
     def __init__(self, tags: List[data.Tag], saving_threshold: float = 0.5):
         """Initialize the RecordingSavingFilter."""
@@ -370,7 +370,7 @@ class DetectionTags(types.RecordingSavingFilter):
         """Determine if a model output has a confident tag.
 
         An output is considered confident if any of its tags or detections
-        have a probability greater than or equal to the threshold.
+        have a score greater than or equal to the threshold.
 
         Parameters
         ----------
@@ -388,7 +388,7 @@ class DetectionTags(types.RecordingSavingFilter):
             return True
 
         for detection in model_output.detections:
-            if detection.detection_probability < self.saving_threshold:
+            if detection.detection_score < self.saving_threshold:
                 continue
 
             for tag in detection.tags:

@@ -50,7 +50,7 @@ Example:
 
     >>> detection = Detection(
     ...     species_name="species",
-    ...     probability=0.5,
+    ...     score=0.5,
     ... )
     >>> store.store_detections(recording, [detection])
 

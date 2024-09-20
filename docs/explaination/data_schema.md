@@ -25,15 +25,10 @@ AI bioacoustics models have different methods of handling audio files.
 
 A **boundingbox** object represents the location of a sound event in time and frequency. It contains information about the start time and end time in seconds and the low frequency and high frequency in Hz of a sound event.
 
-A **detection** object represents a single detection made by a model. It contains information about the specific recording the detection was made, the species that were detected using the `data.PredictedTag` class, and the probability of the detection. A detection can be created by instantiating a `data.Detection` class.
+A **detection** object represents a single detection made by a model. It contains information about the specific recording the detection was made, the species that were detected using the `data.PredictedTag` class, and the score of the detection. A detection can be created by instantiating a `data.Detection` class.
 
 A **predicted tag** object represents the label predicted by a model. It consists of a `data.Tag` object made of a key and a value, and a confidence score. 
 
-A **tag** object represents is made of a key and value pair. The key is
-
-A **boundingbox** object represents the location of a sound event in time and frequency. It contains information about the start time and end time in seconds and the low frequency and high frequency in Hz of a sound event.
-
-A **detection** object represents a single detection made by a model. It contains information about the specific recording the detection was made, the species that were detected using the `data.PredictedTag` class, and the probability of the detection. A detection can be created by instantiating a `data.Detection` class.
 
 ### Messages
 

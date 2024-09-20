@@ -123,7 +123,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
                 return self.dirpath_true
 
             if any(
-                detection.detection_probability >= self.detection_threshold
+                detection.detection_score >= self.detection_threshold
                 for detection in model_output.detections
             ):
                 return self.dirpath_true
@@ -135,7 +135,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
                 return self.dirpath_false
 
             if any(
-                detection.detection_probability >= self.saving_threshold
+                detection.detection_score >= self.saving_threshold
                 for detection in model_output.detections
             ):
                 return self.dirpath_false
@@ -163,7 +163,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
         ...     ),
         ...     data.ModelOutput(
         ...         detections=[
-        ...             data.Detection(detection_probability=0.6)
+        ...             data.Detection(detection_score=0.6)
         ...         ]
         ...     ),
         ... ]

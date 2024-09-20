@@ -38,7 +38,7 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             location=data.BoundingBox(
                 coordinates=(0.1, 15_000, 0.2, 30_000),
             ),
-            detection_probability=0.9,
+            detection_score=0.9,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Myotis myotis"),
@@ -54,7 +54,7 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             location=data.BoundingBox(
                 coordinates=(0.5, 19_000, 0.7, 38_000),
             ),
-            detection_probability=0.6,
+            detection_score=0.6,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Myotis myotis"),
@@ -70,7 +70,7 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             location=data.BoundingBox(
                 coordinates=(0.9, 24_000, 0.95, 41_000),
             ),
-            detection_probability=0.4,
+            detection_score=0.4,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Eptesicus serotinus"),

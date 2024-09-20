@@ -7,7 +7,7 @@ protocols (e.g., MQTT, HTTP) for further processing, storage, or analysis.
 The message factories are useful to filter outputs from the model according
 to various criteria, avoiding sending unnecessary information to a server,
 when connectivity is limited. For example, message factories
-can be used to filter detections with low probability.
+can be used to filter detections with low score.
 
 Message factories are implemented as classes that inherit from MessageBuilder. The class should
 implement the build_message method, which takes a model output and returns a message. The message
@@ -41,11 +41,11 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
     def filter_detections(
         self, detections: List[data.Detection]
     ) -> List[data.Detection]:
-        """Remove detections with low probability."""
+        """Remove detections with low score."""
         return [
             detection
             for detection in detections
-            if detection.detection_probability >= self.detection_threshold
+            if detection.detection_score >= self.detection_threshold
             and detection.tags != []
         ]
 
@@ -55,7 +55,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         Parameters
         ----------
         self.detection_threshold: float
-            The minimum detection probability required for a detection to be included in the message.
+            The minimum detection score required for a detection to be included in the message.
         self.filter_detections: List[data.Detection]
             A list of detections from the model_output.detections to be filtered.
         model_output: data.ModelOutput
@@ -69,7 +69,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         --------
         >>> model_output = data.ModelOutput(
         ...     data.Detection(
-        ...         detection_probability=0.5,
+        ...         detection_score=0.5,
         ...         tags=[
         ...             data.PredictedTag(
         ...                 tag=data.Tag(
@@ -88,7 +88,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
 
         >>> model_output = data.ModelOutput(
         ...     data.Detection(
-        ...         detection_probability=0.9,
+        ...         detection_score=0.9,
         ...         tags=[
         ...             data.PredictedTag(
         ...                 tag=data.Tag(
@@ -103,7 +103,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         ...     detection_threshold=0.6
         ... )
         >>> message_builder.build_message(model_output)
-        Message(content='{"name_model": "TestModel", "recording": {"path": "recording.wav", "deployment": {}, "tags": [], "detections": [{"detection_probability": 0.9, "location": {}, "tags": [{"tag": {"key": "species", "value": "species_1"}, "confidence_score": 0.9}]}]}')
+        Message(content='{"name_model": "TestModel", "recording": {"path": "recording.wav", "deployment": {}, "tags": [], "detections": [{"detection_score": 0.9, "location": {}, "tags": [{"tag": {"key": "species", "value": "species_1"}, "confidence_score": 0.9}]}]}')
         """
         filtered_detections = self.filter_detections(model_output.detections)
         if not filtered_detections:

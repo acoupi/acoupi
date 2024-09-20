@@ -124,7 +124,7 @@ class StatisticsDetectionsSummariser(types.Summariser):
 
 
 class ThresholdsDetectionsSummariser(types.Summariser):
-    """Summariser that summarises detections by classification probability thresholds."""
+    """Summariser that summarises detections by classification score thresholds."""
 
     store: SqliteStore
     """The store to get the detections from."""
@@ -145,11 +145,11 @@ class ThresholdsDetectionsSummariser(types.Summariser):
         Parameters
         ----------
         low_band_threshold: float, optional
-            The lower threshold for the classification probability, by default 0.1.
+            The lower threshold for the classification score, by default 0.1.
         mid_band_threshold: float, optional
-            The middle threshold for the classification probability, by default 0.5.
+            The middle threshold for the classification score, by default 0.5.
         high_band_threshold: float, optional
-            The higher threshold for the classification probability, by default 0.9.
+            The higher threshold for the classification score, by default 0.9.
         """
         self.store = store
 

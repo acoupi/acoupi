@@ -35,7 +35,7 @@ AI bioacoustics models have different methods of handling audio files.
 
 A tag object represents a label for a recording. A predicted tag object
 represents the label predicted by a model. It consists of a key (the tag object)
-and a probability value.
+and a score value.
 
 A boundingbox object represents the location of a sound event in time and
 frequency. It contains information about the start time and end time in seconds
@@ -43,7 +43,7 @@ and the low frequency and high frequency in Hz of a sound event.
 
 A detection object represents a single detection made by a model. It contains
 information about in which the recording the detection was made, what species
-were detected using the `PredictedTag` class, and the probability of the
+were detected using the `PredictedTag` class, and the score of the
 detection. A detection can be created by instantiating a `Detection` class.
 
 ### Messages

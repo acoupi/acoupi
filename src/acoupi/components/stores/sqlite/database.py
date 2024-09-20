@@ -82,7 +82,7 @@ def create_base_models(database: orm.Database) -> BaseModels:
         """Value of the predicted tag"""
 
         confidence_score = orm.Required(float)
-        """Probability of the predicted tag"""
+        """Score of the predicted tag"""
 
         detection = orm.Optional("Detection", column="detection_id")
 
@@ -97,8 +97,8 @@ def create_base_models(database: orm.Database) -> BaseModels:
         location = orm.Optional(str)
         """Location of the detection in the recording"""
 
-        detection_probability = orm.Required(float)
-        """Probability of the detection"""
+        detection_score = orm.Required(float)
+        """Score of the detection"""
 
         tags = orm.Set(PredictedTag)
         """Predicted tags of the detection"""

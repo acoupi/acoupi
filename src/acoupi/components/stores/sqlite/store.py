@@ -33,10 +33,10 @@ class SqliteStore(types.Store):
       and number of                 audio_channels.
 
     - PredictedTag: Contains the predicted tag information. Each predicted tag
-      has a key, value and probability.
+      has a key, value and score.
 
     - Detection: Contains the detection information. Each detection consists
-      of a location, probability and a list of predicted tags.
+      of a location, score and a list of predicted tags.
 
     - ModelOutput: Contains the model output information. Each model output
       has the model name, the list of predicted tags at the recording level,
@@ -173,7 +173,7 @@ class SqliteStore(types.Store):
             db_detection = db_model_output.detections.create(
                 id=detection.id,
                 location=location,
-                detection_probability=detection.detection_probability,
+                detection_score=detection.detection_score,
             )
 
             for tag in detection.tags:
@@ -303,8 +303,8 @@ class SqliteStore(types.Store):
         self,
         ids: Optional[List[UUID]] = None,
         model_output_ids: Optional[List[UUID]] = None,
-        probability_gt: Optional[float] = None,
-        probability_lt: Optional[float] = None,
+        score_gt: Optional[float] = None,
+        score_lt: Optional[float] = None,
         model_names: Optional[List[str]] = None,
         after: Optional[datetime.datetime] = None,
         before: Optional[datetime.datetime] = None,
@@ -318,11 +318,11 @@ class SqliteStore(types.Store):
         if model_output_ids:
             query = query.filter(lambda d: d.model_output.id in model_output_ids)
 
-        if probability_gt is not None:
-            query = query.filter(lambda d: d.detection_probability > probability_gt)
+        if score_gt is not None:
+            query = query.filter(lambda d: d.detection_score > score_gt)
 
-        if probability_lt is not None:
-            query = query.filter(lambda d: d.detection_probability < probability_lt)
+        if score_lt is not None:
+            query = query.filter(lambda d: d.detection_score < score_lt)
 
         if after is not None:
             query = query.filter(lambda d: d.model_output.created_on >= after)
@@ -343,8 +343,8 @@ class SqliteStore(types.Store):
         detection_ids: Optional[List[UUID]] = None,
         after: Optional[datetime.datetime] = None,
         before: Optional[datetime.datetime] = None,
-        probability_gt: Optional[float] = None,
-        probability_lt: Optional[float] = None,
+        score_gt: Optional[float] = None,
+        score_lt: Optional[float] = None,
         keys: Optional[List[str]] = None,
         values: Optional[List[str]] = None,
     ) -> List[data.PredictedTag]:
@@ -368,11 +368,11 @@ class SqliteStore(types.Store):
                 and t.detection.model_output.created_on <= before
             )
 
-        if probability_gt is not None:
-            query = query.filter(lambda t: t.confidence_score > probability_gt)
+        if score_gt is not None:
+            query = query.filter(lambda t: t.confidence_score > score_gt)
 
-        if probability_lt is not None:
-            query = query.filter(lambda t: t.confidence_score < probability_lt)
+        if score_lt is not None:
+            query = query.filter(lambda t: t.confidence_score < score_lt)
 
         if keys:
             query = query.filter(lambda t: t.key in keys)
@@ -555,7 +555,7 @@ def _to_detection(db_detection: db_types.Detection) -> data.Detection:
     return data.Detection(
         id=db_detection.id,
         location=location,
-        detection_probability=db_detection.detection_probability,
+        detection_score=db_detection.detection_score,
         tags=[
             data.PredictedTag(
                 tag=data.Tag(

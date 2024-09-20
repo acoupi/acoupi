@@ -51,11 +51,11 @@ def create_test_detection():
         tag_value: str,
         tag_key: str = "species",
         confidence_score: float = 0.4,
-        detection_probability: float = 0.8,
+        detection_score: float = 0.8,
     ) -> data.Detection:
         """Return a random detection."""
         return data.Detection(
-            detection_probability=detection_probability,
+            detection_score=detection_score,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(
@@ -143,7 +143,7 @@ def test_save_recording_with_confident_detections(
             create_test_detection(
                 tag_value="species_1",
                 confidence_score=0.6,
-                detection_probability=0.8,
+                detection_score=0.8,
             ),
         ]
     )
@@ -195,7 +195,7 @@ def test_save_recording_with_unconfident_detections(
             create_test_detection(
                 tag_value="species_1",
                 confidence_score=0.5,
-                detection_probability=0.6,
+                detection_score=0.6,
             ),
         ]
     )
@@ -248,7 +248,7 @@ def test_recording_is_saved_in_default_dir_if_not_true_or_false_class(
             create_test_detection(
                 tag_value="species_1",
                 confidence_score=0.2,
-                detection_probability=0.3,
+                detection_score=0.3,
             ),
         ]
     )
