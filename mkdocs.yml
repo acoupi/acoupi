@@ -6,6 +6,7 @@ nav:
     - tutorials/index.md
   - How-to Guides: 
     - how_to_guides/index.md
+    Data Schema: how_to_guides/index.md
   - Explaination: 
     - explaination/index.md
     - Architecture: explaination/architecture.md
@@ -23,7 +24,6 @@ nav:
   - Developer Guide:
       - developer_guide/index.md
       - Architecture: developer_guide/architecture.md
-      - Data Schema: developer_guide/data_schema.md
       - Components: developer_guide/components.md
       - Tasks: developer_guide/tasks.md
       - Programs: developer_guide/programs.md

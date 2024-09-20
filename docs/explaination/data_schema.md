@@ -35,7 +35,7 @@ A **predicted tag** object represents the label predicted by a model. It consist
 A message object represents a single message sent by the device. It contains
 information about the message, such as the date and time when the message was
 created, the type of the message, and the content of the message. A message can
-be created by instantiating a `Message` class.
+be created by instantiating a `data.Message` class.
 
 ### Response
 
@@ -43,46 +43,4 @@ A response object represents a single response received by the device when
 sending a message. It contains information about the response, such as the date
 and time when the message was sent, the status of the response (i.e. success,
 failed, error, timeout), and the content of the response. A response can be
-created by instantiating a `Response` class.
-
-# Creating a new data object
-
-Creating a new data object with Pydantic involves defining a Python class that
-inherits from `pydantic.BaseModel`. This class acts as a blueprint for instances
-of the data object, specifying the attributes and their types. The keys steps
-and requirements for creating a new acoupi data objects are the following:
-
-1. Define a Class that inherit from `BaseModel`.
-
-```python
-class YourDataObject(BaseModel):
-    # Attributes for the class
-```
-
-2. Declare the attributes of the new data object as the class variables. Specify
-   the attributes' data types using Python type hints. Optionally, set default
-   values for the attributes.
-
-```python
-class YourDataObject(BaseModel):
-    attribute1: float = 0.5
-    attribute2: str
-    attribute3: Path
-```
-
-3. **Optional**: Implement custom validaiton logic using
-   [**Pydantic's validation methods**](https://docs.pydantic.dev/dev/concepts/validators/#annotated-validators)
-   such as @field_validatior and @model_validator.
-
-```python
-class YourDataObject(BaseModel):
-    attribute1: int = 0.5
-    attribute2: str
-
-    @field_validator("attribute1")
-    def validate_attribute1(cls, value):
-    """Check that attribute1 is a float between 0 and 1."""
-    if value < 0 or value > 1:
-            raise ValueError("attribute1 must be between 0 and 1")
-        return value
-```
+created by instantiating a `data.Response` class.
