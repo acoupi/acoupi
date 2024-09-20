@@ -1,6 +1,6 @@
 # Acoupi Explanation
 
-Welcome to the explanation guide of **acoupi** Python software package.This section of the documentation is intended for users who wish to better understand how acoupi code has been designed and architected. The various explanation guide will enable you to get a deep understanding of the different layers of code forming acoupi, the distinction between an acoupi bare-bone framework and an acoupi running application. 
+Welcome to the _Explanation Guide_ of acoupi package. This section of the documentation is intended for users who wish to better understand how acoupi code has been designed and architected. The various explanation guide will enable you to get a deep understanding of the different layers of code forming acoupi, the distinction between an acoupi bare-bone framework and an acoupi running application. 
 
 <div class="md-table">
     <table>
@@ -17,19 +17,19 @@ Welcome to the explanation guide of **acoupi** Python software package.This sect
                 <td>
                     <a href="Architecture">Overview</a>
                 </td>
-                <td>Overview of what acoupi is built upon</td>
+                <td>Architecture overview which acoupi is built upon</td>
             </tr>
             <tr>
                 <td>
                     <a href="Data_Schema">Framework</a>
                 </td>
-                <td>Learn about the 4 core-elements of acoupi</td>
+                <td>Learn about the 4 elements of acoupi (data, components, tasks, programs)</td>
             </tr>
             <tr>
                 <td>
                 <a href="inner_workings">System</a>
                 </td>
-                <td>Understand the system supporting acoupi application</td>
+                <td>Understand the system code supporting acoupi application</td>
             </tr>
         </tbody>
     </table>

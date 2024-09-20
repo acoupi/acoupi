@@ -4,9 +4,11 @@ nav:
   - Home: index.md
   - Tutorials: 
     - tutorials/index.md
+    - Pre-Built Programs: tutorials/programs.md
   - How-to Guides: 
     - how_to_guides/index.md
     - Data Schema: how_to_guides/index.md
+    - Components: how_to_guides/components.md
   - Explanation: 
     - explanation/index.md
     - Architecture: explanation/architecture.md
@@ -24,7 +26,6 @@ nav:
   - Developer Guide:
       - developer_guide/index.md
       - Architecture: developer_guide/architecture.md
-      - Components: developer_guide/components.md
       - Tasks: developer_guide/tasks.md
       - Programs: developer_guide/programs.md
       - Inner Workings: developer_guide/inner_workings.md
@@ -36,6 +37,7 @@ nav:
       - Programs: reference/programs.md
       - System: reference/system.md
       - CLI: reference/cli.md
+  - FAQ: faq.md
   - About the Project:
       - Authors: authors.md
       - License: license.md

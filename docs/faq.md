@@ -14,7 +14,6 @@ Passive acoustic monitoring (PAM) has emerged as a practical and helpful tool fo
 
 **Acoupi** aims to provide an all-in-one Python toolkit to make it easy to create your smart bioacoustic sensors on edge devices like the Raspberry Pi. With **Acoupi**, you can either use one of the provided programs or build your custom program using the various tools and components that are included.
 
-
 ## Usage
 
 ### For who is acoupi? 
@@ -25,7 +24,7 @@ Yes, acoupi is free and is licensed under the [GNU GPL-3.0](license.md). This me
 
 
 ### I want to use acoupi, but ...
-- **I don't know Python.** No problem. While acoupi is built in Python, it includes a variety of pre-built programs that you can use right out of the box. Follow the [installation guide](installation.md) to get started and have a look at the various pre-built [programs](programs.md) you can use. 
+- **I don't know Python.** No problem. While acoupi is built in Python, it includes a variety of pre-built programs that you can use right out of the box. Follow the [__Tutorials Section__](tutorials/index.md) to get started and have a look at the various pre-built [programs](tutorials/programs.md) you can use. 
 
 - **I don't have access to WiFi.** Acoupi does not require access to WiFi or any other wireless network. You can use acoupi as a standalone device, the audio recordings and audio classification results will be saved on the device's internal storage (i.e., the SD card). 
 
