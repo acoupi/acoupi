@@ -1,6 +1,6 @@
 # Components
 
-Components are the building blocks of all **acoupi** functionality. Each
+The **components** are the building blocks of all **acoupi** functionality. Each
 component is designed to perform a specific action, such as recording audio,
 processing recordings, or sending messages to a remote server. They have a
 single responsibility and are designed to be reusable and modular.
@@ -19,6 +19,9 @@ The set of components available in the acoupi software package was chosen to ref
 - [**Summariser**](#summariser): “Should a summary of the deployment, recordings, detections be created?”
 
 ## Overview Components
+
+??? Tip
+    Please check the [*How To Guides: Components Section*](../how_to_guide/components.md) for a step-by-step guide about building your own component, if none of the acoupi pre-built component suit your needs.
 
 The components mentioned aboved are abstract components (i.e., Python classes). They are examples of the abstraction concept. These abstract component classes are templates that are used by the implemented components (i.e, subclasses) of a deployed acoupi program. The implemented components are called “subclasses”, as they inherit from the abstract component classes. 
 

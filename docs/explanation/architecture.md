@@ -1,6 +1,6 @@
 # Acoupi Architecture Overview
 
-Acoupi has been architected with the aim to empower audio recording device deployed in the wild with edge processing and real-time feedback capabilities. The acoupi package provides a robust framework to facilitate data collection, processing, management and transfer. 
+Acoupi has been architected with the aim to empower audio recording devices deployed in the field with edge processing and real-time feedback capabilities. The acoupi package provides a robust framework to facilitate data collection, processing, management and transfer. 
 
 Acoupi software is divided into two parts; the code base framework and the running application.
 
@@ -14,6 +14,11 @@ The framework is made of four intricate elements, which we call the data schema,
 
 <figure markdown="span">
     ![Figure 1: Overview of a simplified acoupi program](../img/acoupi_program_simplified.png){ width="90%" }
+    <figcaption><b>Example of a simplified acoupi program.</b> An acoupi program illustrating some of the most important data schema, components, and tasks.
+</figure>
+
+<figure markdown="span">
+    ![Figure 1: Overview of a simplified acoupi program](../img/acoupi_program_5tasks.png){ width="110%" }
     <figcaption><b>Example of a simplified acoupi program.</b> An acoupi program illustrating some of the most important data schema, components, and tasks.
 </figure>
 
