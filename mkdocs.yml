@@ -16,6 +16,7 @@ nav:
     - Components: explanation/components.md
     - Tasks: explanation/tasks.md
     - Programs: explanation/programs.md
+    - System: explanation/system.md
   - Reference:
       - reference/index.md
       - Data: reference/data.md
