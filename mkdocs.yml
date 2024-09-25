@@ -4,11 +4,13 @@ nav:
   - Home: index.md
   - Tutorials: 
     - tutorials/index.md
-    - Pre-Built Programs: tutorials/programs.md
-  - How-to Guides: 
-    - how_to_guides/index.md
-    - Data Schema: how_to_guides/index.md
-    - Components: how_to_guides/components.md
+    - Installation: tutorials/installation.md
+    - Configuration: tutorials/configuration.md
+    - Deployment: tutorials/deployment.md
+  - How-To Guides: 
+    - howtoguide/index.md
+    - Customise Components: howtoguide/components.md
+    - Create own's program: howtoguide/programs.md
   - Explanation: 
     - explanation/index.md
     - Architecture: explanation/architecture.md
@@ -17,6 +19,7 @@ nav:
     - Tasks: explanation/tasks.md
     - Programs: explanation/programs.md
     - System: explanation/system.md
+    - Command Line Interface: explanation/cli.md
   - Reference:
       - reference/index.md
       - Data: reference/data.md

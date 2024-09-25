@@ -1,4 +1,4 @@
-# Tasks
+# Tasks (acoupi framework)
 
 The **tasks** are sequences of one or more acoupi components executed in a specific flow. 
 
@@ -6,8 +6,8 @@ The **acoupi** framework defines 5 tasks: recording, detection, messaging, manag
 
 In its essence, each task is a Python function that are orchestrated and syncronised using the Celery framework.  Some tasks run periodically, while others are triggered by other tasks. The combination of tasks form the acoupi program. 
 
-??? Info
-    Please refer to [*Explanation: System Section*](../explaination/system.md) to learn about the registration and orchestration of the tasks in the Celery app.
+??? info
+    Please refer to [*Explanation: System Section*](system.md) to learn about the registration and orchestration of the tasks in the Celery app.
 
 ## Overview Tasks
 

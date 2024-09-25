@@ -1,6 +1,9 @@
 # Acoupi Explanation
 
-Welcome to the _Explanation Guide_ of acoupi package. This section of the documentation is intended for users who wish to better understand how acoupi code has been designed and architected. The various explanation guide will enable you to get a deep understanding of the different layers of code forming acoupi, the distinction between an acoupi bare-bone framework and an acoupi running application. 
+Welcome to the _Explanation Section_ of acoupi package. 
+
+This section of the documentation is intended for users who wish to better understand how acoupi  has been designed and architected. The different sections of this *Explanation* guide will enable you to get a better understanding of the different building blocks forming the *acoupi framework* and how it is configured and deployed into a running *acoupi application*.
+
 
 <div class="md-table">
     <table>
@@ -15,28 +18,28 @@ Welcome to the _Explanation Guide_ of acoupi package. This section of the docume
         <tbody>
             <tr>
                 <td>
-                    <a href="Architecture">Overview</a>
+                    <a href="Architecture">Architecture</a>
                 </td>
-                <td>Architecture overview which acoupi is built upon</td>
+                <td>Overview of the architecture supporting the deployment of acoupi</td>
             </tr>
             <tr>
                 <td>
                     <a href="Data_Schema">Framework</a>
                 </td>
-                <td>Learn about the 4 elements of acoupi (data, components, tasks, programs)</td>
+                <td>Learn about the different elements of acoupi (data, components, tasks)</td>
             </tr>
             <tr>
                 <td>
-                <a href="inner_workings">System</a>
+                <a href="Programs">Application</a>
                 </td>
-                <td>Understand the system code supporting acoupi application</td>
+                <td>Understand the inner-workings of a running acoupi application</td>
             </tr>
         </tbody>
     </table>
 </div>
 
-If you want to get started with acoupi, look at the [_Tutorials Section_](Tutorials) that contains step-by-step guides helping you install, configure, and deploy acoupi. 
+If you want to get started with acoupi, look at the [_Tutorials_](Tutorials) section providing step-by-step information to help you install, configure, and deploy acoupi. 
 
-If you have a specific goal, and are already familiar with acoupi, the [_How to Guide Section_](how_to_guide) will have more in-depth detail information to help you tailor acoupi to your personal use case. 
+If you have a specific goal, and are already familiar with acoupi, the [_How-to Guides_](How-To_Guides) will have more in-depth detail information to help you tailor acoupi to your personal use case. 
 
-Take a look at the [_Reference Section_](Reference) of the documentation when you want to know what parameters and options are available. 
+Take a look at the [_Reference_](Reference) section of the documentation to get insights into the python code and learn about the parameters and options available to customise acoupi.

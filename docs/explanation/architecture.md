@@ -1,4 +1,4 @@
-# Acoupi Architecture Overview
+# Architecture
 
 Acoupi has been architected with the aim to empower audio recording devices deployed in the field with edge processing and real-time feedback capabilities. The acoupi package provides a robust framework to facilitate data collection, processing, management and transfer. 
 
@@ -13,11 +13,6 @@ The **acoupi** framework has been designed to provide maximum flexibility and ke
 The framework is made of four intricate elements, which we call the data schema, components, tasks, and programs.
 
 <figure markdown="span">
-    ![Figure 1: Overview of a simplified acoupi program](../img/acoupi_program_simplified.png){ width="90%" }
-    <figcaption><b>Example of a simplified acoupi program.</b> An acoupi program illustrating some of the most important data schema, components, and tasks.
-</figure>
-
-<figure markdown="span">
     ![Figure 1: Overview of a simplified acoupi program](../img/acoupi_program_5tasks.png){ width="110%" }
     <figcaption><b>Example of a simplified acoupi program.</b> An acoupi program illustrating some of the most important data schema, components, and tasks.
 </figure>
@@ -27,7 +22,7 @@ The framework is made of four intricate elements, which we call the data schema,
 An acoupi application consists of the full set of code that runs at the deployment stage. This includes a set of scripts made of an acoupi program with user configurations, celery files to organise queues and workers, and bash scripts to start, stop, and reboot the application processes. 
 
 <figure markdown="span">
-    ![Figure 2: Overview of steps to install, configure, and deploy an acoupi application](../img/acoupi_installation_steps.png){ width="90%" }
+    ![Figure 2: Overview of steps to install, configure, and deploy an acoupi application](../img/acoupi_installation_steps.png){ width="110%" }
     <figcaption><b>The series of steps required to start an acoupi application.</b>To have an acoupi application running on a device, three steps are required: (1) Installation of the acoupi package, (2) User configuration of an acoupi program, (3) Start of a deployment.
 </figure>
 

@@ -116,25 +116,28 @@ Get to know acoupi better by exploring this documentation.
     <tr>
         <td>
             <a href="tutorials">Tutorials</a>
-            <p>Get started with a step by step guide on how to install, configure and deploy acoupi for new users.</p>
+            <p>Step-by-step information on how to install, configure and deploy acoupi for new users.</p>
         </td>
         <td>
             <a href="how_to_guide">How-to Guides</a>
-            <p>Hands-on guides covering how to customise key elements of acoupi.</p>
+            <p>Guides to learn how to customise and built key elements of acoupi.</p>
         </td>
     </tr>
     <tr>
         <td>
             <a href="explanation">Explanation</a>
-            <p>Understand key elements of acoupi to gain insights on how they work under the hood.</p>
+            <p>Overview of the key elements of acoupi: what they are and how they work.</p>
         </td>
         <td>
             <a href="reference">Reference</a>
-            <p>Technical information.</p>
+            <p>Technical information refering to acoupi code.</p>
         </td>
     </tr>
 </table>
 
+!!! tip "Important"
+
+    We would love to hear your feedback about the documentation. We are always looking to hearing suggestions to improve readability and user's ease of navigation. Don't hesitate to reach out if you have comments!
 
 *[CLI]: Command Line Interface
 *[DL]: Deep Learning

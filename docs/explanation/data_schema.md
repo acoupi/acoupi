@@ -1,6 +1,6 @@
-# Data Schema
+# Data Schema (acoupi framework)
 
-The __data schema__ layer is the most basic layer of the acoupi framework. It is responsible for defining the relevants bits of information about the functionality of the device and the data it collects. The __data schema__ ensures that the data handled by the other layers of acoupi is validated and the flow of information between layers is consistent and easy to understand. 
+The **data schema** layer is the most basic layer of the acoupi framework. It is responsible for defining the relevants bits of information about the functionality of the device and the data it collects. The **data schema** ensures that the data handled by the other layers of acoupi is validated and the flow of information between layers is consistent and easy to understand. 
 
 ??? Info
     We use the  [**Pydantic**](https://docs.pydantic.dev/dev/) library to build acoupi data objects.

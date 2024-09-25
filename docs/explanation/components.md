@@ -1,4 +1,4 @@
-# Components
+# Components (acoupi framework)
 
 The **components** are the building blocks of all **acoupi** functionality. Each
 component is designed to perform a specific action, such as recording audio,
