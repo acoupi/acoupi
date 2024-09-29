@@ -70,7 +70,8 @@ plugins:
             - https://docs.python.org/3.11/objects.inv
             - https://docs.xarray.dev/en/stable/objects.inv
             - https://numpy.org/doc/stable/objects.inv
-            - https://mbsantiago.github.io/soundevent/objects.inv
+            - https://numpy.org/doc/stable/objects.inv
+            - https://docs.celeryq.dev/en/stable/objects.inv
           options:
             show_source: false
             show_root_toc_entry: true
