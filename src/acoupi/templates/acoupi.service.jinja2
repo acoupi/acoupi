@@ -10,6 +10,7 @@ ExecStart={{ start_script }}
 ExecStop={{ stop_script }}
 ExecReload={{ restart_script }}
 Restart=always
+RestartSec=3
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target

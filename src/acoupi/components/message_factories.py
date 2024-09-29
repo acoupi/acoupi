@@ -1,15 +1,73 @@
 """Message factories for acoupi."""
 
 import json
-from typing import Dict
+from typing import Dict, List, Optional
 
 from acoupi import data
 from acoupi.components import types
 
 __all__ = [
+    "DetectionThresholdMessageBuilder",
     "FullModelOutputMessageBuilder",
     "SummaryMessageBuilder",
 ]
+
+
+class DetectionThresholdMessageBuilder(types.MessageBuilder):
+    """A MessageBuilder that builds message from model outputs.
+
+    This message builder builds a message from a model output. The created
+    message will contain the full model output as a JSON string. This
+    includes information about:
+
+    - the model used.
+    - the recording processed, including deployment info.
+    - the detections and predicted tags that meet the threshold.
+    """
+
+    def __init__(self, detection_threshold: float):
+        """Initiatlise the message builder.
+
+        Args:
+            detection_threshold: the threshold that will be used to filter detections to be kept in the message.
+        """
+        self.detection_threshold = detection_threshold
+
+    def filter_detections(
+        self, detections: List[data.Detection]
+    ) -> List[data.Detection]:
+        """Remove detections with low probability."""
+        return [
+            detection
+            for detection in detections
+            if detection.detection_probability >= self.detection_threshold
+            and detection.tags != []
+        ]
+
+    def build_message(
+        self, model_output: data.ModelOutput
+    ) -> Optional[data.Message]:
+        """Build a message with only detections meeting threshold.
+
+        Args:
+            model_output: The model output to build the message from.
+
+        Returns
+        -------
+            A message containing the model output with only detections meeting the threshold"
+        """
+        filtered_detections = self.filter_detections(model_output.detections)
+        if not filtered_detections:
+            return None
+
+        # Clean model output
+        filtered_model_output = data.ModelOutput(
+            name_model=model_output.name_model,
+            recording=model_output.recording,
+            tags=model_output.tags,
+            detections=filtered_detections,
+        )
+        return data.Message(content=filtered_model_output.model_dump_json())
 
 
 class FullModelOutputMessageBuilder(types.MessageBuilder):

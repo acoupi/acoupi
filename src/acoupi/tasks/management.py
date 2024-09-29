@@ -3,14 +3,20 @@ from pathlib import Path
 from typing import Callable, List, Optional
 
 from acoupi.components import types
-from acoupi.files import TEMP_PATH, get_temp_files
+from acoupi.system.files import (
+    TEMP_PATH,
+    delete_recording,
+    get_temp_files,
+    move_recording,
+)
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def generate_file_management_task(
     store: types.Store,
-    file_manager: types.RecordingSavingManager,
+    file_managers: List[types.RecordingSavingManager],
     logger: logging.Logger = logger,
     file_filters: Optional[List[types.RecordingSavingFilter]] = None,
     required_models: Optional[List[str]] = None,
@@ -25,6 +31,18 @@ def generate_file_management_task(
     Recordings are temporarily stored on the memory to reduce the number of
     writes to the disk. This process will move recordings from the memory to
     the disk, and remove recordings that are no longer needed.
+
+    Args:
+        store: The store containing recordings and their associated outputs.
+        file_managers: A list of file managers responsible for saving recordings.
+        logger: The logger used for logging information and errors.
+        file_filters: Optional list of filters to determine whether a recording should be saved.
+        required_models: Optional list of models that must be present in the outputs.
+        temp_path: The path where temporary files are stored.
+
+    Returns
+    -------
+        A callable that executes the file management task.
     """
     if required_models is None:
         required_models = []
@@ -33,15 +51,16 @@ def generate_file_management_task(
 
     def file_management_task() -> None:
         """Manage files."""
+        logger.info(" ----  START MANAGEMENT TASK ---- ")
         temp_wav_files = get_temp_files(path=temp_path)
 
         recordings_and_outputs = store.get_recordings_by_path(
             paths=temp_wav_files
         )
+        logger.info(f"Recordings to manage: {recordings_and_outputs}")
 
         for recording, model_outputs in recordings_and_outputs:
-            logger.debug(f"Recording: {recording.path}")
-            logger.debug(f"Model Outputs: {model_outputs}")
+            logger.info(f"Recording: {recording.path}")
 
             if recording.path is None:
                 logger.error(
@@ -50,26 +69,54 @@ def generate_file_management_task(
                 )
                 continue
 
-            if len(model_outputs) == 0:
-                logger.debug(
-                    f"Recording has not been processed: {recording.path}"
-                )
-                continue
-
-            if file_filters and not all(
-                file_filter.should_save_recording(recording, model_outputs)
-                for file_filter in file_filters
+            # Is the recording ready to be managed?
+            if (not model_outputs) or (
+                required - {model.name_model for model in model_outputs}
             ):
                 logger.debug(
-                    f"Recording does not pass filters: {recording.path}"
+                    "Recording %s is not ready to be managed. Skipping.",
+                    recording,
                 )
-                recording.path.unlink()
                 continue
 
-            new_path = file_manager.save_recording(
-                recording, model_outputs=model_outputs
-            )
-            logger.debug(f"Recording has been moved: {new_path}")
-            store.update_recording_path(recording, new_path)
+            # Which files should be saved?
+            for file_filter in file_filters or []:
+                if not file_filter.should_save_recording(
+                    recording,
+                    model_outputs=model_outputs,
+                ):
+                    logger.debug(
+                        "Recording %s does not pass filter: %s",
+                        recording,
+                        file_filter,
+                    )
+                    delete_recording(recording)
+                    break
+
+            # Has the file already been deleted?
+            if not recording.path.exists():
+                continue
+
+            # Where should files be stored?
+            for file_manager in file_managers:
+                new_path = file_manager.saving_recording(
+                    recording,
+                    model_outputs=model_outputs,
+                )
+
+                if new_path is None:
+                    continue
+
+                new_path = move_recording(recording, new_path)
+
+                if new_path is not None:
+                    store.update_recording_path(recording, new_path)
+
+                break
+            else:
+                logger.warning(
+                    "No file manager was able to save recording %s",
+                    recording,
+                )
 
     return file_management_task

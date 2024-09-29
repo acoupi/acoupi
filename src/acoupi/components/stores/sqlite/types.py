@@ -28,6 +28,8 @@ class Deployment(core.EntityMeta):
     started_on: datetime
     """Datetime when the deployment started. Should be unique."""
 
+    ended_on: Optional[datetime]
+
     latitude: Optional[float]
     """Latitude of the deployment site. Can be None if unknown."""
 

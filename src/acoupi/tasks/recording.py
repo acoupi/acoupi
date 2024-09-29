@@ -23,7 +23,7 @@ def generate_recording_task(
     def recording_task() -> Optional[data.Recording]:
         """Record audio."""
         now = datetime.datetime.now()
-        logger.info("Starting recording process")
+        logger.info("Starting recording process.")
 
         # Check if recording conditions are met
         if not all(

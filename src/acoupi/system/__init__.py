@@ -5,12 +5,13 @@ such as loading programs and getting celery apps from programs.
 """
 
 from acoupi.system.apps import get_celery_app
-from acoupi.system.configs import (
-    get_config_value,
-    is_configured,
+from acoupi.system.celery import run_celery_command
+from acoupi.system.config import (
+    dump_config,
+    get_config_field,
     load_config,
-    show_config,
-    sub_config_value,
+    parse_config_from_args,
+    set_config_field,
     write_config,
 )
 from acoupi.system.constants import Settings
@@ -19,8 +20,13 @@ from acoupi.system.deployments import (
     get_current_deployment,
     start_deployment,
 )
+from acoupi.system.files import (
+    delete_recording,
+    get_temp_file_id,
+    get_temp_files,
+    move_recording,
+)
 from acoupi.system.lifecycle import setup_program, start_program, stop_program
-from acoupi.system.parsers import parse_config_from_args
 from acoupi.system.programs import (
     load_program,
     load_program_class,
@@ -34,30 +40,36 @@ from acoupi.system.services import (
     status_services,
     stop_services,
 )
+from acoupi.system.state import is_configured
 
 __all__ = [
     "Settings",
+    "delete_recording",
     "disable_services",
+    "dump_config",
     "enable_services",
     "end_deployment",
     "get_celery_app",
-    "get_config_value",
+    "get_config_field",
     "get_current_deployment",
+    "get_temp_file_id",
+    "get_temp_files",
     "is_configured",
     "load_config",
     "load_program",
     "load_program_class",
+    "move_recording",
     "parse_config_from_args",
+    "run_celery_command",
     "services_are_installed",
+    "set_config_field",
     "setup_program",
-    "show_config",
     "start_deployment",
     "start_program",
     "start_services",
     "status_services",
     "stop_program",
     "stop_services",
-    "sub_config_value",
     "write_config",
     "write_program_file",
 ]

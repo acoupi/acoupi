@@ -2,23 +2,11 @@
 
 from typing import List, Optional
 
-from acoupi.system.configs import CeleryConfig, write_config
-from acoupi.system.constants import Settings
+from acoupi.system import programs, services
+from acoupi.system.config import parse_config_from_args, write_config
+from acoupi.system.constants import CeleryConfig, Settings
 from acoupi.system.deployments import end_deployment, start_deployment
-from acoupi.system.parsers import parse_config_from_args
-from acoupi.system.programs import (
-    load_program,
-    load_program_class,
-    write_program_file,
-)
 from acoupi.system.scripts import write_scripts
-from acoupi.system.services import (
-    disable_services,
-    enable_services,
-    install_services,
-    start_services,
-    stop_services,
-)
 
 __all__ = [
     "setup_program",
@@ -32,19 +20,24 @@ def start_program(
     name: str,
     latitude: Optional[float] = None,
     longitude: Optional[float] = None,
-):
+) -> None:
     deployment = start_deployment(settings, name, latitude, longitude)
-    program = load_program(settings)
-    program.on_start(deployment)
-    enable_services(settings)
-    start_services(settings)
+
+    try:
+        program = programs.load_program(settings)
+        program.on_start(deployment)
+        services.enable_services(settings)
+        services.start_services(settings)
+    except Exception as error:
+        settings.deployment_file.unlink()
+        raise error
 
 
-def stop_program(settings: Settings):
-    stop_services(settings)
-    disable_services(settings)
+def stop_program(settings: Settings) -> None:
+    services.stop_services(settings)
+    services.disable_services(settings)
     deployment = end_deployment(settings)
-    program = load_program(settings)
+    program = programs.load_program(settings)
     program.on_end(deployment)
 
 
@@ -59,10 +52,10 @@ def setup_program(
         args = []
 
     # Load acoupi program class from specified module
-    program_class = load_program_class(program_name)
+    program_class = programs.load_program_class(program_name)
 
     # Write the celery app program file
-    write_program_file(program_name, settings)
+    programs.write_program_file(program_name, settings)
 
     # Write the name of the program to a file
     if not settings.program_name_file.parent.exists():
@@ -91,4 +84,4 @@ def setup_program(
     settings.log_dir.mkdir(parents=True, exist_ok=True)
 
     # Install systemd services for acoupi
-    install_services(settings)
+    services.install_services(settings)

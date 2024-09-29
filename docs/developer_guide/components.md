@@ -16,6 +16,7 @@ The set of components available in the acoupi software package was chosen to ref
 - [**Saving Managers**](#recording-saving-managers): “Should all the audio recordings be saved?”
 - [**Saving Filters**](#recording-saving-filters): “What filters should be used for saving audio recordings: time based, detections based, species based?
 - [**Store**](#store): “Where should the audio recordings and audio classifications results be saved?” “How should the recordings, classifications results be saved?”
+- [**Summariser**](#summariser): “Should a summary of the deployment, recordings, detections be created?”
 
 ## Overview Components
 
@@ -67,6 +68,14 @@ By combining these categories of components, it is possible to create complex
 programs that can perform a wide variety of monitoring tasks. Each component can
 be configured to operate in a specific way, and can be combined with other
 components to create customized functionality.
+
+#### Summarisers
+The [Summariser](../../src/acoupi/components/summariser.py) component is responsible for summarising information related to the deployment of acoupi, its recordings and detections. The class implement two subclasses `StatisticsDetectionsSummariser` and `ThresholdsDetectionsSummariser`
+
+The class implements three subclasses `FolderFileManager`, `IDFileManager`, and `DateFileManager`. 
+
+
+. This includes storing metadata about the recordings and detections, such as the date and time of the recording, and the type of animal or sound detected. The class implements the subclass `SqliteStore`. 
 
 ## Custom Components
 

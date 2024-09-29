@@ -21,7 +21,7 @@ Passive acoustic monitoring (PAM) has emerged as a practical and helpful tool fo
 **Acoupi** is particularly well-suited for researchers in the field of bioacoustics, but it's also a great option for environmental consultants who are looking to set up their own bioacoustic monitoring systems. 
 
 ### Is acoupi free?
-Yes, acoupi is free and will always be free. That means you can use acoupi freely for personal, academic, or other non-commercial applications.
+Yes, acoupi is free and is licensed under the [GNU GPL-3.0](license.md). This means that acoupi will always be free to use, and free to customise for your own purpose. Please do check the license for more detailed information. 
 
 
 ### I want to use acoupi, but ...

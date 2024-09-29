@@ -1,10 +1,12 @@
 import datetime
+import os
 import shutil
 import stat
+import sys
 from pathlib import Path
 from typing import Optional
 
-from acoupi.programs.workers import WorkerConfig
+from acoupi.programs.core.workers import WorkerConfig
 from acoupi.system.constants import Settings
 from acoupi.system.templates import render_template
 
@@ -15,7 +17,10 @@ __all__ = [
 
 def get_celery_bin() -> Path:
     """Return the path to the celery binary."""
-    path = shutil.which("celery")
+    path = shutil.which(
+        "celery",
+        path=f"{os.environ.get('PATH', None)}:{sys.prefix}/bin",
+    )
     if path is None:
         raise RuntimeError("Could not find celery binary.")
     return Path(path)

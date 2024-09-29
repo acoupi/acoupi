@@ -13,8 +13,8 @@ from pydantic import BaseModel, Field
 
 from acoupi import components, data, tasks
 from acoupi.components.audio_recorder import MicrophoneConfig
-from acoupi.programs.base import AcoupiProgram
-from acoupi.programs.workers import AcoupiWorker, WorkerConfig
+from acoupi.programs.core.base import AcoupiProgram
+from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
 
 """Default paramaters for Acoupi TestProgram"""
 
@@ -27,17 +27,6 @@ class AudioConfig(BaseModel):
 
     recording_interval: int = 10
     """Interval between each audio recording in seconds."""
-
-    # @model_validator(mode="after")
-    # def validate_audio_duration(cls, value):
-    #     """Validate audio duration."""
-    #
-    #     if value.audio_duration > value.recording_interval:
-    #         raise ValueError(
-    #             "Audio duration cannot be greater than recording interval."
-    #         )
-    #
-    #     return value
 
 
 class RecordingSchedule(BaseModel):
@@ -145,7 +134,7 @@ class Program(AcoupiProgram):
         file_management_task = tasks.generate_file_management_task(
             store=self.store,
             logger=self.logger.getChild("file_management"),
-            file_manager=self.file_manager,
+            file_managers=[self.file_manager],
             file_filters=self.create_file_filters(config),
         )
 
@@ -163,6 +152,10 @@ class Program(AcoupiProgram):
             schedule=datetime.timedelta(minutes=1),
             queue="default",
         )
+
+    def on_start(self, deployment: data.Deployment) -> None:
+        super().on_start(deployment)
+        self.store.store_deployment(deployment)
 
     def validate_dirs(self, config: ConfigSchema):
         """Validate directories."""

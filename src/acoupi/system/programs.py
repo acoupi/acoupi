@@ -4,10 +4,10 @@ import inspect
 from importlib import import_module
 from typing import Type
 
-from acoupi import programs
+from acoupi.programs.core import base as programs
 from acoupi.system import exceptions
-from acoupi.system.configs import CeleryConfig, load_config
-from acoupi.system.constants import Settings
+from acoupi.system.config import load_config
+from acoupi.system.constants import CeleryConfig, Settings
 from acoupi.system.templates import render_template
 
 __all__ = [
@@ -73,6 +73,13 @@ def load_program(settings: Settings) -> programs.AcoupiProgram:
     -------
     programs.AcoupiProgram
         A fully configured instance of the acoupi program class.
+
+    Raises
+    ------
+    exceptions.ProgramNotFoundError
+        If the program module is not found.
+    exceptions.InvalidProgramError
+        If the loaded class is not a valid acoupi program class.
     """
     program_name = settings.program_name_file.read_text().strip()
     program_class = load_program_class(program_name)

@@ -13,7 +13,7 @@ sensor. The framework is organized into four increasingly complex layers:
 3. [Tasks](#tasks)
 4. [Programs](#programs)
 
-![Figure 1: Overview of acoupi layers](../img/acoupi_architecture.png) *Figure 1: Overview of the layered architecture of acoupi. From bottom to top the layers are (1) the data schema, (2) the components, (3) the tasks, (4) the programs.*
+![Figure 1: Overview of acoupi layers](../img/acoupi_four_layers_architecture.png) *Figure 1: Overview of the layered architecture of acoupi. From bottom to top the layers are (1) the data schema, (2) the components, (3) the tasks, (4) the programs.*
 
 ## Data Schema
 

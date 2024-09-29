@@ -2,8 +2,8 @@
 
 import pytest
 
-from acoupi.programs.custom.acoupi import Program as SampleProgram
-from acoupi.programs.custom.test import TestProgram
+from acoupi.programs.default import Program as SampleProgram
+from acoupi.programs.test import TestProgram
 from acoupi.system import Settings, exceptions, programs
 
 
@@ -45,15 +45,13 @@ def test_write_program_file_points_to_correct_config_file(settings: Settings):
 
 def test_can_load_the_test_program():
     """Test can load the test program."""
-    program_class = programs.load_program_class("acoupi.programs.custom.test")
+    program_class = programs.load_program_class("acoupi.programs.test")
     assert program_class == TestProgram
 
 
 def test_can_load_the_acoupi_program():
     """Test can load the test program."""
-    program_class = programs.load_program_class(
-        "acoupi.programs.custom.acoupi"
-    )
+    program_class = programs.load_program_class("acoupi.programs.default")
     assert program_class == SampleProgram
 
 
