@@ -1,6 +1,6 @@
 # Programs (acoupi application)
 
-A **Program** constists of a structured collection of tasks orchestrated to establish a distinct configuration for acoustic monitoring.
+A **Program** constists of a structured collection of tasks orchestrated to establish a distinct behaviour for acoustic monitoring.
 A **program** forms the core of an acoupi application that runs on a device.
 
 Programs encompass three essential elements: tasks, configuration schema, and worker configuration.
@@ -17,8 +17,10 @@ Acoupi facilitates class loading using the [`acoupi.system.load_program()`][acou
     <figcaption><b>Overview of an acoupi application.</b> A configuration schema provides the settings to run acoupi program's tasks. Acoupi workers are configured to orchestrate and execute the tasks.
 </figure>
 
-!!! Tip Acoupi offers users the flexibility to either develop your own custom programs or deploy existing ones.
-Please refer to the [_Tutorials: Pre-Built Programs_](../tutorials/programs.md) for a step-by-step guide to deploy and use existing programs, and the [_How-to Guides: Programs_](../howtoguide/programs.md) for detailed instructions on how to develop your own custom programs.
+!!! Tip
+
+    Acoupi offers users the flexibility to either develop your own custom programs or deploy existing ones.
+    Please refer to the [_Tutorials: Pre-Built Programs_](../tutorials/programs.md) for a step-by-step guide to deploy and use existing programs, and the [_How-to Guides: Programs_](../howtoguide/programs.md) for detailed instructions on how to develop your own custom programs.
 
 ## Program Configuration
 
@@ -75,4 +77,6 @@ This instantiation process ensures that the program is equipped with accurate an
 - The [**BatDetect2**](https://github.com/acoupi/acoupi_batdetect2) program to record and classify UK Bats species.
 - The [**BirdNET**](https://github.com/acoupi/acoupi_batdetect2) program to record and classify bird species.
 
-!!! Tip Refer to the pre-built programs documentation if you are looking to use them.
+!!! Tip
+
+    Refer to the pre-built programs documentation if you are looking to use them.

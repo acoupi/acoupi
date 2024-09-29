@@ -1,7 +1,7 @@
 # Acoupi CLI
 
-The acoupi CLI is your primary tool for managing bioacoustic detection models
-on edge devices. Use it to configure, deploy, and monitor your Acoupi programs.
+The acoupi CLI is your primary tool for managing bioacoustic detection models on edge devices.
+Use it to configure, deploy, and monitor your Acoupi programs.
 
 !!! tip
 

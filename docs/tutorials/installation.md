@@ -1,6 +1,7 @@
 # Installation
 
-Acoupi has been designed to run on single-board computer devices like the [Raspberry Pi](https://www.raspberrypi.org/) (RPi). Users should be able to download and test acoupi software on any Linux-based machines with Python version >=3.8,<3.12 installed.
+Acoupi has been designed to run on single-board computer devices like the [Raspberry Pi](https://www.raspberrypi.org/) (RPi).
+Users should be able to download and test acoupi software on any Linux-based machines with Python version >=3.8,<3.12 installed.
 
 ## Installation Requirements
 
@@ -19,7 +20,7 @@ We recommend the following hardware elements to install and run acoupi.
 
 ??? tip "Getting started with Raspberry Pi"
 
-    If you are new to RPi, we recommend you reading and following the RPi's [**Getting started**](https://www.raspberrypi.com/documentation/computers/getting-started.html) documentation. 
+    If you are new to RPi, we recommend you reading and following the RPi's [**Getting started**](https://www.raspberrypi.com/documentation/computers/getting-started.html) documentation.
 
 To install and use the bare-bone framework of acoupi on your embedded device follow these steps:
 
@@ -54,7 +55,8 @@ acoupi deployment start
 
 ## Other acoupi installation
 
-Sometimes the programs might have some additional or different installation requirements. Please refer to the following links, if you wish to implement one of the pre-built bioacoustics classifiers model.
+Sometimes the programs might have some additional or different installation requirements.
+Please refer to the following links, if you wish to implement one of the pre-built bioacoustics classifiers model.
 
 - [acoupi-batdetect2](https://github.com/acoupi/acoupi_batdetect2) (Classifiers for UK bats species)
 - [acoupi-birdnet](https://github.com/acoupi/acoupi_birdnet) (Classifiers for bird species)
