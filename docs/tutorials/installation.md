@@ -50,7 +50,7 @@ acoupi deployment start
 
 ??? tip "Using acoupi from the command line"
 
-    To check what are the available commands for acoupi, enter `acoupi --help`. Also look at the [CLI documentation](user_guide/cli.md) for further info.
+    To check what are the available commands for acoupi, enter `acoupi --help`. Also look at the [CLI documentation](../reference/cli.md) for further info.
 
 ## Other acoupi installation
 

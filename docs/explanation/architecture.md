@@ -36,4 +36,4 @@ For more information about each of them, make sure to check their respective doc
 - [Pytest](https://docs.pytest.org/en/7.4.x/) as a testing framework.
 - [Pony-ORM](https://ponyorm.org/) for databse queries.
 - [Celery](https://docs.celeryq.dev/en/stable/getting-started/introduction.html) to manage the processing of tasks.
-- [Jinja](#jinja) for text templating.
+- [Jinja](https://jinja.palletsprojects.com/en/3.1.x/) for text templating.

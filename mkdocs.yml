@@ -2,24 +2,25 @@ site_name: acoupi
 site_url: https://acoupi.github.io/acoupi/
 nav:
   - Home: index.md
-  - Tutorials: 
-    - tutorials/index.md
-    - Installation: tutorials/installation.md
-    - Configuration: tutorials/configuration.md
-    - Deployment: tutorials/deployment.md
-  - How-To Guides: 
-    - howtoguide/index.md
-    - Customise Components: howtoguide/components.md
-    - Create own's program: howtoguide/programs.md
-  - Explanation: 
-    - explanation/index.md
-    - Architecture: explanation/architecture.md
-    - Data Schema: explanation/data_schema.md
-    - Components: explanation/components.md
-    - Tasks: explanation/tasks.md
-    - Programs: explanation/programs.md
-    - System: explanation/system.md
-    - Command Line Interface: explanation/cli.md
+  - Tutorials:
+      - tutorials/index.md
+      - Installation: tutorials/installation.md
+      - Programs: tutorials/programs.md
+      - Configuration: tutorials/configuration.md
+      - Deployment: tutorials/deployment.md
+  - How-To Guides:
+      - howtoguide/index.md
+      - Customise Components: howtoguide/components.md
+      - Create own's program: howtoguide/programs.md
+  - Explanation:
+      - explanation/index.md
+      - Architecture: explanation/architecture.md
+      - Data Schema: explanation/data_schema.md
+      - Components: explanation/components.md
+      - Tasks: explanation/tasks.md
+      - Programs: explanation/programs.md
+      - System: explanation/system.md
+      - Command Line Interface: explanation/cli.md
   - Reference:
       - reference/index.md
       - Data: reference/data.md

@@ -56,7 +56,7 @@ acoupi deployment start
 
 ??? tip "Using acoupi from the command line"
 
-    To check what are the available commands for acoupi, enter `acoupi --help`. Also look at the [CLI documentation](user_guide/cli.md) for further info.
+    To check what are the available commands for acoupi, enter `acoupi --help`. Also look at the [CLI documentation](reference/cli.md) for further info.
 
 ## Ready to use AI Bioacoustics Classifiers 🚀
 
@@ -67,7 +67,7 @@ Currently, it supports two classifiers: BatDetect2, developed by [@macodha and�
 
     Before using a pre-trained AI bioacoustic classifier, review its license to ensure it aligns with your intended use.
     `acoupi` programs built with these models inherit the corresponding model licenses.
-    For further licensing details, refer to the [FAQ](user_guide/faq.md#licensing) section.
+    For further licensing details, refer to the [FAQ](faq.md#licensing) section.
 
 ??? warning "Model Output Reliability"
 
