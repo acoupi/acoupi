@@ -46,7 +46,8 @@ def generate_detection_task(
     output_cleaners : Optional[List[types.ModelOutputCleaner]], optional
         The output cleaners to clean the model output, by default None.
     processing_filters : Optional[List[types.ProcessingFilter]], optional
-        The processing filters to check if the recording should be processed, by default None.
+        The processing filters to check if the recording should be processed,
+        by default None.
     message_factories : Optional[List[types.MessageBuilder]], optional
         The message factories to create messages, by default None.
 
@@ -56,22 +57,32 @@ def generate_detection_task(
 
     1. **filter.should_process_recording(recording)** -> bool
         - Check if the recording should be processed by the model.
-        - See [components.processing_filters][acoupi.components.processing_filters] for implementations of [types.ProcessingFilter][acoupi.components.types.ProcessingFilter].
+        - See
+        [components.processing_filters][acoupi.components.processing_filters]
+        for implementations of
+        [types.ProcessingFilter][acoupi.components.types.ProcessingFilter].
     2. **model.run(recording)** -> data.ModelOutput
         - Run the model on the recording and return the output.
-        - See [components.model_template][acoupi.components.model_template] for implementation of [types.Model][acoupi.components.types.Model].
+        - See [types.Model][acoupi.components.types.Model].
     3. **cleaner.clean(model_output)** -> data.ModelOutput
         - Clean the outputs of the model based on the output cleaners.
-        - See [components.output_cleaners][acoupi.components.output_cleaners] for implementations of [types.ModelOutputCleaner][acoupi.components.types.ModelOutputCleaner].
+        - See [components.output_cleaners][acoupi.components.output_cleaners]
+        for implementations of
+        [types.ModelOutputCleaner][acoupi.components.types.ModelOutputCleaner].
     4. **store.store_model_output(model_output)** -> None
         - Store the cleaned outputs of the model in the store.
-        - See [components.stores][acoupi.components.stores] for implementation of [types.Store][acoupi.components.types.Store].
+        - See [components.stores][acoupi.components.stores] for implementation
+        of [types.Store][acoupi.components.types.Store].
     5. **message_factory.build_message(model_output)** -> data.Message
         - Create messages to be sent using the Messenger.
-        - See [components.message_factories][acoupi.components.message_factories] for implementations of [types.MessageBuilder][acoupi.components.types.MessageBuilder].
+        - See
+        [components.message_factories][acoupi.components.message_factories] for
+        implementations of
+        [types.MessageBuilder][acoupi.components.types.MessageBuilder].
     6. **message_store.store_message(message)** -> None
         - Store the message in the message store.
-        - See [components.message_stores][acoupi.components.message_stores] for implementation of [types.Store][acoupi.components.types.Store].
+        - See [components.message_stores][acoupi.components.message_stores] for
+        implementation of [types.Store][acoupi.components.types.Store].
     """
 
     def detection_task(recording: data.Recording) -> None:

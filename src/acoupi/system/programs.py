@@ -60,14 +60,9 @@ def load_program(settings: Settings) -> programs.AcoupiProgram:
 
     Parameters
     ----------
-    program_name_file
-        Path to the file containing the program name. Defaults to
-        PROGRAM_NAME_FILE.
-    config_file
-        Path to the configuration file for the acoupi program. Defaults to
-        PROGRAM_CONFIG_FILE.
-    celery_config_file
-        Path to the Celery configuration file. Defaults to CELERY_CONFIG_PATH.
+    settings
+        The settings object containing the paths to the program and celery
+        config files.
 
     Returns
     -------

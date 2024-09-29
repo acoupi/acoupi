@@ -40,7 +40,8 @@ def generate_recording_task(
     logger : logging.Logger, optional
         The logger to log messages, by default logger.
     recording_conditions : Optional[List[T]], optional
-        The recording conditions to check if audio should be recorded, by default None.
+        The recording conditions to check if audio should be recorded, by
+        default None.
 
     Returns
     -------
@@ -53,16 +54,23 @@ def generate_recording_task(
 
     1. **condition.should_record(now)** -> bool
         - Check if the conditions are met to record audio.
-        - See [components.recording_conditions][acoupi.components.recording_conditions] for implementations of [types.RecordingCondition][acoupi.components.types.RecordingCondition].
+        - See
+        [components.recording_conditions][acoupi.components.recording_conditions]
+        for implementations of
+        [types.RecordingCondition][acoupi.components.types.RecordingCondition].
     2. **store.get_current_deployment()** -> data.Deployment
         - Get the current deployment information.
-        - See [components.stores][acoupi.components.stores] for implementation of [types.Store][acoupi.components.types.Store].
+        - See [components.stores][acoupi.components.stores] for implementation
+        of [types.Store][acoupi.components.types.Store].
     3. **recorder.record(deployment)** -> data.Recording
         - Record audio and return the recording metadata.
-        - See [components.audio_recorders][acoupi.components.audio_recorders] for implementation of [types.AudioRecorder][acoupi.components.types.AudioRecorder].
+        - See [components.audio_recorders][acoupi.components.audio_recorder]
+        for implementation of
+        [types.AudioRecorder][acoupi.components.types.AudioRecorder].
     4. **store.store_recording(recording)** -> None
         - Store the recording metadata in the store.
-        - See [components.stores][acoupi.components.stores] for implementation of [types.Store][acoupi.components.types.Store].
+        - See [components.stores][acoupi.components.stores] for implementation
+        of [types.Store][acoupi.components.types.Store].
     """
 
     def recording_task() -> Optional[data.Recording]:

@@ -56,11 +56,6 @@ class IsInInterval(types.RecordingCondition):
     def should_record(self) -> bool:
         """Determine if a recording should be made.
 
-        Parameters
-        ----------
-        time: datetime.datetime
-            The current time to check, in the same timezone as the interval.
-
         Returns
         -------
         bool

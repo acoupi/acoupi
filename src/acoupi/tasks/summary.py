@@ -42,10 +42,13 @@ def generate_summariser_task(
 
     1. **summariser.build_summary(now)** -> data.Message
         - Generate a summary message.
-        - See [components.summarisers][acoupi.components.summarisers] for implementations of [types.Summariser][acoupi.components.types.Summariser].
+        - See [components.summarisers][acoupi.components.summariser] for
+        implementations of
+        [types.Summariser][acoupi.components.types.Summariser].
     2. **message_store.store_message(message)** -> None
         - Store the summary message in the message store.
-        - See [components.stores][acoupi.components.stores] for implementation of [types.Store][acoupi.components.types.Store].
+        - See [components.stores][acoupi.components.stores] for implementation
+        of [types.Store][acoupi.components.types.Store].
     """
 
     def summary_task() -> None:
