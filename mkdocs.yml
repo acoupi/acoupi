@@ -11,7 +11,7 @@ nav:
   - How-To Guides:
       - howtoguide/index.md
       - Customise Components: howtoguide/components.md
-      - Create own's program: howtoguide/programs.md
+      - Create your own's program: howtoguide/programs.md
   - Explanation:
       - explanation/index.md
       - Architecture: explanation/architecture.md
@@ -20,7 +20,6 @@ nav:
       - Tasks: explanation/tasks.md
       - Programs: explanation/programs.md
       - System: explanation/system.md
-      - Command Line Interface: explanation/cli.md
   - Reference:
       - reference/index.md
       - Data: reference/data.md

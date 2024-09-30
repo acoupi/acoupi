@@ -26,11 +26,11 @@ The different sections of this _Explanation_ guide will enable you to get a bett
                 <td>
                     <a href="Data_Schema">Framework</a>
                 </td>
-                <td>Learn about the different elements of acoupi (data, components, tasks)</td>
+                <td>Learn about the different elements of acoupi (data, components, tasks, programs)</td>
             </tr>
             <tr>
                 <td>
-                <a href="Programs">Application</a>
+                <a href="System">System</a>
                 </td>
                 <td>Understand the inner-workings of a running acoupi application</td>
             </tr>

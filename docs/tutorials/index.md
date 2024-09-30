@@ -1,7 +1,7 @@
 # Acoupi Tutorials
 
 This section of the documentation contains step-by-step tutorials to help users getting started with acoupi.
-The tutorials aims to outline what acoupi is capable of while providing specific information as installing acoupi, configuring a pre-built program, retrieving deployment information.
+The tutorials aims to outline what acoupi is capable of while providing specific information such as installing acoupi, configuring a pre-built program, retrieving deployment information.
 
 We hope the tutorials are broadly accessible to anyone with an interest in using acoupi.
 

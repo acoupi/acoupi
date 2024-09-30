@@ -2,12 +2,12 @@
 
 _acoupi_ is designed with the primary goal of simplifying the creation of smart bioacoustic sensors on edge devices.
 We aim to provide a user-friendly framework that allows you to focus on defining your program's behavior—specifying which models to execute, recording triggers, etc.—without being burdened by the intricacies of program execution and task orchestration.
-To achieve this, _acoupi_ is structured into two core components:
+To achieve this, _acoupi_ is made of two parts:
 
-- [**Program Specs**](#program_specification): This component focuses on empowering users to specify their desired program behaviour with minimal input.
-- [**System**](#system): This component handles the execution and management of your defined program.
+- [**Program Specs**](#program_specification): This part focuses on empowering users to specify their desired program behaviour with minimal input.
+- [**System**](#system): This part handles the execution and management of your defined program.
 
-In the following sections, we'll provide a high-level overview of each component before delving deeper into their respective functionalities and implementation details.
+In the following sections, we'll provide a high-level overview of each part before delving deeper into their respective functionalities and implementation details.
 
 ## Program Specification
 
