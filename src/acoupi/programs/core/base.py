@@ -40,7 +40,9 @@ class InvalidAcoupiConfiguration(ValueError):
 class AcoupiProgram(ABC, Generic[ProgramConfig]):
     """A program is a collection of tasks."""
 
-    config: Optional[ProgramConfig]
+    config: ProgramConfig
+
+    config_schema: Type[ProgramConfig]
 
     worker_config: Optional[WorkerConfig] = None
 
@@ -51,20 +53,13 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
     def __init__(
         self,
         program_config: ProgramConfig,
-        celery_config: BaseModel,
-        app: Optional[Celery] = None,
+        app: Celery,
     ):
         """Initialize."""
-        if app is None:
-            app = Celery()
-
         self.config = program_config
         self.app = app
         self.tasks = {}
-
-        self.app.config_from_object(celery_config)
         self.logger = get_task_logger(self.__class__.__name__)
-
         self.setup(program_config)
 
     @abstractmethod
@@ -114,7 +109,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
     @classmethod
     def get_config_schema(cls) -> Type[BaseModel]:
         """Get the config class."""
-        return cls.__annotations__["config"]
+        return cls.config_schema
 
     @classmethod
     def get_worker_config(cls) -> WorkerConfig:
