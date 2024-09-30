@@ -14,6 +14,36 @@ The combination of tasks form the acoupi program.
 
 ## Overview Tasks
 
+??? Example "An acoupi task"
+
+    ```python
+    import logging
+    from typing import Optional
+
+    from acoupi import data
+    from acoupi.components import types
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
+    def generate_acoupi_task(
+        component_1: types.NameComponent1,
+        component_2: types.NameComponent2,
+        logger: logging.Logger = logger, 
+    ) -> Optional[data.DataSchema]:
+        """Generate a task using various acoupi components."""
+
+        def acoupi_task() -> Optional[data.DataSchema]:
+            """Create the structure of the task."""
+
+            output = component_1.associated_method_one()
+            result = component_2.associated_method_two(output)
+
+            logger.info(f"Task result is: {result}")
+
+        return acoupi_task
+    ```
+
 ??? Tip
 
     Please check the [_How To Guides: Tasks Section_](../howtoguide/components.md) for a step-by-step guide about building your own task.
@@ -28,6 +58,20 @@ The recording task builds upon the acoupi components: `AudioRecorder` to capture
     <figcaption><b>Example of the audio recording task.</b> The audio recording is made of various acoupi compoments: RecordingCondition, RecordingScheduler, AudioRecording, and Store.
 </figure>
 
+!!! Example "Structure of a recording task"
+
+    ```python
+    from acoupi import components, tasks
+
+    recording_task = tasks.generate_recording_task(
+        recorder=components.PyAudioRecorder(),
+        store=components.SqliteStore(),
+        recording_conditions=components.IsInInterval(),
+        logger=logger.getChild("recording"),
+    )
+
+    ```
+
 #### Detection
 
 The [Detection](../reference/tasks.md) task is reponsible for processing audio files.
@@ -37,6 +81,25 @@ The task builds upon the acoupi compoments: `ProcessingFilter` to determine if a
     ![Figure 2: Overview of the detection task](../img/task_02_model.png){ width="110%" }
     <figcaption><b>Example of the detection task.</b> The detection process audio recordings, it is made of various acoupi compoments: Model, ModelOutputCleaner, Store, MessageBuilder, and MessageStore.
 </figure>
+
+!!! Example "Structure of a detection task using BatDetect2 classifier"
+
+    ```python
+    from typing import Optional
+
+    from acoupi import components, data, tasks
+    
+    from acoupi_batdetect2.model import BatDetect2
+
+    recording_task = tasks.generate_detection_task(
+        store=components.SqliteStore(),
+        model=BatDetect2()
+        message_store=components.SqliteMessageStore(),
+        message_factories=[compoments.FullModelOutputMessageBuilder()],
+        logger=logger.getChild("detection"),
+        output_cleaners=Optional[components.ThresholdDetectionCleaner()],
+    )
+    ```
 
 #### Messaging
 

@@ -14,6 +14,9 @@ which returns a boolean indicating if a recording should be made.
 import datetime
 from typing import List
 
+from astral import LocationInfo
+from astral.sun import sun
+
 from acoupi import data
 from acoupi.components import types
 
@@ -21,6 +24,68 @@ __all__ = [
     "IsInInterval",
     "IsInIntervals",
 ]
+
+
+class DawnTimeInterval(types.RecordingCondition):
+    """A RecordingCondition that records only during the dawn time interval."""
+
+    duration: float
+    """The duration of time (in minutes) before and after dawntime."""
+
+    timezone: datetime.tzinfo
+    """The timezone that the dawn time is in."""
+
+    time: datetime.datetime
+    """The current time."""
+
+    def __init__(self, duration: float, timezone: datetime.tzinfo):
+        """Initialize the DawnTimeInterval.
+
+        Parameters
+        ----------
+        duration: float
+            The duration of time (in minutes) before and after dawntime.
+        timezone: datetime.tzinfo
+            The timezone that the dawn time is in.
+        """
+        self.duration = duration
+        self.timezone = timezone
+
+    def should_record(self) -> bool:
+        """Determine if a recording should be made.
+
+        Returns
+        -------
+        bool
+            True if the current time is within the dawn time interval.
+            False otherwise.
+
+        Examples
+        --------
+        >>> dawn_time = time(6, 0)
+        >>> duration = 30
+        >>> timezone = "Europe/London"
+        >>> time = datetime(2024, 1, 1, 6, 15, 0, tzinfo=timezone)
+        >>> DawnTimeInterval(dawn_time, duration, timezone).should_record(time)
+        True
+
+        >>> dawn_time = time(6, 0)
+        >>> duration = 30
+        >>> timezone = "Europe/London"
+        >>> time = datetime(2024, 1, 1, 5, 45, 0, tzinfo=timezone)
+        >>> DawnTimeInterval(dawn_time, duration, timezone).should_record(time)
+        False
+        """
+        sun_info = sun(
+            LocationInfo(str(self.timezone)).observer,
+            date=self.time.astimezone(self.timezone),
+            tzinfo=self.timezone,
+        )
+        dawntime = sun_info["dawn"]
+        start_dawninterval = dawntime - datetime.timedelta(minutes=self.duration)
+        end_dawninterval = dawntime + datetime.timedelta(minutes=self.duration)
+
+        return start_dawninterval.time() <= self.time.time() <= end_dawninterval.time()
 
 
 class IsInInterval(types.RecordingCondition):

@@ -8,6 +8,7 @@ The below image show the default parameters of acoupi custom program.
 
 _Add image of acoupi CLI parameters._
 
-!!! note "Important"
+!!! Example
+    ```
 
-    Documentation is under construction.
+    ```
