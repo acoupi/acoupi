@@ -123,7 +123,7 @@ def test_http_messenger_with_complex_message():
                 path=Path("test_recording.wav"),
                 duration=1,
                 samplerate=16000,
-                datetime=datetime.datetime.now(),
+                created_on=datetime.datetime.now(),
                 deployment=data.Deployment(
                     name="test_deployment",
                 ),

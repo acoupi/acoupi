@@ -39,7 +39,7 @@ __all__ = [
 
 
 class PyAudioRecorder(AudioRecorder):
-    """An AudioRecorder that records a 3 second audio file."""
+    """Component that records fixed duration audio to a file."""
 
     duration: float
     """The duration of the audio file in seconds."""
@@ -54,10 +54,9 @@ class PyAudioRecorder(AudioRecorder):
     """The name of the input audio device."""
 
     chunksize: int
-    """The chunksize of the audio file in bytes."""
 
     audio_dir: Path
-    """The path of the audio file in temporary memory."""
+    """The directory where to store the created recordings."""
 
     def __init__(
         self,
@@ -65,7 +64,7 @@ class PyAudioRecorder(AudioRecorder):
         samplerate: int,
         audio_channels: int,
         device_name: str,
-        chunksize: int = 8 * 2048,
+        chunksize: int = 512,
         audio_dir: Path = TMP_PATH,
         logger=None,
     ) -> None:
@@ -98,7 +97,7 @@ class PyAudioRecorder(AudioRecorder):
         self.save_recording(frames, temp_path)
         return data.Recording(
             path=temp_path,
-            datetime=now,
+            created_on=now,
             duration=self.duration,
             samplerate=self.samplerate,
             audio_channels=self.audio_channels,
@@ -170,8 +169,9 @@ class PyAudioRecorder(AudioRecorder):
 
     def check(self):
         """Check if the audio recorder is compatible with the config."""
+        num_chunks = 20
         try:
-            data = self.get_recording_data(num_chunks=1)
+            data = self.get_recording_data(num_chunks=num_chunks)
         except ParameterError as error:
             raise HealthCheckError(
                 message=(
@@ -199,7 +199,7 @@ class PyAudioRecorder(AudioRecorder):
 
             raise error
 
-        if len(data) != self.chunksize * self.audio_channels * 2:
+        if len(data) != self.chunksize * self.audio_channels * 2 * num_chunks:
             raise HealthCheckError(
                 message=(
                     "The audio recorder is not working properly. "

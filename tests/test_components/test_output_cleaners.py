@@ -23,7 +23,7 @@ def create_test_model_output():
         samplerate=256000,
         audio_channels=1,
         deployment=deployment,
-        datetime=datetime.datetime.now(),
+        created_on=datetime.datetime.now(),
     )
 
     def factory(

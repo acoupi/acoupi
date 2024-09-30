@@ -1,5 +1,8 @@
 """Test suite for acoupi program system module."""
 
+import sys
+from pathlib import Path
+
 import pytest
 
 from acoupi.programs.default import Program as SampleProgram
@@ -55,6 +58,31 @@ def test_can_load_the_acoupi_program():
     assert program_class == SampleProgram
 
 
+sample_program = """
+from acoupi.programs.templates import BasicProgram, BasicConfiguration
+
+
+class Config(BasicConfiguration):
+    name: str = "test"
+
+
+class Program(BasicProgram[Config]):
+    config_schema = Config
+
+    name = "test_program"
+"""
+
+
+def test_loads_correct_program_when_multiple_programs_exist(tmp_path: Path):
+    program_file = tmp_path / "test_program.py"
+    program_file.write_text(sample_program)
+    sys.path.append(str(tmp_path))
+    program_class = programs.load_program_class("test_program")
+    assert program_class.__name__ == "Program"
+    assert hasattr(program_class, "name")
+    assert getattr(program_class, "name") == "test_program"
+
+
 def test_load_program_fails_if_module_does_not_exist():
     """Test load_program fails if file does not exist."""
     with pytest.raises(exceptions.ProgramNotFoundError):
@@ -63,5 +91,5 @@ def test_load_program_fails_if_module_does_not_exist():
 
 def test_load_program_fails_if_no_program_is_found_in_module():
     """Test load_program fails if no program is found in module."""
-    with pytest.raises(exceptions.InvalidProgramError):
+    with pytest.raises(exceptions.ProgramNotFoundError):
         programs.load_program_class("math")
