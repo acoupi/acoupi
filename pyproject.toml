@@ -22,6 +22,7 @@ dependencies = [
     "requests>=2.31.0",
     "eventlet>=0.36.1",
     "pygments>=2.18.0",
+    "pydantic-extra-types>=2.9.0",
 ]
 requires-python = ">=3.8,<3.12"
 readme = "README.md"
@@ -34,7 +35,7 @@ acoupi = "acoupi.cli:acoupi"
 requires = ["pdm-pep517>=1.0"]
 build-backend = "pdm.pep517.api"
 
-[tool.rye]
+[tool.uv]
 dev-dependencies = [
     "pytest>=7.4.4",
     "pony-stubs>=0.5.2",
@@ -54,6 +55,7 @@ dev-dependencies = [
     "pytest-celery>=1.0.1",
     "flower>=2.0.1",
     "mkdocs-click>=0.8.1",
+    "pytest-mock>=3.14.0",
 ]
 
 [tool.pyright]
@@ -83,25 +85,3 @@ known-local-folder = ["src", "acoupi"]
 
 [tool.coverage.run]
 source = ["src/acoupi"]
-
-[tool.pdm]
-[tool.pdm.dev-dependencies]
-dev = [
-    "pytest>=7.2.2",
-    "pony-stubs>=0.5.2",
-    "coverage[toml]>=7.2.2",
-    "sphinx>=5.3.0",
-    "furo>=2023.3.27",
-    "sphinx-copybutton>=0.5.1",
-    "sphinx-autobuild>=2021.3.14",
-    "pytest-httpserver>=1.0.6",
-    "black>=23.3.0",
-    "pyright>=1.1.337",
-    "ruff>=0.1.6",
-    "isort>=5.11.5",
-    "mkdocs>=1.5.3",
-    "mkdocs-material>=9.2.7",
-    "mkdocstrings[python]>=0.22.0",
-    "pytest-celery>=0.0.0",
-    "flower>=2.0.1",
-]
