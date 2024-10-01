@@ -76,12 +76,14 @@ class MQTTMessenger(types.Messenger):
             The username to authenticate with.
         topic : str
             The topic to send messages to. Example: "org/survey/device_00/".
-        clientid : str
-            The client ID to use. Example: "org/survey/device_00".
         port : int, optional
             The port to connect to, by default 1884.
         password : Optional[str], optional
             The password to authenticate with, by default None.
+
+        Notes
+        -----
+        Will use the device ID as the client ID.
         """
         self.topic = topic
         self.timeout = timeout

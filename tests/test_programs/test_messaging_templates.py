@@ -25,11 +25,6 @@ class Program(BasicProgramMixin, MessagingProgramMixin, AcoupiProgram):
     config_schema = Config
 
 
-def test_messaging_config_fails_if_http_and_mttq_are_not_provided():
-    with pytest.raises(ValueError):
-        MessagingConfig()
-
-
 @pytest.fixture
 def basic_configuration(tmp_path: Path) -> BasicConfiguration:
     if not tmp_path.exists():
@@ -45,6 +40,11 @@ def basic_configuration(tmp_path: Path) -> BasicConfiguration:
             metadata=tmp_path / "metadata.db",
         ),
     )
+
+
+def test_messaging_config_fails_if_http_and_mttq_are_not_provided():
+    with pytest.raises(ValueError):
+        MessagingConfig()
 
 
 @pytest.mark.usefixtures("celery_app")
@@ -68,12 +68,15 @@ def test_basic_program_with_messaging_mixin_runs_health_checks_correctly(
     celery_app: Celery,
     messaging_config: MessagingConfig,
     basic_configuration: BasicConfiguration,
+    tmp_path: Path,
 ):
     config = Config(
         audio=basic_configuration.audio,
         data=basic_configuration.data,
         microphone=basic_configuration.microphone,
-        messaging=messaging_config,
+        messaging=messaging_config.model_copy(
+            update=dict(messages_db=tmp_path / "messages.db")
+        ),
     )
 
     program = Program(
@@ -94,6 +97,7 @@ def test_basic_program_with_messaging_mixin_runs_health_checks_correctly(
 
 @pytest.mark.usefixtures("celery_app")
 def test_program_has_correct_tasks(
+    tmp_path: Path,
     celery_app: Celery,
     basic_configuration: BasicConfiguration,
 ):
@@ -102,9 +106,10 @@ def test_program_has_correct_tasks(
         data=basic_configuration.data,
         microphone=basic_configuration.microphone,
         messaging=MessagingConfig(
+            messages_db=tmp_path / "messages.db",
             http=HTTPConfig(
                 base_url="http://localhost:8000",
-            )
+            ),
         ),
     )
     program = Program(
