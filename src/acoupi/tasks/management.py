@@ -47,10 +47,11 @@ def generate_file_management_task(
     logger : logging.Logger, optional
         The logger to log messages, by default logger.
     file_filters : Optional[List[types.RecordingSavingFilter]], optional
-        The file filters to determine if recordings should be saved, by default None.
+        The file filters to determine if recordings should be saved, by default
+        None.
     required_models : Optional[List[str]], optional
         The required models that need to be saved, by default None.
-    temp_path : Path, optional
+    tmp_path : Path, optional
         The path where recordings are saved temporarily, by default TEMP_PATH.
 
     Notes

@@ -35,9 +35,6 @@ class DawnTimeInterval(types.RecordingCondition):
     timezone: datetime.tzinfo
     """The timezone that the dawn time is in."""
 
-    time: datetime.datetime
-    """The current time."""
-
     def __init__(self, duration: float, timezone: datetime.tzinfo):
         """Initialize the DawnTimeInterval.
 
@@ -80,9 +77,10 @@ class DawnTimeInterval(types.RecordingCondition):
         ... ).should_record(time)
         False
         """
+        now = datetime.datetime.now(self.timezone)
         sun_info = sun(
             LocationInfo(str(self.timezone)).observer,
-            date=self.time.astimezone(self.timezone),
+            date=now.astimezone(self.timezone),
             tzinfo=self.timezone,
         )
         dawntime = sun_info["dawn"]
@@ -92,9 +90,7 @@ class DawnTimeInterval(types.RecordingCondition):
         end_dawninterval = dawntime + datetime.timedelta(minutes=self.duration)
 
         return (
-            start_dawninterval.time()
-            <= self.time.time()
-            <= end_dawninterval.time()
+            start_dawninterval.time() <= now.time() <= end_dawninterval.time()
         )
 
 
@@ -120,8 +116,6 @@ class IsInInterval(types.RecordingCondition):
         timezone: datetime.tzinfo
             The timezone that the interval is in. This ensures that the interval is
             calculated correctly across different timezones.
-        time: datetime.datetime
-            The current time. Check if this time falls within the interval.
         """
         self.interval = interval
         self.timezone = timezone
@@ -134,6 +128,10 @@ class IsInInterval(types.RecordingCondition):
         bool
             True if the current time falls within the interval.
             False otherwise.
+
+        Notes
+        -----
+        Uses the current time as provided by the system clock.
 
         Examples
         --------
@@ -166,11 +164,12 @@ class IsInIntervals(types.RecordingCondition):
     ):
         """Initialize the MultiIntervalRecordingManager.
 
-        Args:
-            intervals: The intervals of time to record during. Should be a list
-                of Interval objects.
-            timezone: The timezone to use when determining if a recording
-                should be made.
+        Parameters
+        ----------
+        intervals: The intervals of time to record during. Should be a list
+            of Interval objects.
+        timezone: The timezone to use when determining if a recording
+            should be made.
 
         """
         self.intervals = intervals
