@@ -4,7 +4,16 @@ import datetime
 import logging
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Callable, Generic, List, Optional, Type, TypeVar, Union
+from typing import (
+    Callable,
+    Generic,
+    List,
+    Optional,
+    Protocol,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from celery import Celery, Task, group
 from celery.schedules import crontab
@@ -30,6 +39,8 @@ class NoUserPrompt:
 
 ProgramConfig = TypeVar("ProgramConfig", bound=BaseModel)
 
+C = TypeVar("C", bound=BaseModel, covariant=False, contravariant=True)
+
 B = TypeVar("B")
 
 
@@ -37,7 +48,32 @@ class InvalidAcoupiConfiguration(ValueError):
     """Raised when a configuration is invalid."""
 
 
-class AcoupiProgram(ABC, Generic[ProgramConfig]):
+class ProgramProtocol(Generic[C], Protocol):
+    logger: logging.Logger
+
+    def setup(self, config: C) -> None:
+        pass
+
+    def check(self, config: C) -> None:
+        pass
+
+    def on_start(self, deployment: data.Deployment) -> None:
+        pass
+
+    def on_end(self, deployment: data.Deployment) -> None:
+        pass
+
+    def add_task(
+        self,
+        function: Callable[[], Optional[B]],
+        callbacks: Optional[List[Callable[[Optional[B]], None]]] = None,
+        schedule: Union[int, datetime.timedelta, crontab, None] = None,
+        queue: Optional[str] = None,
+    ) -> None:
+        pass
+
+
+class AcoupiProgram(ABC, ProgramProtocol[ProgramConfig]):
     """A program is a collection of tasks."""
 
     config: ProgramConfig
@@ -62,10 +98,9 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         self.logger = get_task_logger(self.__class__.__name__)
         self.setup(program_config)
 
-    @abstractmethod
     def setup(self, config: ProgramConfig):
         """Set up the program."""
-        raise NotImplementedError
+        pass
 
     def check(self, config: ProgramConfig) -> None:
         """Check the configurations.
