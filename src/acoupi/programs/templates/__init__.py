@@ -1,11 +1,19 @@
 from acoupi.programs.templates.basic import (
     BasicConfiguration,
-    BasicProgram,
+    BasicProgramMixin,
     DataConfiguration,
+)
+from acoupi.programs.templates.messaging import (
+    MessagingConfig,
+    MessagingConfigMixin,
+    MessagingProgramMixin,
 )
 
 __all__ = [
     "BasicConfiguration",
-    "BasicProgram",
+    "BasicProgramMixin",
+    "MessagingConfig",
     "DataConfiguration",
+    "MessagingProgramMixin",
+    "MessagingConfigMixin",
 ]

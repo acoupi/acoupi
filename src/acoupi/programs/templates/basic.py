@@ -1,11 +1,12 @@
-"""Program templates.
+"""Basic program template.
 
-This module provides functions that facilitate the creation of programs.
+This template provides configuration of an audio recorder, a metadata store and
+a simple file manager. It configures them and provides a recording and
+file_management task.
 """
 
 import datetime
 import zoneinfo
-from logging import Logger
 from pathlib import Path
 from typing import Annotated, Callable, List, Optional, TypeVar
 
@@ -17,11 +18,11 @@ from acoupi.components import types
 from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.data import TimeInterval
 from acoupi.programs import (
-    AcoupiProgram,
     AcoupiWorker,
     NoUserPrompt,
     WorkerConfig,
 )
+from acoupi.programs.core.base import ProgramProtocol
 from acoupi.system.files import get_temp_dir
 
 __all__ = []
@@ -67,9 +68,7 @@ class BasicConfiguration(BaseModel):
 ProgramConfig = TypeVar("ProgramConfig", bound=BasicConfiguration)
 
 
-class BasicProgram(AcoupiProgram[ProgramConfig]):
-    logger: Logger
-
+class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
     worker_config: Optional[WorkerConfig] = WorkerConfig(
         workers=[
             AcoupiWorker(
@@ -97,6 +96,20 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         self.file_manager = self.configure_file_manager(config)
         self.register_recording_task(config)
         self.register_file_management_task(config)
+        super().setup(config)
+
+    def on_start(self, deployment: data.Deployment):
+        self.store.store_deployment(deployment)
+        super().on_start(deployment)
+
+    def on_end(self, deployment: data.Deployment) -> None:
+        self.store.update_deployment(deployment)
+        super().on_end(deployment)
+
+    def check(self, config: ProgramConfig):
+        if isinstance(self.recorder, components.PyAudioRecorder):
+            self.recorder.check()
+        super().check(config)
 
     def configure_recorder(
         self,
@@ -195,14 +208,6 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
             queue="celery",
         )
 
-    def on_start(self, deployment: data.Deployment):
-        super().on_start(deployment)
-        self.store.store_deployment(deployment)
-
-    def on_end(self, deployment: data.Deployment) -> None:
-        super().on_end(deployment)
-        self.store.update_deployment(deployment)
-
     def validate_dirs(self, config: ProgramConfig):
         if not config.data.tmp.exists():
             config.data.tmp.mkdir(parents=True)
@@ -212,7 +217,3 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
         if not config.data.metadata.parent.exists():
             config.data.metadata.parent.mkdir(parents=True)
-
-    def check(self, config: ProgramConfig):
-        if isinstance(self.recorder, components.PyAudioRecorder):
-            self.recorder.check()
