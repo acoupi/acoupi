@@ -1,9 +1,5 @@
-from pathlib import Path
-
 import pytest
 
-from acoupi.components import MicrophoneConfig
-from acoupi.programs.templates import BasicConfiguration, DataConfiguration
 from acoupi.system.constants import CeleryConfig
 
 
@@ -24,17 +20,3 @@ def celery_worker_parameters():
     return {
         "loglevel": "WARN",
     }
-
-
-@pytest.fixture
-def basic_configuration(tmp_path: Path) -> BasicConfiguration:
-    return BasicConfiguration(
-        microphone=MicrophoneConfig(
-            device_name="default",
-        ),
-        data=DataConfiguration(
-            tmp=tmp_path / "tmp",
-            audio=tmp_path / "audio",
-            metadata=tmp_path / "metadata.db",
-        ),
-    )

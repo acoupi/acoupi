@@ -1,13 +1,16 @@
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 from celery import Celery
 
+from acoupi.components import MicrophoneConfig
 from acoupi.components.messengers import HTTPConfig, MQTTConfig
 from acoupi.programs import AcoupiProgram
 from acoupi.programs.templates import (
     BasicConfiguration,
     BasicProgramMixin,
+    DataConfiguration,
     MessagingConfig,
     MessagingConfigMixin,
     MessagingProgramMixin,
@@ -25,6 +28,23 @@ class Program(BasicProgramMixin, MessagingProgramMixin, AcoupiProgram):
 def test_messaging_config_fails_if_http_and_mttq_are_not_provided():
     with pytest.raises(ValueError):
         MessagingConfig()
+
+
+@pytest.fixture
+def basic_configuration(tmp_path: Path) -> BasicConfiguration:
+    if not tmp_path.exists():
+        tmp_path.mkdir(parents=True)
+
+    return BasicConfiguration(
+        microphone=MicrophoneConfig(
+            device_name="default",
+        ),
+        data=DataConfiguration(
+            tmp=tmp_path / "tmp",
+            audio=tmp_path / "audio",
+            metadata=tmp_path / "metadata.db",
+        ),
+    )
 
 
 @pytest.mark.usefixtures("celery_app")
