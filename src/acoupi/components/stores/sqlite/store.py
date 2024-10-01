@@ -134,8 +134,6 @@ class SqliteStore(types.Store):
         if deployment.ended_on is not None:
             db_deployment.ended_on = deployment.ended_on
 
-        orm.commit()
-
     @db_session
     def store_recording(self, recording: data.Recording) -> None:
         """Store the recording locally.
@@ -184,8 +182,6 @@ class SqliteStore(types.Store):
                     value=tag.tag.value,
                     classification_probability=tag.classification_probability,
                 )
-
-        orm.commit()
 
     @db_session
     def get_recordings_by_path(
@@ -415,7 +411,6 @@ class SqliteStore(types.Store):
         """
         db_recording = self._get_or_create_recording(recording)
         db_recording.path = str(path)
-        orm.commit()
         recording.path = path
         return recording
 
@@ -437,7 +432,6 @@ class SqliteStore(types.Store):
                 latitude=None,
                 longitude=None,
             )
-            orm.commit()
 
         return db_deployment
 
@@ -457,7 +451,6 @@ class SqliteStore(types.Store):
             datetime=recording.datetime,
             deployment=deployment_db,
         )
-        orm.commit()
         return db_recording
 
     @db_session
@@ -498,7 +491,6 @@ class SqliteStore(types.Store):
             latitude=deployment.latitude,
             longitude=deployment.longitude,
         )
-        orm.commit()
         return db_deployment
 
     @db_session
