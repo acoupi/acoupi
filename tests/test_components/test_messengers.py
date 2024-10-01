@@ -299,7 +299,6 @@ def test_mqtt_messenger_can_send_simple_message():
             port=1883,
             username="test",
             topic="acoupi",
-            clientid="test",
         )
         message = data.Message(content='"Hello, world!"')
 
@@ -333,7 +332,6 @@ def test_mqtt_check_is_succesful_when_connected():
             port=1883,
             username="test",
             topic="acoupi",
-            clientid="test",
         )
 
         # Act
@@ -359,7 +357,6 @@ def test_mqtt_check_is_succesful_when_can_reconnect():
             port=1883,
             username="test",
             topic="acoupi",
-            clientid="test",
         )
 
         # Act
@@ -385,7 +382,6 @@ def test_mqtt_check_is_successful_when_can_connect():
             port=1883,
             username="test",
             topic="acoupi",
-            clientid="test",
         )
 
         # Act
@@ -415,7 +411,6 @@ def test_mqtt_check_fails_with_mqtt_error_on_connection(error_code: int):
             port=1883,
             username="test",
             topic="acoupi",
-            clientid="test",
         )
 
         # Act
@@ -449,7 +444,6 @@ def test_mqtt_check_fails_with_mqtt_error_on_reconnection(error_code: int):
             port=1883,
             username="test",
             topic="acoupi",
-            clientid="test",
         )
 
         # Act

@@ -7,14 +7,15 @@ from celery import Celery
 
 from acoupi import data
 from acoupi.components.audio_recorder import MicrophoneConfig
+from acoupi.programs import AcoupiProgram
 from acoupi.programs.templates import (
     BasicConfiguration,
-    BasicProgram,
+    BasicProgramMixin,
     DataConfiguration,
 )
 
 
-class Program(BasicProgram):
+class Program(BasicProgramMixin, AcoupiProgram):
     config: BasicConfiguration
 
 
