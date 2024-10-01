@@ -3,7 +3,6 @@ from unittest.mock import Mock
 import pytest
 from celery import Celery
 
-from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.components.messengers import HTTPConfig, MQTTConfig
 from acoupi.programs import AcoupiProgram
 from acoupi.programs.templates import (
@@ -48,11 +47,12 @@ def test_messaging_config_fails_if_http_and_mttq_are_not_provided():
 def test_basic_program_with_messaging_mixin_runs_health_checks_correctly(
     celery_app: Celery,
     messaging_config: MessagingConfig,
+    basic_configuration: BasicConfiguration,
 ):
     config = Config(
-        microphone=MicrophoneConfig(
-            device_name="default",
-        ),
+        audio=basic_configuration.audio,
+        data=basic_configuration.data,
+        microphone=basic_configuration.microphone,
         messaging=messaging_config,
     )
 
@@ -73,11 +73,14 @@ def test_basic_program_with_messaging_mixin_runs_health_checks_correctly(
 
 
 @pytest.mark.usefixtures("celery_app")
-def test_program_has_correct_tasks(celery_app):
+def test_program_has_correct_tasks(
+    celery_app: Celery,
+    basic_configuration: BasicConfiguration,
+):
     config = Config(
-        microphone=MicrophoneConfig(
-            device_name="default",
-        ),
+        audio=basic_configuration.audio,
+        data=basic_configuration.data,
+        microphone=basic_configuration.microphone,
         messaging=MessagingConfig(
             http=HTTPConfig(
                 base_url="http://localhost:8000",

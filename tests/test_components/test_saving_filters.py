@@ -179,25 +179,37 @@ def test_before_dawndusk_time_interval(
     recording_inside_duskinterval = create_test_recording(
         dusktime - datetime.timedelta(minutes=10)
     )
-    assert saving_filter.should_save_recording(recording_inside_duskinterval) is True
+    assert (
+        saving_filter.should_save_recording(recording_inside_duskinterval)
+        is True
+    )
 
     # Case 2: Recording outside the interval before dusk
     recording_outside_duskinterval = create_test_recording(
         dusktime - datetime.timedelta(minutes=40)
     )
-    assert saving_filter.should_save_recording(recording_outside_duskinterval) is False
+    assert (
+        saving_filter.should_save_recording(recording_outside_duskinterval)
+        is False
+    )
 
     # Case 3: Recording within the interval before dawn
     recording_inside_dawninterval = create_test_recording(
         dawntime - datetime.timedelta(minutes=10)
     )
-    assert saving_filter.should_save_recording(recording_inside_dawninterval) is True
+    assert (
+        saving_filter.should_save_recording(recording_inside_dawninterval)
+        is True
+    )
 
     # Case 4: Recording outside the interval before dawn
     recording_outside_dawninterval = create_test_recording(
         dawntime - datetime.timedelta(minutes=40)
     )
-    assert saving_filter.should_save_recording(recording_outside_dawninterval) is False
+    assert (
+        saving_filter.should_save_recording(recording_outside_dawninterval)
+        is False
+    )
 
 
 def test_after_dawndusk_time_interval(
@@ -224,25 +236,37 @@ def test_after_dawndusk_time_interval(
     recording_inside_duskinterval = create_test_recording(
         dusktime + datetime.timedelta(minutes=10)
     )
-    assert saving_filter.should_save_recording(recording_inside_duskinterval) is True
+    assert (
+        saving_filter.should_save_recording(recording_inside_duskinterval)
+        is True
+    )
 
     # Case 2: Recording outside the interval before dusk
     recording_outside_duskinterval = create_test_recording(
         dusktime + datetime.timedelta(minutes=40)
     )
-    assert saving_filter.should_save_recording(recording_outside_duskinterval) is False
+    assert (
+        saving_filter.should_save_recording(recording_outside_duskinterval)
+        is False
+    )
 
     # Case 3: Recording within the interval before dawn
     recording_inside_dawninterval = create_test_recording(
         dawntime + datetime.timedelta(minutes=10)
     )
-    assert saving_filter.should_save_recording(recording_inside_dawninterval) is True
+    assert (
+        saving_filter.should_save_recording(recording_inside_dawninterval)
+        is True
+    )
 
     # Case 4: Recording outside the interval before dawn
     recording_outside_dawninterval = create_test_recording(
         dawntime + datetime.timedelta(minutes=40)
     )
-    assert saving_filter.should_save_recording(recording_outside_dawninterval) is False
+    assert (
+        saving_filter.should_save_recording(recording_outside_dawninterval)
+        is False
+    )
 
 
 """ TESTS - THRESHOLD DETECTIONS - SAVING FILTERS """
@@ -266,7 +290,9 @@ def test_delete_recording_without_detections(
 
     model_output = create_test_model_output(detections=[])
 
-    saving_filter = saving_filters.SavingThreshold(saving_threshold=saving_threshold)
+    saving_filter = saving_filters.SavingThreshold(
+        saving_threshold=saving_threshold
+    )
     # Act
     result = saving_filter.should_save_recording(
         recording, model_outputs=[model_output]
@@ -303,7 +329,9 @@ def test_save_recording_ifboth_detclassprob_above_savingthreshold(
         ]
     )
 
-    saving_filter = saving_filters.SavingThreshold(saving_threshold=saving_threshold)
+    saving_filter = saving_filters.SavingThreshold(
+        saving_threshold=saving_threshold
+    )
     # Act
     result = saving_filter.should_save_recording(
         recording, model_outputs=[model_output]
@@ -339,7 +367,9 @@ def test_save_recording_if_onlydetprob_above_savingthreshold(
         ]
     )
 
-    saving_filter = saving_filters.SavingThreshold(saving_threshold=saving_threshold)
+    saving_filter = saving_filters.SavingThreshold(
+        saving_threshold=saving_threshold
+    )
     # Act
     result = saving_filter.should_save_recording(
         recording, model_outputs=[model_output]
@@ -380,7 +410,9 @@ def test_delete_recording_if_detclassprob_below_savingthreshold(
         ]
     )
 
-    saving_filter = saving_filters.SavingThreshold(saving_threshold=saving_threshold)
+    saving_filter = saving_filters.SavingThreshold(
+        saving_threshold=saving_threshold
+    )
     # Act
     result = saving_filter.should_save_recording(
         recording, model_outputs=[model_output]

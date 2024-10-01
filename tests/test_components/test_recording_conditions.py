@@ -5,7 +5,7 @@ import datetime
 from acoupi import components, data
 
 
-def test_single_interval_recording_manager():
+def test_single_interval_recording_manager(patched_now):
     """Test the interval recording manager."""
     interval = data.TimeInterval(
         start=datetime.time(10, 0),
@@ -22,26 +22,25 @@ def test_single_interval_recording_manager():
     recording_manager = components.IsInInterval(
         interval,
         timezone=datetime.timezone.utc,
-        time=now.replace(hour=9, minute=59),
     )
 
-    recording_manager.time = now.replace(hour=10, minute=0)
+    patched_now(now.replace(hour=10, minute=0))
     assert recording_manager.should_record() is True
 
-    recording_manager.time = now.replace(hour=9, minute=59)
+    patched_now(now.replace(hour=9, minute=59))
     assert recording_manager.should_record() is False
 
-    recording_manager.time = now.replace(hour=10, minute=30)
+    patched_now(now.replace(hour=10, minute=30))
     assert recording_manager.should_record() is True
 
-    recording_manager.time = now.replace(hour=11, minute=0)
+    patched_now(now.replace(hour=11, minute=0))
     assert recording_manager.should_record() is True
 
-    recording_manager.time = now.replace(hour=11, minute=1)
+    patched_now(now.replace(hour=11, minute=1))
     assert recording_manager.should_record() is False
 
 
-def test_multiple_interval_recording_manager():
+def test_multiple_interval_recording_manager(patched_now):
     """Test the multiple interval recording manager."""
     intervals = [
         data.TimeInterval(
@@ -64,17 +63,16 @@ def test_multiple_interval_recording_manager():
     recording_manager = components.IsInIntervals(
         intervals,
         timezone=datetime.timezone.utc,
-        time=now.replace(hour=9, minute=59),
     )
 
-    recording_manager.time = now.replace(hour=9, minute=40)
+    patched_now(now.replace(hour=9, minute=40))
     assert recording_manager.should_record() is False
 
-    recording_manager.time = now.replace(hour=11, minute=30)
+    patched_now(now.replace(hour=11, minute=30))
     assert recording_manager.should_record() is False
 
-    recording_manager.time = now.replace(hour=10, minute=1)
+    patched_now(now.replace(hour=10, minute=1))
     assert recording_manager.should_record() is True
 
-    recording_manager.time = now.replace(hour=12, minute=59)
+    patched_now(now.replace(hour=12, minute=59))
     assert recording_manager.should_record() is True

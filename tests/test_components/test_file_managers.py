@@ -139,7 +139,9 @@ def test_date_file_manager_save_recording(
 
     # Assert
     assert directory.exists()
-    assert file_path == (directory / "2023" / "4" / "15" / f"180930_{recording.id}.wav")
+    assert file_path == (
+        directory / "2023" / "4" / "15" / f"180930_{recording.id}.wav"
+    )
 
 
 def test_date_file_manager_fails_if_recording_has_no_path(
@@ -211,7 +213,9 @@ def test_date_file_manager_fails_if_recording_file_does_not_exist(
         file_manager.save_recording(recording)
 
 
-def test_id_file_manager_save_recording(tmp_path: Path, deployment: data.Deployment):
+def test_id_file_manager_save_recording(
+    tmp_path: Path, deployment: data.Deployment
+):
     """Test IDFileManager.save_recording."""
     # Arrange
     path = tmp_path / "test.wav"

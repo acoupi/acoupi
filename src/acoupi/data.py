@@ -50,7 +50,9 @@ class Deployment(BaseModel):
     longitude: Optional[float] = None
     """The longitude of the site where the device is deployed."""
 
-    started_on: datetime.datetime = Field(default_factory=datetime.datetime.now)
+    started_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now
+    )
     """The datetime when the device was deployed."""
 
     ended_on: Optional[datetime.datetime] = None
@@ -201,7 +203,9 @@ class BoundingBox(BaseModel):
             raise ValueError("end time must be greater than start time")
 
         if low_freq >= high_freq:
-            raise ValueError("high frequency must be greater than low frequency")
+            raise ValueError(
+                "high frequency must be greater than low frequency"
+            )
 
         return value
 
@@ -260,7 +264,9 @@ class ModelOutput(BaseModel):
     detections: List[Detection] = Field(default_factory=list)
     """List of predicted sound events in the recording."""
 
-    created_on: datetime.datetime = Field(default_factory=datetime.datetime.now)
+    created_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now
+    )
     """The datetime when the model output was created."""
 
     @field_validator("tags")
@@ -294,7 +300,9 @@ class Message(BaseModel):
     content: str
     """The message to be sent. Usually a JSON string."""
 
-    created_on: datetime.datetime = Field(default_factory=datetime.datetime.now)
+    created_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now
+    )
     """The datetime when the message was created."""
 
 
@@ -326,5 +334,7 @@ class Response(BaseModel):
     content: Optional[str] = None
     """The content of the response."""
 
-    received_on: datetime.datetime = Field(default_factory=datetime.datetime.now)
+    received_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now
+    )
     """The datetime the message was received."""

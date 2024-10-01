@@ -59,7 +59,7 @@ def patched_now(monkeypatch):
     def set_now(time: dt.datetime = _now):
         class fake_datetime:
             @classmethod
-            def now(cls):
+            def now(cls, *args, **kwargs):
                 return time
 
         monkeypatch.setattr(

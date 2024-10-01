@@ -35,9 +35,15 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         """Initiatlise the filter."""
         self.detection_threshold = detection_threshold
 
-    def get_clean_tags(self, tags: List[data.PredictedTag]) -> List[data.PredictedTag]:
+    def get_clean_tags(
+        self, tags: List[data.PredictedTag]
+    ) -> List[data.PredictedTag]:
         """Remove tags with low score."""
-        return [tag for tag in tags if tag.confidence_score >= self.detection_threshold]
+        return [
+            tag
+            for tag in tags
+            if tag.confidence_score >= self.detection_threshold
+        ]
 
     def get_clean_detections(
         self, detections: List[data.Detection]

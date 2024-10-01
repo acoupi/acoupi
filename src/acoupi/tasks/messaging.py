@@ -73,7 +73,9 @@ def generate_send_messages_task(
 
             for messenger in messengers:
                 response = messenger.send_message(message)
-                logger.info(f"Message Sent - Response Status: {response.status}")
+                logger.info(
+                    f"Message Sent - Response Status: {response.status}"
+                )
                 message_store.store_response(response)
 
     return send_messages_task

@@ -127,7 +127,9 @@ def test_message_builder_detections_with_mixthreshold(
             ),
         ]
     )
-    clean_detections = message_builder.filter_detections(model_output.detections)
+    clean_detections = message_builder.filter_detections(
+        model_output.detections
+    )
     assert len(clean_detections) == 1
 
     message = message_builder.build_message(model_output)
