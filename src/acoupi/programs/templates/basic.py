@@ -38,7 +38,6 @@ from pydantic_extra_types.timezone_name import TimeZoneName
 from acoupi import components, data, tasks
 from acoupi.components import types
 from acoupi.components.audio_recorder import MicrophoneConfig
-from acoupi.data import TimeInterval
 from acoupi.programs import (
     AcoupiWorker,
     NoUserPrompt,
@@ -62,10 +61,11 @@ class AudioConfiguration(BaseModel):
     chunksize: Annotated[int, NoUserPrompt] = 8192
     """Chunksize of audio recording."""
 
-    schedule: List[data.TimeInterval] = Field(
-        default_factory=lambda: [
-            TimeInterval(start=datetime.time.min, end=datetime.time.max)
-        ]
+    schedule: data.TimeInterval = Field(
+        default_factory=lambda: data.TimeInterval(
+            start=datetime.time(hour=0, minute=0, second=0),
+            end=datetime.time(hour=23, minute=59, second=59),
+        )
     )
     """Schedule for recording audio."""
 
@@ -76,7 +76,7 @@ class PathsConfiguration(BaseModel):
     tmp_audio: Path = Field(default_factory=get_temp_dir)
     """Temporary directory for storing audio files."""
 
-    recordings: Path = Field(default_factory=lambda: Path.home() / "audio")
+    recordings: Path = Field(default_factory=lambda: Path.home() / "storages" / "")
     """Directory for storing audio files permanently."""
 
     db_metadata: Path = Field(
