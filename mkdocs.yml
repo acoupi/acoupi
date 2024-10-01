@@ -5,7 +5,6 @@ nav:
   - Tutorials:
       - tutorials/index.md
       - Installation: tutorials/installation.md
-      - Programs: tutorials/programs.md
       - Configuration: tutorials/configuration.md
       - Deployment: tutorials/deployment.md
   - How-To Guides:
@@ -59,6 +58,12 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 plugins:
+  - mkdocs-video:
+      is_video: True
+      video_muted: True
+      video_controls: True
+      video_autoplay: True
+      video_loop: True
   - search
   - mkdocstrings:
       default_handler: python

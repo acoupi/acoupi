@@ -4,13 +4,22 @@ Once acoupi has been installed on a device, users have the ability to configure 
 Acoupi comes with default configuration parameters, user can accept the default parameters or input their own parameters when setting up acoupi.
 This is done through acoupi command line interface.
 
-_Add image of acoupi CLI parameters._
-
 ### Configuring acoupi program via the CLI.
+The video shows how a user can configured an acoupi program using the command line interface. 
+The prompt to use in the CLI to configure the default program is as follow: 
+
+```bash
+acoupi setup --program acoupi.programs.default
+```
+
+Based on the program configuration, a number of questions will be printed to a user. The keyboard letter `y` or the touch `Enter` is used to **accept** the default configuration. The keyboard letter `n` is used to **reject and modify** the default configuration of a pre-built program.
+
+
+![type:video](../img/acoupi_configuration_default.mp4){: style='width: 100%'}
 
 ### Configuration Paramaters for acoupi default program.
 
-The example below show the configured parameters for the acoupi default program. 
+The example below shows the configured parameters for the acoupi default program. 
 
 Note that audio recordings have a duration of 10 seconds, occuring every 30 seconds between 4am and 11pm. 
 However, recordings are only saved between 11am and 3pm as well as withing the 30 minutes time interval that is before and after dawn and dusk. 
