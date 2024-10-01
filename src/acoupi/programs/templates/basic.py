@@ -56,7 +56,7 @@ class AudioConfiguration(BaseModel):
     duration: int = 3
     """Duration of each audio recording in seconds."""
 
-    interval: int = 5
+    interval: int = 10
     """Interval between each audio recording in seconds."""
 
     chunksize: Annotated[int, NoUserPrompt] = 8192
