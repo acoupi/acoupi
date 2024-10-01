@@ -1,7 +1,7 @@
-"""Acoupi TestProgram Configuraiton Options.
+"""Acoupi Default Program.
 
-This is the most basic acoupi program. It only records audio files and
-does not do any processing and messanging.
+This is the most basic acoupi program. It only records audio files and does not
+do any processing and messaging.
 """
 
 import datetime
@@ -11,7 +11,8 @@ import pytz
 from pydantic import BaseModel
 
 from acoupi import components, data
-from acoupi.programs.templates import BasicConfiguration, BasicProgram
+from acoupi.programs import AcoupiProgram
+from acoupi.programs.templates import BasicConfiguration, BasicProgramMixin
 
 
 class SaveRecordingFilter(BaseModel):
@@ -36,7 +37,7 @@ class ConfigSchema(BasicConfiguration):
     recording_saving: Optional[SaveRecordingFilter] = None
 
 
-class Program(BasicProgram):
+class Program(BasicProgramMixin, AcoupiProgram):
     """Test Program."""
 
     config_schema = ConfigSchema
