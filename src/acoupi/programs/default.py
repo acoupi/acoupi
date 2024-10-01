@@ -15,6 +15,7 @@ from acoupi import components, data, tasks
 from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.programs.core.base import AcoupiProgram
 from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
+from acoupi.system.files import move_recording
 
 """Default paramaters for Acoupi TestProgram"""
 
@@ -110,7 +111,7 @@ class Program(AcoupiProgram):
         self.store = components.SqliteStore(config.dbpath)
         self.file_manager = components.IDFileManager(config.audio_dir)
 
-        def rename_move_file(recording: Optional[data.Recording]):
+        def move_file(recording: Optional[data.Recording]):
             """Rename the file."""
             if not recording:
                 return
@@ -118,10 +119,8 @@ class Program(AcoupiProgram):
             if not recording.path:
                 return
 
-            file_name = recording.path.name
-            new_name = config.audio_dir / f"{file_name}.wav"
-            recording.path.rename(new_name)
-            self.store.update_recording_path(recording, new_name)
+            new_path = move_recording(recording, config.audio_dir)
+            self.store.update_recording_path(recording, new_path)
 
         recording_task = tasks.generate_recording_task(
             recorder=self.recorder,
@@ -140,7 +139,7 @@ class Program(AcoupiProgram):
         self.add_task(
             function=recording_task,
             schedule=datetime.timedelta(seconds=config.audio_config.recording_interval),
-            callbacks=[rename_move_file],
+            callbacks=[move_file],
             queue="recording",
         )
 
