@@ -59,19 +59,18 @@ class AudioConfiguration(BaseModel):
 
     schedule_start: datetime.time = Field(
         default=datetime.time(hour=6, minute=0, second=0),
-        description="Start time for recording schedule."
     )
     """Start time for recording schedule."""
 
     schedule_end: datetime.time = Field(
         default=datetime.time(hour=22, minute=30, second=0),
-        description="End time for recording schedule."
     )
     """End time for recording schedule."""
 
-    def get_schedule(self) -> data.TimeInterval:
+    def get_schedule(self) -> list[data.TimeInterval]:
         """Generate a TimeInterval from start and end times."""
-        return data.TimeInterval(start=self.schedule_start, end=self.schedule_end)
+        return [data.TimeInterval(start=self.schedule_start, end=self.schedule_end)]
+
     """Schedule for recording audio."""
 
 
@@ -295,7 +294,7 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
     def get_recording_conditions(
         self,
         config: ProgramConfig,
-    ) -> types.RecordingCondition:
+    ) -> list[types.RecordingCondition]:
         """Get the recording conditions.
 
         This method defines the conditions under which audio recording should
@@ -307,10 +306,12 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         types.RecordingCondition
             A recording condition.
         """
-        return components.IsInInterval(
-            interval=config.recording.get_schedule(),
-            timezone=zoneinfo.ZoneInfo(config.timezone),
-        )
+        return [
+            components.IsInIntervals(
+                intervals=config.recording.get_schedule(),
+                timezone=zoneinfo.ZoneInfo(config.timezone),
+            )
+        ]
 
     def get_recording_filters(
         self,

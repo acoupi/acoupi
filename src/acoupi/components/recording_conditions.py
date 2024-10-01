@@ -26,74 +26,6 @@ __all__ = [
 ]
 
 
-class DawnTimeInterval(types.RecordingCondition):
-    """A RecordingCondition that records only during the dawn time interval."""
-
-    duration: float
-    """The duration of time (in minutes) before and after dawntime."""
-
-    timezone: datetime.tzinfo
-    """The timezone that the dawn time is in."""
-
-    def __init__(self, duration: float, timezone: datetime.tzinfo):
-        """Initialize the DawnTimeInterval.
-
-        Parameters
-        ----------
-        duration: float
-            The duration of time (in minutes) before and after dawntime.
-        timezone: datetime.tzinfo
-            The timezone that the dawn time is in.
-        """
-        self.duration = duration
-        self.timezone = timezone
-
-    def should_record(self) -> bool:
-        """Determine if a recording should be made.
-
-        Returns
-        -------
-        bool
-            True if the current time is within the dawn time interval.
-            False otherwise.
-
-        Examples
-        --------
-        >>> dawn_time = time(6, 0)
-        >>> duration = 30
-        >>> timezone = "Europe/London"
-        >>> time = datetime(2024, 1, 1, 6, 15, 0, tzinfo=timezone)
-        >>> DawnTimeInterval(
-        ...     dawn_time, duration, timezone
-        ... ).should_record(time)
-        True
-
-        >>> dawn_time = time(6, 0)
-        >>> duration = 30
-        >>> timezone = "Europe/London"
-        >>> time = datetime(2024, 1, 1, 5, 45, 0, tzinfo=timezone)
-        >>> DawnTimeInterval(
-        ...     dawn_time, duration, timezone
-        ... ).should_record(time)
-        False
-        """
-        now = datetime.datetime.now(self.timezone)
-        sun_info = sun(
-            LocationInfo(str(self.timezone)).observer,
-            date=now.astimezone(self.timezone),
-            tzinfo=self.timezone,
-        )
-        dawntime = sun_info["dawn"]
-        start_dawninterval = dawntime - datetime.timedelta(
-            minutes=self.duration
-        )
-        end_dawninterval = dawntime + datetime.timedelta(minutes=self.duration)
-
-        return (
-            start_dawninterval.time() <= now.time() <= end_dawninterval.time()
-        )
-
-
 class IsInInterval(types.RecordingCondition):
     """A RecordingCondition that records only during a specific interval of time.
 
@@ -178,7 +110,68 @@ class IsInIntervals(types.RecordingCondition):
     def should_record(self) -> bool:
         """Determine if a recording should be made."""
         now = datetime.datetime.now(tz=self.timezone).time()
-        return any(
-            interval.start <= now <= interval.end
-            for interval in self.intervals
+        return any(interval.start <= now <= interval.end for interval in self.intervals)
+
+
+class DawnTimeInterval(types.RecordingCondition):
+    """A RecordingCondition that records only during the dawn time interval."""
+
+    duration: float
+    """The duration of time (in minutes) before and after dawntime."""
+
+    timezone: datetime.tzinfo
+    """The timezone that the dawn time is in."""
+
+    def __init__(self, duration: float, timezone: datetime.tzinfo):
+        """Initialize the DawnTimeInterval.
+
+        Parameters
+        ----------
+        duration: float
+            The duration of time (in minutes) before and after dawntime.
+        timezone: datetime.tzinfo
+            The timezone that the dawn time is in.
+        """
+        self.duration = duration
+        self.timezone = timezone
+
+    def should_record(self) -> bool:
+        """Determine if a recording should be made.
+
+        Returns
+        -------
+        bool
+            True if the current time is within the dawn time interval.
+            False otherwise.
+
+        Examples
+        --------
+        >>> dawn_time = time(6, 0)
+        >>> duration = 30
+        >>> timezone = "Europe/London"
+        >>> time = datetime(2024, 1, 1, 6, 15, 0, tzinfo=timezone)
+        >>> DawnTimeInterval(
+        ...     dawn_time, duration, timezone
+        ... ).should_record(time)
+        True
+
+        >>> dawn_time = time(6, 0)
+        >>> duration = 30
+        >>> timezone = "Europe/London"
+        >>> time = datetime(2024, 1, 1, 5, 45, 0, tzinfo=timezone)
+        >>> DawnTimeInterval(
+        ...     dawn_time, duration, timezone
+        ... ).should_record(time)
+        False
+        """
+        now = datetime.datetime.now(self.timezone)
+        sun_info = sun(
+            LocationInfo(str(self.timezone)).observer,
+            date=now.astimezone(self.timezone),
+            tzinfo=self.timezone,
         )
+        dawntime = sun_info["dawn"]
+        start_dawninterval = dawntime - datetime.timedelta(minutes=self.duration)
+        end_dawninterval = dawntime + datetime.timedelta(minutes=self.duration)
+
+        return start_dawninterval.time() <= now.time() <= end_dawninterval.time()
