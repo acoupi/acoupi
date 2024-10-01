@@ -49,7 +49,9 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
             and detection.tags != []
         ]
 
-    def build_message(self, model_output: data.ModelOutput) -> Optional[data.Message]:
+    def build_message(
+        self, model_output: data.ModelOutput
+    ) -> Optional[data.Message]:
         """Build a message with only detections meeting threshold.
 
         Parameters

@@ -34,7 +34,7 @@ def create_test_recording():
             samplerate=samplerate,
             audio_channels=audio_channels,
             deployment=deployment,
-            datetime=recording_time,
+            created_on=recording_time,
         )
 
     return factory
@@ -83,7 +83,7 @@ def create_test_model_output():
         samplerate=256000,
         audio_channels=1,
         deployment=deployment,
-        datetime=datetime.datetime.now(),
+        created_on=datetime.datetime.now(),
     )
 
     def factory(
@@ -158,7 +158,9 @@ def test_save_recording_with_confident_detections(
     )
 
     # Run
-    new_path = saving_manager.save_recording(recording, model_outputs=[model_output])
+    new_path = saving_manager.save_recording(
+        recording, model_outputs=[model_output]
+    )
 
     # assert
     assert new_path is not None
@@ -184,7 +186,9 @@ def test_save_recording_with_unconfident_detections(
 
     recording_file = tmp_path / "test_recording.wav"
     recording_file.touch()
-    recording_file.write_text("test recording going to false_detections folder")
+    recording_file.write_text(
+        "test recording going to false_detections folder"
+    )
 
     recording = create_test_recording(
         recording_time=datetime.datetime(2020, 1, 1, 0, 0, 0),
@@ -210,7 +214,9 @@ def test_save_recording_with_unconfident_detections(
     )
 
     # Run
-    new_path = saving_manager.save_recording(recording, model_outputs=[model_output])
+    new_path = saving_manager.save_recording(
+        recording, model_outputs=[model_output]
+    )
 
     # Assert
     assert new_path is not None
@@ -263,7 +269,9 @@ def test_recording_is_saved_in_default_dir_if_not_true_or_false_class(
     )
 
     # Run
-    new_path = saving_manager.save_recording(recording, model_outputs=[model_output])
+    new_path = saving_manager.save_recording(
+        recording, model_outputs=[model_output]
+    )
 
     # Assert saves in the root folder and not in any of the true or false
     # subdirectories

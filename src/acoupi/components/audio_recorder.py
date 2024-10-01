@@ -14,6 +14,7 @@ audio recorder return a temporary .wav file.
 """
 
 import datetime
+import math
 import wave
 from pathlib import Path
 from typing import List, Optional
@@ -37,7 +38,7 @@ __all__ = [
 
 
 class PyAudioRecorder(AudioRecorder):
-    """An AudioRecorder that records a 3 second audio file."""
+    """Component that records fixed duration audio to a file."""
 
     duration: float
     """The duration of the audio file in seconds."""
@@ -52,10 +53,9 @@ class PyAudioRecorder(AudioRecorder):
     """The name of the input audio device."""
 
     chunksize: int
-    """The chunksize of the audio file in bytes."""
 
     audio_dir: Path
-    """The path of the audio file in temporary memory."""
+    """The directory where to store the created recordings."""
 
     def __init__(
         self,
@@ -63,7 +63,7 @@ class PyAudioRecorder(AudioRecorder):
         samplerate: int,
         audio_channels: int,
         device_name: str,
-        chunksize: int = 8 * 2048,
+        chunksize: int = 2048,
         audio_dir: Path = TMP_PATH,
         logger=None,
     ) -> None:
@@ -98,7 +98,7 @@ class PyAudioRecorder(AudioRecorder):
         self.save_recording(frames, temp_path)
         return data.Recording(
             path=temp_path,
-            datetime=now,
+            created_on=now,
             duration=self.duration,
             samplerate=self.samplerate,
             audio_channels=self.audio_channels,
@@ -115,7 +115,12 @@ class PyAudioRecorder(AudioRecorder):
             if duration is None:
                 raise ValueError("duration or num_chunks must be provided")
 
-            num_chunks = int(duration * self.samplerate / self.chunksize)
+            # NOTE: Round up to the nearest chunk otherwise the recording will
+            # be shorter than the requested duration
+            num_chunks = math.ceil(duration * self.samplerate / self.chunksize)
+
+        if duration is None:
+            duration = num_chunks * self.chunksize / self.samplerate
 
         p = pyaudio.PyAudio()
 
@@ -142,7 +147,18 @@ class PyAudioRecorder(AudioRecorder):
         stream.close()
         p.terminate()
 
-        return b"".join(frames)
+        data = b"".join(frames)
+
+        # NOTE: Due to the rounding up of the number of chunks, the recording
+        # might be longer than the requested duration. We need to truncate the
+        # data to the expected length.
+        expected_length = int(
+            2 * self.samplerate * duration * self.audio_channels
+        )
+        if len(data) > expected_length:
+            data = data[:expected_length]
+
+        return data
 
     def save_recording(self, data: bytes, path: Path) -> None:
         """Save the recording to a file."""
@@ -170,8 +186,9 @@ class PyAudioRecorder(AudioRecorder):
 
     def check(self):
         """Check if the audio recorder is compatible with the config."""
+        num_chunks = 20
         try:
-            data = self.get_recording_data(num_chunks=1)
+            data = self.get_recording_data(num_chunks=num_chunks)
         except ParameterError as error:
             raise HealthCheckError(
                 message=(
@@ -199,7 +216,7 @@ class PyAudioRecorder(AudioRecorder):
 
             raise error
 
-        if len(data) != self.chunksize * self.audio_channels * 2:
+        if len(data) != self.chunksize * self.audio_channels * 2 * num_chunks:
             raise HealthCheckError(
                 message=(
                     "The audio recorder is not working properly. "

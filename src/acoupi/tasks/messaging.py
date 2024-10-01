@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def generate_send_data_task(
+def generate_send_messages_task(
     message_store: types.MessageStore,
     messengers: Optional[List[types.Messenger]] = None,
     logger: logging.Logger = logger,
@@ -54,7 +54,7 @@ def generate_send_data_task(
     if messengers is None:
         messengers = []
 
-    def send_data_task() -> None:
+    def send_messages_task() -> None:
         """Send Messages."""
         messages = message_store.get_unsent_messages()
 
@@ -73,7 +73,9 @@ def generate_send_data_task(
 
             for messenger in messengers:
                 response = messenger.send_message(message)
-                logger.info(f"Message Sent - Response Status: {response.status}")
+                logger.info(
+                    f"Message Sent - Response Status: {response.status}"
+                )
                 message_store.store_response(response)
 
-    return send_data_task
+    return send_messages_task

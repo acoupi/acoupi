@@ -79,7 +79,8 @@ def generate_recording_task(
 
         # Check if recording conditions are met
         if not all(
-            condition.should_record() for condition in recording_conditions or []
+            condition.should_record()
+            for condition in recording_conditions or []
         ):
             # If conditions are not met exit process
             logger.info("Recording conditions not met.")

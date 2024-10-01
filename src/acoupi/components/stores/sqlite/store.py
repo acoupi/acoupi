@@ -13,6 +13,8 @@ from .database import create_base_models
 from acoupi import data
 from acoupi.components import types
 
+db_session = orm.db_session(retry=5)
+
 
 class SqliteStore(types.Store):
     """Sqlite store implementation.
@@ -83,6 +85,7 @@ class SqliteStore(types.Store):
         self.db_path = db_path
         self.database = orm.Database()
         self.models = create_base_models(self.database)
+        print(self.models.Detection.detection_score)
         self.database.bind(
             provider="sqlite",
             filename=str(db_path),
@@ -90,7 +93,7 @@ class SqliteStore(types.Store):
         )
         self.database.generate_mapping(create_tables=True)
 
-    @orm.db_session
+    @db_session
     def get_current_deployment(self) -> data.Deployment:
         """Get the current deployment.
 
@@ -113,7 +116,7 @@ class SqliteStore(types.Store):
             ended_on=deployment.ended_on,
         )
 
-    @orm.db_session
+    @db_session
     def store_deployment(self, deployment: data.Deployment) -> None:
         """Store the deployment locally.
 
@@ -122,7 +125,7 @@ class SqliteStore(types.Store):
         """
         self._get_or_create_deployment(deployment)
 
-    @orm.db_session
+    @db_session
     def update_deployment(self, deployment: data.Deployment) -> None:
         db_deployment = self._get_deployment_by_id(deployment.id)
         db_deployment.name = deployment.name
@@ -132,9 +135,7 @@ class SqliteStore(types.Store):
         if deployment.ended_on is not None:
             db_deployment.ended_on = deployment.ended_on
 
-        orm.commit()
-
-    @orm.db_session
+    @db_session
     def store_recording(self, recording: data.Recording) -> None:
         """Store the recording locally.
 
@@ -145,7 +146,7 @@ class SqliteStore(types.Store):
         """
         self._get_or_create_recording(recording)
 
-    @orm.db_session
+    @db_session
     def store_model_output(self, model_output: data.ModelOutput) -> None:
         """Store the model output locally."""
         db_recording = self._get_or_create_recording(model_output.recording)
@@ -183,9 +184,7 @@ class SqliteStore(types.Store):
                     confidence_score=tag.confidence_score,
                 )
 
-        orm.commit()
-
-    @orm.db_session
+    @db_session
     def get_recordings_by_path(
         self,
         paths: List[Path],
@@ -213,7 +212,7 @@ class SqliteStore(types.Store):
         )
         return _to_recordings_and_outputs(db_recordings)
 
-    @orm.db_session
+    @db_session
     def get_recordings(
         self,
         ids: List[UUID],
@@ -244,7 +243,7 @@ class SqliteStore(types.Store):
 
         return _to_recordings_and_outputs(db_recordings)
 
-    @orm.db_session
+    @db_session
     def get_model_outputs(
         self,
         after: Optional[datetime.datetime] = None,
@@ -284,10 +283,14 @@ class SqliteStore(types.Store):
 
         if detection_ids is not None:
             query = query.filter(
-                lambda mo: orm.exists(d for d in mo.detections if d.id in detection_ids)
+                lambda mo: orm.exists(
+                    d for d in mo.detections if d.id in detection_ids
+                )
             )
 
-        query = query.order_by(orm.desc(self.models.ModelOutput.created_on)).prefetch(
+        query = query.order_by(
+            orm.desc(self.models.ModelOutput.created_on)
+        ).prefetch(
             self.models.ModelOutput.tags,
             self.models.ModelOutput.detections,
             self.models.Detection.tags,
@@ -298,7 +301,7 @@ class SqliteStore(types.Store):
 
         return [_to_model_output(db_model_output) for db_model_output in query]
 
-    @orm.db_session
+    @db_session
     def get_detections(
         self,
         ids: Optional[List[UUID]] = None,
@@ -316,7 +319,9 @@ class SqliteStore(types.Store):
             query = query.filter(lambda d: d.id in ids)
 
         if model_output_ids:
-            query = query.filter(lambda d: d.model_output.id in model_output_ids)
+            query = query.filter(
+                lambda d: d.model_output.id in model_output_ids
+            )
 
         if score_gt is not None:
             query = query.filter(lambda d: d.detection_score > score_gt)
@@ -331,13 +336,15 @@ class SqliteStore(types.Store):
             query = query.filter(lambda d: d.model_output.created_on <= before)
 
         if model_names:
-            query = query.filter(lambda d: d.model_output.model_name in model_names)
+            query = query.filter(
+                lambda d: d.model_output.model_name in model_names
+            )
 
         query = query.prefetch(self.models.Detection.tags)
 
         return [_to_detection(db_detection) for db_detection in query]
 
-    @orm.db_session
+    @db_session
     def get_predicted_tags(
         self,
         detection_ids: Optional[List[UUID]] = None,
@@ -353,7 +360,8 @@ class SqliteStore(types.Store):
 
         if detection_ids:
             query = query.filter(
-                lambda t: t.detection is not None and t.detection.id in detection_ids
+                lambda t: t.detection is not None
+                and t.detection.id in detection_ids
             )
 
         if after is not None:
@@ -382,7 +390,7 @@ class SqliteStore(types.Store):
 
         return [_to_predictedtag(db_tag) for db_tag in query]
 
-    @orm.db_session
+    @db_session
     def update_recording_path(
         self,
         recording: data.Recording,
@@ -396,11 +404,10 @@ class SqliteStore(types.Store):
         """
         db_recording = self._get_or_create_recording(recording)
         db_recording.path = str(path)
-        orm.commit()
         recording.path = path
         return recording
 
-    @orm.db_session
+    @db_session
     def _get_current_deployment(self) -> db_types.Deployment:
         """Get the current deployment in the database."""
         db_deployment = (
@@ -418,11 +425,10 @@ class SqliteStore(types.Store):
                 latitude=None,
                 longitude=None,
             )
-            orm.commit()
 
         return db_deployment
 
-    @orm.db_session
+    @db_session
     def _create_recording(
         self,
         recording: data.Recording,
@@ -435,13 +441,12 @@ class SqliteStore(types.Store):
             duration_s=recording.duration,
             samplerate_hz=recording.samplerate,
             audio_channels=recording.audio_channels,
-            datetime=recording.datetime,
+            datetime=recording.created_on,
             deployment=deployment_db,
         )
-        orm.commit()
         return db_recording
 
-    @orm.db_session
+    @db_session
     def _get_or_create_recording(
         self,
         recording: data.Recording,
@@ -452,7 +457,7 @@ class SqliteStore(types.Store):
         except ValueError:
             return self._create_recording(recording)
 
-    @orm.db_session
+    @db_session
     def _get_deployment_by_started_on(
         self, started_on: datetime.datetime
     ) -> db_types.Deployment:
@@ -466,7 +471,7 @@ class SqliteStore(types.Store):
 
         return deployment
 
-    @orm.db_session
+    @db_session
     def _create_deployment(
         self,
         deployment: data.Deployment,
@@ -479,10 +484,9 @@ class SqliteStore(types.Store):
             latitude=deployment.latitude,
             longitude=deployment.longitude,
         )
-        orm.commit()
         return db_deployment
 
-    @orm.db_session
+    @db_session
     def _get_or_create_deployment(
         self, deployment: data.Deployment
     ) -> db_types.Deployment:
@@ -494,20 +498,24 @@ class SqliteStore(types.Store):
 
         return db_deployment
 
-    @orm.db_session
+    @db_session
     def _get_deployment_by_id(self, id: UUID) -> db_types.Deployment:
         """Get the deployment by the id."""
-        deployment: Optional[db_types.Deployment] = self.models.Deployment.get(id=id)
+        deployment: Optional[db_types.Deployment] = self.models.Deployment.get(
+            id=id
+        )
 
         if deployment is None:
             raise ValueError("No deployment found")
 
         return deployment
 
-    @orm.db_session
+    @db_session
     def _get_recording_by_id(self, id: UUID) -> db_types.Recording:
         """Get the recording by the id."""
-        recording: Optional[db_types.Recording] = self.models.Recording.get(id=id)
+        recording: Optional[db_types.Recording] = self.models.Recording.get(
+            id=id
+        )
 
         if recording is None:
             raise ValueError("No recording found")
@@ -530,7 +538,7 @@ def _to_recording(db_recording: db_types.Recording) -> data.Recording:
     return data.Recording(
         id=db_recording.id,
         deployment=deployment,
-        datetime=db_recording.datetime,
+        created_on=db_recording.datetime,
         duration=db_recording.duration_s,
         samplerate=db_recording.samplerate_hz,
         audio_channels=db_recording.audio_channels,
@@ -550,7 +558,9 @@ def _to_predictedtag(db_tag: db_types.PredictedTag) -> data.PredictedTag:
 
 def _to_detection(db_detection: db_types.Detection) -> data.Detection:
     location = (
-        None if db_detection.location == "" else json.loads(str(db_detection.location))
+        None
+        if db_detection.location == ""
+        else json.loads(str(db_detection.location))
     )
     return data.Detection(
         id=db_detection.id,
@@ -589,7 +599,8 @@ def _to_model_output(
             for db_tag in db_model_output.tags
         ],
         detections=[
-            _to_detection(db_detection) for db_detection in db_model_output.detections
+            _to_detection(db_detection)
+            for db_detection in db_model_output.detections
         ],
     )
 

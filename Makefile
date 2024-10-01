@@ -53,7 +53,7 @@ clean-docs:
 docs: clean-docs
 	$(ENV_PREFIX)mkdocs build --clean
 
-serve-coverage:
+serve-coverage: coverage
 	$(ENV_PREFIX)python -m http.server --directory htmlcov/ 8080
 
 serve-docs:

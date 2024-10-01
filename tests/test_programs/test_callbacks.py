@@ -9,7 +9,6 @@ from pydantic import BaseModel
 
 from acoupi.programs.core.base import AcoupiProgram
 from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
-from acoupi.system.constants import CeleryConfig
 
 
 class Config(BaseModel):
@@ -46,10 +45,8 @@ def test_does_run_callbacks(
 
     assert not path.exists()
 
-    celery_config = CeleryConfig()
     program = TestProgram1(
         program_config=config,
-        celery_config=celery_config,
         app=celery_app,
     )
     assert celery_app.conf["accept_content"] == ["pickle"]
@@ -113,10 +110,8 @@ def test_does_run_callbacks_in_other_queues(
 
     assert not path.exists()
 
-    celery_config = CeleryConfig()
     program = TestProgram2(
         program_config=config,
-        celery_config=celery_config,
         app=celery_app,
     )
 

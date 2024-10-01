@@ -66,14 +66,18 @@ class DawnTimeInterval(types.RecordingCondition):
         >>> duration = 30
         >>> timezone = "Europe/London"
         >>> time = datetime(2024, 1, 1, 6, 15, 0, tzinfo=timezone)
-        >>> DawnTimeInterval(dawn_time, duration, timezone).should_record(time)
+        >>> DawnTimeInterval(
+        ...     dawn_time, duration, timezone
+        ... ).should_record(time)
         True
 
         >>> dawn_time = time(6, 0)
         >>> duration = 30
         >>> timezone = "Europe/London"
         >>> time = datetime(2024, 1, 1, 5, 45, 0, tzinfo=timezone)
-        >>> DawnTimeInterval(dawn_time, duration, timezone).should_record(time)
+        >>> DawnTimeInterval(
+        ...     dawn_time, duration, timezone
+        ... ).should_record(time)
         False
         """
         sun_info = sun(
@@ -82,10 +86,16 @@ class DawnTimeInterval(types.RecordingCondition):
             tzinfo=self.timezone,
         )
         dawntime = sun_info["dawn"]
-        start_dawninterval = dawntime - datetime.timedelta(minutes=self.duration)
+        start_dawninterval = dawntime - datetime.timedelta(
+            minutes=self.duration
+        )
         end_dawninterval = dawntime + datetime.timedelta(minutes=self.duration)
 
-        return start_dawninterval.time() <= self.time.time() <= end_dawninterval.time()
+        return (
+            start_dawninterval.time()
+            <= self.time.time()
+            <= end_dawninterval.time()
+        )
 
 
 class IsInInterval(types.RecordingCondition):
@@ -99,7 +109,6 @@ class IsInInterval(types.RecordingCondition):
         self,
         interval: data.TimeInterval,
         timezone: datetime.tzinfo,
-        time: datetime.datetime,
     ):
         """Initialize the IntervalRecordingManager.
 
@@ -116,7 +125,6 @@ class IsInInterval(types.RecordingCondition):
         """
         self.interval = interval
         self.timezone = timezone
-        self.time = time
 
     def should_record(self) -> bool:
         """Determine if a recording should be made.
@@ -141,12 +149,11 @@ class IsInInterval(types.RecordingCondition):
         >>> IsInInterval(interval, timezone).should_record(time)
         False
         """
+        now = datetime.datetime.now(tz=self.timezone).time()
+
         if self.interval.start > self.interval.end:
-            return (
-                self.interval.start <= self.time.time()
-                or self.time.time() <= self.interval.end
-            )
-        return self.interval.start <= self.time.time() <= self.interval.end
+            return self.interval.start <= now or now <= self.interval.end
+        return self.interval.start <= now <= self.interval.end
 
 
 class IsInIntervals(types.RecordingCondition):
@@ -156,7 +163,6 @@ class IsInIntervals(types.RecordingCondition):
         self,
         intervals: List[data.TimeInterval],
         timezone: datetime.tzinfo,
-        time: datetime.datetime,
     ):
         """Initialize the MultiIntervalRecordingManager.
 
@@ -169,11 +175,11 @@ class IsInIntervals(types.RecordingCondition):
         """
         self.intervals = intervals
         self.timezone = timezone
-        self.time = time
 
     def should_record(self) -> bool:
         """Determine if a recording should be made."""
+        now = datetime.datetime.now(tz=self.timezone).time()
         return any(
-            interval.start <= self.time.time() <= interval.end
+            interval.start <= now <= interval.end
             for interval in self.intervals
         )

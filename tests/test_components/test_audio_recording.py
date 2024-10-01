@@ -1,5 +1,7 @@
 """Test the recording of an audio files."""
 
+import math
+import wave
 from pathlib import Path
 
 import pytest
@@ -144,3 +146,35 @@ def test_check_fails_if_invalid_number_of_audio_channels(tmp_path: Path):
 
     with pytest.raises(HealthCheckError, match="channels"):
         recorder.check()
+
+
+@pytest.mark.skipif(
+    not has_input_audio_device(),
+    reason="No audio device found.",
+)
+@pytest.mark.parametrize("duration", [0.1, 0.3, 0.7, 1])
+def test_recording_duration_is_as_requested(
+    tmp_path: Path,
+    duration: float,
+    deployment: data.Deployment,
+):
+    _, samplerate, device_name = get_default_microphone()
+    recorder = components.PyAudioRecorder(
+        duration=duration,
+        samplerate=samplerate,
+        audio_channels=1,
+        device_name=device_name,
+        chunksize=8192,
+        audio_dir=tmp_path,
+    )
+
+    recording = recorder.record(deployment=deployment)
+
+    assert recording.path is not None
+    with wave.open(str(recording.path)) as wf:
+        assert samplerate == wf.getframerate()
+        assert math.isclose(
+            duration,
+            wf.getnframes() / samplerate,
+            abs_tol=0.01,
+        )

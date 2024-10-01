@@ -17,7 +17,7 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
         ),
         duration=1,
         samplerate=192000,
-        datetime=datetime.datetime(2020, 1, 1, 0, 0, 0),
+        created_on=datetime.datetime(2020, 1, 1, 0, 0, 0),
     ),
     tags=[
         data.PredictedTag(

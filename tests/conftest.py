@@ -59,7 +59,7 @@ def patched_now(monkeypatch):
     def set_now(time: dt.datetime = _now):
         class fake_datetime:
             @classmethod
-            def now(cls):
+            def now(cls, *args, **kwargs):
                 return time
 
         monkeypatch.setattr(
@@ -85,7 +85,7 @@ def recording(deployment: data.Deployment) -> data.Recording:
         path=Path("tests"),
         duration=1,
         samplerate=16000,
-        datetime=dt.datetime.now(),
+        created_on=dt.datetime.now(),
         deployment=deployment,
     )
 

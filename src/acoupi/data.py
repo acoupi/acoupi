@@ -50,7 +50,9 @@ class Deployment(BaseModel):
     longitude: Optional[float] = None
     """The longitude of the site where the device is deployed."""
 
-    started_on: datetime.datetime = Field(default_factory=datetime.datetime.now)
+    started_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now
+    )
     """The datetime when the device was deployed."""
 
     ended_on: Optional[datetime.datetime] = None
@@ -74,28 +76,33 @@ class Deployment(BaseModel):
 class Recording(BaseModel):
     """A Recording is a single audio file recorded from the microphone."""
 
-    datetime: datetime.datetime
+    created_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now,
+        repr=False,
+    )
     """The datetime when the recording was made"""
 
-    duration: float
+    duration: float = Field(
+        repr=False,
+    )
     """The duration of the recording in seconds"""
 
-    samplerate: int
+    samplerate: int = Field(repr=False)
     """The samplerate of the recording in Hz"""
 
-    deployment: Deployment
+    deployment: Deployment = Field(repr=False)
     """The deployment that the recording belongs to"""
 
-    path: Optional[Path] = None
+    path: Optional[Path] = Field(None, repr=True)
     """The path to the audio file in the local filesystem"""
 
-    audio_channels: Optional[int] = 1
+    audio_channels: Optional[int] = Field(default=1, repr=False)
     """The number of audio_channels in the recording."""
 
-    chunksize: Optional[int] = 4096
+    chunksize: Optional[int] = Field(default=4096, repr=False)
     """The chunksize of the audio file in bytes. Defaults to 4096."""
 
-    id: UUID = Field(default_factory=uuid4)
+    id: UUID = Field(default_factory=uuid4, repr=True)
     """The unique ID of the recording"""
 
     @field_validator("duration")
@@ -196,7 +203,9 @@ class BoundingBox(BaseModel):
             raise ValueError("end time must be greater than start time")
 
         if low_freq >= high_freq:
-            raise ValueError("high frequency must be greater than low frequency")
+            raise ValueError(
+                "high frequency must be greater than low frequency"
+            )
 
         return value
 
@@ -255,7 +264,9 @@ class ModelOutput(BaseModel):
     detections: List[Detection] = Field(default_factory=list)
     """List of predicted sound events in the recording."""
 
-    created_on: datetime.datetime = Field(default_factory=datetime.datetime.now)
+    created_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now
+    )
     """The datetime when the model output was created."""
 
     @field_validator("tags")
@@ -289,7 +300,9 @@ class Message(BaseModel):
     content: str
     """The message to be sent. Usually a JSON string."""
 
-    created_on: datetime.datetime = Field(default_factory=datetime.datetime.now)
+    created_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now
+    )
     """The datetime when the message was created."""
 
 
@@ -321,5 +334,7 @@ class Response(BaseModel):
     content: Optional[str] = None
     """The content of the response."""
 
-    received_on: datetime.datetime = Field(default_factory=datetime.datetime.now)
+    received_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now
+    )
     """The datetime the message was received."""
