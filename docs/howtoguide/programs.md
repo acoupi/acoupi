@@ -1,5 +1,7 @@
 # Create a custom Program
 
+## Introduction
+
 While _acoupi_ offers a variety of pre-built programs and community contributions, you might need to create a custom program for your specific needs.
 This guide provides a comprehensive overview of program creation within the _acoupi_ framework.
 
@@ -87,7 +89,8 @@ This schema specifies the options users can adjust to customize the program's be
 In this example, the schema includes a single field called name (of type str) with a default value of "acoupi".
 Pydantic offers valuable features like data validation and type hints, ensuring that configuration values are valid and match the expected types.
 
-I then specify that this is the configuration schema for the custom program by defining the `config_schema` field in the program class.
+To link your configuration schema to your custom program, you'll need to define the `config_schema` attribute within your `AcoupiProgram` subclass.
+This tells _acoupi_ which schema to use when validating and processing configuration values for your program.
 
 ```python
 class MyCustomProgram(AcoupiProgram):
@@ -139,7 +142,7 @@ Here, it simply prints a greeting using the `name` value from the program's conf
 
 [`self.add_task(...)`][acoupi.programs.AcoupiProgram.add_task] is the method that registers your task with the program.
 It takes two key arguments: The first argument is the function that defines the task's logic (e.g., `my_custom_task`).
-The second argument, schedule, determines how the task is executed`.
+The second argument, schedule, determines how the task is executed.
 In this case, `schedule=60` instructs _acoupi_ to run this task every 60 seconds.
 
 #### Scheduling Options
@@ -228,7 +231,9 @@ In the following sections, we'll explore more advanced concepts and tools to enh
 
 ## Tools for Program Creation
 
-_acoupi_ offers several approaches to facilitate custom program creation:
+Now that you understand the fundamentals of program creation, let's explore the tools _acoupi_ provides to facilitate your development process and help you to build meaningful bioacoustic monitoring solutions.
+
+_acoupi_ offers several approaches to simplify and accelerate the creation of custom programs:
 
 - **Program Templates**: Leverage pre-defined templates with commonly used tasks and components to expedite development.
 - **Predefined Schemas**: Utilize existing schemas for typical program components, saving time and effort in defining configuration options.
@@ -238,6 +243,33 @@ _acoupi_ offers several approaches to facilitate custom program creation:
 Now we will explore each of these methods, giving insight into how to create custom programs within the acoupi framework.
 
 ### Program Templates
+
+When building a program, you often need to incorporate basic functionality, such as audio recording and management.
+_acoupi_ provides program templates that serve as foundational building blocks, saving you time and effort.
+
+Here are two examples of program templates:
+
+- **BasicProgramMixin**: This template provides essential features for recording audio and managing recordings, forming a solid base for most bioacoustic monitoring programs.
+- **MessagingProgramMixin**: This template adds functionality for sending messages and heartbeats to remote servers.
+
+??? info "What is a Mixin?"
+
+    In object-oriented programming, a mixin is a class that provides a specific set of functionalities to other classes without being their direct parent class.
+    Think of it as adding a specific "flavor" or capability to your program.
+
+#### Basic Program Mixin
+
+To incorporate the BasicProgramMixin into your program, you simply need to import it and include it as a base class when defining your custom program:
+
+```python
+from acoupi.programs import AcoupiProgram
+from acoupi.programs.templates import BasicProgramMixin
+
+class CustomProgram(BasicProgramMixin, AcoupiProgram):
+    pass
+```
+
+By inheriting from `BasicProgramMixin`, your `CustomProgram` automatically gains the capabilities for audio recording and management provided by the mixin.
 
 ### Predefined Configuration Schemas
 
