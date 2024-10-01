@@ -15,7 +15,6 @@ from acoupi import components, data, tasks
 from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.programs.core.base import AcoupiProgram
 from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
-from acoupi.system.files import TEMP_PATH
 
 """Default paramaters for Acoupi TestProgram"""
 
@@ -56,8 +55,6 @@ class SaveRecordingFilter(BaseModel):
 
 class ConfigSchema(BaseModel):
     """Configuration Schema for Test Program."""
-
-    tmp_path: Path = TEMP_PATH
 
     dbpath: Path = Path.home() / "storages" / "acoupi.db"
 
