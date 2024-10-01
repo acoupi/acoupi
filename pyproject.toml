@@ -32,8 +32,8 @@ license = { text = "GPL-3.0" }
 acoupi = "acoupi.cli:acoupi"
 
 [build-system]
-requires = ["pdm-pep517>=1.0"]
-build-backend = "pdm.pep517.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.uv]
 dev-dependencies = [
