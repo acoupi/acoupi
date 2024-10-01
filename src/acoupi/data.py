@@ -74,28 +74,33 @@ class Deployment(BaseModel):
 class Recording(BaseModel):
     """A Recording is a single audio file recorded from the microphone."""
 
-    datetime: datetime.datetime
+    created_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now,
+        repr=False,
+    )
     """The datetime when the recording was made"""
 
-    duration: float
+    duration: float = Field(
+        repr=False,
+    )
     """The duration of the recording in seconds"""
 
-    samplerate: int
+    samplerate: int = Field(repr=False)
     """The samplerate of the recording in Hz"""
 
-    deployment: Deployment
+    deployment: Deployment = Field(repr=False)
     """The deployment that the recording belongs to"""
 
-    path: Optional[Path] = None
+    path: Optional[Path] = Field(None, repr=True)
     """The path to the audio file in the local filesystem"""
 
-    audio_channels: Optional[int] = 1
+    audio_channels: Optional[int] = Field(default=1, repr=False)
     """The number of audio_channels in the recording."""
 
-    chunksize: Optional[int] = 4096
+    chunksize: Optional[int] = Field(default=4096, repr=False)
     """The chunksize of the audio file in bytes. Defaults to 4096."""
 
-    id: UUID = Field(default_factory=uuid4)
+    id: UUID = Field(default_factory=uuid4, repr=True)
     """The unique ID of the recording"""
 
     @field_validator("duration")

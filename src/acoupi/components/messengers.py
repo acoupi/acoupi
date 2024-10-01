@@ -20,15 +20,26 @@ import paho.mqtt.client as mqtt
 import requests
 from celery.utils.log import get_task_logger
 from paho.mqtt.enums import CallbackAPIVersion, MQTTErrorCode
+from pydantic import BaseModel, SecretStr
 
 from acoupi import data
 from acoupi.components import types
+from acoupi.devices import get_device_id
 from acoupi.system.exceptions import HealthCheckError
 
 __all__ = [
     "MQTTMessenger",
     "HTTPMessenger",
 ]
+
+
+class MQTTConfig(BaseModel):
+    host: str
+    username: str
+    password: Optional[SecretStr] = None
+    topic: str = "acoupi"
+    port: int = 1884
+    timeout: int = 5
 
 
 class MQTTMessenger(types.Messenger):
@@ -48,10 +59,9 @@ class MQTTMessenger(types.Messenger):
     def __init__(
         self,
         host: str,
-        username: str,
         topic: str,
-        clientid: str,
         port: int = 1884,
+        username: Optional[str] = None,
         password: Optional[str] = None,
         timeout: int = 5,
         logger: Optional[logging.Logger] = None,
@@ -77,9 +87,11 @@ class MQTTMessenger(types.Messenger):
         self.timeout = timeout
         self.host = host
         self.port = port
+        self.client_id = get_device_id()
+
         self.client = mqtt.Client(
             callback_api_version=CallbackAPIVersion.VERSION2,
-            client_id=clientid,
+            client_id=self.client_id,
         )
         self.client.username_pw_set(username, password)
 
@@ -87,6 +99,25 @@ class MQTTMessenger(types.Messenger):
             logger = get_task_logger(__name__)
 
         self.logger = logger
+
+    @classmethod
+    def from_config(
+        cls,
+        config: MQTTConfig,
+        logger: Optional[logging.Logger] = None,
+    ):
+        """Create an MQTTMessenger from a configuration object."""
+        return cls(
+            host=config.host,
+            port=config.port,
+            username=config.username,
+            password=config.password.get_secret_value()
+            if config.password
+            else None,
+            topic=config.topic,
+            timeout=config.timeout,
+            logger=logger,
+        )
 
     def check_connection(self) -> MQTTErrorCode:
         """Check the connection status of the MQTT client."""
@@ -199,6 +230,12 @@ class MQTTMessenger(types.Messenger):
             )
 
 
+class HTTPConfig(BaseModel):
+    base_url: str
+    content_type: str = "application/json"
+    timeout: int = 5
+
+
 class HTTPMessenger(types.Messenger):
     """Messenger that sends messages via HTTP POST requests."""
 
@@ -209,7 +246,6 @@ class HTTPMessenger(types.Messenger):
     """Timeout for sending messages in seconds."""
 
     base_params: dict
-    # base_params: str
     """Base parameters to send with each request."""
 
     headers: dict
@@ -222,6 +258,7 @@ class HTTPMessenger(types.Messenger):
         headers: Optional[dict] = None,
         timeout: int = 5,
         content_type: str = "application/json",
+        logger: Optional[logging.Logger] = None,
     ) -> None:
         """Initialize the HTTP messenger.
 
@@ -256,6 +293,25 @@ class HTTPMessenger(types.Messenger):
             self.headers["Accept"] = content_type
 
         self.content_type = self.headers["Content-Type"]
+
+        if logger is None:
+            logger = get_task_logger(__name__)
+
+        self.logger = logger
+
+    @classmethod
+    def from_config(
+        cls,
+        config: HTTPConfig,
+        logger: Optional[logging.Logger] = None,
+    ):
+        """Create an HTTPMessenger from a configuration object."""
+        return cls(
+            base_url=config.base_url,
+            timeout=config.timeout,
+            content_type=config.content_type,
+            logger=logger,
+        )
 
     def send_message(self, message: data.Message) -> data.Response:
         """Send a recording message through a HTTP POST request."""

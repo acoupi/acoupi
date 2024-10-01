@@ -72,7 +72,7 @@ class SaveIfInInterval(types.RecordingSavingFilter):
         >>> filter.should_save_recording(recording)
         True
         """
-        time = recording.datetime.time()
+        time = recording.created_on.time()
         if self.interval.start > self.interval.end:
             return self.interval.start <= time or time <= self.interval.end
 
@@ -99,7 +99,7 @@ class FrequencySchedule(types.RecordingSavingFilter):
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be saved."""
-        time = recording.datetime
+        time = recording.created_on
         elapsed_time = (time.minute % self.frequency) + (time.second / 60)
         return elapsed_time < self.duration
 
@@ -155,7 +155,7 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
         >>> assert saving_filter.should_save_recording(recording)
         False
         """
-        recording_time = recording.datetime.astimezone(self.timezone)
+        recording_time = recording.created_on.astimezone(self.timezone)
 
         sun_info = sun(
             LocationInfo(str(self.timezone)).observer,
@@ -230,7 +230,7 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         >>> assert saving_filter.should_save_recording(recording)
         True
         """
-        recording_time = recording.datetime.astimezone(self.timezone)
+        recording_time = recording.created_on.astimezone(self.timezone)
 
         sun_info = sun(
             LocationInfo(str(self.timezone)).observer,

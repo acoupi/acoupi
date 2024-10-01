@@ -140,7 +140,9 @@ class SaveRecordingManager(types.RecordingSavingManager):
             ):
                 return self.dirpath_false
 
-        return self.dirpath  # Default path if any of the above conditions are not met.
+        return (
+            self.dirpath
+        )  # Default path if any of the above conditions are not met.
 
     def save_recording(
         self,
@@ -158,13 +160,9 @@ class SaveRecordingManager(types.RecordingSavingManager):
         >>> saving_threshold = 0.3
 
         >>> model_outputs = [
+        ...     data.ModelOutput(tags=[data.Tag(confidence_score=0.7)]),
         ...     data.ModelOutput(
-        ...         tags=[data.Tag(confidence_score=0.7)]
-        ...     ),
-        ...     data.ModelOutput(
-        ...         detections=[
-        ...             data.Detection(detection_score=0.6)
-        ...         ]
+        ...         detections=[data.Detection(detection_score=0.6)]
         ...     ),
         ... ]
         >>> saving_directory = self.get_saving_recording_path(
@@ -176,7 +174,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
             raise ValueError("Recording has no path")
 
         sdir = self.get_saving_recording_path(model_outputs)
-        srec_filename = recording.datetime.strftime(self.timeformat)
+        srec_filename = recording.created_on.strftime(self.timeformat)
 
         if sdir is None:
             raise ValueError("No directory to save recording.")
@@ -200,7 +198,9 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
     directory: Path
     """Directory where the files are stored."""
 
-    def __init__(self, directory: Path, logger: Optional[logging.Logger] = None):
+    def __init__(
+        self, directory: Path, logger: Optional[logging.Logger] = None
+    ):
         """Create a new BaseFileManager."""
         if logger is None:
             logger = get_task_logger(__name__)
@@ -283,10 +283,22 @@ class DateFileManager(BaseFileManager):
     """
 
     def get_file_path(self, recording: data.Recording) -> Path:
-        """Get the path where the file of a recording should be stored."""
-        date = recording.datetime
-        directory = Path(str(date.year)) / Path(str(date.month)) / Path(str(date.day))
-        time = recording.datetime.strftime("%H%M%S")
+        """Get the path where the file of a recording should be stored.
+
+        Parameters
+        ----------
+        recording
+            Recording to get the path for.
+
+        Returns
+        -------
+            Path of the file.
+        """
+        date = recording.created_on
+        directory = (
+            Path(str(date.year)) / Path(str(date.month)) / Path(str(date.day))
+        )
+        time = recording.created_on.strftime("%H%M%S")
         return directory / Path(f"{time}_{recording.id}.wav")
 
 

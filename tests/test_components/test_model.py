@@ -13,7 +13,7 @@ def test_model(deployment: data.Deployment):
         path=Path("tests/data/test_ultrasonic.wav"),
         duration=1,
         samplerate=16000,
-        datetime=datetime.datetime.now(),
+        created_on=datetime.datetime.now(),
         deployment=deployment,
     )
     model = TestModel()

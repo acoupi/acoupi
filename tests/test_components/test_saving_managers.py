@@ -34,7 +34,7 @@ def create_test_recording():
             samplerate=samplerate,
             audio_channels=audio_channels,
             deployment=deployment,
-            datetime=recording_time,
+            created_on=recording_time,
         )
 
     return factory
@@ -83,7 +83,7 @@ def create_test_model_output():
         samplerate=256000,
         audio_channels=1,
         deployment=deployment,
-        datetime=datetime.datetime.now(),
+        created_on=datetime.datetime.now(),
     )
 
     def factory(

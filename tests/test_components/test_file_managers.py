@@ -17,7 +17,7 @@ def test_save_recording_manager_fails_if_recording_has_no_path(
         path=None,
         duration=1,
         samplerate=8000,
-        datetime=datetime.datetime.now(),
+        created_on=datetime.datetime.now(),
         deployment=deployment,
     )
 
@@ -36,7 +36,7 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
         path=recording_file,
         duration=1,
         samplerate=8000,
-        datetime=datetime.datetime.now(),
+        created_on=datetime.datetime.now(),
         deployment=data.Deployment(name="test"),
     )
     model_output = data.ModelOutput(
@@ -75,7 +75,7 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
         path=recording_file,
         duration=1,
         samplerate=8000,
-        datetime=datetime.datetime.now(),
+        created_on=datetime.datetime.now(),
         deployment=data.Deployment(name="test"),
     )
     model_output = data.ModelOutput(
@@ -125,7 +125,7 @@ def test_date_file_manager_save_recording(
         path=path,
         duration=1,
         samplerate=8000,
-        datetime=datetime.datetime(year, month, day, hour, minute, second),
+        created_on=datetime.datetime(year, month, day, hour, minute, second),
         deployment=deployment,
     )
     # make sure the recording file exists
@@ -160,7 +160,7 @@ def test_date_file_manager_fails_if_recording_has_no_path(
         path=None,
         duration=1,
         samplerate=8000,
-        datetime=datetime.datetime(year, month, day, hour, minute, second),
+        created_on=datetime.datetime(year, month, day, hour, minute, second),
         deployment=deployment,
     )
 
@@ -193,7 +193,7 @@ def test_date_file_manager_fails_if_recording_file_does_not_exist(
         path=path,
         duration=1,
         samplerate=8000,
-        datetime=datetime.datetime(year, month, day, hour, minute, second),
+        created_on=datetime.datetime(year, month, day, hour, minute, second),
         deployment=deployment,
     )
 
@@ -222,7 +222,7 @@ def test_id_file_manager_save_recording(tmp_path: Path, deployment: data.Deploym
         path=path,
         duration=1,
         samplerate=8000,
-        datetime=datetime.datetime.now(),
+        created_on=datetime.datetime.now(),
         deployment=deployment,
     )
     # make sure the recording file exists
@@ -251,7 +251,7 @@ def test_id_file_manager_fails_if_recording_has_no_path(
         path=None,
         duration=1,
         samplerate=8000,
-        datetime=datetime.datetime.now(),
+        created_on=datetime.datetime.now(),
         deployment=deployment,
     )
 
@@ -278,7 +278,7 @@ def test_id_file_manager_fails_if_recording_file_does_not_exist(
         path=path,
         duration=1,
         samplerate=8000,
-        datetime=datetime.datetime.now(),
+        created_on=datetime.datetime.now(),
         deployment=deployment,
     )
 

@@ -219,7 +219,7 @@ def test_recordings_can_be_registered(
         path=Path("test/path"),
         duration=10.0,
         samplerate=44100,
-        datetime=now,
+        created_on=now,
         audio_channels=2,
     )
 
@@ -257,7 +257,7 @@ def test_recording_can_be_registered_with_custom_deployment(
         path=Path("test/path"),
         duration=10.0,
         samplerate=44100,
-        datetime=now,
+        created_on=now,
         deployment=deployment,
     )
 
@@ -292,14 +292,14 @@ def test_get_all_recordings(
         path=Path("test/path1"),
         duration=10.0,
         samplerate=44100,
-        datetime=now,
+        created_on=now,
     )
     recording2 = data.Recording(
         deployment=deployment,
         path=Path("test/path2"),
         duration=10.0,
         samplerate=44100,
-        datetime=now + datetime.timedelta(seconds=10),
+        created_on=now + datetime.timedelta(seconds=10),
     )
 
     # Add them to the database
@@ -329,14 +329,14 @@ def test_get_some_recordings(
         path=Path("test/path1"),
         duration=10.0,
         samplerate=44100,
-        datetime=now,
+        created_on=now,
     )
     recording2 = data.Recording(
         deployment=deployment,
         path=Path("test/path2"),
         duration=10.0,
         samplerate=44100,
-        datetime=now + datetime.timedelta(seconds=10),
+        created_on=now + datetime.timedelta(seconds=10),
     )
 
     # Add them to the database
