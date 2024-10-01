@@ -18,7 +18,7 @@ For detailed usage and examples, refer to the individual template documentation.
 from acoupi.programs.templates.basic import (
     BasicConfiguration,
     BasicProgramMixin,
-    DataConfiguration,
+    PathsConfiguration,
 )
 from acoupi.programs.templates.messaging import (
     MessagingConfig,
@@ -30,7 +30,7 @@ __all__ = [
     "BasicConfiguration",
     "BasicProgramMixin",
     "MessagingConfig",
-    "DataConfiguration",
+    "PathsConfiguration",
     "MessagingProgramMixin",
     "MessagingConfigMixin",
 ]
