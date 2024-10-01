@@ -41,11 +41,20 @@ curl -sSL https://github.com/acoupi/acoupi/raw/main/scripts/setup.sh | bash
 acoupi setup --program `program-name`
 ```
 
-`acoupi` includes a default program for recording and saving audio files based on your settings, similar to an AudioMoth setup.
-To start using it, simply enter the following command:
+`acoupi` includes two pre-built programs; a `default` and a `connected` program.
+The `default` program only records and saves audio files based on users' settings. This program does not do any audio processing neither send any messages, being comparable to an AudioMoth.
+The `connected` program is similar to the `default` program but with the added capability of sending messages to a remote server. 
+
+To use the `default` program, enter the following command:
 
 ```
 acoupi setup --program acoupi.programs.default
+```
+
+To configure and use the `connected` program, enter the following command:
+
+```
+acoupi setup --program acoupi.programs.connected
 ```
 
 **Step 3:** To start a deployment of `acoupi` with the configured program run the command:
