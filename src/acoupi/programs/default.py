@@ -1,7 +1,7 @@
-"""Acoupi TestProgram Configuraiton Options.
+"""Acoupi TestProgram Configuration Options.
 
-This is the most basic acoupi program. It only records audio files and
-does not do any processing and messanging.
+This is the most basic acoupi program. It only records audio files and saved
+them to a directory. This program does not do any processing or messanging.
 """
 
 import datetime
@@ -15,6 +15,7 @@ from acoupi import components, data, tasks
 from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.programs.core.base import AcoupiProgram
 from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
+from acoupi.system.files import TEMP_PATH
 
 """Default paramaters for Acoupi TestProgram"""
 
@@ -22,17 +23,17 @@ from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
 class AudioConfig(BaseModel):
     """Audio and microphone configuration parameters."""
 
-    audio_duration: int = 5
+    audio_duration: int = 10
     """Duration of each audio recording in seconds."""
 
-    recording_interval: int = 10
+    recording_interval: int = 30
     """Interval between each audio recording in seconds."""
 
 
 class RecordingSchedule(BaseModel):
     """Recording schedule config."""
 
-    start_recording: datetime.time = datetime.time(hour=5, minute=30, second=0)
+    start_recording: datetime.time = datetime.time(hour=6, minute=0, second=0)
 
     end_recording: datetime.time = datetime.time(hour=20, minute=0, second=0)
 
@@ -40,9 +41,9 @@ class RecordingSchedule(BaseModel):
 class SaveRecordingFilter(BaseModel):
     """Recording saving options configuration."""
 
-    starttime: datetime.time = datetime.time(hour=21, minute=30, second=0)
+    starttime: datetime.time = datetime.time(hour=18, minute=30, second=0)
 
-    endtime: datetime.time = datetime.time(hour=23, minute=30, second=0)
+    endtime: datetime.time = datetime.time(hour=20, minute=0, second=0)
 
     before_dawndusk_duration: int = 10
 
@@ -55,6 +56,8 @@ class SaveRecordingFilter(BaseModel):
 
 class ConfigSchema(BaseModel):
     """Configuration Schema for Test Program."""
+
+    tmp_path: Path = TEMP_PATH
 
     dbpath: Path = Path.home() / "storages" / "acoupi.db"
 
@@ -110,7 +113,7 @@ class Program(AcoupiProgram):
         self.store = components.SqliteStore(config.dbpath)
         self.file_manager = components.IDFileManager(config.audio_dir)
 
-        def rename_file(recording: Optional[data.Recording]):
+        def rename_move_file(recording: Optional[data.Recording]):
             """Rename the file."""
             if not recording:
                 return
@@ -118,9 +121,8 @@ class Program(AcoupiProgram):
             if not recording.path:
                 return
 
-            parent_dir = recording.path.parent
-            name = recording.path.name
-            new_name = parent_dir / f"{name}_processed.wav"
+            file_name = recording.path.name
+            new_name = config.audio_dir / f"{file_name}.wav"
             recording.path.rename(new_name)
             self.store.update_recording_path(recording, new_name)
 
@@ -140,10 +142,8 @@ class Program(AcoupiProgram):
 
         self.add_task(
             function=recording_task,
-            schedule=datetime.timedelta(
-                seconds=config.audio_config.recording_interval
-            ),
-            callbacks=[rename_file],
+            schedule=datetime.timedelta(seconds=config.audio_config.recording_interval),
+            callbacks=[rename_move_file],
             queue="recording",
         )
 
@@ -173,21 +173,15 @@ class Program(AcoupiProgram):
                 intervals=[
                     data.TimeInterval(
                         start=config.recording_schedule.start_recording,
-                        end=datetime.datetime.strptime(
-                            "23:59:59", "%H:%M:%S"
-                        ).time(),
+                        end=datetime.datetime.strptime("23:59:59", "%H:%M:%S").time(),
                     ),
                     data.TimeInterval(
-                        start=datetime.datetime.strptime(
-                            "00:00:00", "%H:%M:%S"
-                        ).time(),
+                        start=datetime.datetime.strptime("00:00:00", "%H:%M:%S").time(),
                         end=config.recording_schedule.end_recording,
                     ),
                 ],
                 timezone=timezone,
-                time=datetime.datetime.combine(
-                    datetime.date.today(), time_now
-                ),
+                time=datetime.datetime.combine(datetime.date.today(), time_now),
             )
         ]
 
