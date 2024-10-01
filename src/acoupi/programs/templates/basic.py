@@ -62,7 +62,7 @@ class AudioConfiguration(BaseModel):
     chunksize: Annotated[int, NoUserPrompt] = 8192
     """Chunksize of audio recording."""
 
-    schedule: List[TimeInterval] = Field(
+    schedule: List[data.TimeInterval] = Field(
         default_factory=lambda: [
             TimeInterval(start=datetime.time.min, end=datetime.time.max)
         ]
@@ -70,16 +70,16 @@ class AudioConfiguration(BaseModel):
     """Schedule for recording audio."""
 
 
-class DataConfiguration(BaseModel):
+class PathsConfiguration(BaseModel):
     """Data configuration schema."""
 
-    tmp: Path = Field(default_factory=get_temp_dir)
+    tmp_audio: Path = Field(default_factory=get_temp_dir)
     """Temporary directory for storing audio files."""
 
-    audio: Path = Field(default_factory=lambda: Path.home() / "audio")
+    recordings: Path = Field(default_factory=lambda: Path.home() / "audio")
     """Directory for storing audio files permanently."""
 
-    metadata: Path = Field(
+    db_metadata: Path = Field(
         default_factory=lambda: Path.home() / "storages" / "metadata.db",
     )
     """Path to the metadata database."""
@@ -94,10 +94,10 @@ class BasicConfiguration(BaseModel):
     microphone: MicrophoneConfig
     """Microphone configuration."""
 
-    audio: AudioConfiguration = Field(default_factory=AudioConfiguration)
+    recording: AudioConfiguration = Field(default_factory=AudioConfiguration)
     """Audio configuration."""
 
-    data: DataConfiguration = Field(default_factory=DataConfiguration)
+    paths: PathsConfiguration = Field(default_factory=PathsConfiguration)
     """Data configuration."""
 
 
@@ -142,7 +142,6 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
     --------
     Creating a basic program with custom recording conditions:
 
-
     ```python
     import datetime
     from acoupi import components, data
@@ -152,10 +151,8 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         BasicConfiguration,
     )
 
-
     class Config(BasicConfiguration):
         pass
-
 
     class Program(BasicProgramMixin, AcoupiProgram):
         configuration_schema = Config
@@ -258,12 +255,12 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         """
         microphone = config.microphone
         return components.PyAudioRecorder(
-            duration=config.audio.duration,
+            duration=config.recording.duration,
             samplerate=microphone.samplerate,
             audio_channels=microphone.audio_channels,
             device_name=microphone.device_name,
-            chunksize=config.audio.chunksize,
-            audio_dir=config.data.tmp,
+            chunksize=config.recording.chunksize,
+            audio_dir=config.paths.tmp_audio,
         )
 
     def configure_store(
@@ -280,7 +277,7 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         types.Store
             The configured metadata store instance.
         """
-        return components.SqliteStore(config.data.metadata)
+        return components.SqliteStore(config.paths.db_metadata)
 
     def configure_file_manager(
         self,
@@ -296,7 +293,7 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         types.RecordingSavingManager
             The configured file manager instance.
         """
-        return components.DateFileManager(config.data.audio)
+        return components.DateFileManager(config.paths.recordings)
 
     def get_recording_conditions(
         self,
@@ -315,7 +312,7 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         """
         return [
             components.IsInIntervals(
-                intervals=config.audio.schedule,
+                intervals=config.recording.schedule,
                 timezone=zoneinfo.ZoneInfo(config.timezone),
             )
         ]
@@ -393,7 +390,7 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
             logger=self.logger.getChild("file_management"),
             file_managers=[self.file_manager],
             file_filters=file_filters,
-            tmp_path=config.data.tmp,
+            tmp_path=config.paths.tmp_audio,
         )
 
     def register_recording_task(
@@ -407,7 +404,7 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         recording_task = self.create_recording_task(config)
         self.add_task(
             function=recording_task,
-            schedule=datetime.timedelta(seconds=config.audio.interval),
+            schedule=datetime.timedelta(seconds=config.recording.interval),
             callbacks=self.get_recording_callbacks(config),
             queue="recording",
         )
@@ -424,7 +421,7 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         file_management_task = self.create_file_management_task(config)
         self.add_task(
             function=file_management_task,
-            schedule=datetime.timedelta(minutes=1),
+            schedule=datetime.timedelta(minutes=2),
             queue="celery",
         )
 
@@ -434,11 +431,11 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         This method ensures that the necessary directories for storing audio
         and metadata exist. If they don't, it creates them.
         """
-        if not config.data.tmp.exists():
-            config.data.tmp.mkdir(parents=True)
+        if not config.paths.tmp_audio.exists():
+            config.paths.tmp_audio.mkdir(parents=True)
 
-        if not config.data.audio.exists():
-            config.data.audio.mkdir(parents=True)
+        if not config.paths.recordings.exists():
+            config.paths.recordings.mkdir(parents=True)
 
-        if not config.data.metadata.parent.exists():
-            config.data.metadata.parent.mkdir(parents=True)
+        if not config.paths.db_metadata.parent.exists():
+            config.paths.db_metadata.parent.mkdir(parents=True)
