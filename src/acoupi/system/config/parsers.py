@@ -159,7 +159,7 @@ def parse_pydantic_model_field_from_args(
 
     setup = getattr(model, "setup", None)
     if setup is not None and callable(setup):
-        return setup(args, prompt=prompt, prefix=prefix)
+        return setup(args, prompt=prompt, prefix=prefix)  # type: ignore
 
     if not field.is_required():
         has_some_arg = any(arg.startswith(f"--{prefix}") for arg in args)
