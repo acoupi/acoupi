@@ -47,13 +47,13 @@ The `connected` program is similar to the `default` program but with the added c
 
 To use the `default` program, enter the following command:
 
-```
+```{bash}
 acoupi setup --program acoupi.programs.default
 ```
 
 To configure and use the `connected` program, enter the following command:
 
-```
+```{bash}
 acoupi setup --program acoupi.programs.connected
 ```
 
