@@ -85,7 +85,7 @@ def recording(deployment: data.Deployment) -> data.Recording:
         path=Path("tests"),
         duration=1,
         samplerate=16000,
-        datetime=dt.datetime.now(),
+        created_on=dt.datetime.now(),
         deployment=deployment,
     )
 

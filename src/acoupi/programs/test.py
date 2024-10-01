@@ -12,10 +12,10 @@ class TestConfigSchema(BaseModel):
     name: str = "test_program"
 
 
-class TestProgram(AcoupiProgram):
+class TestProgram(AcoupiProgram[TestConfigSchema]):
     """Test Program."""
 
-    config: TestConfigSchema
+    config_schema = TestConfigSchema
 
     def setup(self, config: TestConfigSchema):
         """Set up Test Program."""

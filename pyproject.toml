@@ -22,6 +22,7 @@ dependencies = [
     "requests>=2.31.0",
     "eventlet>=0.36.1",
     "pygments>=2.18.0",
+    "pydantic-extra-types>=2.9.0",
 ]
 requires-python = ">=3.8,<3.12"
 readme = "README.md"
@@ -54,7 +55,7 @@ dev-dependencies = [
     "pytest-celery>=1.0.1",
     "flower>=2.0.1",
     "mkdocs-click>=0.8.1",
-    "mkdocs-gitbook>=0.0.1",
+    "pytest-mock>=3.14.0",
 ]
 
 [tool.pyright]

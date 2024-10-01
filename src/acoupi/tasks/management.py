@@ -20,7 +20,7 @@ def generate_file_management_task(
     logger: logging.Logger = logger,
     file_filters: Optional[List[types.RecordingSavingFilter]] = None,
     required_models: Optional[List[str]] = None,
-    temp_path: Path = TEMP_PATH,
+    tmp_path: Path = TEMP_PATH,
 ) -> Callable[[], None]:
     """Build a process to manage files.
 
@@ -32,13 +32,25 @@ def generate_file_management_task(
     writes to the disk. This process will move recordings from the memory to
     the disk, and remove recordings that are no longer needed.
 
-    Args:
-        store: The store containing recordings and their associated outputs.
-        file_managers: A list of file managers responsible for saving recordings.
-        logger: The logger used for logging information and errors.
-        file_filters: Optional list of filters to determine whether a recording should be saved.
-        required_models: Optional list of models that must be present in the outputs.
-        temp_path: The path where temporary files are stored.
+    Parameters
+    ----------
+    store
+        The store containing metadata about created recordings and their
+        associated outputs.
+    file_managers
+        A list of file managers that indicate where recordings should be
+        saved.
+    file_filters
+        Optional list of filters to determine whether a recording should be
+        saved.
+    required_models
+        Optional list of models that are required to be present in the
+        recording outputs to save the recording.
+    temp_path
+        Temporary directory where recordings are stored before being moved to
+        their final location.
+    logger
+        The logger used for logging information and errors.
 
     Returns
     -------
@@ -51,16 +63,13 @@ def generate_file_management_task(
 
     def file_management_task() -> None:
         """Manage files."""
-        logger.info(" ----  START MANAGEMENT TASK ---- ")
-        temp_wav_files = get_temp_files(path=temp_path)
+        temp_wav_files = get_temp_files(path=tmp_path)
 
         recordings_and_outputs = store.get_recordings_by_path(
             paths=temp_wav_files
         )
-        logger.info(f"Recordings to manage: {recordings_and_outputs}")
-
         for recording, model_outputs in recordings_and_outputs:
-            logger.info(f"Recording: {recording.path}")
+            logger.info(f"Managing recording: {recording.path}")
 
             if recording.path is None:
                 logger.error(
@@ -70,10 +79,8 @@ def generate_file_management_task(
                 continue
 
             # Is the recording ready to be managed?
-            if (not model_outputs) or (
-                required - {model.name_model for model in model_outputs}
-            ):
-                logger.debug(
+            if required - {model.name_model for model in model_outputs}:
+                logger.info(
                     "Recording %s is not ready to be managed. Skipping.",
                     recording,
                 )
@@ -85,7 +92,7 @@ def generate_file_management_task(
                     recording,
                     model_outputs=model_outputs,
                 ):
-                    logger.debug(
+                    logger.info(
                         "Recording %s does not pass filter: %s",
                         recording,
                         file_filter,
@@ -95,6 +102,10 @@ def generate_file_management_task(
 
             # Has the file already been deleted?
             if not recording.path.exists():
+                logger.error(
+                    "Recording %s has already been deleted",
+                    recording,
+                )
                 continue
 
             # Where should files be stored?
@@ -107,9 +118,10 @@ def generate_file_management_task(
                 if new_path is None:
                     continue
 
-                new_path = move_recording(recording, new_path)
+                new_path = move_recording(recording, new_path, logger=logger)
 
                 if new_path is not None:
+                    print("HUH")
                     store.update_recording_path(recording, new_path)
 
                 break

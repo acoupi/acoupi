@@ -448,7 +448,7 @@ class SqliteStore(types.Store):
             duration_s=recording.duration,
             samplerate_hz=recording.samplerate,
             audio_channels=recording.audio_channels,
-            datetime=recording.datetime,
+            datetime=recording.created_on,
             deployment=deployment_db,
         )
         return db_recording
@@ -545,7 +545,7 @@ def _to_recording(db_recording: db_types.Recording) -> data.Recording:
     return data.Recording(
         id=db_recording.id,
         deployment=deployment,
-        datetime=db_recording.datetime,
+        created_on=db_recording.datetime,
         duration=db_recording.duration_s,
         samplerate=db_recording.samplerate_hz,
         audio_channels=db_recording.audio_channels,

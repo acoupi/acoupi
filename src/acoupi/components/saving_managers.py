@@ -151,7 +151,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
             raise ValueError("Recording has no path")
 
         sdir = self.get_saving_recording_path(model_outputs)
-        srec_filename = recording.datetime.strftime(self.timeformat)
+        srec_filename = recording.created_on.strftime(self.timeformat)
 
         if sdir is None:
             raise ValueError("No directory to save recording.")
@@ -269,11 +269,11 @@ class DateFileManager(BaseFileManager):
         -------
             Path of the file.
         """
-        date = recording.datetime
+        date = recording.created_on
         directory = (
             Path(str(date.year)) / Path(str(date.month)) / Path(str(date.day))
         )
-        time = recording.datetime.strftime("%H%M%S")
+        time = recording.created_on.strftime("%H%M%S")
         return directory / Path(f"{time}_{recording.id}.wav")
 
 
