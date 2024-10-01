@@ -39,10 +39,9 @@ from acoupi import components, data, tasks
 from acoupi.components import types
 from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.data import TimeInterval
-from acoupi.programs import (
-    AcoupiWorker,
+from acoupi.programs.core import (
+    DEFAULT_WORKER_CONFIG,
     NoUserPrompt,
-    WorkerConfig,
 )
 from acoupi.programs.core.base import ProgramProtocol
 from acoupi.system.files import get_temp_dir
@@ -178,19 +177,7 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
     ```
     """
 
-    worker_config: Optional[WorkerConfig] = WorkerConfig(
-        workers=[
-            AcoupiWorker(
-                name="recording",
-                queues=["recording"],
-                concurrency=1,
-            ),
-            AcoupiWorker(
-                name="default",
-                queues=["celery"],
-            ),
-        ],
-    )
+    worker_config = DEFAULT_WORKER_CONFIG
 
     recorder: types.AudioRecorder
 

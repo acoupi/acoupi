@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field, field_validator
 __all__ = [
     "AcoupiWorker",
     "WorkerConfig",
+    "DEFAULT_WORKER_CONFIG",
 ]
 
 
@@ -67,3 +68,18 @@ class WorkerConfig(BaseModel):
         if len(set(names)) != len(names):
             raise ValueError("Worker names must be unique.")
         return workers
+
+
+DEFAULT_WORKER_CONFIG = WorkerConfig(
+    workers=[
+        AcoupiWorker(
+            name="recording",
+            queues=["recording"],
+            concurrency=1,
+        ),
+        AcoupiWorker(
+            name="default",
+            queues=["celery"],
+        ),
+    ],
+)
