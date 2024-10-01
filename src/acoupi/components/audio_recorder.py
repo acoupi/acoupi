@@ -16,6 +16,7 @@ audio recorder return a temporary .wav file.
 """
 
 import datetime
+import math
 import wave
 from pathlib import Path
 from typing import List, Optional
@@ -64,7 +65,7 @@ class PyAudioRecorder(AudioRecorder):
         samplerate: int,
         audio_channels: int,
         device_name: str,
-        chunksize: int = 512,
+        chunksize: int = 2048,
         audio_dir: Path = TMP_PATH,
         logger=None,
     ) -> None:
@@ -114,7 +115,12 @@ class PyAudioRecorder(AudioRecorder):
             if duration is None:
                 raise ValueError("duration or num_chunks must be provided")
 
-            num_chunks = int(duration * self.samplerate / self.chunksize)
+            # NOTE: Round up to the nearest chunk otherwise the recording will
+            # be shorter than the requested duration
+            num_chunks = math.ceil(duration * self.samplerate / self.chunksize)
+
+        if duration is None:
+            duration = num_chunks * self.chunksize / self.samplerate
 
         p = pyaudio.PyAudio()
 
@@ -141,7 +147,18 @@ class PyAudioRecorder(AudioRecorder):
         stream.close()
         p.terminate()
 
-        return b"".join(frames)
+        data = b"".join(frames)
+
+        # NOTE: Due to the rounding up of the number of chunks, the recording
+        # might be longer than the requested duration. We need to truncate the
+        # data to the expected length.
+        expected_length = int(
+            2 * self.samplerate * duration * self.audio_channels
+        )
+        if len(data) > expected_length:
+            data = data[:expected_length]
+
+        return data
 
     def save_recording(self, data: bytes, path: Path) -> None:
         """Save the recording to a file."""
