@@ -2,7 +2,7 @@
 
 import datetime
 import logging
-from abc import ABC, abstractmethod
+from abc import ABC
 from functools import wraps
 from typing import (
     Callable,

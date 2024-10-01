@@ -1,8 +1,30 @@
-"""Basic program template.
+"""Basic Program template module.
 
-This template provides configuration of an audio recorder, a metadata store and
-a simple file manager. It configures them and provides a recording and
-file_management task.
+This module provides a template for creating a basic Acoupi program.
+
+The template includes:
+
+- **BasicProgramMixin:** A mixin class that provides a basic program
+  implementation with features for audio recording, metadata storage, and
+  file management.
+- **Configuration Schema:**  Defines the configuration schema
+  (`BasicConfiguration`) required to configure a basic program, including
+  settings for audio recording, data storage, and microphone configuration.
+
+A basic program, utilizing this template, performs the following tasks:
+
+- Records audio at regular intervals.
+- Manages audio files on disk (e.g., saving recordings permanently).
+
+Key Components:
+
+- **Audio Recorder:**  Records audio clips according to the specified
+    configuration.
+- **Metadata Store:** Stores metadata associated with recordings.
+- **File Manager:**  Handles saving audio recordings to persistent storage.
+
+To use this template, create a new program class that inherits from
+`BasicProgramMixin` and configure it using the `BasicConfiguration` schema.
 """
 
 import datetime
@@ -29,6 +51,8 @@ __all__ = []
 
 
 class AudioConfiguration(BaseModel):
+    """Audio configuration schema."""
+
     duration: int = 3
     """Duration of each audio recording in seconds."""
 
@@ -43,32 +67,117 @@ class AudioConfiguration(BaseModel):
             TimeInterval(start=datetime.time.min, end=datetime.time.max)
         ]
     )
+    """Schedule for recording audio."""
 
 
 class DataConfiguration(BaseModel):
+    """Data configuration schema."""
+
     tmp: Path = Field(default_factory=get_temp_dir)
+    """Temporary directory for storing audio files."""
 
     audio: Path = Field(default_factory=lambda: Path.home() / "audio")
+    """Directory for storing audio files permanently."""
 
     metadata: Path = Field(
         default_factory=lambda: Path.home() / "storages" / "metadata.db",
     )
+    """Path to the metadata database."""
 
 
 class BasicConfiguration(BaseModel):
+    """Configuration schema for a basic program."""
+
     timezone: TimeZoneName = Field(default=TimeZoneName("Europe/London"))
+    """Time zone where the device will be deployed."""
 
     microphone: MicrophoneConfig
+    """Microphone configuration."""
 
     audio: AudioConfiguration = Field(default_factory=AudioConfiguration)
+    """Audio configuration."""
 
     data: DataConfiguration = Field(default_factory=DataConfiguration)
+    """Data configuration."""
 
 
 ProgramConfig = TypeVar("ProgramConfig", bound=BasicConfiguration)
 
 
 class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
+    """Basic program mixin.
+
+    This mixin provides a basic program implementation with the following
+    components:
+
+    - **Audio Recorder:** Records audio clips according to the program's
+    configuration.
+    - **File Manager:** Manages the storage of audio recordings, including
+    saving them to permanent storage.
+    - **Store:**  Provides an interface for storing and retrieving metadata
+    associated with the program and its recordings.
+
+    Tasks:
+
+    The mixin includes the following pre-defined tasks:
+
+    - **Audio Recording:**  Records audio at regular intervals, configurable
+      through the `audio` settings in the `BasicConfiguration` schema.
+    - **File Management:**  Periodically performs file management operations,
+    such as moving recordings from temporary to permanent storage.
+
+    Customization:
+
+    Customize the program's behavior by inheriting from this mixin and
+    overriding these methods:
+
+    - `get_recording_conditions`:  Modify the conditions that trigger audio
+    recording.
+    - `get_recording_filters`:  Add filters to determine which recordings to
+    save.
+    - `get_recording_callbacks`: Define actions to perform after a recording is
+    made.
+
+    Examples
+    --------
+    Creating a basic program with custom recording conditions:
+
+
+    ```python
+    import datetime
+    from acoupi import components, data
+    from acoupi.programs import AcoupiProgram
+    from acoupi.programs.templates import (
+        BasicProgramMixin,
+        BasicConfiguration,
+    )
+
+
+    class Config(BasicConfiguration):
+        pass
+
+
+    class Program(BasicProgramMixin, AcoupiProgram):
+        configuration_schema = Config
+
+        def get_recording_conditions(self, config: Config):
+            # Get the default recording conditions
+            conditions = super().get_recording_conditions(
+                config
+            )
+
+            return [
+                components.IsInInterval(
+                    data.TimeInterval(
+                        start=datetime.time(hour=3),
+                        end=datetime.time(hour=6),
+                    )
+                ),
+                *conditions,
+            ]
+    ```
+    """
+
     worker_config: Optional[WorkerConfig] = WorkerConfig(
         workers=[
             AcoupiWorker(
@@ -90,6 +199,12 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
     file_manager: types.RecordingSavingManager
 
     def setup(self, config: ProgramConfig) -> None:
+        """Set up the basic program.
+
+        This method initializes the program's components (audio recorder,
+        store, and file manager), registers the recording and file management
+        tasks, and performs necessary setup operations.
+        """
         self.validate_dirs(config)
         self.recorder = self.configure_recorder(config)
         self.store = self.configure_store(config)
@@ -99,14 +214,30 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         super().setup(config)
 
     def on_start(self, deployment: data.Deployment):
+        """Handle program start event.
+
+        This method is called when the program starts and stores the
+        deployment information in the metadata store.
+        """
         self.store.store_deployment(deployment)
         super().on_start(deployment)
 
     def on_end(self, deployment: data.Deployment) -> None:
+        """Handle program end event.
+
+        This method is called when the program ends and updates the
+        deployment information in the metadata store.
+        """
         self.store.update_deployment(deployment)
         super().on_end(deployment)
 
     def check(self, config: ProgramConfig):
+        """Check the program's components.
+
+        This method performs checks on the program's components to ensure
+        they are functioning correctly. Currently, it only checks the PyAudio
+        recorder if it is being used.
+        """
         if isinstance(self.recorder, components.PyAudioRecorder):
             self.recorder.check()
         super().check(config)
@@ -115,6 +246,16 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         self,
         config: ProgramConfig,
     ) -> types.AudioRecorder:
+        """Configure the audio recorder.
+
+        This method creates and configures an instance of the `PyAudioRecorder`
+        based on the provided configuration.
+
+        Returns
+        -------
+        types.AudioRecorder
+            The configured audio recorder instance.
+        """
         microphone = config.microphone
         return components.PyAudioRecorder(
             duration=config.audio.duration,
@@ -129,18 +270,49 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         self,
         config: ProgramConfig,
     ) -> types.Store:
+        """Configure the metadata store.
+
+        This method creates and configures an instance of the `SqliteStore`
+        based on the provided configuration.
+
+        Returns
+        -------
+        types.Store
+            The configured metadata store instance.
+        """
         return components.SqliteStore(config.data.metadata)
 
     def configure_file_manager(
         self,
         config: ProgramConfig,
     ) -> types.RecordingSavingManager:
+        """Configure the file manager.
+
+        This method creates and configures an instance of the `DateFileManager`
+        based on the provided configuration.
+
+        Returns
+        -------
+        types.RecordingSavingManager
+            The configured file manager instance.
+        """
         return components.DateFileManager(config.data.audio)
 
     def get_recording_conditions(
         self,
         config: ProgramConfig,
     ) -> list[types.RecordingCondition]:
+        """Get the recording conditions.
+
+        This method defines the conditions under which audio recording should
+        be performed. By default, it uses the schedule defined in the
+        configuration.
+
+        Returns
+        -------
+        list[types.RecordingCondition]
+            A list of recording conditions.
+        """
         return [
             components.IsInIntervals(
                 intervals=config.audio.schedule,
@@ -152,18 +324,48 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         self,
         config: ProgramConfig,
     ) -> list[types.RecordingSavingFilter]:
+        """Get the recording saving filters.
+
+        This method defines filters that determine which recordings should be
+        saved permanently. By default, it returns an empty list, meaning all
+        recordings are saved.
+
+        Returns
+        -------
+        list[types.RecordingSavingFilter]
+            A list of recording saving filters.
+        """
         return []
 
     def get_recording_callbacks(
         self,
         config: ProgramConfig,
     ) -> list[Callable[[Optional[data.Recording]], None]]:
+        """Get the recording callbacks.
+
+        This method defines callbacks to be executed after a recording is
+        completed. By default, it returns an empty list.
+
+        Returns
+        -------
+        list[Callable[[Optional[data.Recording]], None]]
+            A list of recording callbacks.
+        """
         return []
 
     def create_recording_task(
         self,
         config: ProgramConfig,
     ) -> Callable[[], Optional[data.Recording]]:
+        """Create the recording task.
+
+        This method creates the task responsible for recording audio.
+
+        Returns
+        -------
+        Callable[[], Optional[data.Recording]]
+            The recording task.
+        """
         recording_conditions = self.get_recording_conditions(config)
         return tasks.generate_recording_task(
             recorder=self.recorder,
@@ -172,22 +374,19 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
             recording_conditions=recording_conditions,
         )
 
-    def register_recording_task(
-        self,
-        config: ProgramConfig,
-    ) -> None:
-        recording_task = self.create_recording_task(config)
-        self.add_task(
-            function=recording_task,
-            schedule=datetime.timedelta(seconds=config.audio.interval),
-            callbacks=self.get_recording_callbacks(config),
-            queue="recording",
-        )
-
     def create_file_management_task(
         self,
         config: ProgramConfig,
     ) -> Callable[[], None]:
+        """Create the file management task.
+
+        This method creates the task responsible for managing audio files.
+
+        Returns
+        -------
+        Callable[[], None]
+            The file management task.
+        """
         file_filters = self.get_recording_filters(config)
         return tasks.generate_file_management_task(
             store=self.store,
@@ -197,10 +396,31 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
             tmp_path=config.data.tmp,
         )
 
+    def register_recording_task(
+        self,
+        config: ProgramConfig,
+    ) -> None:
+        """Register the recording task.
+
+        This method registers the recording task with the program's scheduler.
+        """
+        recording_task = self.create_recording_task(config)
+        self.add_task(
+            function=recording_task,
+            schedule=datetime.timedelta(seconds=config.audio.interval),
+            callbacks=self.get_recording_callbacks(config),
+            queue="recording",
+        )
+
     def register_file_management_task(
         self,
         config: ProgramConfig,
     ) -> None:
+        """Register the file management task.
+
+        This method registers the file management task with the program's
+        scheduler.
+        """
         file_management_task = self.create_file_management_task(config)
         self.add_task(
             function=file_management_task,
@@ -209,6 +429,11 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         )
 
     def validate_dirs(self, config: ProgramConfig):
+        """Validate the directories used by the program.
+
+        This method ensures that the necessary directories for storing audio
+        and metadata exist. If they don't, it creates them.
+        """
         if not config.data.tmp.exists():
             config.data.tmp.mkdir(parents=True)
 
