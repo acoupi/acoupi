@@ -11,7 +11,7 @@ from acoupi.programs import AcoupiProgram
 from acoupi.programs.templates import (
     BasicConfiguration,
     BasicProgramMixin,
-    DataConfiguration,
+    PathsConfiguration,
 )
 
 
@@ -22,7 +22,7 @@ class Program(BasicProgramMixin, AcoupiProgram):
 @pytest.fixture
 def config(tmp_path: Path) -> BasicConfiguration:
     return BasicConfiguration(
-        data=DataConfiguration(
+        data=PathsConfiguration(
             tmp=tmp_path / "tmp",
             audio=tmp_path / "audio",
             metadata=tmp_path / "metadata.db",

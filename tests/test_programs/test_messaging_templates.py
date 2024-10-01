@@ -10,7 +10,7 @@ from acoupi.programs import AcoupiProgram
 from acoupi.programs.templates import (
     BasicConfiguration,
     BasicProgramMixin,
-    DataConfiguration,
+    PathsConfiguration,
     MessagingConfig,
     MessagingConfigMixin,
     MessagingProgramMixin,
@@ -34,10 +34,10 @@ def basic_configuration(tmp_path: Path) -> BasicConfiguration:
         microphone=MicrophoneConfig(
             device_name="default",
         ),
-        data=DataConfiguration(
-            tmp=tmp_path / "tmp",
-            audio=tmp_path / "audio",
-            metadata=tmp_path / "metadata.db",
+        data=PathsConfiguration(
+            tmp_audio=tmp_path / "tmp_audio",
+            recordings=tmp_path / "recordings",
+            db_metadata=tmp_path / "db_metadata.db",
         ),
     )
 
@@ -71,8 +71,8 @@ def test_basic_program_with_messaging_mixin_runs_health_checks_correctly(
     tmp_path: Path,
 ):
     config = Config(
-        audio=basic_configuration.audio,
-        data=basic_configuration.data,
+        recording=basic_configuration.recording,
+        paths=basic_configuration.paths,
         microphone=basic_configuration.microphone,
         messaging=messaging_config.model_copy(
             update=dict(messages_db=tmp_path / "messages.db")
@@ -102,8 +102,8 @@ def test_program_has_correct_tasks(
     basic_configuration: BasicConfiguration,
 ):
     config = Config(
-        audio=basic_configuration.audio,
-        data=basic_configuration.data,
+        recording=basic_configuration.recording,
+        paths=basic_configuration.paths,
         microphone=basic_configuration.microphone,
         messaging=MessagingConfig(
             messages_db=tmp_path / "messages.db",
