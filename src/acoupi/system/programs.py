@@ -29,7 +29,7 @@ def load_program_class(program_name: str) -> Type[programs.AcoupiProgram]:
 
     Parameters
     ----------
-    program
+    program_name
         The name of the module containing the acoupi program class.
 
     Returns

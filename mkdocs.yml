@@ -10,6 +10,7 @@ nav:
       - Deployment: tutorials/deployment.md
   - How-To Guides:
       - howtoguide/index.md
+      - Create a custom program: howtoguide/programs.md
       - Create new data schema: howtoguide/data_schema.md
       - Create new components: howtoguide/components.md
   - Explanation:
