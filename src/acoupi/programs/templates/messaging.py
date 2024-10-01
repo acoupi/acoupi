@@ -48,7 +48,7 @@ class MessagingConfig(BaseModel):
     message_send_interval: int = 120
     """Interval between sending messages in seconds."""
 
-    heartbeat_interval: int = 60
+    heartbeat_interval: int = 60 * 60
     """Interval between sending heartbeats in seconds."""
 
     http: Optional[messengers.HTTPConfig] = None
@@ -116,9 +116,7 @@ class MessagingProgramMixin(ProgramProtocol[ProgramConfig]):
 
         super().check(config)
 
-    def configure_message_store(
-        self, config: ProgramConfig
-    ) -> types.MessageStore:
+    def configure_message_store(self, config: ProgramConfig) -> types.MessageStore:
         """Configure the message store.
 
         This method creates and configures an instance of the
