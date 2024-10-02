@@ -21,15 +21,15 @@ It defines the tasks the sensor performs, how those tasks are configured, and th
 To define an _acoupi_ program, you need to specify three key elements:
 
 - **Tasks**: These are the individual units of work carried out by your program.
-    Think of them as the building blocks of your sensor's behavior.
-    Each task has a specific purpose, whether it's recording audio or runnning a model.
+    Think of them as the building blocks of your sensor's behaviour.
+    Each task has a specific purpose, whether it's recording audio or running a model.
     When defining a task, you specify:
 
       - _Functionality_: What the task actually does.
       - _Scheduling_: When and how often the task runs (e.g., continuously, at specific intervals, triggered by an event).
       - _Dependencies_: How the task relates to other tasks in the program (e.g., does it need to run before or after another task?).
 
-* **Configuration Schema**: This acts as a blueprint for customizing your program.
+* **Configuration Schema**: This acts as a blueprint for customising your program.
     It defines the parameters and options that users can modify to adjust the program's behavior.
     A well-defined schema ensures your program is flexible and adaptable to different needs and scenarios.
 
@@ -42,7 +42,7 @@ Therefore, creating a custom program involves defining your own `AcoupiProgram` 
 
 ## Building a Program
 
-To create a custom program in acoupi, you'll define a new Python class that inherits from the `AcoupiProgram` class.
+To create a custom program in _acoupi_, you'll define a new Python class that inherits from the `AcoupiProgram` class.
 This new class will encapsulate the tasks, configuration schema, and worker configuration for your program.
 
 Here's a basic example of a custom program:
@@ -75,7 +75,7 @@ class MyCustomProgram(AcoupiProgram):
 ```
 
 This line indicates that `MyCustomProgram` is a specialised type of `AcoupiProgram`, inheriting its core functionality and structure.
-This is essential for _acoupi_ to recognize and execute your custom program.
+This is essential for _acoupi_ to recognise and execute your custom program.
 
 ### Create a Configuration Schema
 
@@ -84,9 +84,9 @@ class MyProgramConfig(BaseModel):
     name: str = "acoupi"
 ```
 
-We use Pydantic's BaseModel to define the configuration schema.
-This schema specifies the options users can adjust to customize the program's behaviour.
-In this example, the schema includes a single field called name (of type str) with a default value of "acoupi".
+We use Pydantic's `BaseModel` to define the configuration schema.
+This schema specifies the options users can adjust to customise the program's behaviour.
+In this example, the schema includes a single field called `name` (of type `str`) with a default value of "acoupi".
 Pydantic offers valuable features like data validation and type hints, ensuring that configuration values are valid and match the expected types.
 
 To link your configuration schema to your custom program, you'll need to define the `config_schema` attribute within your `AcoupiProgram` subclass.
@@ -112,12 +112,12 @@ class MyProgramConfig(AcoupiProgram):
     ...
 ```
 
-This line sets the worker_config attribute to DEFAULT_WORKER_CONFIG, utilizing the standard worker configuration provided by acoupi.
+This line sets the `worker_config` attribute to `DEFAULT_WORKER_CONFIG`, utilising the standard worker configuration provided by _acoupi_.
 The worker configuration handles lower-level aspects of program execution, which we'll keep at their default settings for now.
 
 ### Define Tasks
 
-The core of your _acoupi_ program lies in its tasks – the individual units of work that define the sensor's behavior.
+The core of your _acoupi_ program lies in its tasks – the individual units of work that define the sensor's behaviour.
 You define these tasks within the setup method of your `AcoupiProgram` subclass.
 
 ```python
@@ -134,7 +134,7 @@ You define these tasks within the setup method of your `AcoupiProgram` subclass.
 ```
 
 The `setup` method is where you define the tasks your program performs.
-It receives the program's configuration (`config`) as an argument, allowing tasks to access and utilize those settings.
+It receives the program's configuration (`config`) as an argument, allowing tasks to access and utilise those settings.
 
 In this example, we define a function called `my_custom_task`.
 This function encapsulates the logic for a single task.
@@ -147,7 +147,7 @@ In this case, `schedule=60` instructs _acoupi_ to run this task every 60 seconds
 
 #### Scheduling Options
 
-acoupi provides flexible options for scheduling tasks:
+_acoupi_ provides flexible options for scheduling tasks:
 
 - **Intervals**:
 
@@ -189,7 +189,7 @@ from celery.schedules import crontab
 #### Task dependencies
 
 Often, tasks within a program need to execute in a specific order or depend on the output of other tasks.
-acoupi enables this through callbacks.
+_acoupi_ enables this through callbacks.
 
 Callbacks are functions that are executed immediately after a task completes.
 The output of the preceding task is passed as an argument to the callback function.
@@ -236,7 +236,7 @@ Now that you understand the fundamentals of program creation, let's explore the 
 _acoupi_ offers several approaches to simplify and accelerate the creation of custom programs:
 
 - **Program Templates**: Leverage pre-defined templates with commonly used tasks and components to expedite development.
-- **Predefined Schemas**: Utilize existing schemas for typical program components, saving time and effort in defining configuration options.
+- **Predefined Configuration Schemas**: Utilise existing schemas for typical program components, saving time and effort in defining configuration options.
 - **Task Templates**: Employ templates for frequently used tasks, such as recording audio or sending data, as building blocks for your program.
 - **Component Selection**: Modify existing tasks by replacing default components with alternatives or custom implementations to tailor functionality.
 
@@ -260,7 +260,7 @@ Here are two examples of program templates:
 #### Basic Program Mixin
 
 The [`BasicProgramMixin`][acoupi.programs.templates.BasicProgramMixin] provides a convenient starting point for programs that require fundamental audio recording and management capabilities.
-By incorporating this mixin, you can quickly set up a program that captures audio data and organizes recordings efficiently.
+By incorporating this mixin, you can quickly set up a program that captures audio data and organises recordings efficiently.
 
 To use the `BasicProgramMixin`, import it and include it as a base class along with `AcoupiProgram` when defining your custom program:
 
@@ -277,11 +277,11 @@ This automatically equips your `CustomProgram` with two essential tasks:
 
 - **Recording Task**: This task handles the core audio recording functionality.
     It checks recording conditions, captures audio segments of a defined duration at specified intervals, and temporarily stores the recordings.
-    This task utilizes the `generate_recording_task` template ([`acoupi.tasks.generate_recording_task`][acoupi.tasks.generate_recording_task]) for its implementation.
+    This task utilises the `generate_recording_task` template ([`acoupi.tasks.generate_recording_task`][acoupi.tasks.generate_recording_task]) for its implementation.
 
 - **File Management Task**: This task manages the recorded audio files.
     It processes the temporary recordings, determining which recordings to save permanently based on predefined criteria (by default, all recordings are saved).
-    Saved recordings are organized in a structured folder hierarchy: `<base_directory>/<year>/<month>/<day>/<time>_<recording_id>.wav`.
+    Saved recordings are organised in a structured folder hierarchy: `<base_directory>/<year>/<month>/<day>/<time>_<recording_id>.wav`.
     This task is based on the `generate_file_management_task` template ([`acoupi.tasks.generate_file_management_task`][acoupi.tasks.generate_file_management_task]).
 
 The `BasicProgramMixin` uses the `BasicConfiguration` schema ([`acoupi.programs.templates.BasicConfiguration`][acoupi.programs.templates.BasicConfiguration]) to define its configurable parameters.
@@ -293,7 +293,7 @@ class ExpandedConfigurations(BasicConfiguration):
     # ... your additional fields ...
 ```
 
-While the `BasicProgramMixin` provides a solid foundation, you can further customize its behaviour by overriding specific methods.
+While the `BasicProgramMixin` provides a solid foundation, you can further customise its behaviour by overriding specific methods.
 For instance, you can modify the recording conditions to control when audio recording occurs:
 
 ```python
@@ -321,7 +321,7 @@ class CustomProgram(BasicProgramMixin, AcoupiProgram):
 
 ```
 
-For a complete understanding of the BasicProgramMixin's capabilities and customization options, refer to its [reference documentation][acoupi.programs.templates.BasicProgramMixin].
+For a complete understanding of the `BasicProgramMixin`'s capabilities and customisation options, refer to its [reference documentation][acoupi.programs.templates.BasicProgramMixin].
 
 #### Messaging Program Mixin
 
@@ -330,7 +330,7 @@ The [`MessagingProgramMixin`][acoupi.programs.templates.MessagingProgramMixin] p
 To incorporate messaging functionality into your program, follow a similar approach to the `BasicProgramMixin`:
 
 - **Inherit from the Mixin**: Include `MessagingProgramMixin` as a base class along with `AcoupiProgram` when defining your custom program.
-- **Use a Compatible Schema**: Ensure your configuration schema inherits from [`MessagingConfigMixin`][acoupi.programs.templates.MessagingConfigMixin] to include the necessary messaging-related settings.
+- **Use a Compatible Configuration Schema**: Ensure your configuration schema inherits from [`MessagingConfigMixin`][acoupi.programs.templates.MessagingConfigMixin] to include the necessary messaging-related settings.
 
 ```python
 from acoupi.programs.templates import MessagingProgramMixin, MessagingConfigMixin
@@ -364,7 +364,7 @@ import datetime
 class CustomProgram(MessagingProgramMixin, AcoupiProgram):
 
     def setup(self, config):
-        super().setup(config)  # Initialize the messaging components
+        super().setup(config)  # Initialise the messaging components
 
         def random_task():
             current_time = datetime.datetime.now()
@@ -382,25 +382,25 @@ class CustomProgram(MessagingProgramMixin, AcoupiProgram):
 In this example, `random_task` creates a simple message and stores it in the `message_store`.
 The **Send Messages Task** will then handle delivering this message at its next scheduled execution.
 
-For detailed information about the configuration options and customization possibilities of the `MessagingProgramMixin`, consult its comprehensive [reference documentation][acoupi.programs.templates.MessagingProgramMixin].
+For detailed information about the configuration options and customisation possibilities of the `MessagingProgramMixin`, consult its comprehensive [reference documentation][acoupi.programs.templates.MessagingProgramMixin].
 
 ### Predefined Configuration Schemas
 
 Defining a robust configuration schema is crucial for designing effective and adaptable _acoupi_ programs.
 A well-structured schema enhances program flexibility, provides clear guidance to users on configurable options, and ensures that configurations are validated before deployment, preventing potential issues.
 
-While you'll need to create custom schemas for program-specific behaviors, _acoupi_ strongly encourages reusing predefined schemas for common components.
+While you'll need to create custom schemas for program-specific behaviours, _acoupi_ strongly encourages reusing predefined schemas for common components.
 This approach not only saves you time and effort but also ensures compatibility with program templates and benefits from carefully designed and validated schema structures.
 
 _acoupi_ provides a collection of predefined schemas for common components:
 
 1. [**MicrophoneConfig**][acoupi.components.MicrophoneConfig]: This schema facilitates configuration of the microphone device, including device selection, sampling rate, and the number of channels.
-      It's highly customized for ease of use during setup, so utilizing it is recommended for streamlined microphone configuration.
+      It's highly customised for ease of use during setup, so utilising it is recommended for streamlined microphone configuration.
 
 2. [**MQTTConfig**][acoupi.components.MQTTConfig] and [**HTTPConfig**][acoupi.components.HTTPConfig]: These schemas streamline the configuration of MQTT and HTTP messengers, respectively, for programs that require communication capabilities.
 
 3. [**PathsConfiguration**][acoupi.programs.templates.PathsConfiguration]: This schema defines options for configuring storage locations for audio recordings and metadata.
-      By default, temporary recordings are stored in memory (if available) and permanent recordings are saved in `$HOME/audio/`, but you can customize these paths according to your needs.
+      By default, temporary recordings are stored in memory (if available) and permanent recordings are saved in `$HOME/audio/`, but you can customise these paths according to your needs.
 
 4. [**RecordingConfiguration**][acoupi.programs.templates.AudioConfiguration]: This schema covers the essential parameters for the recording task, such as recording duration, recording interval, and scheduling options.
 
@@ -408,13 +408,70 @@ _acoupi_ provides a collection of predefined schemas for common components:
 
 These predefined schemas are further grouped into higher-level schemas for broader functionalities:
 
-1. [**BasicConfiguration**][acoupi.programs.templates.BasicConfiguration]: This schema combines MicrophoneConfig, PathsConfiguration, and RecordingConfiguration, providing all the essential configurations for a basic _acoupi_ program.
+1. [**BasicConfiguration**][acoupi.programs.templates.BasicConfiguration]: This schema combines `MicrophoneConfig`, `PathsConfiguration`, and `RecordingConfiguration`, providing all the essential configurations for a basic _acoupi_ program.
 
-2. [**MessagingConfigMixin**][acoupi.programs.templates.MessagingConfigMixin]: This schema includes the necessary configurations for using the MessagingProgramMixin, enabling message sending capabilities in your programs.
+2. [**MessagingConfigMixin**][acoupi.programs.templates.MessagingConfigMixin]: This schema includes the necessary configurations for using the `MessagingProgramMixin`, enabling message sending capabilities in your programs.
 
 Leverage these predefined schemas as building blocks to construct comprehensive configuration schemas tailored to your specific program requirements.
 This modular approach promotes consistency, reduces redundancy, and ensures your programs are well-structured and easily configurable.
 
 ### Task Templates
 
+For more granular control over your program's tasks and components, _acoupi_ offers task templates.
+These templates are functions that generate pre-built tasks with customisable components, allowing you to assemble program logic efficiently while maintaining flexibility.
+
+1. [**`generate_recording_task`**][acoupi.tasks.generate_recording_task]: This template creates a task that handles the fundamental aspects of audio recording.
+      It allows you to define custom recording conditions to specify when recording should occur and automatically stores recording metadata for future reference.
+
+2. [**`generate_file_management_task`**][acoupi.tasks.generate_file_management_task]: This template generates a task that manages temporary audio recordings.
+      It ensures recordings are ready to be moved (e.g., after processing), selects which recordings to save permanently, and organises them in the designated storage location.
+
+3. [**`generate_send_messages_task`**][acoupi.tasks.generate_send_messages_task]: This template creates a task responsible for sending pending messages to remote endpoints using the configured messengers (e.g. HTTP or MQTT).
+
+4. [**`generate_detection_task`**][acoupi.tasks.generate_detection_task]: This template generates a task that performs audio analysis using a specified model.
+      It includes preliminary checks to determine if the model should be run on a given recording, executes the model, post-processes the results, generates messages based on detections, and stores detection information in the metadata store.
+
+5. [**`generate_heartbeat_task`**][acoupi.tasks.generate_heartbeat_task]: This template creates a task that periodically sends heartbeat messages via the configured messengers, providing status updates and ensuring the device remains connected.
+
+6. [**`generate_summariser_task`**][acoupi.tasks.generate_summariser_task]: This template generates tasks that analyse the metadata store to produce meaningful summaries of recorded data and detections.
+      These summaries are then packaged as messages for remote delivery.
+
+Each task template requires specific components as arguments.
+However, this requirement is flexible in that you need to provide components of the correct type rather than specific instances.
+This allows you to integrate custom components into the pre-built task workflows.
+
+For example, the `generate_detection_task` function requires components such as a [`Store`][acoupi.components.types.Store], [`Model`][acoupi.components.types.Model], [`MessageStore`][acoupi.components.types.MessageStore], etc.:
+
+```python
+def generate_detection_task(
+    store: types.Store,
+    model: types.Model,
+    message_store: types.MessageStore,
+    # ... other optional components ...
+) -> Callable[[data.Recording], None]:
+    ...
+```
+
+As long as you provide components that adhere to the specified types, the generated task will function correctly within the defined workflow.
+
+To understand the specific requirements and workflows of each task template, consult their respective documentation for detailed information.
+This will guide you in selecting the appropriate components and customising the tasks to suit your program's needs.
+
 ### Component Selection
+
+_acoupi_ offers a wide array of pre-built components to streamline your program and task development.
+These components cover essential functionalities such as messaging, metadata storage, file management, and more.
+Refer to the reference documentation for a comprehensive [list of available components][acoupi.components].
+
+You can readily swap these pre-built components within default implementations or when creating custom tasks.
+As long as your chosen components adhere to the required type specifications, they should integrate seamlessly.
+
+Beyond the built-in components, you can also leverage community-created components.
+For instance, the `acoupi_batdetect2` and `acoupi_birdnet` modules provide ready-to-use `Batdetect2` and `BirdNET` models (of type [`acoupi.components.types.Model`][acoupi.components.types.Model]) for your custom programs.
+If you develop your own components that you believe would benefit the _acoupi_ community, please reach out to us for guidance on sharing them.
+
+## Conclusion
+
+Here we covered what you need to get started for building your custom program.
+Dive into the reference documentation to see the details of the individual parts that were covered here.
+If you have a question, it might already be covered by our [FAQ](../faq.md), but you can also reach out through our [GitHub](https://github.com/acoupi/acoupi) repository.

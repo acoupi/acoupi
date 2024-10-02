@@ -3,7 +3,7 @@
 ## What is acoupi?
 
 **acoupi** is an open-source Python package that streamlines bioacoustic classifier deployment on edge devices like the Raspberry Pi.
-It integrates and standardizes the entire bioacoustic monitoring workflow, from recording to classification.
+It integrates and standardises the entire bioacoustic monitoring workflow, from recording to classification.
 With various components and templates, **acoupi** simplifies the creation of custom sensors, handling audio recordings, processing, classifications, detections, communication, and data management.
 
 <figure markdown="span">
@@ -86,7 +86,7 @@ Currently, it supports two classifiers: BatDetect2, developed by [@macodha and�
 ### BatDetect2 🦇
 
 The BatDetect2 bioacoustics DL model has been trained to detect and classify UK bats species.
-The [**acoupi_batdetect2**](https://github.com/acoupi/acoupi_batdetect2) repository provides users with a pre-built acoupi program that can be configured and tailored to their use cases.
+The [**acoupi_batdetect2**](https://github.com/acoupi/acoupi_batdetect2) repository provides users with a pre-built _acoupi_ program that can be configured and tailored to their use cases.
 
 The program can directly be installed with the following command:
 
@@ -103,7 +103,7 @@ acoupi setup --program acoupi_batdetect2.program
 ### BirdNET-Lite 🦜
 
 The BirdNET-Lite bioacoustics DL model has been trained to detect and classify a large number of bird species.
-The [**acoupi_birdnet**](https://github.com/acoupi/acoupi_birdnet) repository provides users with a pre-build acoupi program that can be configured and tailored to their use cases of birds monitoring.
+The [**acoupi_birdnet**](https://github.com/acoupi/acoupi_birdnet) repository provides users with a pre-build _acoupi_ program that can be configured and tailored to their use cases of birds monitoring.
 
 To install the `acoupi_birdnet` program run:
 
@@ -119,27 +119,27 @@ acoupi setup --program acoupi_birdnet.program
 
 ## Next steps 📖
 
-Get to know acoupi better by exploring this documentation.
+Get to know _acoupi_ better by exploring this documentation.
 
 <table>
     <tr>
         <td>
             <a href="tutorials">Tutorials</a>
-            <p>Step-by-step information on how to install, configure and deploy acoupi for new users.</p>
+            <p>Step-by-step information on how to install, configure and deploy <i>acoupi</i> for new users.</p>
         </td>
         <td>
             <a href="how_to_guide">How-to Guides</a>
-            <p>Guides to learn how to customise and built key elements of acoupi.</p>
+            <p>Guides to learn how to customise and built key elements of <i>acoupi</i>.</p>
         </td>
     </tr>
     <tr>
         <td>
             <a href="explanation">Explanation</a>
-            <p>Overview of the key elements of acoupi: what they are and how they work.</p>
+            <p>Overview of the key elements of <i>acoupi</i>: what they are and how they work.</p>
         </td>
         <td>
             <a href="reference">Reference</a>
-            <p>Technical information refering to acoupi code.</p>
+            <p>Technical information refering to <i>acoupi</i> code.</p>
         </td>
     </tr>
 </table>

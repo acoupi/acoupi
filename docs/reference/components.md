@@ -1,5 +1,10 @@
 # Components
 
+::: acoupi.components
+
+    options:
+        members: none
+
 ## Component Types
 
 ::: acoupi.components.types
