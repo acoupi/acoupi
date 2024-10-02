@@ -1,25 +1,35 @@
 """Messaging Program template module.
 
-This module provides a template for adding messaging capabilities to Acoupi
-programs.
+This module provides a base class (`MessagingProgram`) for creating Acoupi
+programs with messaging capabilities. It extends the `BasicProgram` class to
+add functionality for sending messages and heartbeats.
 
-It includes:
+Components:
 
-- **MessagingProgramMixin:**  A mixin class that provides functionality for
-  sending messages and heartbeats.
-- **Configuration Schemas:** Defines the configuration schemas
-  (`MessagingConfig` and `MessagingConfigMixin`) for configuring messaging
-  settings, including message store location, message sending interval,
-  heartbeat interval, and messenger configurations (HTTP or MQTT).
+- **Messenger:**  A component responsible for sending messages and heartbeats
+  via a configured communication protocol (HTTP or MQTT).
+- **Message Store:** A database for storing messages before they are sent.
 
-To use this template:
+Tasks:
 
-1. Create a new program class that inherits from `MessagingProgramMixin`.
-2. Include `MessagingConfigMixin` in your program's configuration schema.
-3. Configure the `messaging` settings in your program's configuration.
+Using the components above, `MessagingProgram` creates and manages the
+following tasks:
 
-This will add messaging capabilities to your program, allowing it to send
-messages and heartbeats via the configured messenger (HTTP or MQTT).
+- **Heartbeat Task:** Periodically sends heartbeat messages to indicate that
+  the program is running.
+- **Send Messages Task:**  Periodically sends messages from the message store
+  with the configured messenger.
+
+This program includes all the functionality of
+[`BasicProgram`][acoupi.programs.templates.BasicProgram], inheriting its
+components and tasks for audio recording, metadata storage, and file
+management.
+
+Usage:
+
+To create an Acoupi program with messaging capabilities, define a new class
+that inherits from `MessagingProgram` and configure it using the
+`MessagingProgramConfiguration` schema.
 """
 
 from pathlib import Path
@@ -29,7 +39,10 @@ from pydantic import BaseModel, Field, model_validator
 
 from acoupi import tasks
 from acoupi.components import SqliteMessageStore, messengers, types
-from acoupi.programs.core import ProgramProtocol
+from acoupi.programs.templates.basic import (
+    BasicProgram,
+    BasicProgramConfiguration,
+)
 
 
 class MessagingConfig(BaseModel):
@@ -64,24 +77,45 @@ class MessagingConfig(BaseModel):
         return self
 
 
-class MessagingConfigMixin(BaseModel):
-    """Messaging configuration mixin.
+class MessagingProgramConfiguration(BasicProgramConfiguration):
+    """Messaging Program Configuration schema.
 
-    This mixin includes the `MessagingConfig` schema in the program's
-    configuration.
+    This schema extends the `BasicProgramConfiguration` to include settings
+    for messaging functionality.
     """
 
     messaging: MessagingConfig
 
 
-ProgramConfig = TypeVar("ProgramConfig", bound=MessagingConfigMixin)
+ProgramConfig = TypeVar("ProgramConfig", bound=MessagingProgramConfiguration)
 
 
-class MessagingProgramMixin(ProgramProtocol[ProgramConfig]):
-    """Messaging program mixin.
+class MessagingProgram(BasicProgram[ProgramConfig]):
+    """Messaging Acoupi Program.
 
-    This mixin provides functionality for sending messages and heartbeats
-    to a configured messenger (HTTP or MQTT).
+    This class extends the `BasicProgram` to provide functionality for
+    sending messages and heartbeats with a configured messenger (HTTP or MQTT).
+
+    Components:
+
+    - **Messenger:** A component responsible for sending messages and
+      heartbeats via a configured communication protocol (HTTP or MQTT).
+    - **Message Store:** A database for storing messages before they are sent.
+
+    Tasks:
+
+    Using the components above, this class creates and manages the following
+    tasks:
+
+    - **Heartbeat Task:** Periodically sends heartbeat messages to indicate
+      that the program is running.
+    - **Send Messages Task:** Periodically sends messages from the message
+      store to the configured messenger.
+
+    This program includes all the functionality of
+    [`BasicProgram`][acoupi.programs.templates.BasicProgram], inheriting its
+    components and tasks for audio recording, metadata storage, and file
+    management.
     """
 
     messenger: types.Messenger
@@ -91,7 +125,7 @@ class MessagingProgramMixin(ProgramProtocol[ProgramConfig]):
     """The configured message store instance."""
 
     def setup(self, config: ProgramConfig):
-        """Set up the messaging program mixin.
+        """Set up the Messaging Program.
 
         This method initializes the message store and messenger, registers
         the messaging and heartbeat tasks, and performs any necessary setup.
@@ -109,11 +143,9 @@ class MessagingProgramMixin(ProgramProtocol[ProgramConfig]):
         This method checks the connection to the configured messenger
         (HTTP or MQTT).
         """
-        if isinstance(self.messenger, messengers.HTTPMessenger):
-            self.messenger.check()
-
-        if isinstance(self.messenger, messengers.MQTTMessenger):
-            self.messenger.check()
+        check_messenger = getattr(self.messenger, "check", None)
+        if callable(check_messenger):
+            check_messenger()
 
         super().check(config)
 
@@ -132,7 +164,7 @@ class MessagingProgramMixin(ProgramProtocol[ProgramConfig]):
         """
         return SqliteMessageStore(config.messaging.messages_db)
 
-    def configure_messenger(self: ProgramProtocol, config: ProgramConfig):
+    def configure_messenger(self, config: ProgramConfig):
         """Configure the messenger.
 
         This method creates and configures an instance of the

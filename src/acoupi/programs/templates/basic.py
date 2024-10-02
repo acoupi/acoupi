@@ -1,30 +1,53 @@
 """Basic Program template module.
 
-This module provides a template for creating a basic Acoupi program.
+This module provides a base class (`BasicProgram`) for creating basic Acoupi
+programs. It offers essential features for audio recording, metadata storage,
+and file management.
 
-The template includes:
+The `BasicProgram` class defines the following components:
 
-- **BasicProgramMixin:** A mixin class that provides a basic program
-  implementation with features for audio recording, metadata storage, and
-  file management.
-- **Configuration Schema:**  Defines the configuration schema
-  (`BasicConfiguration`) required to configure a basic program, including
-  settings for audio recording, data storage, and microphone configuration.
+- **Audio Recorder:**  Records audio clips according to the program's
+  configuration.
+- **File Manager:**  Manages the storage of audio recordings, including saving
+  them to permanent storage and handling temporary files.
+- **Store:** Provides an interface for storing and retrieving metadata
+  associated with the program and its recordings.
 
-A basic program, utilizing this template, performs the following tasks:
+Using these components, `BasicProgram` creates and manages the following
+tasks:
 
-- Records audio at regular intervals.
-- Manages audio files on disk (e.g., saving recordings permanently).
+- **Audio Recording:** Records audio at regular intervals, configurable
+  through the `audio` settings in the `BasicProgramConfiguration` schema.
+- **File Management:**  Periodically performs file management operations,
+  such as moving recordings from temporary to permanent storage.
 
-Key Components:
+Configuration:
 
-- **Audio Recorder:**  Records audio clips according to the specified
-    configuration.
-- **Metadata Store:** Stores metadata associated with recordings.
-- **File Manager:**  Handles saving audio recordings to persistent storage.
+The program's configuration is defined by the `BasicProgramConfiguration`
+schema, which includes settings for:
 
-To use this template, create a new program class that inherits from
-`BasicProgramMixin` and configure it using the `BasicConfiguration` schema.
+- Timezone
+- Microphone configuration
+- Audio recording settings (duration, interval, schedule)
+- Data storage locations (temporary directory, audio directory,
+  metadata database)
+
+Usage:
+
+To create a basic Acoupi program, define a new class that inherits from
+`BasicProgram`.
+
+Customization:
+
+You can customize the program's behavior by overriding the following methods:
+
+- `get_recording_conditions`:  Modify the conditions that trigger audio
+  recording.
+- `get_recording_filters`:  Add filters to determine which recordings to
+  save permanently.
+- `get_recording_callbacks`: Define actions to perform after a recording
+  is made.
+
 """
 
 import datetime
@@ -38,8 +61,11 @@ from pydantic_extra_types.timezone_name import TimeZoneName
 from acoupi import components, data, tasks
 from acoupi.components import types
 from acoupi.components.audio_recorder import MicrophoneConfig
-from acoupi.programs.core import DEFAULT_WORKER_CONFIG, NoUserPrompt
-from acoupi.programs.core.base import ProgramProtocol
+from acoupi.programs.core import (
+    DEFAULT_WORKER_CONFIG,
+    AcoupiProgram,
+    NoUserPrompt,
+)
 from acoupi.system.files import get_temp_dir
 
 __all__ = []
@@ -93,7 +119,7 @@ class PathsConfiguration(BaseModel):
     """Path to the metadata database."""
 
 
-class BasicConfiguration(BaseModel):
+class BasicProgramConfiguration(BaseModel):
     """Configuration schema for a basic program."""
 
     timezone: TimeZoneName = Field(default=TimeZoneName("Europe/London"))
@@ -109,80 +135,85 @@ class BasicConfiguration(BaseModel):
     """Data configuration."""
 
 
-ProgramConfig = TypeVar("ProgramConfig", bound=BasicConfiguration)
+ProgramConfig = TypeVar("ProgramConfig", bound=BasicProgramConfiguration)
 
 
-class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
-    """Basic program mixin.
+class BasicProgram(AcoupiProgram[ProgramConfig]):
+    """Basic Acoupi Program.
 
-    This mixin provides a basic program implementation with the following
-    components:
+        This class provides a base for creating basic Acoupi programs. It offers
+        essential features for audio recording, metadata storage, and file
+        management.
 
-    - **Audio Recorder:** Records audio clips according to the program's
-    configuration.
-    - **File Manager:** Manages the storage of audio recordings, including
-    saving them to permanent storage.
-    - **Store:**  Provides an interface for storing and retrieving metadata
-    associated with the program and its recordings.
+        Components:
 
-    Tasks:
+        - **Audio Recorder:** Records audio clips according to the program's
+          configuration.
+        - **File Manager:** Manages the storage of audio recordings, including
+          saving them to permanent storage and handling temporary files.
+        - **Store:** Provides an interface for storing and retrieving metadata
+          associated with the program and its recordings.
 
-    The mixin includes the following pre-defined tasks:
+        Tasks:
 
-    - **Audio Recording:**  Records audio at regular intervals, configurable
-      through the `audio` settings in the `BasicConfiguration` schema.
-    - **File Management:**  Periodically performs file management operations,
-    such as moving recordings from temporary to permanent storage.
+        Using the components above, this class creates and manages the following
+        tasks:
 
-    Customization:
+        - **Audio Recording:** Records audio at regular intervals, configurable
+          through the `audio` settings in the `BasicProgramConfiguration` schema.
+        - **File Management:** Periodically performs file management operations,
+          such as moving recordings from temporary to permanent storage.
 
-    Customize the program's behavior by inheriting from this mixin and
-    overriding these methods:
+        Customization:
 
-    - `get_recording_conditions`:  Modify the conditions that trigger audio
-    recording.
-    - `get_recording_filters`:  Add filters to determine which recordings to
-    save.
-    - `get_recording_callbacks`: Define actions to perform after a recording is
-    made.
+        Customize the program's behavior by overriding these methods:
 
-    Examples
-    --------
-    Creating a basic program with custom recording conditions:
+        - `get_recording_conditions`: Define the specific conditions that must be
+            met for audio recording to continue when the recording task is
+            triggered by the scheduler.
+        - `get_recording_filters`:  Add filters to determine which recordings to
+          save.
+        - `get_recording_callbacks`: Define actions to perform after a recording
+          is made.
 
-    ```python
-    import datetime
-    from acoupi import components, data
-    from acoupi.programs import AcoupiProgram
-    from acoupi.programs.templates import (
-        BasicProgramMixin,
-        BasicConfiguration,
-    )
+        Examples
+        --------
+    <<<<<<< HEAD
+        Creating a basic program with custom recording conditions:
+
+    =======
+    >>>>>>> main
+        ```python
+        import datetime
+        from acoupi import components, data
+        from acoupi.programs.templates import (
+            BasicProgram,
+            BasicProgramConfiguration,
+        )
 
 
-    class Config(BasicConfiguration):
-        pass
+        class Config(BasicProgramConfiguration):
+            pass
 
 
-    class Program(BasicProgramMixin, AcoupiProgram):
-        configuration_schema = Config
+        class Program(BasicProgram):
+            configuration_schema = Config
 
-        def get_recording_conditions(self, config: Config):
-            # Get the default recording conditions
-            conditions = super().get_recording_conditions(
-                config
-            )
-
-            return [
-                components.IsInInterval(
-                    data.TimeInterval(
-                        start=datetime.time(hour=3),
-                        end=datetime.time(hour=6),
-                    )
-                ),
-                *conditions,
-            ]
-    ```
+            def get_recording_conditions(self, config: Config):
+                # Get the default recording conditions
+                conditions = super().get_recording_conditions(
+                    config
+                )
+                return [
+                    components.IsInInterval(
+                        data.TimeInterval(
+                            start=datetime.time(hour=3),
+                            end=datetime.time(hour=6),
+                        )
+                    ),
+                    *conditions,
+                ]
+        ```
     """
 
     worker_config = DEFAULT_WORKER_CONFIG
@@ -233,8 +264,10 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
         they are functioning correctly. Currently, it only checks the PyAudio
         recorder if it is being used.
         """
-        if isinstance(self.recorder, components.PyAudioRecorder):
-            self.recorder.check()
+        recorder_check = getattr(self.recorder, "check", None)
+        if callable(recorder_check):
+            recorder_check()
+
         super().check(config)
 
     def configure_recorder(

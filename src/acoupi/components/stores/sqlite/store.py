@@ -115,7 +115,6 @@ class SqliteStore(types.Store):
             ended_on=deployment.ended_on,
         )
 
-    @db_session
     def store_deployment(self, deployment: data.Deployment) -> None:
         """Store the deployment locally.
 
@@ -485,7 +484,6 @@ class SqliteStore(types.Store):
         )
         return db_deployment
 
-    @db_session
     def _get_or_create_deployment(
         self, deployment: data.Deployment
     ) -> db_types.Deployment:

@@ -6,22 +6,21 @@ from celery import Celery
 
 from acoupi.components import MicrophoneConfig
 from acoupi.components.messengers import HTTPConfig, MQTTConfig
-from acoupi.programs import AcoupiProgram
 from acoupi.programs.templates import (
     BasicConfiguration,
     BasicProgramMixin,
-    PathsConfiguration,
     MessagingConfig,
-    MessagingConfigMixin,
-    MessagingProgramMixin,
+    MessagingProgram,
+    MessagingProgramConfiguration,
+    PathsConfiguration,
 )
 
 
-class Config(BasicConfiguration, MessagingConfigMixin):
+class Config(MessagingProgramConfiguration):
     name: str = "Test Program"
 
 
-class Program(BasicProgramMixin, MessagingProgramMixin, AcoupiProgram):
+class Program(MessagingProgram):
     config_schema = Config
 
 
@@ -67,7 +66,6 @@ def test_messaging_config_fails_if_http_and_mttq_are_not_provided():
 def test_basic_program_with_messaging_mixin_runs_health_checks_correctly(
     celery_app: Celery,
     messaging_config: MessagingConfig,
-    basic_configuration: BasicConfiguration,
     tmp_path: Path,
 ):
     config = Config(
@@ -97,20 +95,13 @@ def test_basic_program_with_messaging_mixin_runs_health_checks_correctly(
 
 @pytest.mark.usefixtures("celery_app")
 def test_program_has_correct_tasks(
-    tmp_path: Path,
-    celery_app: Celery,
-    basic_configuration: BasicConfiguration,
+    celery_app,
+    microphone_config: MicrophoneConfig,
+    messaging_config: MessagingConfig,
 ):
     config = Config(
-        recording=basic_configuration.recording,
-        paths=basic_configuration.paths,
-        microphone=basic_configuration.microphone,
-        messaging=MessagingConfig(
-            messages_db=tmp_path / "messages.db",
-            http=HTTPConfig(
-                base_url="http://localhost:8000",
-            ),
-        ),
+        microphone=microphone_config,
+        messaging=messaging_config,
     )
     program = Program(
         config,

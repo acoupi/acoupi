@@ -1,9 +1,8 @@
 """Acoupi Connected Program.
 
-This program provides a basic Acoupi program with added messaging
-capabilities. It combines the features of the `BasicProgramMixin` and
-`MessagingProgramMixin` templates to create a program that can record audio,
-store metadata, manage files, and send messages and heartbeats.
+This program provides a basic Acoupi program with added messaging capabilities.
+It uses the `MessagingProgram` template to create a program that can record
+audio, store metadata, manage files, and send messages and heartbeats.
 
 Features:
 
@@ -17,9 +16,8 @@ Features:
 
 Configuration:
 
-The program's configuration is defined by the `ConfigSchema`, which inherits
-from `BasicConfiguration` and `MessagingConfigMixin`. This schema includes
-settings for:
+The program's configuration is defined by the `MessagingProgramConfig`. This
+schema includes settings for:
 
 - **Basic Program:**
     - Timezone
@@ -60,13 +58,11 @@ import pytz
 from pydantic import BaseModel
 
 from acoupi import components, data
-from acoupi.programs import AcoupiProgram
 from acoupi.programs.templates import (
-    BasicConfiguration,
-    BasicProgramMixin,
-    MessagingConfigMixin,
-    MessagingProgramMixin,
+    MessagingConfig,
+    MessagingProgram,
 )
+from acoupi.programs.templates.messaging import MessagingProgramConfiguration
 
 
 class SaveRecordingFilter(BaseModel):
@@ -85,7 +81,7 @@ class SaveRecordingFilter(BaseModel):
     frequency_interval: int = 5
 
 
-class ConfigSchema(BasicConfiguration, MessagingConfigMixin):
+class ConfigSchema(MessagingProgramConfiguration):
     """Configuration Schema for Connected Program.
 
     This schema combines the settings for basic program functionality and
@@ -95,13 +91,12 @@ class ConfigSchema(BasicConfiguration, MessagingConfigMixin):
     recording_saving: Optional[SaveRecordingFilter] = None
 
 
-class Program(MessagingProgramMixin, BasicProgramMixin, AcoupiProgram):
+class Program(MessagingProgram):
     """Connected Program.
 
     This program provides a basic Acoupi program with added messaging
     capabilities.
     """
-
     config_schema = ConfigSchema
 
     def get_recording_filters(self, config: ConfigSchema):

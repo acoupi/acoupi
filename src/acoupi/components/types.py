@@ -4,7 +4,7 @@ import datetime
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Generic, List, Optional, Tuple
+from typing import Generic, List, Optional, Protocol, Tuple
 from uuid import UUID
 
 from acoupi import data
@@ -125,7 +125,7 @@ class ProcessingFilter(ABC):
         """
 
 
-class Model(ABC):
+class Model(Protocol):
     """Model for making predictions.
 
     The Model is responsible for running the model on the audio file

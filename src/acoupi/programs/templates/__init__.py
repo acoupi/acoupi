@@ -1,38 +1,62 @@
 """Acoupi program templates.
 
-This module provides templates to simplify the creation of Acoupi programs.
+This module provides base classes and configuration schemas to simplify the
+creation of Acoupi programs.
 
-Features:
+Available Templates:
 
-- **Program Mixins:**  These class mixins add functionality to your programs,
-  such as messaging capabilities. Simply inherit from the mixin to integrate
-  its features into your program.
+- **Basic Program:** Provides a foundation for building Acoupi programs,
+  including features for audio recording, metadata storage, and file management.
+  - Base class: `BasicProgram`
+  - Configuration schema: `BasicProgramConfiguration`
+- **Messaging Program:** Extends the `BasicProgram` with messaging
+  capabilities, enabling programs to send messages and heartbeats via HTTP or
+  MQTT.
+  - Base class: `MessagingProgram`
+  - Configuration schema: `MessagingProgramConfiguration`
+- **Detection Program:**  Extends the `MessagingProgram` with audio detection
+  capabilities, allowing programs to run detection models on recordings and
+  generate messages based on the results.
+  - Base class: `DetectionProgram`
+  - Configuration schema: `DetectionProgramConfiguration`
 
-- **Configuration Schemas:**  Pre-built configuration schemas ensure
-  compatibility with Acoupi templates and provide a foundation for defining
-  your program's configuration structure.
+Each template includes a base class that provides core functionality and a
+configuration schema to define the program's settings.
 
-For detailed usage and examples, refer to the individual template documentation.
+For detailed usage instructions, customization options, and examples, refer
+to the individual template documentation.
 """
 
 from acoupi.programs.templates.basic import (
     AudioConfiguration,
-    BasicConfiguration,
-    BasicProgramMixin,
+    BasicProgramConfiguration,
+    BasicProgram,
     PathsConfiguration,
+)
+from acoupi.programs.templates.detection import (
+    DetectionProgram,
+    DetectionProgramConfiguration,
 )
 from acoupi.programs.templates.messaging import (
     MessagingConfig,
-    MessagingConfigMixin,
-    MessagingProgramMixin,
+    MessagingProgram,
+    MessagingProgramConfiguration,
 )
 
 __all__ = [
     "AudioConfiguration",
     "BasicConfiguration",
+    "BasicProgram",
+    "BasicProgramConfiguration",
     "BasicProgramMixin",
+    "DataConfiguration",
+    "DetectionProgram",
+    "DetectionProgramConfiguration",
     "MessagingConfig",
-    "PathsConfiguration",
+    "MessagingConfig",
+    "MessagingConfig",
+    "MessagingProgram",
+    "MessagingProgramConfiguration",
     "MessagingProgramMixin",
-    "MessagingConfigMixin",
+    "PathsConfiguration",
 ]

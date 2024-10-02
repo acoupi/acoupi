@@ -11,8 +11,7 @@ import pytz
 from pydantic import BaseModel
 
 from acoupi import components, data
-from acoupi.programs import AcoupiProgram
-from acoupi.programs.templates import BasicConfiguration, BasicProgramMixin
+from acoupi.programs.templates import BasicProgram, BasicProgramConfiguration
 
 
 class SaveRecordingFilter(BaseModel):
@@ -31,13 +30,13 @@ class SaveRecordingFilter(BaseModel):
     frequency_interval: int = 5
 
 
-class ConfigSchema(BasicConfiguration):
+class ConfigSchema(BasicProgramConfiguration):
     """Configuration Schema for Test Program."""
 
     recording_saving: Optional[SaveRecordingFilter] = None
 
 
-class Program(BasicProgramMixin, AcoupiProgram):
+class Program(BasicProgram):
     """Test Program."""
 
     config_schema = ConfigSchema
