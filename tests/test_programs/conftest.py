@@ -6,8 +6,8 @@ from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.components.messengers import HTTPConfig
 from acoupi.programs.templates import (
     AudioConfiguration,
-    DataConfiguration,
     MessagingConfig,
+    PathsConfiguration,
 )
 from acoupi.system.constants import CeleryConfig
 
@@ -32,11 +32,11 @@ def celery_worker_parameters():
 
 
 @pytest.fixture
-def data_config(tmp_path: Path) -> DataConfiguration:
-    return DataConfiguration(
-        tmp=tmp_path / "tmp",
-        audio=tmp_path / "audio",
-        metadata=tmp_path / "metadata.db",
+def paths_config(tmp_path: Path) -> PathsConfiguration:
+    return PathsConfiguration(
+        tmp_audio=tmp_path / "tmp",
+        recordings=tmp_path / "audio",
+        db_metadata=tmp_path / "metadata.db",
     )
 
 

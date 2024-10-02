@@ -6,10 +6,10 @@ from celery import Celery
 from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.programs.templates import (
     AudioConfiguration,
-    DataConfiguration,
-    DetectionProgramConfiguration,
     DetectionProgram,
+    DetectionProgramConfiguration,
     MessagingConfig,
+    PathsConfiguration,
 )
 
 
@@ -20,16 +20,16 @@ class Config(DetectionProgramConfiguration):
 @pytest.fixture
 def config(
     audio_config: AudioConfiguration,
-    data_config: DataConfiguration,
+    paths_config: PathsConfiguration,
     microphone_config: MicrophoneConfig,
     messaging_config: MessagingConfig,
 ) -> Config:
     return Config(
         name="test",
-        data=data_config,
+        paths=paths_config,
         microphone=microphone_config,
         messaging=messaging_config,
-        audio=audio_config,
+        recording=audio_config,
     )
 
 

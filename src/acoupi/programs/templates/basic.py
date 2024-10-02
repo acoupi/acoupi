@@ -141,79 +141,74 @@ ProgramConfig = TypeVar("ProgramConfig", bound=BasicProgramConfiguration)
 class BasicProgram(AcoupiProgram[ProgramConfig]):
     """Basic Acoupi Program.
 
-        This class provides a base for creating basic Acoupi programs. It offers
-        essential features for audio recording, metadata storage, and file
-        management.
+    This class provides a base for creating basic Acoupi programs. It offers
+    essential features for audio recording, metadata storage, and file
+    management.
 
-        Components:
+    Components:
 
-        - **Audio Recorder:** Records audio clips according to the program's
-          configuration.
-        - **File Manager:** Manages the storage of audio recordings, including
-          saving them to permanent storage and handling temporary files.
-        - **Store:** Provides an interface for storing and retrieving metadata
-          associated with the program and its recordings.
+    - **Audio Recorder:** Records audio clips according to the program's
+      configuration.
+    - **File Manager:** Manages the storage of audio recordings, including
+      saving them to permanent storage and handling temporary files.
+    - **Store:** Provides an interface for storing and retrieving metadata
+      associated with the program and its recordings.
 
-        Tasks:
+    Tasks:
 
-        Using the components above, this class creates and manages the following
-        tasks:
+    Using the components above, this class creates and manages the following
+    tasks:
 
-        - **Audio Recording:** Records audio at regular intervals, configurable
-          through the `audio` settings in the `BasicProgramConfiguration` schema.
-        - **File Management:** Periodically performs file management operations,
-          such as moving recordings from temporary to permanent storage.
+    - **Audio Recording:** Records audio at regular intervals, configurable
+      through the `audio` settings in the `BasicProgramConfiguration` schema.
+    - **File Management:** Periodically performs file management operations,
+      such as moving recordings from temporary to permanent storage.
 
-        Customization:
+    Customization:
 
-        Customize the program's behavior by overriding these methods:
+    Customize the program's behavior by overriding these methods:
 
-        - `get_recording_conditions`: Define the specific conditions that must be
-            met for audio recording to continue when the recording task is
-            triggered by the scheduler.
-        - `get_recording_filters`:  Add filters to determine which recordings to
-          save.
-        - `get_recording_callbacks`: Define actions to perform after a recording
-          is made.
+    - `get_recording_conditions`: Define the specific conditions that must be
+        met for audio recording to continue when the recording task is
+        triggered by the scheduler.
+    - `get_recording_filters`:  Add filters to determine which recordings to
+      save.
+    - `get_recording_callbacks`: Define actions to perform after a recording
+      is made.
 
-        Examples
-        --------
-    <<<<<<< HEAD
-        Creating a basic program with custom recording conditions:
-
-    =======
-    >>>>>>> main
-        ```python
-        import datetime
-        from acoupi import components, data
-        from acoupi.programs.templates import (
-            BasicProgram,
-            BasicProgramConfiguration,
-        )
+    Examples
+    --------
+    ```python
+    import datetime
+    from acoupi import components, data
+    from acoupi.programs.templates import (
+        BasicProgram,
+        BasicProgramConfiguration,
+    )
 
 
-        class Config(BasicProgramConfiguration):
-            pass
+    class Config(BasicProgramConfiguration):
+        pass
 
 
-        class Program(BasicProgram):
-            configuration_schema = Config
+    class Program(BasicProgram):
+        configuration_schema = Config
 
-            def get_recording_conditions(self, config: Config):
-                # Get the default recording conditions
-                conditions = super().get_recording_conditions(
-                    config
-                )
-                return [
-                    components.IsInInterval(
-                        data.TimeInterval(
-                            start=datetime.time(hour=3),
-                            end=datetime.time(hour=6),
-                        )
-                    ),
-                    *conditions,
-                ]
-        ```
+        def get_recording_conditions(self, config: Config):
+            # Get the default recording conditions
+            conditions = super().get_recording_conditions(
+                config
+            )
+            return [
+                components.IsInInterval(
+                    data.TimeInterval(
+                        start=datetime.time(hour=3),
+                        end=datetime.time(hour=6),
+                    )
+                ),
+                *conditions,
+            ]
+    ```
     """
 
     worker_config = DEFAULT_WORKER_CONFIG

@@ -29,8 +29,8 @@ to the individual template documentation.
 
 from acoupi.programs.templates.basic import (
     AudioConfiguration,
-    BasicProgramConfiguration,
     BasicProgram,
+    BasicProgramConfiguration,
     PathsConfiguration,
 )
 from acoupi.programs.templates.detection import (
@@ -45,18 +45,13 @@ from acoupi.programs.templates.messaging import (
 
 __all__ = [
     "AudioConfiguration",
-    "BasicConfiguration",
+    "BasicProgram",
     "BasicProgram",
     "BasicProgramConfiguration",
-    "BasicProgramMixin",
-    "DataConfiguration",
     "DetectionProgram",
     "DetectionProgramConfiguration",
     "MessagingConfig",
-    "MessagingConfig",
-    "MessagingConfig",
     "MessagingProgram",
     "MessagingProgramConfiguration",
-    "MessagingProgramMixin",
     "PathsConfiguration",
 ]

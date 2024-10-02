@@ -10,7 +10,6 @@ from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.programs.templates import (
     BasicProgram,
     BasicProgramConfiguration,
-    DataConfiguration,
     PathsConfiguration,
 )
 

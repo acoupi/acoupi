@@ -7,8 +7,7 @@ from celery import Celery
 from acoupi.components import MicrophoneConfig
 from acoupi.components.messengers import HTTPConfig, MQTTConfig
 from acoupi.programs.templates import (
-    BasicConfiguration,
-    BasicProgramMixin,
+    AudioConfiguration,
     MessagingConfig,
     MessagingProgram,
     MessagingProgramConfiguration,
@@ -22,23 +21,6 @@ class Config(MessagingProgramConfiguration):
 
 class Program(MessagingProgram):
     config_schema = Config
-
-
-@pytest.fixture
-def basic_configuration(tmp_path: Path) -> BasicConfiguration:
-    if not tmp_path.exists():
-        tmp_path.mkdir(parents=True)
-
-    return BasicConfiguration(
-        microphone=MicrophoneConfig(
-            device_name="default",
-        ),
-        data=PathsConfiguration(
-            tmp_audio=tmp_path / "tmp_audio",
-            recordings=tmp_path / "recordings",
-            db_metadata=tmp_path / "db_metadata.db",
-        ),
-    )
 
 
 def test_messaging_config_fails_if_http_and_mttq_are_not_provided():
@@ -65,13 +47,16 @@ def test_messaging_config_fails_if_http_and_mttq_are_not_provided():
 )
 def test_basic_program_with_messaging_mixin_runs_health_checks_correctly(
     celery_app: Celery,
-    messaging_config: MessagingConfig,
     tmp_path: Path,
+    messaging_config: MessagingConfig,
+    microphone_config: MicrophoneConfig,
+    paths_config: PathsConfiguration,
+    audio_config: AudioConfiguration,
 ):
     config = Config(
-        recording=basic_configuration.recording,
-        paths=basic_configuration.paths,
-        microphone=basic_configuration.microphone,
+        recording=audio_config,
+        paths=paths_config,
+        microphone=microphone_config,
         messaging=messaging_config.model_copy(
             update=dict(messages_db=tmp_path / "messages.db")
         ),
@@ -96,12 +81,16 @@ def test_basic_program_with_messaging_mixin_runs_health_checks_correctly(
 @pytest.mark.usefixtures("celery_app")
 def test_program_has_correct_tasks(
     celery_app,
-    microphone_config: MicrophoneConfig,
     messaging_config: MessagingConfig,
+    microphone_config: MicrophoneConfig,
+    paths_config: PathsConfiguration,
+    audio_config: AudioConfiguration,
 ):
     config = Config(
         microphone=microphone_config,
         messaging=messaging_config,
+        paths=paths_config,
+        recording=audio_config,
     )
     program = Program(
         config,

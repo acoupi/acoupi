@@ -59,10 +59,9 @@ from pydantic import BaseModel
 
 from acoupi import components, data
 from acoupi.programs.templates import (
-    MessagingConfig,
     MessagingProgram,
+    MessagingProgramConfiguration,
 )
-from acoupi.programs.templates.messaging import MessagingProgramConfiguration
 
 
 class SaveRecordingFilter(BaseModel):
@@ -97,6 +96,7 @@ class Program(MessagingProgram):
     This program provides a basic Acoupi program with added messaging
     capabilities.
     """
+
     config_schema = ConfigSchema
 
     def get_recording_filters(self, config: ConfigSchema):
