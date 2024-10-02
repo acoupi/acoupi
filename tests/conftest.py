@@ -16,7 +16,7 @@ pytest_plugins = ("celery.contrib.pytest",)
 
 
 @pytest.fixture
-def patched_rpi_serial_number(monkeypatch) -> str:
+def patched_device_serial_number(monkeypatch) -> str:
     """Patch the RPi serial number.
 
     In order to use this fixture, you must import the module that uses
@@ -26,7 +26,7 @@ def patched_rpi_serial_number(monkeypatch) -> str:
     Example:
         from acoupi import utils
 
-        def test_foo(patched_rpi_serial_number):
+        def test_foo(patched_device_serial_number):
             assert utils.get_device_serial_number() == "1234567890ABCDEF"
     """
     serial_number = "1234567890ABCDEF"
