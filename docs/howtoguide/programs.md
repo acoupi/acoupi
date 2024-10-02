@@ -247,30 +247,19 @@ Now we will explore each of these methods, giving insight into how to create cus
 When building a program, you often need to incorporate basic functionality, such as audio recording and management.
 _acoupi_ provides program templates that serve as foundational building blocks, saving you time and effort.
 
-Here are two examples of program templates:
+#### Basic Program
 
-- **BasicProgramMixin**: This template provides essential features for recording audio and managing recordings, forming a solid base for most bioacoustic monitoring programs.
-- **MessagingProgramMixin**: This template adds functionality for sending messages and heartbeats to remote servers.
+The [`BasicProgram`][acoupi.programs.templates.BasicProgram] provides a convenient starting point for programs that require fundamental audio recording and management capabilities.
+By incorporating this template, you can quickly set up a program that captures audio data and organises recordings efficiently.
 
-??? info "What is a Mixin?"
-
-    In object-oriented programming, a mixin is a class that provides a specific set of functionalities to other classes without being their direct parent class.
-    Think of it as adding a specific "flavor" or capability to your program.
-
-#### Basic Program Mixin
-
-The [`BasicProgramMixin`][acoupi.programs.templates.BasicProgramMixin] provides a convenient starting point for programs that require fundamental audio recording and management capabilities.
-By incorporating this mixin, you can quickly set up a program that captures audio data and organises recordings efficiently.
-
-To use the `BasicProgramMixin`, import it and include it as a base class along with `AcoupiProgram` when defining your custom program:
+To use the `BasicProgram`, define your custom program class that inherits from it:
 
 ```python
-from acoupi.programs import AcoupiProgram
-from acoupi.programs.templates import BasicProgramMixin, BasicConfiguration
+from acoupi.programs.templates import BasicProgram, BasicProgramConfiguration
 
-class CustomProgram(BasicProgramMixin, AcoupiProgram):
+class CustomProgram(BasicProgram):
 
-    config_schema = BasicConfiguration
+    config_schema = BasicProgramConfiguration
 ```
 
 This automatically equips your `CustomProgram` with two essential tasks:
@@ -284,7 +273,7 @@ This automatically equips your `CustomProgram` with two essential tasks:
     Saved recordings are organised in a structured folder hierarchy: `<base_directory>/<year>/<month>/<day>/<time>_<recording_id>.wav`.
     This task is based on the `generate_file_management_task` template ([`acoupi.tasks.generate_file_management_task`][acoupi.tasks.generate_file_management_task]).
 
-The `BasicProgramMixin` uses the `BasicConfiguration` schema ([`acoupi.programs.templates.BasicConfiguration`][acoupi.programs.templates.BasicConfiguration]) to define its configurable parameters.
+The `BasicProgram` uses the `BasicProgramConfiguration` schema ([`acoupi.programs.templates.BasicProgramConfiguration`][acoupi.programs.templates.BasicProgramConfiguration]) to define its configurable parameters.
 To extend these parameters, you can create a new configuration class that inherits from `BasicConfiguration` and adds your custom fields:
 
 ```python
@@ -293,7 +282,7 @@ class ExpandedConfigurations(BasicConfiguration):
     # ... your additional fields ...
 ```
 
-While the `BasicProgramMixin` provides a solid foundation, you can further customise its behaviour by overriding specific methods.
+While the `BasicProgram` provides a solid foundation, you can further customise its behaviour by overriding specific methods.
 For instance, you can modify the recording conditions to control when audio recording occurs:
 
 ```python
@@ -308,7 +297,7 @@ class IsWarmEnough(RecordingCondition):
         temperature = sensor.get_current_temperature()
         return temperature >= self.threshold
 
-class CustomProgram(BasicProgramMixin, AcoupiProgram):
+class CustomProgram(BasicProgram):
     # ... other parts of your program ...
 
     def get_recording_conditions(self, config):
@@ -318,33 +307,29 @@ class CustomProgram(BasicProgramMixin, AcoupiProgram):
             *default_conditions,
             IsWarmEnough(config.temperature_threshold)  # Add your custom condition
         ]
-
 ```
 
-For a complete understanding of the `BasicProgramMixin`'s capabilities and customisation options, refer to its [reference documentation][acoupi.programs.templates.BasicProgramMixin].
+For a complete understanding of the `BasicProgram`'s capabilities and customisation options, refer to its [reference documentation][acoupi.programs.templates.BasicProgram].
 
-#### Messaging Program Mixin
+#### Messaging Program
 
-The [`MessagingProgramMixin`][acoupi.programs.templates.MessagingProgramMixin] provides your programs with communication capabilities, enabling them to send messages based on events or data processed by your sensor.
+The [`MessagingProgram`][acoupi.programs.templates.MessagingProgram] extends the `BasicProgram` to add messaging capabilities.
+This allows your programs to send messages and heartbeats to remote servers via HTTP or MQTT.
 
-To incorporate messaging functionality into your program, follow a similar approach to the `BasicProgramMixin`:
-
-- **Inherit from the Mixin**: Include `MessagingProgramMixin` as a base class along with `AcoupiProgram` when defining your custom program.
-- **Use a Compatible Configuration Schema**: Ensure your configuration schema inherits from [`MessagingConfigMixin`][acoupi.programs.templates.MessagingConfigMixin] to include the necessary messaging-related settings.
+To incorporate messaging functionality into your program, define your custom program class that inherits from `MessagingProgram`:
 
 ```python
-from acoupi.programs.templates import MessagingProgramMixin, MessagingConfigMixin
-from acoupi.programs import AcoupiProgram
+from acoupi.programs.templates import MessagingProgram, MessagingProgramConfig
 
-class CustomConfig(MessagingConfigMixin):
+class CustomConfig(MessagingProgramConfig):
     # ... your custom configuration fields ...
 
-class CustomProgram(MessagingProgramMixin, AcoupiProgram):
+class CustomProgram(MessagingProgram):
 
     config_schema = CustomConfig
 ```
 
-This configuration grants your program the following messaging features:
+This equips your program with the following messaging features:
 
 - **Messenger**: A [`Messenger`][acoupi.components.types.Messenger] object is created, allowing you to choose between HTTP or MQTT protocols for message delivery.
 - **Message Store**: A dedicated message store is initialised to keep track of all messages generated by your device, including their delivery status.
@@ -353,15 +338,15 @@ This configuration grants your program the following messaging features:
 - **Heartbeat Task**: This task periodically sends a heartbeat message (every 30 minutes by default, configurable) containing information about the device's status, ID, and the current time.
     This provides a regular indication that the device is active and functioning correctly.
 
-By default, the `MessagingProgramMixin` doesn't generate any messages on its own.
+By default, the `MessagingProgram` doesn't generate any messages on its own.
 Its primary purpose is to provide the underlying framework for sending messages.
-You can easily create and send messages from your custom tasks using the message_store:
+You can easily create and send messages from your custom tasks using the `message_store`:
 
 ```python
 from acoupi.data import Message
 import datetime
 
-class CustomProgram(MessagingProgramMixin, AcoupiProgram):
+class CustomProgram(MessagingProgram):
 
     def setup(self, config):
         super().setup(config)  # Initialise the messaging components
@@ -382,7 +367,69 @@ class CustomProgram(MessagingProgramMixin, AcoupiProgram):
 In this example, `random_task` creates a simple message and stores it in the `message_store`.
 The **Send Messages Task** will then handle delivering this message at its next scheduled execution.
 
-For detailed information about the configuration options and customisation possibilities of the `MessagingProgramMixin`, consult its comprehensive [reference documentation][acoupi.programs.templates.MessagingProgramMixin].
+For detailed information about the configuration options and customisation possibilities of the `MessagingProgram`, consult its comprehensive [reference documentation][acoupi.programs.templates.MessagingProgram].
+
+#### Detection Program
+
+To create an Acoupi program that performs audio detection and sends detection information to a remote server, you can use the [`DetectionProgram`][acoupi.programs.templates.DetectionProgram] template.
+This template builds upon the `BasicProgram` and `MessagingProgram` templates, inheriting their functionality for audio recording, file management, heartbeats, and sending messages.
+
+The `DetectionProgram` adds a detection task that runs a detection model on recorded audio segments.
+This allows you to create "smart" bioacoustic detectors that can automatically identify sounds or events of interest.
+
+To use the `DetectionProgram` template, define your custom program class that inherits from `DetectionProgram` and implement the `configure_model` method:
+
+```python
+from acoupi.programs.templates import DetectionProgram, DetectionProgramConfig
+from acoupi_birdnet.models import BirdNET
+
+
+
+class CustomConfig(DetectionProgramConfig):
+    threshold: float = 0.5
+    # ... your custom fields ...
+
+class CustomProgram(DetectionProgram):
+
+    config_schema = CustomConfig
+
+    #
+    def configure_model(self, config):
+        # create a model instance with your configurations
+        return BirdNET(threshold=config.threshold)
+```
+
+The `configure_model` method should return any component that inherits from the [types.Model][acoupi.components.types.Model] class.
+This allows you to use any compatible detection model with your program.
+
+By defining a program like this, it will automatically create a new task called "detection_task" that will be triggered whenever a recording has been successfully finalised.
+
+The `DetectionProgram` template offers several customisation options:
+
+- `get_message_factories`: Override this method to customise the messages generated based on the detection results.
+    For example, you can create messages that are sent whenever a particular species is detected or when there is a high level of acoustic diversity.
+
+```python
+from acoupi.components import DetectionThresholdMessageBuilder
+
+class CustomProgram(DetectionProgram):
+    ...
+
+    def get_message_factories(self, config):
+        return [
+            # This message factory will remove any detections below 0.8 score
+            # but otherwise will send everything
+            DetectionThresholdMessageBuilder(threshold=0.8)
+        ]
+```
+
+- `get_output_cleaners`: Override this method to define a list of output cleaners that will be applied to the model's raw output to clean it up or extract relevant information.
+
+- `get_processing_filters`: Override this method to define a list of processing filters that will be applied to each recording before it is processed by the model.
+    These filters determine whether a recording should be processed at all.
+    This can be useful to avoid unnecessary model processing when it is not required by the context or based on simple heuristics on the recording content.
+
+For more info on how this program can be configured have a look at its [reference documentation][acoupi.programs.templates.DetectionProgram].
 
 ### Predefined Configuration Schemas
 
@@ -408,9 +455,9 @@ _acoupi_ provides a collection of predefined schemas for common components:
 
 These predefined schemas are further grouped into higher-level schemas for broader functionalities:
 
-1. [**BasicConfiguration**][acoupi.programs.templates.BasicConfiguration]: This schema combines `MicrophoneConfig`, `PathsConfiguration`, and `RecordingConfiguration`, providing all the essential configurations for a basic _acoupi_ program.
+1. [**BasicConfiguration**][acoupi.programs.templates.BasicProgramConfiguration]: This schema combines `MicrophoneConfig`, `PathsConfiguration`, and `RecordingConfiguration`, providing all the essential configurations for a basic _acoupi_ program.
 
-2. [**MessagingConfigMixin**][acoupi.programs.templates.MessagingConfigMixin]: This schema includes the necessary configurations for using the `MessagingProgramMixin`, enabling message sending capabilities in your programs.
+2. [**MessagingProgramConfiguration**][acoupi.programs.templates.MessagingProgramConfiguration]: This schema includes the necessary configurations for using the `MessagingProgram`, enabling message sending capabilities in your programs.
 
 Leverage these predefined schemas as building blocks to construct comprehensive configuration schemas tailored to your specific program requirements.
 This modular approach promotes consistency, reduces redundancy, and ensures your programs are well-structured and easily configurable.
