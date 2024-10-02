@@ -20,6 +20,10 @@ from acoupi.programs.templates.basic import (
     BasicProgramMixin,
     DataConfiguration,
 )
+from acoupi.programs.templates.detection import (
+    DetectionConfig,
+    DetectionProgramMixin,
+)
 from acoupi.programs.templates.messaging import (
     MessagingConfig,
     MessagingConfigMixin,
@@ -33,4 +37,6 @@ __all__ = [
     "DataConfiguration",
     "MessagingProgramMixin",
     "MessagingConfigMixin",
+    "DetectionConfig",
+    "DetectionProgramMixin",
 ]
