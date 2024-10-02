@@ -60,14 +60,14 @@ def test_can_load_the_acoupi_program():
 
 sample_program = """
 from acoupi.programs import AcoupiProgram
-from acoupi.programs.templates import BasicProgramMixin, BasicConfiguration
+from acoupi.programs.templates import BasicProgram, BasicProgramConfiguration
 
 
-class Config(BasicConfiguration):
+class Config(BasicProgramConfiguration):
     name: str = "test"
 
 
-class Program(BasicProgramMixin[Config], AcoupiProgram):
+class Program(BasicProgram[Config]):
     config_schema = Config
 
     name = "test_program"

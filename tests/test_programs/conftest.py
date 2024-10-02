@@ -1,5 +1,14 @@
+from pathlib import Path
+
 import pytest
 
+from acoupi.components.audio_recorder import MicrophoneConfig
+from acoupi.components.messengers import HTTPConfig
+from acoupi.programs.templates import (
+    AudioConfiguration,
+    DataConfiguration,
+    MessagingConfig,
+)
 from acoupi.system.constants import CeleryConfig
 
 
@@ -20,3 +29,36 @@ def celery_worker_parameters():
     return {
         "loglevel": "WARN",
     }
+
+
+@pytest.fixture
+def data_config(tmp_path: Path) -> DataConfiguration:
+    return DataConfiguration(
+        tmp=tmp_path / "tmp",
+        audio=tmp_path / "audio",
+        metadata=tmp_path / "metadata.db",
+    )
+
+
+@pytest.fixture
+def audio_config() -> AudioConfiguration:
+    return AudioConfiguration(duration=1, interval=2)
+
+
+@pytest.fixture
+def microphone_config():
+    return MicrophoneConfig(
+        samplerate=44100,
+        audio_channels=1,
+        device_name="default",
+    )
+
+
+@pytest.fixture
+def messaging_config(tmp_path: Path) -> MessagingConfig:
+    return MessagingConfig(
+        messages_db=tmp_path / "messages.db",
+        http=HTTPConfig(
+            base_url="http://localhost:8000",
+        ),
+    )

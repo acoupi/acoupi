@@ -9,7 +9,6 @@ from typing import (
     Generic,
     List,
     Optional,
-    Protocol,
     Type,
     TypeVar,
     Union,
@@ -48,32 +47,7 @@ class InvalidAcoupiConfiguration(ValueError):
     """Raised when a configuration is invalid."""
 
 
-class ProgramProtocol(Generic[C], Protocol):
-    logger: logging.Logger
-
-    def setup(self, config: C) -> None:
-        pass
-
-    def check(self, config: C) -> None:
-        pass
-
-    def on_start(self, deployment: data.Deployment) -> None:
-        pass
-
-    def on_end(self, deployment: data.Deployment) -> None:
-        pass
-
-    def add_task(
-        self,
-        function: Callable[[], Optional[B]],
-        callbacks: Optional[List[Callable[[Optional[B]], None]]] = None,
-        schedule: Union[int, datetime.timedelta, crontab, None] = None,
-        queue: Optional[str] = None,
-    ) -> None:
-        pass
-
-
-class AcoupiProgram(ABC, ProgramProtocol[ProgramConfig]):
+class AcoupiProgram(ABC, Generic[ProgramConfig]):
     """A program is a collection of tasks."""
 
     config: ProgramConfig
@@ -100,7 +74,6 @@ class AcoupiProgram(ABC, ProgramProtocol[ProgramConfig]):
 
     def setup(self, config: ProgramConfig):
         """Set up the program."""
-        pass
 
     def check(self, config: ProgramConfig) -> None:
         """Check the configurations.
