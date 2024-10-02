@@ -38,7 +38,6 @@ class MQTTConfig(BaseModel):
     username: str
     password: Optional[SecretStr] = None
     topic: str = "acoupi"
-    client_id: Optional[str] = None
     port: int = 1884
     timeout: int = 5
 
@@ -61,10 +60,9 @@ class MQTTMessenger(types.Messenger):
         self,
         host: str,
         topic: str,
-        client_id: Optional[str] = None,
         port: int = 1884,
         username: Optional[str] = None,
-        password: Optional[str] = None,
+        password: Optional[SecretStr] = None,
         timeout: int = 5,
         logger: Optional[logging.Logger] = None,
     ) -> None:
@@ -80,7 +78,7 @@ class MQTTMessenger(types.Messenger):
             The topic to send messages to. Example: "org/survey/device_00/".
         port : int, optional
             The port to connect to, by default 1884.
-        password : Optional[str], optional
+        password : Optional[SecretStr], optional
             The password to authenticate with, by default None.
 
         Notes
@@ -91,11 +89,7 @@ class MQTTMessenger(types.Messenger):
         self.timeout = timeout
         self.host = host
         self.port = port
-
-        if client_id is None:
-            self.client_id = get_device_id()
-        else:
-            self.client_id = client_id
+        self.client_id = get_device_id()
 
         self.client = mqtt.Client(
             callback_api_version=CallbackAPIVersion.VERSION2,
@@ -119,8 +113,8 @@ class MQTTMessenger(types.Messenger):
             host=config.host,
             port=config.port,
             username=config.username,
-            password=config.password.get_secret_value() if config.password else None,
-            client_id=config.client_id,
+            # password=config.password.get_secret_value() if config.password else None,
+            password=config.password,
             topic=config.topic,
             timeout=config.timeout,
             logger=logger,
@@ -197,7 +191,9 @@ class MQTTMessenger(types.Messenger):
             logging.debug(f"Message not sent: {message.content}. Error: {e}")
 
         if response.rc != MQTTErrorCode.MQTT_ERR_SUCCESS:
-            logging.debug(f"Message not sent: {message.content}. Error: {response.rc}")
+            logging.debug(
+                f"Message not sent: {message.content}. Error: {response.rc}"
+            )
             status = data.ResponseStatus.ERROR
 
         received_on = datetime.datetime.now()
@@ -403,7 +399,10 @@ class HTTPMessenger(types.Messenger):
                 "temporarily unavailable or experiencing issues."
             )
 
-        if "Allow" in response.headers and "POST" not in response.headers["Allow"]:
+        if (
+            "Allow" in response.headers
+            and "POST" not in response.headers["Allow"]
+        ):
             raise HealthCheckError(
                 f"Could connect to {self.base_url} but POST method is "
                 "not allowed. Check the server configuration."
