@@ -57,12 +57,20 @@ class AudioConfiguration(BaseModel):
     chunksize: Annotated[int, NoUserPrompt] = 8192
     """Chunksize of audio recording."""
 
-    schedule: data.TimeInterval = Field(
-        default_factory=lambda: data.TimeInterval(
-            start=datetime.time(hour=0, minute=0, second=0),
-            end=datetime.time(hour=23, minute=59, second=59),
-        )
+    schedule_start: datetime.time = Field(
+        default=datetime.time(hour=6, minute=0, second=0),
     )
+    """Start time for recording schedule."""
+
+    schedule_end: datetime.time = Field(
+        default=datetime.time(hour=22, minute=30, second=0),
+    )
+    """End time for recording schedule."""
+
+    def get_schedule(self) -> list[data.TimeInterval]:
+        """Generate a TimeInterval from start and end times."""
+        return [data.TimeInterval(start=self.schedule_start, end=self.schedule_end)]
+
     """Schedule for recording audio."""
 
 
@@ -73,7 +81,7 @@ class PathsConfiguration(BaseModel):
     """Temporary directory for storing audio files."""
 
     recordings: Path = Field(
-        default_factory=lambda: Path.home() / "storages" / ""
+        default_factory=lambda: Path.home() / "storages" / "recordings",
     )
     """Directory for storing audio files permanently."""
 
@@ -295,12 +303,12 @@ class BasicProgramMixin(ProgramProtocol[ProgramConfig]):
 
         Returns
         -------
-        list[types.RecordingCondition]
-            A list of recording conditions.
+        types.RecordingCondition
+            A recording condition.
         """
         return [
             components.IsInIntervals(
-                intervals=config.recording.schedule,
+                intervals=config.recording.get_schedule(),
                 timezone=zoneinfo.ZoneInfo(config.timezone),
             )
         ]

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 import click
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, SecretStr
 from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefined
 from typing_extensions import Annotated, Protocol, get_args, get_origin
@@ -469,6 +469,63 @@ def get_field_dtype(field: FieldInfo) -> type:
     return origin
 
 
+def parse_secret_str_field(
+    field_name: str,
+    field: FieldInfo,
+    args: List[str],
+    prompt: bool = True,
+    prefix: str = "",
+) -> SecretStr:
+    """Parse a SecretStr field from the command line arguments."""
+    name = f"{prefix}.{field_name}" if prefix else field_name
+
+    value = parse_simple_field_from_args(
+        args,
+        name,
+        field,
+        str,  # We treat it as a string for the prompt
+        raise_on_missing=not prompt,
+    )
+
+    if not prompt:
+        return SecretStr(value)  # Return the parsed value as SecretStr
+
+    if value is not None:
+        if click.confirm(
+            "Would you like to set "
+            f"{click.style(name, fg='blue', bold=True)}="
+            f"{click.style(repr(value), fg='yellow', bold=True)}?",
+            default=True,
+        ):
+            return SecretStr(value)
+
+    help = (
+        click.style(f" Help: {field.description}", italic=True)
+        if field.description
+        else ""
+    )
+
+    while True:
+        try:
+            return SecretStr(click.prompt(
+                (
+                    "Please provide a value for "
+                    f"{click.style(name, fg='blue', bold=True)}."
+                    f"{help}"
+                ),
+                value_proc=str,
+                default=value,
+            ))
+        except ParameterError as error:
+            msg = (
+                "Invalid value for "
+                f"{click.style(name, fg='blue', bold=True)}: "
+                f"{click.style(error.message, fg='red', bold=True)}"
+            )
+            if error.help is not None:
+                msg += f" {error.help}"
+            click.echo(msg)
+
 FIELD_PARSERS: Dict[type, FieldParser] = {
     BaseModel: parse_pydantic_model_field_from_args,
     bool: build_simple_field_parser(cast_to_bool),
@@ -481,4 +538,5 @@ FIELD_PARSERS: Dict[type, FieldParser] = {
     datetime.time: build_simple_field_parser(parse_time),
     datetime.datetime: build_simple_field_parser(datetime.datetime),
     Path: build_simple_field_parser(Path),
+    SecretStr: parse_secret_str_field,
 }
