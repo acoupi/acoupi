@@ -263,13 +263,59 @@ To incorporate the BasicProgramMixin into your program, you simply need to impor
 
 ```python
 from acoupi.programs import AcoupiProgram
-from acoupi.programs.templates import BasicProgramMixin
+from acoupi.programs.templates import BasicProgramMixin, BasicConfiguration
 
 class CustomProgram(BasicProgramMixin, AcoupiProgram):
-    pass
+
+    config_schema = BasicConfiguration
 ```
 
 By inheriting from `BasicProgramMixin`, your `CustomProgram` automatically gains the capabilities for audio recording and management provided by the mixin.
+
+This mixin provides two tasks by default:
+
+1. a Recording task: Will check if all conditions for recording are OK and record audio of a fixed duration at set intervals. The recordings are saved in a temporary location. This template uses the [`generate_recording_task`][acoupi.tasks.generate_recording_task] template, see that for more info.
+2. a File management task: will look at the temporary recordings and decide which to save. By default all recordings are saved, but this is easily customisable. The ones that are saved will be saved in the desired folder with a structure of `<base_directory>/<year>/<month>/<day>/<time>_<recording_id>.wav`. This template uses the [`generate_file_management_task`][acoupi.tasks.generate_file_management_task], see that for more info.
+
+The [`BasicConfiguration`][acoupi.programs.templates.BasicConfiguration] provides all the necessary configurable parameters.
+If you want to use this template but expand the set of configurable parameters, you can expand on the `BasicConfiguration` like so
+
+```python
+class ExpandedConfigurations(BasicConfiguration):
+    other_field: bool = True
+    ...
+```
+
+This is what the mixin provides by default, but it can be further customised by overriding some of its methods. For example, if you want to
+add recording conditions to refine when recordings are made you can do so:
+
+
+```python
+from acoupi.components.types import RecordingCondition
+
+class IsWarmEnough(RecordingCondition):
+    def __init__(self, threshold):
+        self.threshold = threshold
+
+    def should_record(self):
+        # This is a hypothetical sensor, not included in acoupi
+        temperature = sensor.get_current_temperature()
+        return temperature >= self.threshold
+
+
+class CustomProgram(BasicProgramMixin, AcoupiProgram):
+    ...
+    def get_recording_conditions(self, config):
+        # Get the default conditions that check if the time is within the set 
+        # recording interval.
+        default_conditions = super().get_recording_conditions(config)
+        return [
+            *default_conditions,
+            IsWarmEnough(config.temperature_threshold)
+        ]
+```
+
+For more info on what this mixin provides, and how it can configured and customise consult its [reference documentation][acoupi.programs.templates.BasicProgramMixin].
 
 ### Predefined Configuration Schemas
 
