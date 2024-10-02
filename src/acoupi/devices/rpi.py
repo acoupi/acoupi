@@ -3,32 +3,33 @@
 import socket
 
 __all__ = [
-    "get_rpi_serial_number",
-    "get_rpi_host_name",
+    "get_device_serial_number",
+    "get_device_host_name",
     "is_rpi",
+    "get_device_memory_stats",
 ]
 
 
-def get_rpi_serial_number() -> str:
-    """Get the serial number of the Raspberry Pi.
+def get_device_serial_number() -> str:
+    """Get the serial number of the device.
 
     Returns
     -------
-        The serial number of the Raspberry Pi as a string.
+        The serial number of the device as a string.
     """
     with open("/proc/cpuinfo", "r") as f:
         for line in f:
             if line[0:6] == "Serial":
                 return line[10:26]
-    raise RuntimeError("Could not find serial number of Raspberry Pi")
+    raise RuntimeError("Could not find serial number of the device.")
 
 
-def get_rpi_host_name() -> str:
-    """Get the hostname of the Raspberry Pi.
+def get_device_host_name() -> str:
+    """Get the hostname of the device.
 
     Returns
     -------
-        The hostname of the Raspberry Pi as a string.
+        The hostname of the device as a string.
     """
     return socket.gethostname()
 
@@ -41,9 +42,24 @@ def is_rpi() -> bool:
         True if the current device is a Raspberry Pi, False otherwise.
     """
     try:
-        get_rpi_serial_number()
+        get_device_serial_number()
         return True
     except FileNotFoundError:
         return False
     except RuntimeError:
         return False
+
+
+def get_device_memory_stats() -> dict:
+    """Get memory statistics of the device.
+
+    Retruns
+    -------
+        A dictionary containing memory statistics.
+    """
+    memory_stats = shutil.disk_usage("/")
+    return {
+        "total": memory_stats.total,
+        "used": memory_stats.used,
+        "free": memory_stats.free,
+    }

@@ -20,18 +20,18 @@ def patched_rpi_serial_number(monkeypatch) -> str:
     """Patch the RPi serial number.
 
     In order to use this fixture, you must import the module that uses
-    the get_rpi_serial_number function. This is because the patching
+    the get_device_serial_number function. This is because the patching
     happens at import time.
 
     Example:
         from acoupi import utils
 
         def test_foo(patched_rpi_serial_number):
-            assert utils.get_rpi_serial_number() == "1234567890ABCDEF"
+            assert utils.get_device_serial_number() == "1234567890ABCDEF"
     """
     serial_number = "1234567890ABCDEF"
     monkeypatch.setattr(
-        "acoupi.devices.get_rpi_serial_number",
+        "acoupi.devices.get_device_serial_number",
         lambda: serial_number,
     )
     return serial_number
