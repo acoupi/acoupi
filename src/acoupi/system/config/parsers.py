@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 import click
-from pydantic import BaseModel, ValidationError, SecretStr
+from pydantic import BaseModel, SecretStr, ValidationError
 from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefined
 from typing_extensions import Annotated, Protocol, get_args, get_origin

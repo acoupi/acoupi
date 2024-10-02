@@ -113,7 +113,9 @@ class MQTTMessenger(types.Messenger):
             host=config.host,
             port=config.port,
             username=config.username,
-            password=config.password.get_secret_value() if config.password else None,
+            password=config.password.get_secret_value()
+            if config.password
+            else None,
             topic=config.topic,
             timeout=config.timeout,
             logger=logger,
