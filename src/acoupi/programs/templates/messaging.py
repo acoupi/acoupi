@@ -96,6 +96,7 @@ class MessagingProgramMixin(ProgramProtocol[ProgramConfig]):
         This method initializes the message store and messenger, registers
         the messaging and heartbeat tasks, and performs any necessary setup.
         """
+        self.validate_dirs(config)
         self.message_store = self.configure_message_store(config)
         self.messenger = self.configure_messenger(config)
         self.register_messaging_task(config)
@@ -116,7 +117,9 @@ class MessagingProgramMixin(ProgramProtocol[ProgramConfig]):
 
         super().check(config)
 
-    def configure_message_store(self, config: ProgramConfig) -> types.MessageStore:
+    def configure_message_store(
+        self, config: ProgramConfig
+    ) -> types.MessageStore:
         """Configure the message store.
 
         This method creates and configures an instance of the
@@ -212,3 +215,12 @@ class MessagingProgramMixin(ProgramProtocol[ProgramConfig]):
             schedule=config.messaging.heartbeat_interval,
             queue="celery",
         )
+
+    def validate_dirs(self, config: ProgramConfig):
+        """Validate the directories used by the program.
+
+        This method ensures that the necessary directories for storing audio
+        and metadata exist. If they don't, it creates them.
+        """
+        if not config.messaging.messages_db.parent.exists():
+            config.messaging.messages_db.parent.mkdir(parents=True)
