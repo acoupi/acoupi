@@ -62,7 +62,7 @@ class MQTTMessenger(types.Messenger):
         topic: str,
         port: int = 1884,
         username: Optional[str] = None,
-        password: Optional[SecretStr] = None,
+        password: Optional[str] = None,
         timeout: int = 5,
         logger: Optional[logging.Logger] = None,
     ) -> None:
@@ -113,8 +113,7 @@ class MQTTMessenger(types.Messenger):
             host=config.host,
             port=config.port,
             username=config.username,
-            # password=config.password.get_secret_value() if config.password else None,
-            password=config.password,
+            password=config.password.get_secret_value() if config.password else None,
             topic=config.topic,
             timeout=config.timeout,
             logger=logger,
