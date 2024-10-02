@@ -16,6 +16,7 @@ For detailed usage and examples, refer to the individual template documentation.
 """
 
 from acoupi.programs.templates.basic import (
+    AudioConfiguration,
     BasicConfiguration,
     BasicProgramMixin,
     PathsConfiguration,
@@ -27,6 +28,7 @@ from acoupi.programs.templates.messaging import (
 )
 
 __all__ = [
+    "AudioConfiguration",
     "BasicConfiguration",
     "BasicProgramMixin",
     "MessagingConfig",
