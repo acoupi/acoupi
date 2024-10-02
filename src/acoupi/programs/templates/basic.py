@@ -69,7 +69,9 @@ class AudioConfiguration(BaseModel):
 
     def get_schedule(self) -> list[data.TimeInterval]:
         """Generate a TimeInterval from start and end times."""
-        return [data.TimeInterval(start=self.schedule_start, end=self.schedule_end)]
+        return [
+            data.TimeInterval(start=self.schedule_start, end=self.schedule_end)
+        ]
 
     """Schedule for recording audio."""
 

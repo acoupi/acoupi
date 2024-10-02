@@ -507,15 +507,17 @@ def parse_secret_str_field(
 
     while True:
         try:
-            return SecretStr(click.prompt(
-                (
-                    "Please provide a value for "
-                    f"{click.style(name, fg='blue', bold=True)}."
-                    f"{help}"
-                ),
-                value_proc=str,
-                default=value,
-            ))
+            return SecretStr(
+                click.prompt(
+                    (
+                        "Please provide a value for "
+                        f"{click.style(name, fg='blue', bold=True)}."
+                        f"{help}"
+                    ),
+                    value_proc=str,
+                    default=value,
+                )
+            )
         except ParameterError as error:
             msg = (
                 "Invalid value for "
@@ -525,6 +527,7 @@ def parse_secret_str_field(
             if error.help is not None:
                 msg += f" {error.help}"
             click.echo(msg)
+
 
 FIELD_PARSERS: Dict[type, FieldParser] = {
     BaseModel: parse_pydantic_model_field_from_args,
