@@ -259,19 +259,161 @@ Here are two examples of program templates:
 
 #### Basic Program Mixin
 
-To incorporate the BasicProgramMixin into your program, you simply need to import it and include it as a base class when defining your custom program:
+The [`BasicProgramMixin`][acoupi.programs.templates.BasicProgramMixin] provides a convenient starting point for programs that require fundamental audio recording and management capabilities.
+By incorporating this mixin, you can quickly set up a program that captures audio data and organizes recordings efficiently.
+
+To use the `BasicProgramMixin`, import it and include it as a base class along with `AcoupiProgram` when defining your custom program:
 
 ```python
 from acoupi.programs import AcoupiProgram
-from acoupi.programs.templates import BasicProgramMixin
+from acoupi.programs.templates import BasicProgramMixin, BasicConfiguration
 
 class CustomProgram(BasicProgramMixin, AcoupiProgram):
-    pass
+
+    config_schema = BasicConfiguration
 ```
 
-By inheriting from `BasicProgramMixin`, your `CustomProgram` automatically gains the capabilities for audio recording and management provided by the mixin.
+This automatically equips your `CustomProgram` with two essential tasks:
+
+- **Recording Task**: This task handles the core audio recording functionality.
+    It checks recording conditions, captures audio segments of a defined duration at specified intervals, and temporarily stores the recordings.
+    This task utilizes the `generate_recording_task` template ([`acoupi.tasks.generate_recording_task`][acoupi.tasks.generate_recording_task]) for its implementation.
+
+- **File Management Task**: This task manages the recorded audio files.
+    It processes the temporary recordings, determining which recordings to save permanently based on predefined criteria (by default, all recordings are saved).
+    Saved recordings are organized in a structured folder hierarchy: `<base_directory>/<year>/<month>/<day>/<time>_<recording_id>.wav`.
+    This task is based on the `generate_file_management_task` template ([`acoupi.tasks.generate_file_management_task`][acoupi.tasks.generate_file_management_task]).
+
+The `BasicProgramMixin` uses the `BasicConfiguration` schema ([`acoupi.programs.templates.BasicConfiguration`][acoupi.programs.templates.BasicConfiguration]) to define its configurable parameters.
+To extend these parameters, you can create a new configuration class that inherits from `BasicConfiguration` and adds your custom fields:
+
+```python
+class ExpandedConfigurations(BasicConfiguration):
+    other_field: bool = True
+    # ... your additional fields ...
+```
+
+While the `BasicProgramMixin` provides a solid foundation, you can further customize its behavior by overriding specific methods.
+For instance, you can modify the recording conditions to control when audio recording occurs:
+
+```python
+from acoupi.components.types import RecordingCondition
+
+class IsWarmEnough(RecordingCondition):
+    def __init__(self, threshold):
+        self.threshold = threshold
+
+    def should_record(self):
+        # This is a hypothetical sensor, not included in acoupi
+        temperature = sensor.get_current_temperature()
+        return temperature >= self.threshold
+
+class CustomProgram(BasicProgramMixin, AcoupiProgram):
+    # ... other parts of your program ...
+
+    def get_recording_conditions(self, config):
+        # Get the default conditions (e.g., recording interval)
+        default_conditions = super().get_recording_conditions(config)
+        return [
+            *default_conditions,
+            IsWarmEnough(config.temperature_threshold)  # Add your custom condition
+        ]
+
+```
+
+For a complete understanding of the BasicProgramMixin's capabilities and customization options, refer to its [reference documentation][acoupi.programs.templates.BasicProgramMixin].
+
+#### Messaging Program Mixin
+
+The [`MessagingProgramMixin`][acoupi.programs.templates.MessagingProgramMixin] provides your programs with communication capabilities, enabling them to send messages based on events or data processed by your sensor.
+
+To incorporate messaging functionality into your program, follow a similar approach to the `BasicProgramMixin`:
+
+- **Inherit from the Mixin**: Include `MessagingProgramMixin` as a base class along with `AcoupiProgram` when defining your custom program.
+- **Use a Compatible Schema**: Ensure your configuration schema inherits from [`MessagingConfigMixin`][acoupi.programs.templates.MessagingConfigMixin] to include the necessary messaging-related settings.
+
+```python
+from acoupi.programs.templates import MessagingProgramMixin, MessagingConfigMixin
+from acoupi.programs import AcoupiProgram
+
+class CustomConfig(MessagingConfigMixin):
+    # ... your custom configuration fields ...
+
+class CustomProgram(MessagingProgramMixin, AcoupiProgram):
+
+    config_schema = CustomConfig
+```
+
+This configuration grants your program the following messaging features:
+
+- **Messenger**: A [`Messenger`][acoupi.components.types.Messenger] object is created, allowing you to choose between HTTP or MQTT protocols for message delivery.
+- **Message Store**: A dedicated message store is initialized to keep track of all messages generated by your device, including their delivery status.
+- **Send Messages Task**: This periodic task (running every 2 minutes by default, but configurable) checks the message store for pending messages and attempts to deliver them.
+    It leverages the [`generate_send_messages_task`][acoupi.tasks.generate_send_messages_task] template for its implementation.
+- **Heartbeat Task**: This task periodically sends a heartbeat message (every 30 minutes by default, configurable) containing information about the device's status, ID, and the current time.
+    This provides a regular indication that the device is active and functioning correctly.
+
+By default, the `MessagingProgramMixin` doesn't generate any messages on its own.
+Its primary purpose is to provide the underlying framework for sending messages.
+You can easily create and send messages from your custom tasks using the message_store:
+
+```python
+from acoupi.data import Message
+import datetime
+
+class CustomProgram(MessagingProgramMixin, AcoupiProgram):
+
+    def setup(self, config):
+        super().setup(config)  # Initialize the messaging components
+
+        def random_task():
+            current_time = datetime.datetime.now()
+            message = Message(content=f"Hi! The current time is {current_time}")
+            self.message_store.store_message(message)  # Add the message to the store
+
+        self.add_task(  # Register the task in your program
+            random_task,
+            schedule=3600 # Every hour
+        )
+
+        # ... your other tasks ...
+```
+
+In this example, `random_task` creates a simple message and stores it in the `message_store`.
+The **Send Messages Task** will then handle delivering this message at its next scheduled execution.
+
+For detailed information about the configuration options and customization possibilities of the `MessagingProgramMixin`, consult its comprehensive [reference documentation][acoupi.programs.templates.MessagingProgramMixin].
 
 ### Predefined Configuration Schemas
+
+Defining a robust configuration schema is crucial for designing effective and adaptable _acoupi_ programs.
+A well-structured schema enhances program flexibility, provides clear guidance to users on configurable options, and ensures that configurations are validated before deployment, preventing potential issues.
+
+While you'll need to create custom schemas for program-specific behaviors, _acoupi_ strongly encourages reusing predefined schemas for common components.
+This approach not only saves you time and effort but also ensures compatibility with program templates and benefits from carefully designed and validated schema structures.
+
+_acoupi_ provides a collection of predefined schemas for common components:
+
+1. [**MicrophoneConfig**][acoupi.components.MicrophoneConfig]: This schema facilitates configuration of the microphone device, including device selection, sampling rate, and the number of channels.
+      It's highly customized for ease of use during setup, so utilizing it is recommended for streamlined microphone configuration.
+
+2. [**MQTTConfig**][acoupi.components.MQTTConfig] and [**HTTPConfig**][acoupi.components.HTTPConfig]: These schemas streamline the configuration of MQTT and HTTP messengers, respectively, for programs that require communication capabilities.
+
+3. [**PathsConfiguration**][acoupi.programs.templates.PathsConfiguration]: This schema defines options for configuring storage locations for audio recordings and metadata.
+      By default, temporary recordings are stored in memory (if available) and permanent recordings are saved in `$HOME/audio/`, but you can customize these paths according to your needs.
+
+4. [**RecordingConfiguration**][acoupi.programs.templates.AudioConfiguration]: This schema covers the essential parameters for the recording task, such as recording duration, recording interval, and scheduling options.
+
+5. [**MessagingConfiguration**][acoupi.programs.templates.MessagingConfig]: This schema encompasses all the necessary settings for configuring the messaging task.
+
+These predefined schemas are further grouped into higher-level schemas for broader functionalities:
+
+1. [**BasicConfiguration**][acoupi.programs.templates.BasicConfiguration]: This schema combines MicrophoneConfig, PathsConfiguration, and RecordingConfiguration, providing all the essential configurations for a basic acoupi program.
+
+2. [**MessagingConfigMixin**][acoupi.programs.templates.MessagingConfigMixin]: This schema includes the necessary configurations for using the MessagingProgramMixin, enabling message sending capabilities in your programs.
+
+Leverage these predefined schemas as building blocks to construct comprehensive configuration schemas tailored to your specific program requirements.
+This modular approach promotes consistency, reduces redundancy, and ensures your programs are well-structured and easily configurable.
 
 ### Task Templates
 

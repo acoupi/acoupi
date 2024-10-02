@@ -5,3 +5,5 @@
 ::: acoupi.programs.core.base
 
 ::: acoupi.programs
+
+::: acoupi.programs.templates
