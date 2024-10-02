@@ -8,8 +8,6 @@ The `BasicProgram` class defines the following components:
 
 - **Audio Recorder:**  Records audio clips according to the program's
   configuration.
-- **File Manager:**  Manages the storage of audio recordings, including saving
-  them to permanent storage and handling temporary files.
 - **Store:** Provides an interface for storing and retrieving metadata
   associated with the program and its recordings.
 
@@ -149,8 +147,6 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
     - **Audio Recorder:** Records audio clips according to the program's
       configuration.
-    - **File Manager:** Manages the storage of audio recordings, including
-      saving them to permanent storage and handling temporary files.
     - **Store:** Provides an interface for storing and retrieving metadata
       associated with the program and its recordings.
 
@@ -217,8 +213,6 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
     store: types.Store
 
-    file_manager: types.RecordingSavingManager
-
     def setup(self, config: ProgramConfig) -> None:
         """Set up the basic program.
 
@@ -229,7 +223,6 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         self.validate_dirs(config)
         self.recorder = self.configure_recorder(config)
         self.store = self.configure_store(config)
-        self.file_manager = self.configure_file_manager(config)
         self.register_recording_task(config)
         self.register_file_management_task(config)
         super().setup(config)
@@ -305,21 +298,33 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         """
         return components.SqliteStore(config.paths.db_metadata)
 
-    def configure_file_manager(
+    def get_file_managers(
         self,
         config: ProgramConfig,
-    ) -> types.RecordingSavingManager:
-        """Configure the file manager.
+    ) -> list[types.RecordingSavingManager]:
+        """Get the file managers.
 
-        This method creates and configures an instance of the `DateFileManager`
-        based on the provided configuration.
+        This method defines how audio recordings should be saved and managed.
+        It returns a list of file managers that are responsible for determining
+        the final storage location of each recording.
+
+        When a recording is marked for saving, the program iterates through the
+        list of file managers in order. Each manager can either:
+
+        - Return a path where the recording should be saved.
+        - Return `None` to indicate that it cannot handle the recording,
+        allowing the next manager in the list to be used.
+
+        By default, this method returns a list containing a single
+        `DateFileManager`, which saves recordings in a structured folder
+        hierarchy based on the recording date.
 
         Returns
         -------
-        types.RecordingSavingManager
-            The configured file manager instance.
+        list[types.RecordingSavingManager]
+            A list of file manager instances.
         """
-        return components.DateFileManager(config.paths.recordings)
+        return [components.DateFileManager(config.paths.recordings)]
 
     def get_recording_conditions(
         self,
@@ -414,7 +419,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         return tasks.generate_file_management_task(
             store=self.store,
             logger=self.logger.getChild("file_management"),
-            file_managers=[self.file_manager],
+            file_managers=self.get_file_managers(config),
             file_filters=file_filters,
             tmp_path=config.paths.tmp_audio,
         )
