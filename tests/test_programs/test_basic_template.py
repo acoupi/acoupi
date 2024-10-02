@@ -7,21 +7,20 @@ from celery import Celery
 
 from acoupi import data
 from acoupi.components.audio_recorder import MicrophoneConfig
-from acoupi.programs import AcoupiProgram
 from acoupi.programs.templates import (
-    BasicConfiguration,
-    BasicProgramMixin,
+    BasicProgramConfiguration,
+    BasicProgram,
     DataConfiguration,
 )
 
 
-class Program(BasicProgramMixin, AcoupiProgram):
-    config: BasicConfiguration
+class Program(BasicProgram):
+    config: BasicProgramConfiguration
 
 
 @pytest.fixture
-def config(tmp_path: Path) -> BasicConfiguration:
-    return BasicConfiguration(
+def config(tmp_path: Path) -> BasicProgramConfiguration:
+    return BasicProgramConfiguration(
         data=DataConfiguration(
             tmp=tmp_path / "tmp",
             audio=tmp_path / "audio",
@@ -38,7 +37,7 @@ def config(tmp_path: Path) -> BasicConfiguration:
 @pytest.mark.usefixtures("celery_app")
 def test_basic_program_has_correct_tasks(
     celery_app: Celery,
-    config: BasicConfiguration,
+    config: BasicProgramConfiguration,
 ):
     program = Program(config, celery_app)
     assert "recording_task" in program.tasks
@@ -48,7 +47,7 @@ def test_basic_program_has_correct_tasks(
 @pytest.mark.usefixtures("celery_app")
 def test_basic_program_registers_deployment_in_store_on_start(
     celery_app: Celery,
-    config: BasicConfiguration,
+    config: BasicProgramConfiguration,
 ):
     program = Program(config, celery_app)
     deployment = data.Deployment(
@@ -65,7 +64,7 @@ def test_basic_program_registers_deployment_in_store_on_start(
 @pytest.mark.usefixtures("celery_app")
 def test_basic_program_registers_deployment_in_store_on_end(
     celery_app: Celery,
-    config: BasicConfiguration,
+    config: BasicProgramConfiguration,
 ):
     program = Program(config, celery_app)
     deployment = data.Deployment(
@@ -86,7 +85,7 @@ def test_basic_program_registers_deployment_in_store_on_end(
 @pytest.mark.usefixtures("celery_app")
 def test_basic_program_calls_recorder_check_on_check(
     celery_app: Celery,
-    config: BasicConfiguration,
+    config: BasicProgramConfiguration,
 ):
     program = Program(config, celery_app)
     program.recorder = Mock(program.recorder)
