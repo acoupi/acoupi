@@ -85,7 +85,6 @@ class SqliteStore(types.Store):
         self.db_path = db_path
         self.database = orm.Database()
         self.models = create_base_models(self.database)
-        print(self.models.Detection.detection_score)
         self.database.bind(
             provider="sqlite",
             filename=str(db_path),

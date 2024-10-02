@@ -144,7 +144,6 @@ def generate_file_management_task(
                 new_path = move_recording(recording, new_path, logger=logger)
 
                 if new_path is not None:
-                    print("HUH")
                     store.update_recording_path(recording, new_path)
 
                 break
