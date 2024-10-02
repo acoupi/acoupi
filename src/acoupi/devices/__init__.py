@@ -10,8 +10,8 @@ import uuid
 
 from acoupi.devices.rpi import (
     get_device_host_name,
-    get_device_serial_number,
     get_device_memory_stats,
+    get_device_serial_number,
     is_rpi,
 )
 

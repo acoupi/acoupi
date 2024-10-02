@@ -1,5 +1,6 @@
 """Module for detecting and identifying devices."""
 
+import shutil
 import socket
 
 __all__ = [
