@@ -27,17 +27,23 @@ This section of the documentation is intended for users who are already familiar
         </td>
         <td>Learn how to create new compoments</td>
       </tr>
+      <tr>
+        <td>
+          <a href="Programs">Create custom programs</a>
+        </td>
+        <td>Learn how to create a custom program</td>
+      </tr>
     </tbody>
   </table>
 </div>
 
 
-If you want to get started with acoupi, look at the _Tutorials_ section providing step-by-step information to help you install, configure, and deploy acoupi.
+If you want to get started with acoupi, look at the [_Tutorials_](../tutorials/index.md) section providing step-by-step information to help you install, configure, and deploy acoupi.
 
-To get a better understanding of the key elements of acoupi have a read at the _Explanation_ section of the documentation. 
+To get a better understanding of the key elements of acoupi have a read at the [_Explanation_](../explanation/index.md) section of the documentation. 
 Illustrations and examples should provide you with easy-to-follow descriptions about the structure of the code. 
 
-Take a look at the _Reference_ section of the documentation to know which options are available and can be used "out-of the box".
+Take a look at the [_Reference_](../reference/index.md) section of the documentation to know which options are available and can be used "out-of the box".
 
 !!! tip "Contribution"
 

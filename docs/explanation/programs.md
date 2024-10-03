@@ -1,7 +1,5 @@
 # Programs (acoupi framework)
 
-## Introduction
-
 An _acoupi_ program is a set of instructions that dictate the behaviour of a smart bioacoutics sensor. 
 It defines the tasks the sensor performs, how those tasks are configured, and the underlying execution environment.
 The **program** is the heart of an acoupi application.

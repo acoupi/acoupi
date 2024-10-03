@@ -75,7 +75,7 @@ class AudioConfiguration(BaseModel):
     duration: int = 3
     """Duration of each audio recording in seconds."""
 
-    interval: int = 10
+    interval: int = 15
     """Interval between each audio recording in seconds."""
 
     chunksize: Annotated[int, NoUserPrompt] = 8192
@@ -93,9 +93,7 @@ class AudioConfiguration(BaseModel):
 
     def get_schedule(self) -> list[data.TimeInterval]:
         """Generate a TimeInterval from start and end times."""
-        return [
-            data.TimeInterval(start=self.schedule_start, end=self.schedule_end)
-        ]
+        return [data.TimeInterval(start=self.schedule_start, end=self.schedule_end)]
 
     """Schedule for recording audio."""
 

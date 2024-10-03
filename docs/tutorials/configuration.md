@@ -14,12 +14,13 @@ acoupi setup --program acoupi.programs.default
 
 Based on the program configuration, a number of questions will be printed to a user. The keyboard letter `y` or the touch `Enter` is used to **accept** the default configuration. The keyboard letter `n` is used to **reject and modify** the default configuration of a pre-built program.
 
+![type:video](../img/acoupi_configuration.mp4){: style='width: 100%'}
 
-![type:video](../img/acoupi_configuration_default.mp4){: style='width: 100%'}
+### Configuration Paramaters 
 
-### Configuration Paramaters for acoupi default program.
+#### acoupi.programs.default
 
-The example below shows the configured parameters for the acoupi default program. 
+The example below shows the configured parameters for the acoupi _default_ program. 
 
 Note that audio recordings have a duration of 10 seconds, occuring every 30 seconds between 4am and 11pm. 
 However, recordings are only saved between 11am and 3pm as well as withing the 30 minutes time interval that is before and after dawn and dusk. 
@@ -29,32 +30,68 @@ The values of `0` for parameters `frequency_duration`, and `frequency_interval` 
 The database registering the functionment of acoupi tasks and the audio recordings files are saved on the home directory in a folder entitled `storages/`. 
 
 !!! Example "> acoupi config get"
+
     ```json 
     {
-        "dbpath": "/home/pi/storages/acoupi.db",
-        "audio_dir": "/home/pi/storages/recordings",
-        "timeformat": "%Y%m%d_%H%M%S",
-        "timezone": "Europe/London",
-        "microphone_config": {
+      "timezone": "Europe/London",
+        "microphone": {
           "device_name": "UltraMic 250K 16 bit r4",
           "samplerate": 250000,
           "audio_channels": 1
+      },
+      "recording": {
+        "duration": 10,
+        "interval": 30,
+        "chunksize": 8192,
+        "schedule_start": "04:00:00",
+        "schedule_end": "23:00:00"
+      },
+      "paths": {
+        "tmp_audio": "/run/shm",
+        "recordings": "/home/pi/storages/recordings",
+        "db_metadata": "/home/pi/storages/metadata.db"
+      },
+      "recording_saving": {
+        "starttime": "11:00:00",
+        "endtime": "15:00:00",
+        "before_dawndusk_duration": 30,
+        "after_dawndusk_duration": 30,
+        "frequency_duration": 0,
+        "frequency_interval": 0
+      }
+    }
+    ```
+
+#### acoupi.programs.connected
+The example below shows the added parameters for the acoupi _connected_ program. 
+
+This program comes with a messaging section to configure the parameters to the send messages to a remote server. 
+The messages to be sent and their associated status is stored in a database named `messages.db` on the home directory in a folder entitled `storages/`. The value of `message_send_interval` indicates that messages will be sent every 120 seconds, while the `heartbeat_interval` indicates that heartbeat_message are sent every 10 minutes. Messages are sent via the HTTP and MQTT protocols. 
+
+!!! Example "> acoupi config get"
+
+    ```json
+    {
+      "recording": {},
+      "paths": {},
+      "messaging": {
+        "messages_db": "/home/pi/storages/messages.db",
+        "message_send_interval": 120,
+        "heartbeat_interval": 600,
+        "http": {
+          "base_url": "https://test_acoupi.org/",
+          "content_type": "application/json",
+          "timeout": 5
         },
-        "audio_config": {
-          "audio_duration": 10,
-          "recording_interval": 30
+        "mqtt": {
+          "host": "test_acoupi.mqtt.org",
+          "username": "test_username",
+          "password": "**********",
+          "topic": "acoupi",
+          "port": 1884,
+          "timeout": 5
         },
-        "recording_schedule": {
-          "start_recording": "04:00:00",
-          "end_recording": "23:00:00"
-        },
-        "recording_saving": {
-          "starttime": "11:00:00",
-          "endtime": "15:00:00",
-          "before_dawndusk_duration": 30,
-          "after_dawndusk_duration": 30,
-          "frequency_duration": 0,
-          "frequency_interval": 0
-        }
+      },
+      "recording_saving": {},
     }
     ```

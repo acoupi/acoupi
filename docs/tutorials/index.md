@@ -39,9 +39,9 @@ We hope the tutorials are broadly accessible to anyone with an interest in using
 </div>
 
 
-To get a better understanding of the key elements of acoupi have a read at the _Explanation_ section of the documentation. Illustrations and examples should provide you with easy-to-follow descriptions about the structure of the code. 
+To get a better understanding of the key elements of acoupi have a read at the [_Explanation_](../explanation/index.md) section of the documentation. Illustrations and examples should provide you with easy-to-follow descriptions about the structure of the code. 
 
-Take a look at the _Reference_ section of the documentation to know which options are available and can be used "out-of the box".
+Take a look at the [_Reference_](../reference/index.md) section of the documentation to know which options are available and can be used "out-of the box".
 
 !!! tip "Contribution"
 

@@ -1,23 +1,7 @@
 # Tasks (acoupi framework)
 
-## Introduction 
-
 Tasks are individual units of work performing a set of specific actions. These are built as a sequence of one or more _acoupi_ components. 
 The _acoupi_ framework defines 6 tasks recording, detection, messaging, management, summary, and heartbeat. 
-
-## Understanding Tasks
-
-Tasks are characterised by three elements:
-
-- **Function**: The functionality of the task. This is the sequence of _acoupi_ compoments specifiying what actions the task perform.
-- **Schedule**: When and how often the task runs (e.g., continuously, at specific intervals, triggered by an event).
-- **Dependencies**: How the task relates to other tasks in the program (e.g., does it need to run before or after another task?).
-
-In its essence, each task is a Python function that is orchestrated and syncronised within an[_acoupi program_](../explanation/programs.md). 
-
-??? info
-
-    Please refer to [_Explanation: System Section_](system.md) to learn more about the registration and orchestration of the tasks in the Celery app.
 
 ## Overview Tasks
 
@@ -124,3 +108,15 @@ It handles the saving, deleting, and movement of files using the `SavingFilters`
 The [Summary](../reference/tasks.md) task is reponsible for creating summary messages to be sent to a remote server.
 It uses the `Summariser` compoment and the `Messenger` compoment to define the communication protocol for sending these messages.
 The summary task is useful for providing aggregrate information on detections or system status updates, such as daily report with details like avaialbe storage and battery capacity.
+
+## Understanding Tasks 
+
+In an acoupi program, tasks are characterised by three elements:
+
+- **Function**: The functionality of the task. This is the sequence of _acoupi_ compoments specifiying what actions the task perform.
+- **Schedule**: When and how often the task runs (e.g., continuously, at specific intervals, triggered by an event).
+- **Dependencies**: How the task relates to other tasks in the program (e.g., does it need to run before or after another task?).
+
+??? info
+
+    Please refer to [_Explanation: System Section_](../explanation/system.md) to learn more about the registration and orchestration of the tasks in an acoupi program using the Celery app.

@@ -1,11 +1,8 @@
 # Terminology & Definitions
 
-__application__:
-
 __framework__: the elements constituing the acoupi software. The _acoupi_ __framework__ provides the building blocks also refered to as templates for developing a smart bioacoutics sensor. 
 
 __system__: the set of code responsible to execute and manage an _acoupi program_ on an edge device. 
-
 
 ## Using acoupi
 
@@ -18,5 +15,3 @@ __task__: an individual unit of work carried out by a program. Each task perform
 
 ## Developing acoupi
 __custom program__: an acoupi _program_ that does not yet exist, as opposed to an acoupi _pre-built program_. A __custom program__ refers to the steps involved in buildling a _pre-built program_. The [how-to guide: create a custom program](howtoguide/programs.md) detailed the instructions for users to follow to create a __custom program__
-
-acoupi __program task__ 

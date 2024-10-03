@@ -80,12 +80,23 @@ class SaveRecordingFilter(BaseModel):
     frequency_interval: int = 5
 
 
-class ConfigSchema(MessagingProgramConfiguration):
+class HeartbeatMessage(BaseModel):
+    """Heartbeat message schema."""
+
+    status: str = "running"
+
+    message_send_interval: int = 60 * 60 * 12
+    """Interval between sending messages in seconds."""
+
+
+class Connected_ConfigSchema(MessagingProgramConfiguration):
     """Configuration Schema for Connected Program.
 
     This schema combines the settings for basic program functionality and
     messaging capabilities.
     """
+
+    message_send_interval: int = 60 * 60 * 12
 
     recording_saving: Optional[SaveRecordingFilter] = None
 
@@ -97,9 +108,9 @@ class Program(MessagingProgram):
     capabilities.
     """
 
-    config_schema = ConfigSchema
+    config_schema = Connected_ConfigSchema
 
-    def get_recording_filters(self, config: ConfigSchema):
+    def get_recording_filters(self, config: Connected_ConfigSchema):
         if not config.recording_saving:
             # No saving filters defined
             return []
