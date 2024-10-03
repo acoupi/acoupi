@@ -1,20 +1,27 @@
 # Tasks (acoupi framework)
 
-The **tasks** are sequences of one or more acoupi components executed in a specific flow.
+## Introduction 
 
-The **acoupi** framework defines 5 tasks: recording, detection, messaging, management, and summary.
+Tasks are individual units of work performing a set of specific actions. These are built as a sequence of one or more _acoupi_ components. 
+The _acoupi_ framework defines 6 tasks recording, detection, messaging, management, summary, and heartbeat. 
 
-In its essence, each task is a Python function that are orchestrated and syncronised using the Celery framework.
-Some tasks run periodically, while others are triggered by other tasks.
-The combination of tasks form the acoupi program.
+## Understanding Tasks
+
+Tasks are characterised by three elements:
+
+- **Function**: The functionality of the task. This is the sequence of _acoupi_ compoments specifiying what actions the task perform.
+- **Schedule**: When and how often the task runs (e.g., continuously, at specific intervals, triggered by an event).
+- **Dependencies**: How the task relates to other tasks in the program (e.g., does it need to run before or after another task?).
+
+In its essence, each task is a Python function that is orchestrated and syncronised within an[_acoupi program_](../explanation/programs.md). 
 
 ??? info
 
-    Please refer to [_Explanation: System Section_](system.md) to learn about the registration and orchestration of the tasks in the Celery app.
+    Please refer to [_Explanation: System Section_](system.md) to learn more about the registration and orchestration of the tasks in the Celery app.
 
 ## Overview Tasks
 
-??? Example "An acoupi task"
+??? Example "a dummy acoupi task"
 
     ```python
     import logging
@@ -26,27 +33,23 @@ The combination of tasks form the acoupi program.
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 
-    def generate_acoupi_task(
-        component_1: types.NameComponent1,
-        component_2: types.NameComponent2,
+    def generate_dummy_acoupi_task(
+        component_1: types.DummyComponent1,
+        component_2: types.DummyComponent2,
         logger: logging.Logger = logger, 
     ) -> Optional[data.DataSchema]:
-        """Generate a task using various acoupi components."""
+        """Generate a dummy task using various acoupi components."""
 
-        def acoupi_task() -> Optional[data.DataSchema]:
-            """Create the structure of the task."""
+        def dummy_acoupi_task() -> Optional[data.DataSchema]:
+            """Create the structure of a dummy task."""
 
             output = component_1.associated_method_one()
             result = component_2.associated_method_two(output)
 
-            logger.info(f"Task result is: {result}")
+            logger.info(f"Dummy Task result is: {result}")
 
-        return acoupi_task
+        return dummy_acoupi_task
     ```
-
-??? Tip
-
-    Please check the [_How To Guides: Tasks Section_](../howtoguide/components.md) for a step-by-step guide about building your own task.
 
 #### Recording
 

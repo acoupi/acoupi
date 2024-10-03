@@ -29,6 +29,7 @@ nav:
       - System: reference/system.md
       - CLI: reference/cli.md
   - FAQ: faq.md
+  - Index: terms.md
   - About the Project:
       - Authors: authors.md
       - License: license.md

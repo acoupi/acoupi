@@ -2,43 +2,31 @@
 
 ## Introduction
 
-While _acoupi_ offers a variety of pre-built programs and community contributions, you might need to create a custom program for your specific needs.
-This guide provides a comprehensive overview of program creation within the _acoupi_ framework.
+While _acoupi_ offers a variety of [_pre-built programs_](../explanation/programs.md/#pre-built_programs) and community contributions, you might need to create a custom program for your specific needs.
+This guide provides a comprehensive overview of how to create a custom program using the _acoupi_ framework.
 
 Here's what we'll cover:
 
-1. **Understanding _acoupi_ Programs**: We'll explore the core concepts an _acoupi_ program.
-2. **Building a Program**: You'll learn the essential steps involved in creating a custom program.
-3. **Tools for Program Creation**: Discover the tools and features _acoupi_ provides to simplify the development process.
+1. **Building a Program**: You'll learn the essential steps involved in creating a custom program.
+2. **Tools for Program Creation**: Discover the tools and features _acoupi_ provides to simplify the development process.
+
+!!! Tip "Before diving in!"
+
+    This section is aimed at individuals interested in developing their own program. Make sure you have read the sections of the [Explanation](../explanation/index.md) of the documentation before going through this technical how-to guide. 
 
 ## Understanding _acoupi_ Programs
 
-Before diving into building your own program, let's clarify what constitutes an _acoupi_ program and its fundamental components.
-
-Essentially, an _acoupi_ program is a set of instructions that dictate how your smart bioacoustic sensor behaves.
+An _acoupi_ program is of a set of instructions that dictate how a smart bioacoustic sensor behaves.
 It defines the tasks the sensor performs, how those tasks are configured, and the underlying execution environment.
 
 To define an _acoupi_ program, you need to specify three key elements:
 
-- **Tasks**: These are the individual units of work carried out by your program.
-    Think of them as the building blocks of your sensor's behaviour.
-    Each task has a specific purpose, whether it's recording audio or running a model.
-    When defining a task, you specify:
-
-      - _Functionality_: What the task actually does.
-      - _Scheduling_: When and how often the task runs (e.g., continuously, at specific intervals, triggered by an event).
-      - _Dependencies_: How the task relates to other tasks in the program (e.g., does it need to run before or after another task?).
-
-* **Configuration Schema**: This acts as a blueprint for customising your program.
-    It defines the parameters and options that users can modify to adjust the program's behavior.
-    A well-defined schema ensures your program is flexible and adaptable to different needs and scenarios.
-
-* **Worker Configuration**: This encompasses lower-level settings related to how the program runs on the device.
-    For simplicity, this guide uses the default worker configuration, allowing you to focus on the core aspects of program design.
+- **Tasks**: The individual units of work carried out by your program. 
+- **Configuration Schema**: A "blueprint" establishing the parameters and options that users can configured to adjust the program behaviour.
+- **Worker Configuration**: The lower-level settings defining how to orchestrate the tasks and runs the program on a device. 
 
 To represent these program elements in code, _acoupi_ defines a Python class called `AcoupiProgram` ([`acoupi.programs.AcoupiProgram`][acoupi.programs.AcoupiProgram]).
-This class encapsulates all the necessary information for _acoupi_ to execute your program on a device.
-Therefore, creating a custom program involves defining your own `AcoupiProgram` class, which we'll explore in the next section.
+This class encapsulates all the necessary information for _acoupi_ to execute a program on a device.
 
 ## Building a Program
 
