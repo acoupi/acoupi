@@ -342,3 +342,14 @@ class DetectionProgram(MessagingProgram[C], ABC):
             A list of recording callbacks, including the detection task.
         """
         return [self.create_detection_task(config)]
+
+    def get_required_models(self, config: C) -> list[str]:
+        name = getattr(self.model, "name", None)
+        if name is not None:
+            return [name]
+
+        name = getattr(self.model, "__name__", None)
+        if name is not None:
+            return [name]
+
+        raise ValueError("Model must have a name attribute.")
