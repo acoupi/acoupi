@@ -1,17 +1,40 @@
-# Data Schema (acoupi framework)
+# Data (acoupi framework)
 
-The **data schema** layer is the most basic layer of the acoupi framework.
-It is responsible for defining the relevants bits of information about the functionality of the device and the data it collects.
-The **data schema** ensures that the data handled by the other layers of acoupi is validated and the flow of information between layers is consistent and easy to understand.
+The **data layer** is the most basic layer of the _acoupi_ framework.
+It is responsible for defining the relevant bits of information about the functionality of the device and the information it collects.
+`acoupi` uses [Python's type hinting](https://docs.python.org/3/library/typing.html) extensively to clearly indicate the kinds of objects handled and produced by different parts of the system.
+The **data layer** ensures that the data handled by the other layers of _acoupi_ is validated and the flow of information between layers is consistent and easy to understand.
 
-??? Info
+## Why is the Data Layer Important?
 
-    We use the [**Pydantic**](https://docs.pydantic.dev/dev/) library to build acoupi data objects.
+Understanding the data layer is crucial when you're customising _acoupi_ components or building your own tasks.
+It provides a clear and consistent structure for the information flowing through your program.
 
-## Acoupi Data Objects
+Think of it like this: the data layer defines the "language" that different parts of your _acoupi_ program use to communicate.
+By using specific data objects with defined types, you ensure that everyone is on the same page.
 
-**acoupi** comes with pre-built data objects.
-These are defined in the [**acoupi.data**][acoupi.data] module.
+For example, consider the definition of a `Model` in _acoupi_:
+
+```python
+from acoupi import data
+
+class Model:
+    def run(self, recording: data.Recording) -> data.ModelOutput:
+        ...
+```
+
+This tells us that a `Model` in _acoupi_ takes a `Recording` object as input and produces a `ModelOutput` object.
+The data layer defines exactly what information these objects contain and how they're structured.
+This makes development much easier because:
+
+- **You know what to expect:** You can rely on the data objects having specific attributes and types.
+- **Code completion helps:** Your code editor can assist you by autocompleting data fields and catching potential errors.
+- **Collaboration is smoother:** Everyone working with _acoupi_ understands the shared data structure.
+
+## _acoupi_ Data Objects
+
+_acoupi_ comes with pre-built data objects.
+These are defined in the [`acoupi.data`][acoupi.data] module.
 Below is an overview of a short selection of them.
 
 ### Deployment
@@ -51,3 +74,7 @@ A message can be created by instantiating a [**`data.Message`**][acoupi.data.Mes
 A response object represents a single response received by the device when sending a message.
 It contains information about the response, such as the date and time when the message was sent, the status of the response (i.e. success, failed, error, timeout), and the content of the response.
 A response can be created by instantiating a [**`data.Response`**][acoupi.data.Response] class.
+
+??? Info "Leveraging Pydantic for defining data schemas"
+
+    We use the [**Pydantic**](https://docs.pydantic.dev/dev/) library to build acoupi data objects.

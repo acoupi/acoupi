@@ -1,9 +1,9 @@
 # Create Custom Components
 
-Acoupi comes with a series of pre-defined [**components**](../reference/components.md) that allow the customisation of acoupi [**tasks**](../reference/tasks.md), such as recording audio at specific time of the day or
-sending messages to a remote server using specific messaging protocols (e.g., MQTT, HTTP).
+_acoupi_ comes with a series of pre-defined [**components**](../reference/components.md) that allow the customisation of _acoupi_ [**tasks**](../reference/tasks.md), such as recording audio at specific time of the day or sending messages to a remote server using specific messaging protocols (e.g., MQTT, HTTP).
 
-For use cases requiring more specialised behaviour, new custom components can be created. There are two different processes to create new compoments. 
+For use cases requiring more specialised behaviour, new custom components can be created.
+There are two different processes to create new components.
 
 1. Case 1: Create components from pre-built templates
 2. Case 2: Create components from scratch
@@ -15,7 +15,8 @@ For use cases requiring more specialised behaviour, new custom components can be
 
 ## 1. Create components from pre-built templates
 
-Pre-buit templates are the abstract component classes defined in acoupi module [**components/types.py**](../reference/components.md). These templates defined the functions of an acoupi's component, yet requires implementation to be integrated into program tasks. 
+Pre-built templates are the abstract component classes defined in _acoupi_ module [**components/types.py**](../reference/components.md).
+These templates defined the functions of an _acoupi_'s component, yet requires implementation to be integrated into program tasks.
 
 !!! Example "Example of abstract components (types.py)."
 
@@ -30,7 +31,7 @@ Pre-buit templates are the abstract component classes defined in acoupi module [
 
             @abstractmethod
             def component_method(self, input) -> output
-      
+
 
       class RecordingCondition(ABC):
             """A component to decide if a recording should be made."""
@@ -46,7 +47,7 @@ Pre-buit templates are the abstract component classes defined in acoupi module [
             def run(self, data.Recording) -> data.ModelOutput
       ```
 
-Is there an abstract component that would suit a newly created component subclass? If so, the new component subclass should inherit from the abstract component. 
+Is there an abstract component that would suit a newly created component subclass? If so, the new component subclass should inherit from the abstract component.
 An example of a new component subclass could be one that specifies when recordings should occur.
 
 !!! Example "Create new subclass inheriting from types.RecordingConditions."
@@ -65,7 +66,7 @@ An example of a new component subclass could be one that specifies when recordin
 
             duration: float
             "The duration of time (in minutes) where recording should occur."
-      
+
             timezone: datetime.tzinfo
             """The timezone of the deployed device to get the dawn time."""
 
@@ -76,7 +77,7 @@ An example of a new component subclass could be one that specifies when recordin
                   self.duration = duration
                   self.timezone = timezone
                   self.time = time
-            
+
             def should_record(self) -> bool
                   """Determine if a recording should be made."""
 
@@ -87,7 +88,7 @@ An example of a new component subclass could be one that specifies when recordin
                   )
 
                   dawntime = sun_info["dawn"]
-            
+
                   start_dawninterval = dawntime - datetime.timedelta(minutes=self.duration)
                   end_dawninterval = dawntime + datetime.timedelta(minutes=self.duration)
 
@@ -96,4 +97,4 @@ An example of a new component subclass could be one that specifies when recordin
 
 ## 2. Create components from scratch
 
-If the component you wish to implement does not fit into any of the pre-built abstract classes, then you should try to define a simple template as described in the example of abstract components with input and output parameters that uses the data objects such as the ones defined in [`data_schema`](../reference/data.md). 
+If the component you wish to implement does not fit into any of the pre-built abstract classes, then you should try to define a simple template as described in the example of abstract components with input and output parameters that uses the data objects such as the ones defined in [`data_schema`](../reference/data.md).

@@ -2,7 +2,7 @@
 
 Creating a new data object with Pydantic involves defining a Python class that inherits from `pydantic.BaseModel`.
 This class acts as a blueprint for instances of the data object, specifying the attributes and their types.
-The keys steps and requirements for creating a new acoupi data objects are the following:
+The keys steps and requirements for creating a new _acoupi_ data objects are the following:
 
 Step 1: In `/src/acoupi/data.py` define a data object class that inherit from `BaseModel`.
 

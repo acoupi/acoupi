@@ -1,12 +1,12 @@
 # Acoupi Technical Reference
 
-The _acoupi Reference Section_ is helpful to find technical informations about the inner-workings of acoupi and how it operates.
-In the following section, you will find more about the available acoupi functions.
+The _acoupi Reference Section_ is helpful to find technical information about the inner-workings of _acoupi_ and how it operates.
+In the following section, you will find more about the available _acoupi_ functions.
 
 - [Data](data.md): Responsible for defining a standardised data structure and ensuring that the flow of information between the other layers is validated and consistent.
     The data schema is composed of multiple data objects built using the Pydantic library, these correspond to attributes of Python classes.
 
-- [Compoments](components.md): Form the building blocks of acoupi.
+- [Components](components.md): Form the building blocks of acoupi.
     They are individual elements (i.e., Python classes) designed to perform specific actions based on the configurations of a user.
     Their inputs and outputs follow the structure of the data.
 
