@@ -101,6 +101,7 @@ def generate_file_management_task(
                 )
                 continue
 
+            logging.info("Requiring models: %s", required)
             # Is the recording ready to be managed?
             if required - {model.name_model for model in model_outputs}:
                 logger.info(
