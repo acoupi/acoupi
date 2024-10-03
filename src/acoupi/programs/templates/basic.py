@@ -381,6 +381,25 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         """
         return []
 
+    def get_required_models(self, config: ProgramConfig) -> list[str]:
+        """Get the required models for a recording to be considered ready.
+
+        This method specifies which bioacoustic models must process a recording
+        before it is considered "ready" to be moved from temporary storage.
+
+        By default, no models are required, meaning recordings are immediately
+        considered ready. However, you can override this method to define
+        specific models that must process the recordings based on the program's
+        configuration.
+
+        Returns
+        -------
+        list[str]
+            A list of model names that are required to process a recording
+            before it is considered ready.
+        """
+        return []
+
     def create_recording_task(
         self,
         config: ProgramConfig,
@@ -394,12 +413,11 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         Callable[[], Optional[data.Recording]]
             The recording task.
         """
-        recording_conditions = self.get_recording_conditions(config)
         return tasks.generate_recording_task(
             recorder=self.recorder,
             store=self.store,
             logger=self.logger.getChild("recording"),
-            recording_conditions=recording_conditions,
+            recording_conditions=self.get_recording_conditions(config),
         )
 
     def create_file_management_task(
@@ -415,12 +433,12 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         Callable[[], None]
             The file management task.
         """
-        file_filters = self.get_recording_filters(config)
         return tasks.generate_file_management_task(
             store=self.store,
             logger=self.logger.getChild("file_management"),
             file_managers=self.get_file_managers(config),
-            file_filters=file_filters,
+            file_filters=self.get_recording_filters(config),
+            required_models=self.get_required_models(config),
             tmp_path=config.paths.tmp_audio,
         )
 
