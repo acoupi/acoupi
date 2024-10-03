@@ -80,23 +80,12 @@ class SaveRecordingFilter(BaseModel):
     frequency_interval: int = 5
 
 
-class HeartbeatMessage(BaseModel):
-    """Heartbeat message schema."""
-
-    status: str = "running"
-
-    message_send_interval: int = 60 * 60 * 12
-    """Interval between sending messages in seconds."""
-
-
 class Connected_ConfigSchema(MessagingProgramConfiguration):
     """Configuration Schema for Connected Program.
 
     This schema combines the settings for basic program functionality and
     messaging capabilities.
     """
-
-    message_send_interval: int = 60 * 60 * 12
 
     recording_saving: Optional[SaveRecordingFilter] = None
 
