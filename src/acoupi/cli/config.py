@@ -32,7 +32,7 @@ def config(ctx):
         raise click.Abort()
 
     try:
-        program = system.load_program(settings)
+        schema = system.load_config_schema(settings)
     except exceptions.ProgramNotFoundError as err:
         click.secho(
             f"We couldn't find the program\n\nError: {err.program}",
@@ -45,8 +45,6 @@ def config(ctx):
             fg="red",
         )
         raise click.Abort() from err
-
-    schema = program.get_config_schema()
 
     try:
         config = system.load_config(

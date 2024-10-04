@@ -16,6 +16,7 @@ from acoupi.system.templates import render_template
 __all__ = [
     "load_program",
     "load_program_class",
+    "load_config_schema",
     "write_program_file",
 ]
 
@@ -130,6 +131,13 @@ def load_program(settings: Settings) -> programs.AcoupiProgram:
     app.config_from_object(celery_config)
 
     return program_class(config, app)
+
+
+def load_config_schema(settings: Settings):
+    """Load the configuration schema for the program."""
+    program_name = settings.program_name_file.read_text().strip()
+    program_class = load_program_class(program_name)
+    return program_class.get_config_schema()
 
 
 def write_program_file(
