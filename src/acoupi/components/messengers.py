@@ -1,19 +1,23 @@
 """Messengers for acoupi.
 
-Messengers are responsible for sending messages to external services. The messengers are templates
-illustrating how to send messages using different communication protocols (e.g., MQTT, HTTP).
+Messengers are responsible for sending messages to external services. The
+messengers are templates illustrating how to send messages using different
+communication protocols (e.g., MQTT, HTTP).
 
-The messengers are implemented as classes that inherit from Messenger. The class should implement
-the send_message method, which takes a message and sends it to the external service. The class
-should also implement the check method, which checks the connection status of the messenger.
+The messengers are implemented as classes that inherit from Messenger. The
+class should implement the send_message method, which takes a message and sends
+it to the external service. The class should also implement the check method,
+which checks the connection status of the messenger.
 
-The MQTTMessenger sends messages using the MQTT protocol. The HTTPMessenger sends messages using
-HTTP POST requests.
+The MQTTMessenger sends messages using the MQTT protocol. The HTTPMessenger
+sends messages using HTTP POST requests.
 """
 
 import datetime
 import json
 import logging
+import socket
+import time
 from typing import Optional
 
 import paho.mqtt.client as mqtt
@@ -145,12 +149,13 @@ class MQTTMessenger(types.Messenger):
         Returns
         -------
         data.Response
-            A response containing the message, status, content, and received time.
+            A response containing the message, status, content, and received
+            time.
 
         Examples
         --------
         >>> message = data.Message(
-        ...     content='{"name_model": "TestModel", "recording": {"path": "recording.wav", "deployment": {}, "tags": [], "detections": [{"detection_score": 0.9, "location": {}, "tags": [{"tag": {"key": "species", "value": "species_1"}, "confidence_score": 0.9}]}]}'
+        ...     content="hello world",
         ... )
         >>> messenger = MQTTMessenger(
         ...     host="mqtt.localhost.org",
@@ -216,7 +221,12 @@ class MQTTMessenger(types.Messenger):
             If the connection is not successful. This could be due to a
             connection error or an authentication failure.
         """
-        mqtt_status = self.check_connection()
+        try:
+            mqtt_status = self.check_connection()
+        except socket.gaierror as err:
+            raise HealthCheckError(
+                "Health check failed: Unable to resolve the MQTT broker host."
+            ) from err
 
         if mqtt_status != MQTTErrorCode.MQTT_ERR_SUCCESS:
             error_name = MQTTErrorCode(mqtt_status).name
@@ -231,6 +241,18 @@ class MQTTMessenger(types.Messenger):
                 "firewall settings.\n"
                 "  * Misconfiguration: Review your MQTT configuration "
                 "parameters for accuracy."
+            )
+
+        # Wait for the connection to be established or disconnected due to
+        # failed authentication
+        time.sleep(1)
+
+        if not self.client.is_connected():
+            raise HealthCheckError(
+                "Health check failed: MQTT Connection Error (Authentication "
+                "Failed).\n"
+                "The MQTT client was unable to authenticate with the broker. "
+                "Verify your MQTT credentials (username/password) are correct."
             )
 
 
