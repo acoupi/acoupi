@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import warnings
 from pathlib import Path
 from typing import List, Optional, Tuple
 from uuid import UUID
@@ -147,7 +148,9 @@ class SqliteStore(types.Store):
     @db_session
     def store_model_output(self, model_output: data.ModelOutput) -> None:
         """Store the model output locally."""
-        db_recording = self._get_or_create_recording(model_output.recording)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=orm.PonyRuntimeWarning)
+            db_recording = self._get_or_create_recording(model_output.recording)
 
         db_model_output = self.models.ModelOutput(
             id=model_output.id,
@@ -444,7 +447,6 @@ class SqliteStore(types.Store):
         )
         return db_recording
 
-    @db_session
     def _get_or_create_recording(
         self,
         recording: data.Recording,
