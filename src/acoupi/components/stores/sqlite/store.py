@@ -150,7 +150,9 @@ class SqliteStore(types.Store):
         """Store the model output locally."""
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=orm.PonyRuntimeWarning)
-            db_recording = self._get_or_create_recording(model_output.recording)
+            db_recording = self._get_or_create_recording(
+                model_output.recording
+            )
 
         db_model_output = self.models.ModelOutput(
             id=model_output.id,

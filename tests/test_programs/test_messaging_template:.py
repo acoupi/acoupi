@@ -23,11 +23,6 @@ class Program(MessagingProgram):
     config_schema = Config
 
 
-def test_messaging_config_fails_if_http_and_mttq_are_not_provided():
-    with pytest.raises(ValueError):
-        MessagingConfig()
-
-
 @pytest.mark.usefixtures("celery_app")
 @pytest.mark.parametrize(
     "messaging_config",
@@ -99,3 +94,25 @@ def test_program_has_correct_tasks(
 
     assert "send_messages_task" in program.tasks
     assert "heartbeat_task" in program.tasks
+
+
+@pytest.mark.usefixtures("celery_app")
+def test_program_does_not_have_messaging_task_if_messaging_config_is_empty(
+    celery_app,
+    microphone_config: MicrophoneConfig,
+    paths_config: PathsConfiguration,
+    audio_config: AudioConfiguration,
+):
+    config = Config(
+        microphone=microphone_config,
+        messaging=MessagingConfig(),
+        paths=paths_config,
+        recording=audio_config,
+    )
+    program = Program(
+        config,
+        celery_app,
+    )
+
+    assert "send_messages_task" not in program.tasks
+    assert "heartbeat_task" not in program.tasks
