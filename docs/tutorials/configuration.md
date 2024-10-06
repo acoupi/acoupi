@@ -1,41 +1,55 @@
 # Configuration
 
-Once _acoupi_ has been installed on a device, users have the ability to configure a pre-built program.
-_acoupi_ comes with default configuration parameters, user can accept the default parameters or input their own parameters when setting up _acoupi_.
-This is done through _acoupi_ command line interface.
+Once _acoupi_ has been installed on a device, users can configure a pre-built program.
+_acoupi_ comes with default settings, which users can either accept or customise through the command line interface (CLI). 
 
-### Configuring _acoupi_ program via the CLI.
+## Configuring _acoupi_ programs via the CLI
 
-The video shows how a user can configure an _acoupi_ program using the command line interface.
-The command to use in the CLI to configure the default program is as follow:
+- __default program__: The _acoupi default_ program is the most simplest program, handling only two tasks: recording and managing audio files.
+- __connected program__: The _acoupi connected_ program extends the default program by adding messaging capabilities, allowing users to send messages to a remote server.
 
-```bash
-acoupi setup --program acoupi.programs.default
-```
+To select and configure your prefered _acoupi_ program,  use of the following commands:
 
-Based on the program configuration, a number of questions will be presented to the user.
-The keyboard letter `y` or the touch `Enter` is used to **accept** the default configuration.
-The keyboard letter `n` is used to **reject and modify** the default configuration of a pre-built program.
+!!! Example "CLI Command: _acoupi default_ program"
+
+    ```bash
+    acoupi setup --program acoupi.programs.default
+    ```
+
+!!! Example "CLI Command: _acoupi connected_ program"
+
+    ```bash
+    acoupi setup --program acoupi.programs.connected
+    ```
+
+Based on the selected program, users will be prompted with several questions during setup. 
+To **accept** the default values, press the keyboard letter `y` or the key `Enter`. 
+To **reject and modify** a setting, press the keyboard letter `n` and input a new value.
+
+The video below shows the configuration process for the _acoupi default_ program via the command line interface.  
 
 ![type:video](../img/acoupi_configuration.mp4){: style='width: 100%'}
 
-### Overview Configuration Parameters
+## Configuration Parameters
 
-#### acoupi paramaters description
+### acoupi.programs.default
 
+Below is an example of the configured parameters for the _default_ program in JSON format.
 
-#### acoupi.programs.default
+Audio recordings have a duration of 10 seconds and occur every 30 seconds between 4am and 11pm.
+However, recordings are only saved between 11am and 3pm, and during a 30-minute window before and after dawn and dusk.
 
-The example below shows the configured parameters for the _acoupi_ _default_ program in JSON format.
+The values `0` for `frequency_duration` and `frequency_interval` indicate that no frequency filter is applied to save recordings.
 
-Note that audio recordings have a duration of 10 seconds, occurring every 30 seconds between 4am and 11pm.
-However, recordings are only saved between 11am and 3pm as well as within the 30 minutes time interval that is before and after dawn and dusk.
+The database storing the execution of _acoupi_ tasks and recordings of audion files is located in the `storages/` folder in the home directory.
 
-The values of `0` for parameters `frequency_duration`, and `frequency_interval` indicates that this filter will not be used to save recordings.
+!!! Example "CLI Command: view program configuration after setup"
 
-The database registering the functioning of _acoupi_ tasks and the audio recordings files are saved on the home directory in a folder titled `storages/`.
+    ```bash
+    acoupi config get
+    ```
 
-!!! Example "> acoupi config get"
+!!! Example "CLI Output: _acoupi config get_"
 
     ```json
     {
@@ -68,7 +82,26 @@ The database registering the functioning of _acoupi_ tasks and the audio recordi
     }
     ```
 
-  
+!!! Tip "How to modify a value after setup"
+    
+    You can adjust the value of a parameter after an acoupi program has been set up. This can be necessary either due to
+    a misconfiguration or to make changes to the current program. To modify a parameter, use the command:
+
+
+    !!! Example "CLI Command: modify a configuration parameter after setup"
+
+          ```bash
+          acoupi config set --field <parameter_name> <new_value>
+          ```
+
+      Replace the _`parameter_name`_ with the full name of the parameter to modified. For example, to update the recording start time to 10am, the CLI command would be as follow:
+
+    !!! Example "CLI Command: modify recording start time"
+
+          ```bash
+          acoupi config set --field recording.schedule_start 10:00:00
+          ```
+
 The table below provides detailed information about the parameters available for configuration when using the _acoupi_ __default program__.
 
 | Parameter | Type | Default Value | Definition | Comment |
@@ -88,7 +121,7 @@ The table below provides detailed information about the parameters available for
 | `paths.tmp_audio`| string | "/run/shm" | Temporary storage path for audio recordings. | Temporary in-memory path. Do not modify. |
 | `paths.recordings`| string | "/home/pi/storages/recordings" | Path to directory storing recorded audio files.| Modify accordingly. With default paths, recordings are stored on the SDCard, modify if using external usb hardrive. |
 | `paths.db_metadata`| string | "/home/pi/storages/metadata.db" | Path to the database file storing the metadata. | This .db keeps track of recorded files, ML detection results, and system information. |
-| __Recording Saving (Optional)__ | N/A | - | Configuration for saving recorded audio files. | |
+| __Recording Saving__ | N/A | - | Configuration for saving recorded audio files. | |
 | `recording_saving.starttime`| time (HH:MM:SS)| "18:30:00"| Start time for saving recorded audio files (24-hour format).| Insert 00:00:00 to not use this parameter to save audio recordings.|
 | `recording_saving.endtime`| time (HH:MM:SS)| "20:00:00"| End time for saving recorded audio files (24-hour format)| Insert 00:00:00 to not use this parameter to save audio recordings. |
 | `recording_saving.before_dawndusk_duration` | int (min.) | 10 | Additional duration (in minutes) to save recordings __before__ the dawn/dusk time.| Ensure recording interval covers the dawn and dusk time if using this parameter. |
@@ -97,16 +130,18 @@ The table below provides detailed information about the parameters available for
 | `recording_saving.frequency_interval` | int (min.) | 0 | Interval duration in minutes between period of time to save recordings. | Set to zero if not using this parameter. |
 
 
-#### acoupi.programs.connected
+### acoupi.programs.connected
 
-The example below shows the added parameters for the _acoupi_ _connected_ program.
+The _acoupi connected_ program extends the  _acoupi default_ program by adding configuration options for sending messages to a remote server. It retains all the settings from the _acoupi default_ program but introduces new parameters for network communication.
 
-This program comes with a messaging section to configure the parameters to the send messages to a remote server.
-The messages to be sent and their associated status is stored in a database named `messages.db` on the home directory in a folder titled `storages/`.
-The value of `message_send_interval` indicates that messages will be sent every 120 seconds, while the `heartbeat_interval` indicates that `heartbeat_message` are sent every 10 minutes.
-Messages are sent via the HTTP and MQTT protocols.
+Messages can be sent using either the HTTP or MQTT protocol. At least one of these protocols must be configured. If neither protocol is setup, the program will raise an error. 
 
-!!! Example "> acoupi config get"
+The messages and their statuses, indicating if they have been sent, and whether this was a success or a failure, are stored in a database called `messages.db`. By default, this file is located in the `storages/` folder in the home directory.
+
+The `message_send_interval` parameter controls how frequently the _acoupi_ program checks for new messages to send (i.e., 120 seconds by default). Similarly, the `heartbeat_interval` determines how often a `heartbeat_message`is sent (i.e., 10 minutes by default).
+
+
+!!! Example "CLI Output: _acoupi config get_"
 
     ```json
     {
@@ -140,12 +175,17 @@ The table below provides detailed information about the supplementary parameters
 |---|---|---|---|---|
 | __Paths__| | | Configuration for file paths.| |
 | `messaging.messages_db`| string | "/home/pi/storages/messages.db" | Path to the database file storing messages. | This .db keeps track of the messages to be sent to a remote server and their sending/receiving status. |
-| __Messaging (Optional)__| | | Configuration for sending messages to remote server.| Will require access to network connectivity at the location of your device deployment. |
+| __Messaging__| | | Configuration for sending messages to remote server.| Will require access to network connectivity at the location of your device deployment. |
 | `messaging.message_send_interval`| int (sec.) | 120 | Interval in seconds for sending messages to the remote server. | Adjust for network performance and data bandwidth. |
 | `messaging.heartbeat_interval` | int (sec.) | 600 | Interval in seconds for sending heartbeat messages to the server. | Heartbeat message provides information about the device status (i.e., the correct functioning of the device). |
+| __Messaging HTTP__| | | Configuration for sending messages via HTTP.| |
+| `messaging.http.base_url` | string | - | URL of the HTTP server to which messages are sent. | Configure according to your server setup. |
+| `messaging.http.content_type` | string | - | Content type of the HTTP messages. | Messages to be sent are formated into a `json` object. |
+| `messaging.http.timeout` | int (sec) | - | Timeout for HTTP requres in seconds.. | |
+| __Messaging MQTT__| | | Configuration for sending messages via MQTT.| |
 | `messaging.mqtt.host` | string | - | MQTT server hostname for message transmission. | Configure according to your server setup. |
 | `messaging.mqtt.username` | string | - | Username for authentication with the MQTT broker. | Replace with your server username. |
 | `messaging.mqtt.password` | string | - | Password for authentication with the MQTT broker. | Replace with your server password. |
 | `messaging.mqtt.topic` | string | "acoupi" | Topic on the MQTT broker to publish messages | Replace with your server setup. |
 | `messaging.mqtt.port`| int | 1884 |  Port number of the MQTT broker. | Default port is usually fine unless other setup on your server. |
-| `messaging.mqtt.timeout` | int (sec) | 5 | Timeout for connecting to the MQTT broker | |
+| `messaging.mqtt.timeout` | int (sec) | 5 | Timeout for connecting to the MQTT broker in seconds. | |
