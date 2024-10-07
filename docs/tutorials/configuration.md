@@ -26,7 +26,7 @@ Based on the selected program, users will be prompted with several questions dur
 To **accept** the default values, press the keyboard letter `y` or the key `Enter`. 
 To **reject and modify** a setting, press the keyboard letter `n` and input a new value.
 
-The video below shows the configuration process for the _acoupi default_ program via the command line interface.  
+The video shows the configuration process for the _acoupi default_ program via the CLI.  
 
 ![type:video](../img/acoupi_configuration.mp4){: style='width: 100%'}
 
@@ -82,9 +82,9 @@ The database storing the execution of _acoupi_ tasks and recordings of audion fi
     }
     ```
 
-!!! Tip "How to modify a value after setup"
+!!! Tip "How to modify a value after setup?"
     
-    You can adjust the value of a parameter after an acoupi program has been set up. This can be necessary either due to
+    You can modify the value of a parameter after an _acoupi_ program has been set up. This can be necessary either due to
     a misconfiguration or to make changes to the current program. To modify a parameter, use the command:
 
 
@@ -102,7 +102,7 @@ The database storing the execution of _acoupi_ tasks and recordings of audion fi
           acoupi config set --field recording.schedule_start 10:00:00
           ```
 
-The table below provides detailed information about the parameters available for configuration when using the _acoupi_ __default program__.
+The table below provides detailed information about the parameters available when setting up _acoupi_ _default_ program.
 
 | Parameter | Type | Default Value | Definition | Comment |
 |---|---|---|---|---|
@@ -169,7 +169,7 @@ The `message_send_interval` parameter controls how frequently the _acoupi_ progr
     }
     ```
 
-The table below provides detailed information about the supplementary parameters available for configuration when using the _acoupi_ __connected program__.
+The table below provides detailed information about the supplementary parameters available when setting up _acoupi_ _connected_ program.
 
 | Parameter | Type | Default Value | Definition | Comment |
 |---|---|---|---|---|

@@ -1,41 +1,60 @@
 # Deployment
 
-Once acoupi has been installed and configured on a device, users can proceed to deploy the program. This means the device will begin to record audio according to the chosen recording schedule, manage saving and deleting of audio files, and if the _connected_ program was configured, send messages to a remote server. 
+After installing and configuring an _acoupi_ program, users can proceed to deploy it. This means the device will start running the program, ensuring audio recordings happen according to the configured recording schedule, recorded files will be saved or deleted, and if the _connected_ program was configured, messages will be sent to a remote server. 
  
-## What happens during deployment? 
+??? Tip "What happens when a deployment starts?" 
 
-- __Running Tasks__: The device will handle audio recording, manage files such as saving and deleting, and if the _connected_ program was configured, send messages to a remote sever. 
-- __Create Storage__: A new folder named `storages/` will be created in the home directory. This folder will contain database files such as `metadata.db` and `messaging.db`, and a `recordings` folder to save the `.wav` audio files. 
+    When starting the deployment of a program, _acoupi_ will do the following:
 
-Starting the deployment of a program means that 
+    - __Create Storages__: This step checks that the folders and database files to store recordings and metadata exist. If using the _default_ program configuration, a `storages/` folder will be created in the home directory (i.e., `home/pi/`), containing a `metadata.db` file and a `recordings/` folder to store the `.wav` audio files. 
+    - __Schedule Tasks__: This step creates special instructions called systemd unit files to ensure that the program runs automatically in the background. This means the program will keep running even when the terminal window is closed or the device restarts after power interruption.
 
-- Before disconnecting, it is good practice to ensure that the program is running correclty. This can be done by checking the status of the program (i.e., the status of acoupi services). Use the command `status` to pring the status of the services. If everything is green and at the line: Active: `active (running)` then everything is working well. If something is showing up in orange or red, read the error message to understand what is going wrong. 
+??? tip "How are deployments managed?"
 
-- now that the program is running, users can leave the device do it job. This means that a user can disconnect from the `ssh session` and the terminal window they have been working on to setup the device. To close the connection without shuting down the device use the command `control D` on Mac OS. 
+    For more details about the system background processes and the management of a deployment, refer to the [_Explanation: System_](../explanation/system.md) section.
 
-- users have the options to stop a deployment. Stopping a deployment can be useful, if users for example want to modify some of the configuration parameters, move the device to a different location, or simply ends the collection of data. The command to use is `deployment stop`. Note that if a deployment is stopped, the only way to start a deployment again, is by entering the `deployment start` command. 
 
-The deployment of an _acoupi program_ generates two systemd unit files to manage the start, restart, and stop of an _acoupi_ program.
 
-## Managing _acoupi_ deployment via the CLI
+## Managing the deployment of _acoupi_ programs via the CLI
+
+The video shows how a user can start, stop, and get the status of _acoupi_ programs.
+
+![type:video](../img/acoupi_deployment.mp4){: style='width: 100%'}
+
+### Before starting a deployment
+
+Before starting a deployment, it's important to run a health check to ensure there are no errors in the program configuration. If everything is in order, a green message saying __`Health checks passed`__ will be printed. However, if there are any errors, the system will display specific error messages. To resolve them, modify the configurations settings according to the provided error messages. 
+
+!!! Example "CLI Command: pre-deployment checks"
+
+    ```bash
+    acoupi check
+    ```
 
 ### Starting a deployment
+
+When ready to start a program, use the `acoupi deployment start` command. This will prompt you to provide some additional information; a name for the deployment and the latitude and longitude coordinates of the device’s location. This data will be saved in the `metadata.db` file along with the start date and time of the deployment.
 
 !!! Example "CLI Command: activating an acoupi program"
 
     ```bash
     acoupi deployment start
     ```
+??? Info "Table: Additional parameters when starting a deployment"
 
-### Stopping a deployment
-
-!!! Example "CLI Command: halting an acoupi program"
-
-    ```bash
-    acoupi deployment stop
-    ```
+    | __Deployment Parameter__ | Type | Value | Definition|
+    | --- | --- | --- | ---|
+    | `name`| string | - | Name for the specific deployment.| 
+    | `latitude`| float | - | The latitude coordinate of the device location when   deployed. | 
+    |`longitude`| float | - | The longitude coordinate of the device location when  deployed. | 
 
 ### Getting the status of a deployment
+
+After starting a deployment, it’s good practice to check the status of the program by running the `acoupi deployment status` command. This command can show the following outputs: 
+
+- _`active (running)`_ in green meaning that everything is working well
+- _`inactive (dead)`_ colourless meaning that the program is not running. Run the start command to active it. 
+- _`failed (Result: exit-code)`_ in red meanting that there is an error with running the program. Read the error messages to troubleshoot the issue. 
 
 !!! Example "CLI Command: viewing the status of an acoupi program"
 
@@ -43,11 +62,12 @@ The deployment of an _acoupi program_ generates two systemd unit files to manage
     acoupi deployment status
     ```
 
+### Stopping a deployment
 
-The video shows how a user can start, stop, and get the status of an _acoupi_ program using the command line interface.
+Stopping the deployment can be necessary if you need to modify the program’s configuration, move the device to a different location, or fix any errors that have appeared in the logs. To halt the program, use the `acoupi deployment stop` command. Remember, once a deployment is stopped, it can only be restarted by running the acoupi deployment start command again.
 
-![type:video](../img/acoupi_deployment.mp4){: style='width: 100%'}
+!!! Example "CLI Command: halting an acoupi program"
 
-??? tip "How are deployments managed?"
-
-    To learn more about how the system manage a deployment, refer to the [_Explanation: System_](../explanation/system.md/#3-orchestration) section.
+    ```bash
+    acoupi deployment stop
+    ```
