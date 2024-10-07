@@ -140,7 +140,9 @@ class SaveRecordingManager(types.RecordingSavingManager):
             ):
                 return self.dirpath_false
 
-        return self.dirpath  # Default path if any of the above conditions are not met.
+        return (
+            self.dirpath
+        )  # Default path if any of the above conditions are not met.
 
     def save_recording(
         self,
@@ -196,7 +198,9 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
     directory: Path
     """Directory where the files are stored."""
 
-    def __init__(self, directory: Path, logger: Optional[logging.Logger] = None):
+    def __init__(
+        self, directory: Path, logger: Optional[logging.Logger] = None
+    ):
         """Create a new BaseFileManager."""
         if logger is None:
             logger = get_task_logger(__name__)
@@ -291,7 +295,9 @@ class DateFileManager(BaseFileManager):
             Path of the file.
         """
         date = recording.created_on
-        directory = Path(str(date.year)) / Path(str(date.month)) / Path(str(date.day))
+        directory = (
+            Path(str(date.year)) / Path(str(date.month)) / Path(str(date.day))
+        )
         time = recording.created_on.strftime("%H%M%S")
         return directory / Path(f"{time}_{recording.id}.wav")
 
