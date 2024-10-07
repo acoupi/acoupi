@@ -36,16 +36,16 @@ class StatisticsDetectionsSummariser(types.Summariser):
     """The store to get the detections from."""
 
     interval: datetime.timedelta
-    """The interval to get the detections from."""
+    """The interval to get the detections from in seconds."""
 
     def __init__(
         self,
         store: SqliteStore,
-        interval: Union[float, int, datetime.timedelta] = 120,
+        interval: Union[float, int, datetime.timedelta] = 3600,
     ):
         """Initialise the Summariser."""
         if isinstance(interval, (float, int)):
-            interval = datetime.timedelta(minutes=interval)
+            interval = datetime.timedelta(seconds=interval)
 
         self.store = store
         self.interval = interval
@@ -130,12 +130,12 @@ class ThresholdsDetectionsSummariser(types.Summariser):
     """The store to get the detections from."""
 
     interval: datetime.timedelta
-    """The interval to get the detections from."""
+    """The interval to get the detections from in seconds."""
 
     def __init__(
         self,
         store: SqliteStore,
-        interval: Union[float, int, datetime.timedelta] = 120,
+        interval: Union[float, int, datetime.timedelta] = 3600,
         low_band_threshold: float = 0.1,
         mid_band_threshold: float = 0.5,
         high_band_threshold: float = 0.9,
@@ -154,7 +154,7 @@ class ThresholdsDetectionsSummariser(types.Summariser):
         self.store = store
 
         if isinstance(interval, (float, int)):
-            interval = datetime.timedelta(minutes=interval)
+            interval = datetime.timedelta(seconds=interval)
 
         self.interval = interval
         self.low_band_threshold = low_band_threshold
@@ -216,27 +216,17 @@ class ThresholdsDetectionsSummariser(types.Summariser):
 
             stats = {
                 "count_low_threshold": len(
-                    [
-                        d
-                        for d in species_probabilities
-                        if d <= self.low_band_threshold
-                    ]
+                    [d for d in species_probabilities if d <= self.low_band_threshold]
                 ),
                 "count_mid_threshold": len(
                     [
                         d
                         for d in species_probabilities
-                        if self.low_band_threshold
-                        < d
-                        <= self.mid_band_threshold
+                        if self.low_band_threshold < d <= self.mid_band_threshold
                     ]
                 ),
                 "count_high_threshold": len(
-                    [
-                        d
-                        for d in species_probabilities
-                        if self.mid_band_threshold < d
-                    ]
+                    [d for d in species_probabilities if self.mid_band_threshold < d]
                 ),
                 "mean_low_threshold": round(
                     mean(
@@ -253,9 +243,7 @@ class ThresholdsDetectionsSummariser(types.Summariser):
                         [
                             d
                             for d in species_probabilities
-                            if self.low_band_threshold
-                            < d
-                            <= self.mid_band_threshold
+                            if self.low_band_threshold < d <= self.mid_band_threshold
                         ]
                     ),
                     3,
