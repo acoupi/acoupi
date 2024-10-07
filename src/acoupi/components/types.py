@@ -197,7 +197,7 @@ class ModelOutputCleaner(ABC):
 
 
 class RecordingSavingFilter(ABC):
-    """The Recording Saving Filter is reponsible for determining if a recording should be saved.
+    """The Recording Saving Filter is responsible for determining if a recording should be saved.
 
     Notes
     -----

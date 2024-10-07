@@ -121,7 +121,7 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
     def setup(self, config: ProgramConfig):
         """Set up the Messaging Program.
 
-        This method initializes the message store and messenger, registers
+        This method initialises the message store and messenger, registers
         the messaging and heartbeat tasks, and performs any necessary setup.
         """
         self.validate_dirs(config)
@@ -143,9 +143,7 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
 
         super().check(config)
 
-    def configure_message_store(
-        self, config: ProgramConfig
-    ) -> types.MessageStore:
+    def configure_message_store(self, config: ProgramConfig) -> types.MessageStore:
         """Configure the message store.
 
         This method creates and configures an instance of the
@@ -206,9 +204,7 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
             logger=self.logger.getChild("messaging"),
         )
 
-    def create_heartbeat_task(
-        self, config: ProgramConfig
-    ) -> Optional[Callable]:
+    def create_heartbeat_task(self, config: ProgramConfig) -> Optional[Callable]:
         """Create the heartbeat task.
 
         This method creates the task responsible for sending heartbeats.

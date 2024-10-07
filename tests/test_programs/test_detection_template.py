@@ -34,7 +34,7 @@ def config(
 
 
 @pytest.mark.usefixtures("celery_app")
-def test_can_initialize_program(
+def test_can_initialise_program(
     celery_app: Celery,
     config: Config,
 ):

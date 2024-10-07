@@ -65,7 +65,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         program_config: ProgramConfig,
         app: Celery,
     ):
-        """Initialize."""
+        """Initialise."""
         self.config = program_config
         self.app = app
         self.tasks = {}
@@ -130,11 +130,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
     @classmethod
     def get_queue_names(cls) -> List[str]:
         """Get the queue names."""
-        return [
-            q
-            for worker in cls.get_worker_config().workers
-            for q in worker.queues
-        ]
+        return [q for worker in cls.get_worker_config().workers for q in worker.queues]
 
     def add_task(
         self,
@@ -173,12 +169,10 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
     def add_task_to_queue(self, task_name: str, queue: str):
         """Add a task to a queue."""
         if queue not in self.get_queue_names():
-            raise ValueError(
-                f"Queue {queue} is not declared in the worker config"
-            )
+            raise ValueError(f"Queue {queue} is not declared in the worker config")
 
         if not self.app.conf.task_routes:
-            # initialize the task routes
+            # initialise the task routes
             self.app.conf.task_routes = {}
 
         # configure the app to route the task to the queue

@@ -70,7 +70,7 @@ class MQTTMessenger(types.Messenger):
         timeout: int = 5,
         logger: Optional[logging.Logger] = None,
     ) -> None:
-        """Initialize the MQTT messenger.
+        """Initialise the MQTT messenger.
 
         Parameters
         ----------
@@ -117,9 +117,7 @@ class MQTTMessenger(types.Messenger):
             host=config.host,
             port=config.port,
             username=config.username,
-            password=config.password.get_secret_value()
-            if config.password
-            else None,
+            password=config.password.get_secret_value() if config.password else None,
             topic=config.topic,
             timeout=config.timeout,
             logger=logger,
@@ -197,9 +195,7 @@ class MQTTMessenger(types.Messenger):
             logging.debug(f"Message not sent: {message.content}. Error: {e}")
 
         if response.rc != MQTTErrorCode.MQTT_ERR_SUCCESS:
-            logging.debug(
-                f"Message not sent: {message.content}. Error: {response.rc}"
-            )
+            logging.debug(f"Message not sent: {message.content}. Error: {response.rc}")
             status = data.ResponseStatus.ERROR
 
         received_on = datetime.datetime.now()
@@ -286,7 +282,7 @@ class HTTPMessenger(types.Messenger):
         content_type: str = "application/json",
         logger: Optional[logging.Logger] = None,
     ) -> None:
-        """Initialize the HTTP messenger.
+        """Initialise the HTTP messenger.
 
         Parameters
         ----------
@@ -422,10 +418,7 @@ class HTTPMessenger(types.Messenger):
                 "temporarily unavailable or experiencing issues."
             )
 
-        if (
-            "Allow" in response.headers
-            and "POST" not in response.headers["Allow"]
-        ):
+        if "Allow" in response.headers and "POST" not in response.headers["Allow"]:
             raise HealthCheckError(
                 f"Could connect to {self.base_url} but POST method is "
                 "not allowed. Check the server configuration."

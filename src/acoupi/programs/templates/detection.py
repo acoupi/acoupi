@@ -38,11 +38,11 @@ To create an Acoupi program with audio detection capabilities:
 2. Define a configuration schema that inherits from
    `DetectionProgramConfiguration`.
 3. Implement the `configure_model` method to configure your detection model.
-4. Optionally override the following methods to customize the detection
+4. Optionally override the following methods to customise the detection
    process:
     - `get_output_cleaners`:  To clean up the model's raw output.
     - `get_processing_filters`:  To filter recordings before processing.
-    - `get_message_factories`:  To customize the messages generated based on
+    - `get_message_factories`:  To customise the messages generated based on
       detection results.
 """
 
@@ -132,14 +132,14 @@ class DetectionProgram(MessagingProgram[C], ABC):
 
     Customization:
 
-    You can customize the detection process by overriding the following
+    You can customise the detection process by overriding the following
     methods:
 
     - `configure_model`:  **Required.** Implement this method to configure
       and return an instance of your detection model.
     - `get_output_cleaners`:  To clean up the model's raw output.
     - `get_processing_filters`:  To filter recordings before processing.
-    - `get_message_factories`:  To customize the messages generated based on
+    - `get_message_factories`:  To customise the messages generated based on
       detection results.
 
     Examples
@@ -183,7 +183,7 @@ class DetectionProgram(MessagingProgram[C], ABC):
     def setup(self, config: C) -> None:
         """Set up the Detection Program.
 
-        This method initializes the detection model and performs any
+        This method initialises the detection model and performs any
         necessary setup.
         """
         self.model = self.configure_model(config)
@@ -312,7 +312,7 @@ class DetectionProgram(MessagingProgram[C], ABC):
         Notes
         -----
         This method uses the `generate_detection_task` function to create the
-        detection task. You can override this method to customize the task
+        detection task. You can override this method to customise the task
         creation process.
         """
         return generate_detection_task(

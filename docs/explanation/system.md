@@ -9,7 +9,7 @@ The **System** is responsible for ensuring the accurate execution of user-define
 
 ??? warning "Pre-requisites"
 
-    Before proceeding, please ensure you have familiarized yourself with the following sections of the Explanation:
+    Before proceeding, please ensure you have familiarised yourself with the following sections of the Explanation:
 
     * [**Data Schema**](data_schema.md)
     * [**Components**](components.md)
@@ -59,7 +59,7 @@ To facilitate observability and error identification, _acoupi_ maintains compreh
 ### Home Directory
 
 _acoupi_ centralizes all essential data and files within the `ACOUPI_HOME` directory.
-By default, this directory is set to `$HOME/.acoupi`, but users can customize its location by modifying the `ACOUPI_HOME` environment variable.
+By default, this directory is set to `$HOME/.acoupi`, but users can customise its location by modifying the `ACOUPI_HOME` environment variable.
 
 !!! warning
 
@@ -96,7 +96,7 @@ When the user specifies the program to run and/or modifies configurations, _acou
 ### Execution Files
 
 _acoupi_ generates scripts within the `$ACOUPI_HOME/bin` folder to manage Celery operations (start, stop, restart, and schedule tasks).
-These scripts direct Celery to utilize the `$ACOUPI/app.py` file for the definition of the Celery app, which encapsulates the _acoupi_ program to be executed.
+These scripts direct Celery to utilise the `$ACOUPI/app.py` file for the definition of the Celery app, which encapsulates the _acoupi_ program to be executed.
 
 ### Logs and Status
 
@@ -112,8 +112,8 @@ This ensures that the generated files within `ACOUPI_HOME` accurately reflect th
 ## 3. Orchestration
 
 Upon deployment initiation, _acoupi_ invokes the necessary steps to prepare the device for program execution.
-It utilizes [Celery](https://docs.celeryq.dev/en/stable/index.html) as the framework to execute and schedule tasks.
-_acoupi_ initializes Celery workers and starts executing the Celery app defined within the current _acoupi_ program.
+It utilises [Celery](https://docs.celeryq.dev/en/stable/index.html) as the framework to execute and schedule tasks.
+_acoupi_ initialises Celery workers and starts executing the Celery app defined within the current _acoupi_ program.
 Simultaneously, [systemd](https://systemd.io/) is employed to install _acoupi_ as a system service, ensuring automatic restarts in case of failures or system reboots.
 
 ### Celery App
@@ -134,7 +134,7 @@ However, in bioacoustics sensor systems, certain tasks might necessitate exclusi
 To address this, Celery allows the creation of multiple queues, enabling specific workers to fetch tasks from designated queues.
 This approach grants flexibility by permitting sequential task processing within a particular queue (concurrency of 1), while other workers handle tasks concurrently in other queues.
 The [AcoupiWorker][acoupi.programs.AcoupiWorker] class allows for configuring multiple workers and organizing them into an [WorkerConfig][acoupi.programs.WorkerConfig] object.
-This configuration is then utilized when creating the [AcoupiProgram][acoupi.programs.AcoupiProgram].
+This configuration is then utilised when creating the [AcoupiProgram][acoupi.programs.AcoupiProgram].
 
 !!! Example
 

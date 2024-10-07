@@ -28,7 +28,7 @@ class IntervalScheduler(RecordingScheduler):
     """The interval between each recording. In seconds."""
 
     def __init__(self, timeinterval: float):
-        """Initialize the recording scheduler.
+        """Initialise the recording scheduler.
 
         Parameters
         ----------

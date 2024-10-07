@@ -95,7 +95,7 @@ The [types.MessageStores][acoupi.components.types.MessageStore] component is cha
 This allows retrying sending messages if they fail to send, or that can log the status of messages for later analysis.
 
 By combining these categories of components, it is possible to create complex programs that can perform a wide variety of monitoring tasks.
-Each component can be configured to operate in a specific way, and can be combined with other components to create customized functionality.
+Each component can be configured to operate in a specific way, and can be combined with other components to create customised functionality.
 
 #### Summarisers
 

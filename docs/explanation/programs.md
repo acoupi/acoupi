@@ -12,7 +12,7 @@ A configuration schema defines the program's configuration structure, and worker
 
 * **Tasks** outline the operations of a program, these are individual units of work performing a set of specific actions. Tasks are orchestrated by an _acoupi_ program by specifying the task function, its schedule and dependencies.
     
-    - _Function_: The functionality of the task. This is the sequence of _acoupi_ compoments specifiying what actions the task perform.
+    - _Function_: The functionality of the task. This is the sequence of _acoupi_ components specifiying what actions the task perform.
     - _Schedule_: When and how often the task runs (e.g., continuously, at specific intervals, triggered by an event).
     - _Dependencies_: How the task relates to other tasks in the program (e.g., does it need to run before or after another task?).
 
@@ -59,7 +59,7 @@ This instantiation process ensures that the program is equipped with accurate an
     from pydantic import BaseModel, Field
 
     from acoupi import components, data, tasks
-    from acoupi.compoments import types
+    from acoupi.components import types
     from acoupi.programs.core import (
         AcoupiProgram, 
         AcoupiWorker, 
@@ -84,7 +84,7 @@ This instantiation process ensures that the program is equipped with accurate an
         dummy_component: types.DummyComponent
 
         def setup(self, config: Dummy_ConfigSchema):
-            """Initialise program compoment."""
+            """Initialise program component."""
             self.dummy_component = self.configure_dummycomponent(config)
             self.register_task(config)
             super().setup(config)
@@ -98,7 +98,7 @@ This instantiation process ensures that the program is equipped with accurate an
             def create_task(self, config):
                 task_configuration = self.configure_task(config)
                 return tasks.generate_task(
-                    compoment=self.dummy_component, 
+                    component=self.dummy_component, 
                     logger=self.logger.getChild("task_name"),
                 )
             

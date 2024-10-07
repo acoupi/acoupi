@@ -38,7 +38,7 @@ class IsInInterval(types.RecordingCondition):
         interval: data.TimeInterval,
         timezone: datetime.tzinfo,
     ):
-        """Initialize the IntervalRecordingManager.
+        """Initialise the IntervalRecordingManager.
 
         Parameters
         ----------
@@ -94,7 +94,7 @@ class IsInIntervals(types.RecordingCondition):
         intervals: List[data.TimeInterval],
         timezone: datetime.tzinfo,
     ):
-        """Initialize the MultiIntervalRecordingManager.
+        """Initialise the MultiIntervalRecordingManager.
 
         Parameters
         ----------
@@ -110,10 +110,7 @@ class IsInIntervals(types.RecordingCondition):
     def should_record(self) -> bool:
         """Determine if a recording should be made."""
         now = datetime.datetime.now(tz=self.timezone).time()
-        return any(
-            interval.start <= now <= interval.end
-            for interval in self.intervals
-        )
+        return any(interval.start <= now <= interval.end for interval in self.intervals)
 
 
 class DawnTimeInterval(types.RecordingCondition):
@@ -126,7 +123,7 @@ class DawnTimeInterval(types.RecordingCondition):
     """The timezone that the dawn time is in."""
 
     def __init__(self, duration: float, timezone: datetime.tzinfo):
-        """Initialize the DawnTimeInterval.
+        """Initialise the DawnTimeInterval.
 
         Parameters
         ----------
@@ -174,11 +171,7 @@ class DawnTimeInterval(types.RecordingCondition):
             tzinfo=self.timezone,
         )
         dawntime = sun_info["dawn"]
-        start_dawninterval = dawntime - datetime.timedelta(
-            minutes=self.duration
-        )
+        start_dawninterval = dawntime - datetime.timedelta(minutes=self.duration)
         end_dawninterval = dawntime + datetime.timedelta(minutes=self.duration)
 
-        return (
-            start_dawninterval.time() <= now.time() <= end_dawninterval.time()
-        )
+        return start_dawninterval.time() <= now.time() <= end_dawninterval.time()

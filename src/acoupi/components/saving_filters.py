@@ -165,12 +165,8 @@ class Before_DawnDuskTimeInterval(types.RecordingSavingFilter):
         dawntime = sun_info["dawn"]
         dusktime = sun_info["dusk"]
 
-        dawntime_interval = dawntime - datetime.timedelta(
-            minutes=self.duration
-        )
-        dusktime_interval = dusktime - datetime.timedelta(
-            minutes=self.duration
-        )
+        dawntime_interval = dawntime - datetime.timedelta(minutes=self.duration)
+        dusktime_interval = dusktime - datetime.timedelta(minutes=self.duration)
 
         return (dawntime_interval <= recording_time <= dawntime) or (
             dusktime_interval <= recording_time <= dusktime
@@ -244,12 +240,8 @@ class After_DawnDuskTimeInterval(types.RecordingSavingFilter):
         dawntime = sun_info["dawn"]
         dusktime = sun_info["dusk"]
 
-        dawntime_interval = dawntime + datetime.timedelta(
-            minutes=self.duration
-        )
-        dusktime_interval = dusktime + datetime.timedelta(
-            minutes=self.duration
-        )
+        dawntime_interval = dawntime + datetime.timedelta(minutes=self.duration)
+        dusktime_interval = dusktime + datetime.timedelta(minutes=self.duration)
 
         return (dawntime <= recording_time <= dawntime_interval) or (
             dusktime <= recording_time <= dusktime_interval
@@ -263,12 +255,10 @@ class SavingThreshold(types.RecordingSavingFilter):
     """The score threshold to use."""
 
     def __init__(self, saving_threshold: float):
-        """Initialize the RecordingSavingFilter."""
+        """Initialise the RecordingSavingFilter."""
         self.saving_threshold = saving_threshold
 
-    def has_confident_model_output(
-        self, model_output: data.ModelOutput
-    ) -> bool:
+    def has_confident_model_output(self, model_output: data.ModelOutput) -> bool:
         """Determine if a model output has confident detections or tags.
 
         An output is considered confident if any of its detection score
@@ -286,8 +276,7 @@ class SavingThreshold(types.RecordingSavingFilter):
             False if no detection or classification score is above the saving threshold.
         """
         if any(
-            tag.confidence_score >= self.saving_threshold
-            for tag in model_output.tags
+            tag.confidence_score >= self.saving_threshold for tag in model_output.tags
         ):
             return True
 
@@ -321,7 +310,7 @@ class DetectionTagValue(types.RecordingSavingFilter):
     """The tag values to focus on."""
 
     def __init__(self, values: List[str]):
-        """Initialize the RecordingSavingFilter."""
+        """Initialise the RecordingSavingFilter."""
         self.values = values
 
     def has_confident_tagvalues(self, model_output: data.ModelOutput) -> bool:
@@ -355,8 +344,7 @@ class DetectionTagValue(types.RecordingSavingFilter):
             return False
 
         return any(
-            self.has_confident_tagvalues(model_output)
-            for model_output in model_outputs
+            self.has_confident_tagvalues(model_output) for model_output in model_outputs
         )
 
 
@@ -374,7 +362,7 @@ class DetectionTags(types.RecordingSavingFilter):
     """The score threshold to use."""
 
     def __init__(self, tags: List[data.Tag], saving_threshold: float = 0.5):
-        """Initialize the RecordingSavingFilter."""
+        """Initialise the RecordingSavingFilter."""
         self.tags = tags
         self.saving_threshold = saving_threshold
 
@@ -394,8 +382,7 @@ class DetectionTags(types.RecordingSavingFilter):
             bool
         """
         if any(
-            tag.tag in self.tags
-            and tag.confidence_score >= self.saving_threshold
+            tag.tag in self.tags and tag.confidence_score >= self.saving_threshold
             for tag in model_output.tags
         ):
             return True
@@ -423,6 +410,5 @@ class DetectionTags(types.RecordingSavingFilter):
             return False
 
         return any(
-            self.has_confident_tag(model_output)
-            for model_output in model_outputs
+            self.has_confident_tag(model_output) for model_output in model_outputs
         )

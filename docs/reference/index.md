@@ -38,7 +38,7 @@ In the following section, you will find more about the available _acoupi_ functi
       <a href="tasks">Tasks</a>
     </td>
     <td>
-      <p>Integrate sequences of one or more compoments.</p>
+      <p>Integrate sequences of one or more components.</p>
     </td>
   </tr>
   <tr>

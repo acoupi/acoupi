@@ -140,9 +140,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
             ):
                 return self.dirpath_false
 
-        return (
-            self.dirpath
-        )  # Default path if any of the above conditions are not met.
+        return self.dirpath  # Default path if any of the above conditions are not met.
 
     def save_recording(
         self,
@@ -198,9 +196,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
     directory: Path
     """Directory where the files are stored."""
 
-    def __init__(
-        self, directory: Path, logger: Optional[logging.Logger] = None
-    ):
+    def __init__(self, directory: Path, logger: Optional[logging.Logger] = None):
         """Create a new BaseFileManager."""
         if logger is None:
             logger = get_task_logger(__name__)
@@ -267,9 +263,9 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
 
 
 class DateFileManager(BaseFileManager):
-    """FileManager that uses the date to organize the recordings.
+    """FileManager that uses the date to organise the recordings.
 
-    The recordings are organized in directories of the form
+    The recordings are organised in directories of the form
 
     YYYY/MM/DD/
 
@@ -295,15 +291,13 @@ class DateFileManager(BaseFileManager):
             Path of the file.
         """
         date = recording.created_on
-        directory = (
-            Path(str(date.year)) / Path(str(date.month)) / Path(str(date.day))
-        )
+        directory = Path(str(date.year)) / Path(str(date.month)) / Path(str(date.day))
         time = recording.created_on.strftime("%H%M%S")
         return directory / Path(f"{time}_{recording.id}.wav")
 
 
 class IDFileManager(BaseFileManager):
-    """FileManager that uses the ID of the recording to organize the files.
+    """FileManager that uses the ID of the recording to organise the files.
 
     The recordings are saved in a single directory that is specified in
     the constructor. The files are named using the ID of the recording.

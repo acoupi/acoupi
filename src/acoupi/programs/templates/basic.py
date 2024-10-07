@@ -37,7 +37,7 @@ To create a basic Acoupi program, define a new class that inherits from
 
 Customization:
 
-You can customize the program's behavior by overriding the following methods:
+You can customise the program's behavior by overriding the following methods:
 
 - `get_recording_conditions`:  Modify the conditions that trigger audio
   recording.
@@ -93,9 +93,7 @@ class AudioConfiguration(BaseModel):
 
     def get_schedule(self) -> list[data.TimeInterval]:
         """Generate a TimeInterval from start and end times."""
-        return [
-            data.TimeInterval(start=self.schedule_start, end=self.schedule_end)
-        ]
+        return [data.TimeInterval(start=self.schedule_start, end=self.schedule_end)]
 
     """Schedule for recording audio."""
 
@@ -162,7 +160,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
     Customization:
 
-    Customize the program's behavior by overriding these methods:
+    customise the program's behavior by overriding these methods:
 
     - `get_recording_conditions`: Define the specific conditions that must be
         met for audio recording to continue when the recording task is
@@ -216,7 +214,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
     def setup(self, config: ProgramConfig) -> None:
         """Set up the basic program.
 
-        This method initializes the program's components (audio recorder,
+        This method initialises the program's components (audio recorder,
         store, and file manager), registers the recording and file management
         tasks, and performs necessary setup operations.
         """
