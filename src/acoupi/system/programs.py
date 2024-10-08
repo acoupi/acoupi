@@ -4,10 +4,9 @@ import inspect
 import warnings
 from enum import Enum
 from importlib import import_module
-from typing import Optional, Type
+from typing import Type
 
 from celery import Celery
-from pydantic import BaseModel
 
 from acoupi.programs.core import base as programs
 from acoupi.system import exceptions
