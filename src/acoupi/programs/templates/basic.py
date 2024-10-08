@@ -96,7 +96,9 @@ class PathsConfiguration(BaseModel):
     """Data configuration schema."""
 
     cprofile: Path = Field(
-        default_factory=lambda: Path.home() / "storages" / "cprofile_output.prof",
+        default_factory=lambda: Path.home()
+        / "storages"
+        / "cprofile_output.prof",
     )
 
     tmp_audio: Path = Field(default_factory=get_temp_dir)
@@ -444,7 +446,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
             The file management task.
         """
         return tasks.generate_cprofile_management_task(
-        #return tasks.generate_file_management_task(
+            # return tasks.generate_file_management_task(
             store=self.store,
             logger=self.logger.getChild("file_management"),
             file_managers=self.get_file_managers(config),
