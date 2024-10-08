@@ -14,8 +14,6 @@ from .database import create_base_models
 from acoupi import data
 from acoupi.components import types
 
-db_session = orm.db_session(retry=5)
-
 
 class SqliteStore(types.Store):
     """Sqlite store implementation.
@@ -150,9 +148,7 @@ class SqliteStore(types.Store):
         """Store the model output locally."""
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=orm.PonyRuntimeWarning)
-            db_recording = self._get_or_create_recording(
-                model_output.recording
-            )
+            db_recording = self._get_or_create_recording(model_output.recording)
 
         db_model_output = self.models.ModelOutput(
             id=model_output.id,
@@ -286,14 +282,10 @@ class SqliteStore(types.Store):
 
         if detection_ids is not None:
             query = query.filter(
-                lambda mo: orm.exists(
-                    d for d in mo.detections if d.id in detection_ids
-                )
+                lambda mo: orm.exists(d for d in mo.detections if d.id in detection_ids)
             )
 
-        query = query.order_by(
-            orm.desc(self.models.ModelOutput.created_on)
-        ).prefetch(
+        query = query.order_by(orm.desc(self.models.ModelOutput.created_on)).prefetch(
             self.models.ModelOutput.tags,
             self.models.ModelOutput.detections,
             self.models.Detection.tags,
@@ -322,9 +314,7 @@ class SqliteStore(types.Store):
             query = query.filter(lambda d: d.id in ids)
 
         if model_output_ids:
-            query = query.filter(
-                lambda d: d.model_output.id in model_output_ids
-            )
+            query = query.filter(lambda d: d.model_output.id in model_output_ids)
 
         if score_gt is not None:
             query = query.filter(lambda d: d.detection_score > score_gt)
@@ -339,9 +329,7 @@ class SqliteStore(types.Store):
             query = query.filter(lambda d: d.model_output.created_on <= before)
 
         if model_names:
-            query = query.filter(
-                lambda d: d.model_output.model_name in model_names
-            )
+            query = query.filter(lambda d: d.model_output.model_name in model_names)
 
         query = query.prefetch(self.models.Detection.tags)
 
@@ -363,8 +351,7 @@ class SqliteStore(types.Store):
 
         if detection_ids:
             query = query.filter(
-                lambda t: t.detection is not None
-                and t.detection.id in detection_ids
+                lambda t: t.detection is not None and t.detection.id in detection_ids
             )
 
         if after is not None:
@@ -502,9 +489,7 @@ class SqliteStore(types.Store):
     @db_session
     def _get_deployment_by_id(self, id: UUID) -> db_types.Deployment:
         """Get the deployment by the id."""
-        deployment: Optional[db_types.Deployment] = self.models.Deployment.get(
-            id=id
-        )
+        deployment: Optional[db_types.Deployment] = self.models.Deployment.get(id=id)
 
         if deployment is None:
             raise ValueError("No deployment found")
@@ -514,9 +499,7 @@ class SqliteStore(types.Store):
     @db_session
     def _get_recording_by_id(self, id: UUID) -> db_types.Recording:
         """Get the recording by the id."""
-        recording: Optional[db_types.Recording] = self.models.Recording.get(
-            id=id
-        )
+        recording: Optional[db_types.Recording] = self.models.Recording.get(id=id)
 
         if recording is None:
             raise ValueError("No recording found")
@@ -559,9 +542,7 @@ def _to_predictedtag(db_tag: db_types.PredictedTag) -> data.PredictedTag:
 
 def _to_detection(db_detection: db_types.Detection) -> data.Detection:
     location = (
-        None
-        if db_detection.location == ""
-        else json.loads(str(db_detection.location))
+        None if db_detection.location == "" else json.loads(str(db_detection.location))
     )
     return data.Detection(
         id=db_detection.id,
@@ -600,8 +581,7 @@ def _to_model_output(
             for db_tag in db_model_output.tags
         ],
         detections=[
-            _to_detection(db_detection)
-            for db_detection in db_model_output.detections
+            _to_detection(db_detection) for db_detection in db_model_output.detections
         ],
     )
 
