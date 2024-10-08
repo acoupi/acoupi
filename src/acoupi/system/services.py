@@ -1,6 +1,7 @@
 """System functions to manage acoupi services."""
 
 import subprocess
+from enum import Enum
 from pathlib import Path
 from typing import Optional
 
@@ -17,6 +18,19 @@ __all__ = [
     "disable_services",
     "status_services",
 ]
+
+
+class ServiceStatus(str, Enum):
+    """Service status."""
+
+    UNINSTALLED = "uninstalled"
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    FAILED = "failed"
+    RELOADING = "reloading"
+    ACTIVATING = "activating"
+    DEACTIVATING = "deactivating"
+    UNKNOWN = "unknown"
 
 
 def get_user_unit_dir() -> Path:
@@ -163,3 +177,38 @@ def status_services(settings: Settings, path: Optional[Path] = None, **kwargs):
     subprocess.run(
         ["systemctl", "--user", "status", "acoupi-beat.service"], text=True
     )
+
+
+def get_service_status(service_name: str) -> ServiceStatus:
+    status = subprocess.run(
+        ["systemctl", "--user", "is-active", service_name],
+        text=True,
+        capture_output=True,
+    )
+
+    output = status.stdout.strip()
+
+    if output not in ServiceStatus:
+        return ServiceStatus.UNKNOWN
+
+    return ServiceStatus(output)
+
+
+def get_acoupi_service_status(
+    settings: Settings, path: Optional[Path] = None
+) -> ServiceStatus:
+    """Get the status of acoupi services."""
+    if not services_are_installed(settings, path):
+        return ServiceStatus.UNINSTALLED
+
+    return get_service_status("acoupi.service")
+
+
+def get_acoupi_beat_service_status(
+    settings: Settings, path: Optional[Path] = None
+) -> ServiceStatus:
+    """Get the status of acoupi services."""
+    if not services_are_installed(settings, path):
+        return ServiceStatus.UNINSTALLED
+
+    return get_service_status("acoupi-beat.service")
