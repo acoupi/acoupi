@@ -1,6 +1,15 @@
 # Components
 
+::: acoupi.components
+
+    options:
+        members: none
+
+## Component Types
+
 ::: acoupi.components.types
+
+## Concrete Components
 
 ::: acoupi.components.audio_recorder
 
@@ -25,3 +34,5 @@
 ::: acoupi.components.saving_filters
 
 ::: acoupi.components.saving_managers
+
+::: acoupi.components.summariser

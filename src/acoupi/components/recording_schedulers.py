@@ -28,24 +28,30 @@ class IntervalScheduler(RecordingScheduler):
     """The interval between each recording. In seconds."""
 
     def __init__(self, timeinterval: float):
-        """Initialize the recording scheduler.
+        """Initialise the recording scheduler.
 
-        Args:
-            timeinterval: The interval between each recording. In seconds.
+        Parameters
+        ----------
+        timeinterval: float
+            The interval between each recording. In seconds.
         """
         self.timeinterval = timeinterval
 
     def time_until_next_recording(
         self, time: Optional[datetime.datetime] = None
     ) -> float:
-        """Return the number of second until the next recording.
+        """Provide the number of seconds until the next recording.
 
-        Should return 0 if a recording should be made immediately.
+        Parameters
+        ----------
+        time : Optional[datetime.datetime], optional
+            The time to use for determining the next recording, by default None.
 
-        Args:
-            time: The time to use for determining the next recording.
-                Defaults to None.
-
+        Returns
+        -------
+        float
+            The number of seconds until the next recording.
+            Will return 0 if a recording should be made immediately.
         """
         if not time:
             time = datetime.datetime.now()

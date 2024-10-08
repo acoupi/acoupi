@@ -30,7 +30,7 @@ def test_focus_species_filter_rejects_if_no_target_species_found(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        classification_probability=0.6,
+                        confidence_score=0.6,
                     ),
                 ],
             ),
@@ -55,7 +55,7 @@ def test_focus_species_filter_rejects_low_confidence_detections(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        classification_probability=0.4,
+                        confidence_score=0.4,
                     ),
                 ],
             ),
@@ -77,11 +77,11 @@ def test_focus_species_filter_keeps_high_confidence_detections(
         recording=recording,
         detections=[
             data.Detection(
-                detection_probability=0.6,
+                detection_score=0.6,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        classification_probability=0.6,
+                        confidence_score=0.6,
                     ),
                 ],
             ),
@@ -107,15 +107,15 @@ def test_focus_species_filter_rejects_even_with_confident_non_target(
         recording=recording,
         detections=[
             data.Detection(
-                detection_probability=0.6,
+                detection_score=0.6,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        classification_probability=0.6,
+                        confidence_score=0.6,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        classification_probability=0.4,
+                        confidence_score=0.4,
                     ),
                 ],
             ),
@@ -130,7 +130,7 @@ def test_focus_species_filter_keeps_with_at_least_one_target_species(
     """Test focus species recording filter keeps correctly.
 
     It should keep recordings with at least one target species detection
-    with a probability above the provided threshold.
+    with a score above the provided threshold.
     """
     filter = components.DetectionTags(
         tags=[
@@ -147,11 +147,11 @@ def test_focus_species_filter_keeps_with_at_least_one_target_species(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
-                        classification_probability=0.6,
+                        confidence_score=0.6,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test"),
-                        classification_probability=0.4,
+                        confidence_score=0.4,
                     ),
                 ],
             ),

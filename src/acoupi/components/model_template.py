@@ -17,7 +17,7 @@ class TestModel(types.Model):
 
         detections = [
             data.Detection(
-                detection_probability=0.9,
+                detection_score=0.9,
                 location=data.BoundingBox.from_coordinates(
                     start_time=0,
                     low_freq=4000,
@@ -30,7 +30,7 @@ class TestModel(types.Model):
                             key="species",
                             value="scientific_name",
                         ),
-                        classification_probability=0.9,
+                        confidence_score=0.9,
                     ),
                 ],
             )

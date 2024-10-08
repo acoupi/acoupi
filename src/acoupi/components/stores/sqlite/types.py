@@ -77,8 +77,8 @@ class PredictedTag(core.EntityMeta):
     value: str
     """Value of the predicted tag"""
 
-    classification_probability: float
-    """Probability of the predicted tag"""
+    confidence_score: float
+    """Score of the predicted tag"""
 
     detection: Optional["Detection"]
     """Detection that the predicted tag belongs to"""
@@ -96,8 +96,8 @@ class Detection(core.EntityMeta):
     location: Json
     """Location of the detection."""
 
-    detection_probability: float
-    """Probability of the detection."""
+    detection_score: float
+    """Score of the detection."""
 
     tags: List[PredictedTag]
     """Predicted tags of the detection."""

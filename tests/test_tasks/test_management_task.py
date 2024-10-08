@@ -21,11 +21,11 @@ class DummyRecordingManager(RecordingSavingManager):
         if not self.path.exists():
             self.path.mkdir(parents=True)
 
-    def saving_recording(
+    def save_recording(
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
-    ) -> Optional[Path]:
+    ) -> Path:
         if recording.path is None:
             raise ValueError("Recording has no path")
 
@@ -73,25 +73,25 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
         tags=[
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value1"),
-                classification_probability=0.8,
+                confidence_score=0.8,
             ),
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value2"),
-                classification_probability=0.8,
+                confidence_score=0.8,
             ),
         ],
         detections=[
             data.Detection(
                 location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
-                detection_probability=0.6,
+                detection_score=0.6,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="test2", value="value3"),
-                        classification_probability=0.3,
+                        confidence_score=0.3,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="test", value="value1"),
-                        classification_probability=0.2,
+                        confidence_score=0.2,
                     ),
                 ],
             )

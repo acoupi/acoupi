@@ -3,7 +3,11 @@ from acoupi.programs.core.base import (
     NoUserPrompt,
     ProgramConfig,
 )
-from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
+from acoupi.programs.core.workers import (
+    DEFAULT_WORKER_CONFIG,
+    AcoupiWorker,
+    WorkerConfig,
+)
 
 __all__ = [
     "AcoupiProgram",
@@ -11,4 +15,5 @@ __all__ = [
     "WorkerConfig",
     "ProgramConfig",
     "NoUserPrompt",
+    "DEFAULT_WORKER_CONFIG",
 ]

@@ -28,6 +28,7 @@ from acoupi.system.files import (
 )
 from acoupi.system.lifecycle import setup_program, start_program, stop_program
 from acoupi.system.programs import (
+    load_config_schema,
     load_program,
     load_program_class,
     write_program_file,
@@ -58,6 +59,7 @@ __all__ = [
     "load_config",
     "load_program",
     "load_program_class",
+    "load_config_schema",
     "move_recording",
     "parse_config_from_args",
     "run_celery_command",

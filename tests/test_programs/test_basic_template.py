@@ -8,9 +8,9 @@ from celery import Celery
 from acoupi import data
 from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.programs.templates import (
-    BasicProgramConfiguration,
     BasicProgram,
-    DataConfiguration,
+    BasicProgramConfiguration,
+    PathsConfiguration,
 )
 
 
@@ -21,10 +21,10 @@ class Program(BasicProgram):
 @pytest.fixture
 def config(tmp_path: Path) -> BasicProgramConfiguration:
     return BasicProgramConfiguration(
-        data=DataConfiguration(
-            tmp=tmp_path / "tmp",
-            audio=tmp_path / "audio",
-            metadata=tmp_path / "metadata.db",
+        paths=PathsConfiguration(
+            tmp_audio=tmp_path / "tmp",
+            recordings=tmp_path / "audio",
+            db_metadata=tmp_path / "metadata.db",
         ),
         microphone=MicrophoneConfig(
             samplerate=44100,

@@ -1,3 +1,17 @@
+"""Management Task for recordings.
+
+This module contains the function to manage audio recordings. The file
+management task is a function that moves recordings from temporary storage
+to permanent storage and deletes recordings that are no longer needed. The
+file management process contains the following steps:
+
+1. Get the recordings that need to be managed.
+2. Check if the recordings should be saved.
+3. Move the recordings that should be saved outside of the temporary file system
+to a permanent storage location (e.g., the sd card storage, an external hard drive).
+4. Update the store with the new paths of the recordings.
+"""
+
 import logging
 from pathlib import Path
 from typing import Callable, List, Optional
@@ -22,39 +36,47 @@ def generate_file_management_task(
     required_models: Optional[List[str]] = None,
     tmp_path: Path = TEMP_PATH,
 ) -> Callable[[], None]:
-    """Build a process to manage files.
-
-    Use this function to build a process that will manage files using your
-    preferred file manager and store. This function will return a function
-    that can be used to start the process.
-
-    Recordings are temporarily stored on the memory to reduce the number of
-    writes to the disk. This process will move recordings from the memory to
-    the disk, and remove recordings that are no longer needed.
+    """Generate a file management task.
 
     Parameters
     ----------
-    store
-        The store containing metadata about created recordings and their
-        associated outputs.
-    file_managers
-        A list of file managers that indicate where recordings should be
-        saved.
-    file_filters
-        Optional list of filters to determine whether a recording should be
-        saved.
-    required_models
-        Optional list of models that are required to be present in the
-        recording outputs to save the recording.
-    temp_path
-        Temporary directory where recordings are stored before being moved to
-        their final location.
-    logger
-        The logger used for logging information and errors.
+    store : types.Store
+        The store to get and update recordings.
+    file_managers : List[types.RecordingSavingManager]
+        The file managers to save recordings.
+    logger : logging.Logger, optional
+        The logger to log messages, by default logger.
+    file_filters : Optional[List[types.RecordingSavingFilter]], optional
+        The file filters to determine if recordings should be saved, by default
+        None.
+    required_models : Optional[List[str]], optional
+        The required models that need to be saved, by default None.
+    tmp_path : Path, optional
+        The path where recordings are saved temporarily, by default TEMP_PATH.
 
-    Returns
-    -------
-        A callable that executes the file management task.
+    Notes
+    -----
+    The file management task calls the following methods:
+
+    1. **store.get_recordings_by_path(paths)** -> List[Tuple[data.Recording, List[data.ModelOutput]]]
+        - Get the recordings that need to be managed.
+        - See [components.stores][acoupi.components.stores] for implementation
+        of [types.Store][acoupi.components.types.Store].
+    2. **filter.should_save_recording(recording, model_outputs)** -> bool
+        - Determine if the recordings should be saved.
+        - See [components.saving_filters][acoupi.components.saving_filters] for
+        implementations of
+        [types.RecordingSavingFilter][acoupi.components.types.RecordingSavingFilter].
+    3. **manager.save_recording(recording, model_outputs)** -> Path
+        - Move the recordings that should be saved outside of the temporary file system
+        to a permanent storage location.
+        - See [components.saving_managers][acoupi.components.saving_managers]
+        for implementations of
+        [types.RecordingSavingManager][acoupi.components.types.RecordingSavingManager].
+    4. **store.update_recording_path(recording, new_path)** -> None
+        - Update the store with the new paths of the recordings.
+        - See [components.stores][acoupi.components.stores] for implementation
+        of [types.Store][acoupi.components.types.Store].
     """
     if required_models is None:
         required_models = []
@@ -63,6 +85,7 @@ def generate_file_management_task(
 
     def file_management_task() -> None:
         """Manage files."""
+        logger.info("Starting file management process.")
         temp_wav_files = get_temp_files(path=tmp_path)
 
         recordings_and_outputs = store.get_recordings_by_path(
@@ -110,7 +133,7 @@ def generate_file_management_task(
 
             # Where should files be stored?
             for file_manager in file_managers:
-                new_path = file_manager.saving_recording(
+                new_path = file_manager.save_recording(
                     recording,
                     model_outputs=model_outputs,
                 )
@@ -121,7 +144,6 @@ def generate_file_management_task(
                 new_path = move_recording(recording, new_path, logger=logger)
 
                 if new_path is not None:
-                    print("HUH")
                     store.update_recording_path(recording, new_path)
 
                 break

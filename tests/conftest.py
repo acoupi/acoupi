@@ -59,7 +59,7 @@ def patched_now(monkeypatch):
     def set_now(time: dt.datetime = _now):
         class fake_datetime:
             @classmethod
-            def now(cls):
+            def now(cls, *args, **kwargs):
                 return time
 
         monkeypatch.setattr(
@@ -98,25 +98,25 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
         tags=[
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value1"),
-                classification_probability=0.8,
+                confidence_score=0.8,
             ),
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value2"),
-                classification_probability=0.8,
+                confidence_score=0.8,
             ),
         ],
         detections=[
             data.Detection(
                 location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
-                detection_probability=0.6,
+                detection_score=0.6,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="test2", value="value3"),
-                        classification_probability=0.3,
+                        confidence_score=0.3,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="test", value="value1"),
-                        classification_probability=0.2,
+                        confidence_score=0.2,
                     ),
                 ],
             )

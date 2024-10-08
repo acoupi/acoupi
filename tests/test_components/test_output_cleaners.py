@@ -48,20 +48,20 @@ def create_test_detection():
 
     def factory(
         tag_value: str,
-        detection_probability: float = 0.5,
-        tag_probability: float = 1,
+        detection_score: float = 0.5,
+        tag_score: float = 1,
         tag_key: str = "species",
     ) -> data.Detection:
         """Return a random detection."""
         return data.Detection(
-            detection_probability=detection_probability,
+            detection_score=detection_score,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(
                         value=tag_value,
                         key=tag_key,
                     ),
-                    classification_probability=tag_probability,
+                    confidence_score=tag_score,
                 ),
             ],
         )
@@ -82,13 +82,13 @@ def test_threshold_detection_filter_removes_detections_with_low_confidence(
         detections=[
             create_test_detection(
                 "species1",
-                detection_probability=0.1,
-                tag_probability=0.5,
+                detection_score=0.1,
+                tag_score=0.5,
             ),
             create_test_detection(
                 "species2",
-                detection_probability=0.6,
-                tag_probability=0.5,
+                detection_score=0.6,
+                tag_score=0.5,
             ),
         ]
     )
@@ -113,13 +113,13 @@ def test_threshold_detection_keeps_detections_even_with_low_confidence_tags(
         detections=[
             create_test_detection(
                 "species1",
-                detection_probability=0.7,
-                tag_probability=0.1,
+                detection_score=0.7,
+                tag_score=0.1,
             ),
             create_test_detection(
                 "species2",
-                detection_probability=0.6,
-                tag_probability=0.5,
+                detection_score=0.6,
+                tag_score=0.5,
             ),
         ]
     )
@@ -131,11 +131,11 @@ def test_threshold_detection_keeps_detections_even_with_low_confidence_tags(
     assert len(cleaned_model_output.detections) == 2
 
 
-def test_threshold_removes_detections_with_default_tag_probability(
+def test_threshold_removes_detections_with_default_tag_score(
     create_test_model_output,
     create_test_detection,
 ):
-    """Test threshold filter removes detections with default tag probability."""
+    """Test threshold filter removes detections with default tag score."""
     # Arrange
     cleaner = output_cleaners.ThresholdDetectionCleaner(
         detection_threshold=0.5,
@@ -144,12 +144,12 @@ def test_threshold_removes_detections_with_default_tag_probability(
         detections=[
             create_test_detection(
                 "species1",
-                detection_probability=0.7,
-                tag_probability=0.5,
+                detection_score=0.7,
+                tag_score=0.5,
             ),
             create_test_detection(
                 "species2",
-                detection_probability=0.3,
+                detection_score=0.3,
             ),
         ]
     )
@@ -163,11 +163,11 @@ def test_threshold_removes_detections_with_default_tag_probability(
     assert cleaned_model_output.detections[0].tags[0].tag.value == "species1"
 
 
-def test_threshold_removes_low_probability_tags(
+def test_threshold_removes_low_score_tags(
     create_test_model_output,
     create_test_detection,
 ):
-    """Test filter keeps tags even if with low probability score."""
+    """Test filter keeps tags even if with low score score."""
     # Arrange
     cleaner = output_cleaners.ThresholdDetectionCleaner(
         detection_threshold=0.5,
@@ -176,8 +176,8 @@ def test_threshold_removes_low_probability_tags(
         detections=[
             create_test_detection(
                 "species1",
-                detection_probability=0.7,
-                tag_probability=0.1,
+                detection_score=0.7,
+                tag_score=0.1,
             ),
         ]
     )

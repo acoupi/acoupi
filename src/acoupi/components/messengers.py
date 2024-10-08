@@ -1,8 +1,23 @@
-"""Messengers for the acoupi package."""
+"""Messengers for acoupi.
+
+Messengers are responsible for sending messages to external services. The
+messengers are templates illustrating how to send messages using different
+communication protocols (e.g., MQTT, HTTP).
+
+The messengers are implemented as classes that inherit from Messenger. The
+class should implement the send_message method, which takes a message and sends
+it to the external service. The class should also implement the check method,
+which checks the connection status of the messenger.
+
+The MQTTMessenger sends messages using the MQTT protocol. The HTTPMessenger
+sends messages using HTTP POST requests.
+"""
 
 import datetime
 import json
 import logging
+import socket
+import time
 from typing import Optional
 
 import paho.mqtt.client as mqtt
@@ -55,7 +70,25 @@ class MQTTMessenger(types.Messenger):
         timeout: int = 5,
         logger: Optional[logging.Logger] = None,
     ) -> None:
-        """Initialize the MQTT messenger."""
+        """Initialise the MQTT messenger.
+
+        Parameters
+        ----------
+        host : str
+            The host to connect to. Example: "mqtt.localhost.org".
+        username : str
+            The username to authenticate with.
+        topic : str
+            The topic to send messages to. Example: "org/survey/device_00/".
+        port : int, optional
+            The port to connect to, by default 1884.
+        password : Optional[SecretStr], optional
+            The password to authenticate with, by default None.
+
+        Notes
+        -----
+        Will use the device ID as the client ID.
+        """
         self.topic = topic
         self.timeout = timeout
         self.host = host
@@ -106,7 +139,38 @@ class MQTTMessenger(types.Messenger):
         return self.client.connect(self.host, port=self.port)
 
     def send_message(self, message: data.Message) -> data.Response:
-        """Send a recording message."""
+        """Send a recording message.
+
+        Parameters
+        ----------
+        message : data.Message
+            The message to send.
+
+        Returns
+        -------
+        data.Response
+            A response containing the message, status, content, and received
+            time.
+
+        Examples
+        --------
+        >>> message = data.Message(
+        ...     content="hello world",
+        ... )
+        >>> messenger = MQTTMessenger(
+        ...     host="mqtt.localhost.org",
+        ...     username="mqttusername",
+        ...     topic="org/survey/device_00",
+        ...     clientid="org/survey/device_00",
+        ... )
+        >>> messenger.send_message(message)
+        >>> data.Response(
+        ...     message=data.Message(content="{}"),
+        ...     status=ResponseStatus.SUCCESS,
+        ...     content="MQTT_ERR_SUCCESS",
+        ...     received_on=datetime.datetime(),
+        ... )
+        """
         mqtt_status = self.check_connection()
 
         if mqtt_status != MQTTErrorCode.MQTT_ERR_SUCCESS:
@@ -149,8 +213,20 @@ class MQTTMessenger(types.Messenger):
         )
 
     def check(self) -> None:
-        """Check the connection status of the MQTT client."""
-        mqtt_status = self.check_connection()
+        """Check the connection status of the MQTT client.
+
+        Raises
+        ------
+        HealthCheckError
+            If the connection is not successful. This could be due to a
+            connection error or an authentication failure.
+        """
+        try:
+            mqtt_status = self.check_connection()
+        except socket.gaierror as err:
+            raise HealthCheckError(
+                "Health check failed: Unable to resolve the MQTT broker host."
+            ) from err
 
         if mqtt_status != MQTTErrorCode.MQTT_ERR_SUCCESS:
             error_name = MQTTErrorCode(mqtt_status).name
@@ -165,6 +241,18 @@ class MQTTMessenger(types.Messenger):
                 "firewall settings.\n"
                 "  * Misconfiguration: Review your MQTT configuration "
                 "parameters for accuracy."
+            )
+
+        # Wait for the connection to be established or disconnected due to
+        # failed authentication
+        time.sleep(1)
+
+        if not self.client.is_connected():
+            raise HealthCheckError(
+                "Health check failed: MQTT Connection Error (Authentication "
+                "Failed).\n"
+                "The MQTT client was unable to authenticate with the broker. "
+                "Verify your MQTT credentials (username/password) are correct."
             )
 
 
@@ -198,7 +286,7 @@ class HTTPMessenger(types.Messenger):
         content_type: str = "application/json",
         logger: Optional[logging.Logger] = None,
     ) -> None:
-        """Initialize the HTTP messenger.
+        """Initialise the HTTP messenger.
 
         Parameters
         ----------

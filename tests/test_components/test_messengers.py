@@ -133,21 +133,21 @@ def test_http_messenger_with_complex_message():
                     location=data.BoundingBox(
                         coordinates=(0, 0, 1, 1),
                     ),
-                    detection_probability=0.5,
+                    detection_score=0.5,
                     tags=[
                         data.PredictedTag(
                             tag=data.Tag(
                                 key="test_tag",
                                 value="test_value",
                             ),
-                            classification_probability=0.2,
+                            confidence_score=0.2,
                         ),
                         data.PredictedTag(
                             tag=data.Tag(
                                 key="event",
                                 value="echolocation",
                             ),
-                            classification_probability=0.8,
+                            confidence_score=0.8,
                         ),
                     ],
                 ),
@@ -341,8 +341,16 @@ def test_mqtt_check_is_succesful_when_connected():
 def test_mqtt_check_is_succesful_when_can_reconnect():
     """Test the MQTTMessenger check connection is successful when can reconnect."""
     # Arrange
+    called = {"is_conected": False}
+
+    def is_conected():
+        if not called["is_conected"]:
+            called["is_conected"] = True
+            return False
+        return True
+
     config = {
-        "is_connected.return_value": False,
+        "is_connected": is_conected,
         "host": "localhost",
         "reconnect.return_value": 0,
     }
@@ -366,8 +374,16 @@ def test_mqtt_check_is_succesful_when_can_reconnect():
 def test_mqtt_check_is_successful_when_can_connect():
     """Test the MQTTMessenger check connection is successful when can connect."""
     # Arrange
+    called = {"is_conected": False}
+
+    def is_conected():
+        if not called["is_conected"]:
+            called["is_conected"] = True
+            return False
+        return True
+
     config = {
-        "is_connected.return_value": False,
+        "is_connected": is_conected,
         "host": None,
         "connect.return_value": 0,
     }
@@ -452,3 +468,29 @@ def test_mqtt_check_fails_with_mqtt_error_on_reconnection(error_code: int):
             match=MQTTErrorCode(error_code).name,
         ):
             messenger.check()
+
+
+def test_mqtt_check_fails_with_bad_host():
+    """Test the MQTTMessenger check connection fails if auth failed."""
+    # Arrange
+    messenger = messengers.MQTTMessenger(
+        host="unexistent.mosquitto.org",
+        port=1884,
+        username="test",
+        topic="#",
+    )
+    # Act
+    with pytest.raises(HealthCheckError):
+        messenger.check()
+
+
+def test_mqtt_messenger_can_send_message_to_test_server():
+    # Arrange
+    messenger = messengers.MQTTMessenger(
+        host="test.mosquitto.org",
+        port=1883,
+        topic="acoupi",
+    )
+    # Act
+    response = messenger.send_message(data.Message(content='"Hello, world!"'))
+    assert response.status == data.ResponseStatus.SUCCESS

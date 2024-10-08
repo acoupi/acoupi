@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 import click
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, SecretStr, ValidationError
 from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefined
 from typing_extensions import Annotated, Protocol, get_args, get_origin
@@ -27,14 +27,6 @@ ArgumentParserProtocol = Union[
     argparse.ArgumentParser,
     argparse._ArgumentGroup,
 ]
-"""
-
-When configurations are nested, they can be parsed from the command
-line arguments using the following syntax:
-
-    --field.subfield=value
-
-"""
 
 
 def parse_config_from_args(
@@ -84,43 +76,6 @@ def parse_config_from_args(
         ) from error
 
 
-def should_prompt(field: FieldInfo, prompt: bool = True) -> bool:
-    """Check whether a field should be prompted to the user."""
-    if not prompt:
-        return False
-
-    if hasattr(field, "metadata"):
-        return NoUserPrompt not in field.metadata
-
-    return True
-
-
-def get_field_dtype(field: FieldInfo) -> type:
-    """Get the dtype of a field."""
-    annotation = field.annotation
-
-    if annotation is None:
-        raise ValueError(f"Field {field} has no annotation.")
-
-    origin = get_origin(annotation)
-
-    # Remove typing.Annotated if present
-    if origin == Annotated:
-        annotation = get_args(annotation)[0]
-
-    # Check for optional fields and remove the
-    # typing.Optional if present
-    if origin == Union:
-        nested = get_args(annotation)[0]
-        return nested
-
-    origin = get_origin(annotation)
-    if origin is None:
-        return annotation
-
-    return origin
-
-
 def parse_field_from_args(
     field_name: str,
     field: FieldInfo,
@@ -129,8 +84,9 @@ def parse_field_from_args(
     prefix: str = "",
 ) -> object:
     """Parse a field from the command line arguments."""
+    field_type = get_field_dtype(field)
+
     for dtype, _parse_argument in FIELD_PARSERS.items():
-        field_type = get_field_dtype(field)
         if issubclass(field_type, dtype):
             return _parse_argument(
                 field_name,
@@ -157,9 +113,14 @@ def parse_pydantic_model_field_from_args(
 
     prefix = f"{prefix}.{field_name}" if prefix else field_name
 
-    setup = getattr(model, "setup", None)
-    if setup is not None and callable(setup):
-        return setup(args, prompt=prompt, prefix=prefix)  # type: ignore
+    custom_setup = getattr(model, "setup", None)
+    if custom_setup is not None and callable(custom_setup):
+        config = custom_setup(args, prompt=prompt, prefix=prefix)
+
+        if config is not None and not isinstance(config, BaseModel):
+            raise RuntimeError("Setup function must return a BaseModel.")
+
+        return config
 
     if not field.is_required():
         has_some_arg = any(arg.startswith(f"--{prefix}") for arg in args)
@@ -310,6 +271,52 @@ DType = Union[
 ]
 
 
+def get_field_default(field: FieldInfo) -> Any:
+    """Get the default value of a field."""
+    default = field.get_default(call_default_factory=True)
+
+    if default == PydanticUndefined:
+        return
+
+    return default
+
+
+def parse_simple_field_from_args(
+    args: List[str],
+    name: str,
+    field: FieldInfo,
+    dtype: DType,
+    raise_on_missing: bool = True,
+):
+    parser = argparse.ArgumentParser()
+
+    default = get_field_default(field)
+
+    action = parser.add_argument(
+        f"--{name}",
+        dest="value",
+        type=dtype,
+        default=default,
+        help=field.description,
+    )
+    try:
+        parsed_args, _ = parser.parse_known_args(args)
+    except SystemExit as error:
+        raise argparse.ArgumentError(
+            action, f"Invalid value for {name}."
+        ) from error
+
+    value = parsed_args.value
+
+    if value is None and default is None and raise_on_missing:
+        raise argparse.ArgumentError(action, f"Missing value for {name}.")
+
+    if value is None:
+        return default
+
+    return value
+
+
 def build_simple_field_parser(dtype: DType) -> FieldParser:
     def field_parser(
         field_name: str,
@@ -318,35 +325,17 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
         prompt: bool = True,
         prefix: str = "",
     ):
-        parser = argparse.ArgumentParser()
         name = f"{prefix}.{field_name}" if prefix else f"{field_name}"
 
-        default = (
-            field.default if field.default is not PydanticUndefined else None
+        value = parse_simple_field_from_args(
+            args,
+            name,
+            field,
+            dtype,
+            raise_on_missing=not prompt,
         )
-
-        action = parser.add_argument(
-            f"--{name}",
-            dest="value",
-            type=dtype,
-            default=default,
-            help=field.description,
-        )
-        try:
-            parsed_args, _ = parser.parse_known_args(args)
-        except SystemExit:
-            raise argparse.ArgumentError(
-                action, f"Invalid value for {field_name}."
-            ) from None
-
-        value = parsed_args.value
 
         if not prompt:
-            if value is None and default is None:
-                raise argparse.ArgumentError(
-                    action, f"Missing value for {field_name}."
-                )
-
             return value
 
         if value is not None:
@@ -373,7 +362,7 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
                         f"{help}"
                     ),
                     value_proc=dtype,
-                    default=field.default,
+                    default=value,
                 )
             except ParameterError as error:
                 msg = (
@@ -443,6 +432,103 @@ def parse_date(value: str) -> datetime.date:
         ) from None
 
 
+def should_prompt(field: FieldInfo, prompt: bool = True) -> bool:
+    """Check whether a field should be prompted to the user."""
+    if not prompt:
+        return False
+
+    if hasattr(field, "metadata"):
+        return NoUserPrompt not in field.metadata
+
+    return True
+
+
+def get_field_dtype(field: FieldInfo) -> type:
+    """Get the dtype of a field."""
+    annotation = field.annotation
+
+    if annotation is None:
+        raise ValueError(f"Field {field} has no annotation.")
+
+    origin = get_origin(annotation)
+
+    # Remove typing.Annotated if present
+    if origin == Annotated:
+        annotation = get_args(annotation)[0]
+
+    # Check for optional fields and remove the
+    # typing.Optional if present
+    if origin == Union:
+        nested = get_args(annotation)[0]
+        return nested
+
+    origin = get_origin(annotation)
+    if origin is None:
+        return annotation
+
+    return origin
+
+
+def parse_secret_str_field(
+    field_name: str,
+    field: FieldInfo,
+    args: List[str],
+    prompt: bool = True,
+    prefix: str = "",
+) -> SecretStr:
+    """Parse a SecretStr field from the command line arguments."""
+    name = f"{prefix}.{field_name}" if prefix else field_name
+
+    value = parse_simple_field_from_args(
+        args,
+        name,
+        field,
+        str,  # We treat it as a string for the prompt
+        raise_on_missing=not prompt,
+    )
+
+    if not prompt:
+        return SecretStr(value)  # Return the parsed value as SecretStr
+
+    if value is not None:
+        if click.confirm(
+            "Would you like to set "
+            f"{click.style(name, fg='blue', bold=True)}="
+            f"{click.style(repr(value), fg='yellow', bold=True)}?",
+            default=True,
+        ):
+            return SecretStr(value)
+
+    help = (
+        click.style(f" Help: {field.description}", italic=True)
+        if field.description
+        else ""
+    )
+
+    while True:
+        try:
+            return SecretStr(
+                click.prompt(
+                    (
+                        "Please provide a value for "
+                        f"{click.style(name, fg='blue', bold=True)}."
+                        f"{help}"
+                    ),
+                    value_proc=str,
+                    default=value,
+                )
+            )
+        except ParameterError as error:
+            msg = (
+                "Invalid value for "
+                f"{click.style(name, fg='blue', bold=True)}: "
+                f"{click.style(error.message, fg='red', bold=True)}"
+            )
+            if error.help is not None:
+                msg += f" {error.help}"
+            click.echo(msg)
+
+
 FIELD_PARSERS: Dict[type, FieldParser] = {
     BaseModel: parse_pydantic_model_field_from_args,
     bool: build_simple_field_parser(cast_to_bool),
@@ -455,4 +541,5 @@ FIELD_PARSERS: Dict[type, FieldParser] = {
     datetime.time: build_simple_field_parser(parse_time),
     datetime.datetime: build_simple_field_parser(datetime.datetime),
     Path: build_simple_field_parser(Path),
+    SecretStr: parse_secret_str_field,
 }

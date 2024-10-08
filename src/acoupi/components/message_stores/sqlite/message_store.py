@@ -32,7 +32,7 @@ class SqliteMessageStore(types.MessageStore):
     """The Pony ORM models."""
 
     def __init__(self, db_path: Path) -> None:
-        """Initialize the message store."""
+        """Initialise the message store."""
         self.db_path = db_path
         self.database = orm.Database()
         self.models = create_message_models(self.database)
