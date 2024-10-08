@@ -10,3 +10,7 @@ def is_configured(settings: Settings) -> bool:
         and settings.program_file.exists()
         and settings.program_name_file.exists()
     )
+
+
+def get_status(settings: Settings) -> bool:
+    pass
