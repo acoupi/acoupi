@@ -14,6 +14,8 @@ from .database import create_base_models
 from acoupi import data
 from acoupi.components import types
 
+db_session = orm.db_session()
+
 
 class SqliteStore(types.Store):
     """Sqlite store implementation.
