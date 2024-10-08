@@ -29,8 +29,6 @@ class SaveRecordingFilter(BaseModel):
 
     frequency_interval: int = 30
 
-    saving_threshold: Optional[float] = 0.9
-
 
 class ConfigSchema(BasicProgramConfiguration):
     """Configuration Schema for Test Program."""
@@ -101,18 +99,6 @@ class Program(BasicProgram):
                 components.After_DawnDuskTimeInterval(
                     duration=recording_saving.after_dawndusk_duration,
                     timezone=timezone,
-                )
-            )
-
-        if (
-            recording_saving.saving_threshold is not None
-            and recording_saving.saving_threshold != 0.0
-        ):
-            # This filter will only save recordings if the recording files
-            # have detection above the threshold.
-            saving_filters.append(
-                components.SavingThreshold(
-                    saving_threshold=recording_saving.saving_threshold,
                 )
             )
 
