@@ -25,7 +25,7 @@ class SaveRecordingFilter(BaseModel):
 
     after_dawndusk_duration: int = 10
 
-    frequency_duration: int = 10
+    frequency_duration: int = 5
 
     frequency_interval: int = 30
 

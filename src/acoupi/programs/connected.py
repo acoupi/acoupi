@@ -77,7 +77,9 @@ class SaveRecordingFilter(BaseModel):
 
     frequency_duration: int = 5
 
-    frequency_interval: int = 5
+    frequency_interval: int = 30
+
+    saving_threshold: Optional[float] = 0.9
 
 
 class Connected_ConfigSchema(MessagingProgramConfiguration):
@@ -99,6 +101,7 @@ class Program(MessagingProgram):
 
     config_schema = Connected_ConfigSchema
 
+    ### --- Configure Additional Filters - SavingRecordingFilters --- ###
     def get_recording_filters(self, config: Connected_ConfigSchema):
         if not config.recording_saving:
             # No saving filters defined
@@ -111,20 +114,24 @@ class Program(MessagingProgram):
         # Main filter
         # Will only save recordings if the recording time is in the
         # interval defined by the start and end time.
-        saving_filters.append(
-            components.SaveIfInInterval(
-                interval=data.TimeInterval(
-                    start=recording_saving.starttime,
-                    end=recording_saving.endtime,
-                ),
-                timezone=timezone,
+        if (
+            recording_saving.starttime is not None
+            and recording_saving.endtime is not None
+        ):
+            saving_filters.append(
+                components.SaveIfInInterval(
+                    interval=data.TimeInterval(
+                        start=recording_saving.starttime,
+                        end=recording_saving.endtime,
+                    ),
+                    timezone=timezone,
+                )
             )
-        )
 
         # Additional filters
         if (
-            recording_saving.frequency_duration is not None
-            and recording_saving.frequency_interval is not None
+            recording_saving.frequency_duration != 0
+            and recording_saving.frequency_interval != 0
         ):
             # This filter will only save recordings at a frequency defined
             # by the duration and interval.
@@ -135,7 +142,7 @@ class Program(MessagingProgram):
                 )
             )
 
-        if recording_saving.before_dawndusk_duration is not None:
+        if recording_saving.before_dawndusk_duration != 0:
             # This filter will only save recordings if the recording time
             # is before dawn or dusk.
             saving_filters.append(
@@ -145,13 +152,25 @@ class Program(MessagingProgram):
                 )
             )
 
-        if components.After_DawnDuskTimeInterval is not None:
+        if recording_saving.after_dawndusk_duration != 0:
             # This filter will only save recordings if the recording time
             # is after dawn or dusk.
             saving_filters.append(
                 components.After_DawnDuskTimeInterval(
                     duration=recording_saving.after_dawndusk_duration,
                     timezone=timezone,
+                )
+            )
+
+        if (
+            recording_saving.saving_threshold is not None
+            and recording_saving.saving_threshold != 0.0
+        ):
+            # This filter will only save recordings if the recording files
+            # have detection above the threshold.
+            saving_filters.append(
+                components.SavingThreshold(
+                    saving_threshold=recording_saving.saving_threshold,
                 )
             )
 
