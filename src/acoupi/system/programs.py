@@ -2,10 +2,12 @@
 
 import inspect
 import warnings
+from enum import Enum
 from importlib import import_module
-from typing import Type
+from typing import Optional, Type
 
 from celery import Celery
+from pydantic import BaseModel
 
 from acoupi.programs.core import base as programs
 from acoupi.system import exceptions
@@ -157,3 +159,20 @@ def write_program_file(
             settings=settings,
         )
     )
+
+
+class ProgramState(str, Enum):
+    OK = "ok"
+    UNHEALTHY = "unhealthy"
+    ERROR = "error"
+
+
+def get_program_state(settings: Settings) -> ProgramState:
+    program = load_program(settings)
+    try:
+        program.check(program.config)
+        return ProgramState.OK
+    except exceptions.HealthCheckError:
+        return ProgramState.UNHEALTHY
+    except:  # noqa: E722
+        return ProgramState.ERROR

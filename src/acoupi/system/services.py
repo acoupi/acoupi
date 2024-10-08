@@ -188,10 +188,10 @@ def get_service_status(service_name: str) -> ServiceStatus:
 
     output = status.stdout.strip()
 
-    if output not in ServiceStatus:
+    try:
+        return ServiceStatus(output)
+    except ValueError:
         return ServiceStatus.UNKNOWN
-
-    return ServiceStatus(output)
 
 
 def get_acoupi_service_status(

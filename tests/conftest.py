@@ -178,7 +178,7 @@ def celery_worker_parameters():
 
 
 @pytest.fixture
-def data_config(tmp_path: Path) -> PathsConfiguration:
+def paths_config(tmp_path: Path) -> PathsConfiguration:
     return PathsConfiguration(
         tmp_audio=tmp_path / "tmp",
         recordings=tmp_path / "audio",
