@@ -118,10 +118,10 @@ class IsInIntervals(types.RecordingCondition):
             for interval in self.intervals
         )
 
-        #return any(
+        # return any(
         #    interval.start <= now <= interval.end
         #    for interval in self.intervals
-        #)
+        # )
 
 
 class DawnTimeInterval(types.RecordingCondition):
