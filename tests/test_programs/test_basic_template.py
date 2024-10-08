@@ -8,8 +8,8 @@ from celery import Celery
 from acoupi import data
 from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.programs.templates import (
-    BasicProgramConfiguration,
     BasicProgram,
+    BasicProgramConfiguration,
     DataConfiguration,
 )
 
