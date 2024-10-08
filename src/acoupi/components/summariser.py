@@ -216,17 +216,27 @@ class ThresholdsDetectionsSummariser(types.Summariser):
 
             stats = {
                 "count_low_threshold": len(
-                    [d for d in species_probabilities if d <= self.low_band_threshold]
+                    [
+                        d
+                        for d in species_probabilities
+                        if d <= self.low_band_threshold
+                    ]
                 ),
                 "count_mid_threshold": len(
                     [
                         d
                         for d in species_probabilities
-                        if self.low_band_threshold < d <= self.mid_band_threshold
+                        if self.low_band_threshold
+                        < d
+                        <= self.mid_band_threshold
                     ]
                 ),
                 "count_high_threshold": len(
-                    [d for d in species_probabilities if self.mid_band_threshold < d]
+                    [
+                        d
+                        for d in species_probabilities
+                        if self.mid_band_threshold < d
+                    ]
                 ),
                 "mean_low_threshold": round(
                     mean(
@@ -243,7 +253,9 @@ class ThresholdsDetectionsSummariser(types.Summariser):
                         [
                             d
                             for d in species_probabilities
-                            if self.low_band_threshold < d <= self.mid_band_threshold
+                            if self.low_band_threshold
+                            < d
+                            <= self.mid_band_threshold
                         ]
                     ),
                     3,

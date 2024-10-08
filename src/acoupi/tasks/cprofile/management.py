@@ -1,4 +1,5 @@
 """CProfile Management Task."""
+
 import cProfile
 import logging
 import pstats
@@ -20,7 +21,7 @@ def generate_cprofile_management_task(
     file_filters: Optional[List[types.RecordingSavingFilter]] = None,
     required_models: Optional[List[str]] = None,
     cprofile_output: Optional[Path] = "home/pi/storages/cprofile_output.prof",
-    tmp_path: Path = TEMP_PATH
+    tmp_path: Path = TEMP_PATH,
 ) -> Callable[[], None]:
     """Generate a file management task."""
     management_task = generate_file_management_task(
@@ -31,6 +32,7 @@ def generate_cprofile_management_task(
         required_models=required_models,
         tmp_path=tmp_path,
     )
+
     def cprofile_management_task() -> None:
         """Profile the file management task."""
         profiler = cProfile.Profile()
