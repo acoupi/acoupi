@@ -17,7 +17,6 @@ argument. This allows users to use out-of-the-box components or components
 that they have created themselves.
 """
 
-from acoupi.tasks.cprofile import generate_cprofile_management_task
 from acoupi.tasks.detection import generate_detection_task
 from acoupi.tasks.heartbeat import generate_heartbeat_task
 from acoupi.tasks.management import generate_file_management_task
@@ -26,7 +25,6 @@ from acoupi.tasks.recording import generate_recording_task
 from acoupi.tasks.summary import generate_summariser_task
 
 __all__ = [
-    "generate_cprofile_management_task",
     "generate_detection_task",
     "generate_file_management_task",
     "generate_recording_task",
