@@ -110,10 +110,18 @@ class IsInIntervals(types.RecordingCondition):
     def should_record(self) -> bool:
         """Determine if a recording should be made."""
         now = datetime.datetime.now(tz=self.timezone).time()
+
         return any(
-            interval.start <= now <= interval.end
+            (interval.start <= now <= interval.end)
+            if interval.start <= interval.end
+            else (interval.start <= now or now <= interval.end)
             for interval in self.intervals
         )
+
+        #return any(
+        #    interval.start <= now <= interval.end
+        #    for interval in self.intervals
+        #)
 
 
 class DawnTimeInterval(types.RecordingCondition):

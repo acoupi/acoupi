@@ -75,7 +75,7 @@ class AudioConfiguration(BaseModel):
     duration: int = 3
     """Duration of each audio recording in seconds."""
 
-    interval: int = 15
+    interval: int = 12
     """Interval between each audio recording in seconds."""
 
     chunksize: Annotated[int, NoUserPrompt] = 8192
@@ -90,14 +90,6 @@ class AudioConfiguration(BaseModel):
         default=datetime.time(hour=22, minute=30, second=0),
     )
     """End time for recording schedule."""
-
-    def get_schedule(self) -> list[data.TimeInterval]:
-        """Generate a TimeInterval from start and end times."""
-        return [
-            data.TimeInterval(start=self.schedule_start, end=self.schedule_end)
-        ]
-
-    """Schedule for recording audio."""
 
 
 class PathsConfiguration(BaseModel):
@@ -341,10 +333,20 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         types.RecordingCondition
             A recording condition.
         """
+        timezone = zoneinfo.ZoneInfo(config.timezone)
         return [
             components.IsInIntervals(
-                intervals=config.recording.get_schedule(),
-                timezone=zoneinfo.ZoneInfo(config.timezone),
+                intervals=[
+                    data.TimeInterval(
+                        start=config.recording.schedule_start,
+                        end=datetime.datetime.strptime("23:59:59", "%H:%M:%S").time(),
+                    ),
+                    data.TimeInterval(
+                        start=datetime.datetime.strptime("00:00:00", "%H:%M:%S").time(),
+                        end=config.recording.schedule_end,
+                    ),
+                ],
+                timezone=timezone,
             )
         ]
 
