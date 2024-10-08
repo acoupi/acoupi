@@ -31,6 +31,27 @@ def test_parse_config_with_empty_args_has_default_values():
     assert parsed_config.foo == "bar"
 
 
+def test_parse_config_with_args_has_default_values(monkeypatch):
+    """Test that parsing args overrides default values."""
+
+    class Schema(BaseModel):
+        """Test schema."""
+
+        foo: str = Field(default_factory=lambda: "bar")
+
+    mock = Mock(return_value="true")
+    monkeypatch.setattr(click, "confirm", mock)
+
+    parsed_config = parse_config_from_args(
+        Schema,
+        [],
+        prompt=True,
+    )
+
+    assert isinstance(parsed_config, Schema)
+    assert parsed_config.foo == "bar"
+
+
 def test_parse_config_overrides_default_values_with_args():
     """Test that parsing args overrides default values."""
 

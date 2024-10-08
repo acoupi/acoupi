@@ -22,7 +22,7 @@ def test_save_recording_manager_fails_if_recording_has_no_path(
     )
 
     with pytest.raises(ValueError):
-        manager.saving_recording(recording)
+        manager.save_recording(recording)
 
 
 def test_save_recording_with_confident_tags(tmp_path: Path):
@@ -45,11 +45,11 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
         tags=[
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value1"),
-                classification_probability=0.6,
+                confidence_score=0.6,
             ),
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value2"),
-                classification_probability=0.3,
+                confidence_score=0.3,
             ),
         ],
     )
@@ -57,9 +57,7 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
         audio_dir, detection_threshold=0.6, saving_threshold=0.5
     )
 
-    new_path = manager.saving_recording(
-        recording, model_outputs=[model_output]
-    )
+    new_path = manager.save_recording(recording, model_outputs=[model_output])
 
     assert new_path is not None
     assert new_path.parent.parent == audio_dir
@@ -86,11 +84,11 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
         tags=[
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value1"),
-                classification_probability=0.4,
+                confidence_score=0.4,
             ),
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value2"),
-                classification_probability=0.3,
+                confidence_score=0.3,
             ),
         ],
     )
@@ -100,9 +98,7 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
         saving_threshold=0.4,
     )
 
-    new_path = manager.saving_recording(
-        recording, model_outputs=[model_output]
-    )
+    new_path = manager.save_recording(recording, model_outputs=[model_output])
 
     assert new_path is not None
     assert new_path.parent.parent == audio_dir
@@ -139,7 +135,7 @@ def test_date_file_manager_save_recording(
     file_manager = components.DateFileManager(directory)
 
     # Act
-    file_path = file_manager.saving_recording(recording)
+    file_path = file_manager.save_recording(recording)
 
     # Assert
     assert directory.exists()
@@ -175,7 +171,7 @@ def test_date_file_manager_fails_if_recording_has_no_path(
 
     # Act and Assert
     with pytest.raises(ValueError):
-        file_manager.saving_recording(recording)
+        file_manager.save_recording(recording)
 
 
 def test_date_file_manager_fails_if_recording_file_does_not_exist(
@@ -214,7 +210,7 @@ def test_date_file_manager_fails_if_recording_file_does_not_exist(
 
     # Act and Assert
     with pytest.raises(FileNotFoundError):
-        file_manager.saving_recording(recording)
+        file_manager.save_recording(recording)
 
 
 def test_id_file_manager_save_recording(
@@ -240,7 +236,7 @@ def test_id_file_manager_save_recording(
     file_manager = components.IDFileManager(directory)
 
     # Act
-    file_path = file_manager.saving_recording(recording)
+    file_path = file_manager.save_recording(recording)
 
     # Assert
     assert directory.exists()
@@ -268,7 +264,7 @@ def test_id_file_manager_fails_if_recording_has_no_path(
 
     # Act and Assert
     with pytest.raises(ValueError):
-        file_manager.saving_recording(recording)
+        file_manager.save_recording(recording)
 
 
 def test_id_file_manager_fails_if_recording_file_does_not_exist(
@@ -301,4 +297,4 @@ def test_id_file_manager_fails_if_recording_file_does_not_exist(
 
     # Act and Assert
     with pytest.raises(FileNotFoundError):
-        file_manager.saving_recording(recording)
+        file_manager.save_recording(recording)

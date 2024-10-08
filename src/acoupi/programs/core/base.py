@@ -65,7 +65,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         program_config: ProgramConfig,
         app: Celery,
     ):
-        """Initialize."""
+        """Initialise."""
         self.config = program_config
         self.app = app
         self.tasks = {}
@@ -178,7 +178,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
             )
 
         if not self.app.conf.task_routes:
-            # initialize the task routes
+            # initialise the task routes
             self.app.conf.task_routes = {}
 
         # configure the app to route the task to the queue

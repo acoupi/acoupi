@@ -54,19 +54,19 @@ def create_test_detection():
     def factory(
         tag_value: str,
         tag_key: str = "species",
-        classification_probability: float = 0.4,
-        detection_probability: float = 0.8,
+        confidence_score: float = 0.4,
+        detection_score: float = 0.8,
     ) -> data.Detection:
         """Return a random detection."""
         return data.Detection(
-            detection_probability=detection_probability,
+            detection_score=detection_score,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(
                         value=tag_value,
                         key=tag_key,
                     ),
-                    classification_probability=classification_probability,
+                    confidence_score=confidence_score,
                 ),
             ],
         )
@@ -318,13 +318,13 @@ def test_save_recording_ifboth_detclassprob_above_savingthreshold(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability=0.7,
-                detection_probability=0.8,
+                confidence_score=0.7,
+                detection_score=0.8,
             ),
             create_test_detection(
                 tag_value="species_2",
-                classification_probability=0.8,
-                detection_probability=0.9,
+                confidence_score=0.8,
+                detection_score=0.9,
             ),
         ]
     )
@@ -356,13 +356,13 @@ def test_save_recording_if_onlydetprob_above_savingthreshold(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability=0.4,
-                detection_probability=0.8,
+                confidence_score=0.4,
+                detection_score=0.8,
             ),
             create_test_detection(
                 tag_value="species_2",
-                classification_probability=0.3,
-                detection_probability=0.7,
+                confidence_score=0.3,
+                detection_score=0.7,
             ),
         ]
     )
@@ -399,13 +399,13 @@ def test_delete_recording_if_detclassprob_below_savingthreshold(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability=0.4,
-                detection_probability=0.5,
+                confidence_score=0.4,
+                detection_score=0.5,
             ),
             create_test_detection(
                 tag_value="species_2",
-                classification_probability=0.3,
-                detection_probability=0.4,
+                confidence_score=0.3,
+                detection_score=0.4,
             ),
         ]
     )
@@ -441,13 +441,13 @@ def test_save_recording_with_focus_tagvalues(
         detections=[
             create_test_detection(
                 tag_value="species_1",
-                classification_probability=0.4,
-                detection_probability=0.8,
+                confidence_score=0.4,
+                detection_score=0.8,
             ),
             create_test_detection(
                 tag_value="species_2",
-                classification_probability=0.3,
-                detection_probability=0.7,
+                confidence_score=0.3,
+                detection_score=0.7,
             ),
         ]
     )
@@ -477,13 +477,13 @@ def test_delete_recording_ifnot_focus_tagvalues(
         detections=[
             create_test_detection(
                 tag_value="species_3",
-                classification_probability=0.4,
-                detection_probability=0.8,
+                confidence_score=0.4,
+                detection_score=0.8,
             ),
             create_test_detection(
                 tag_value="species_4",
-                classification_probability=0.3,
-                detection_probability=0.7,
+                confidence_score=0.3,
+                detection_score=0.7,
             ),
         ]
     )

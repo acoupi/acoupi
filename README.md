@@ -100,7 +100,7 @@ The **acoupi** software has been designed to provide maximum flexibility and kee
 The figure below provides a simplified example of an acoupi program. This program illustrates some of the most important data schema, components, and tasks.
 
 ![Figure 2: An example of a simplified acoupi program.](/docs/img/acoupi_program_simplified.png)
-***Figure 2: An example of a simplified acoupi program.** This example program implements the four tasks; audio recording, model, communication and management. Each task is composed of components executing specific actions such as recording an audio file, processing it, sending results, and storing associated metadata. The components input or output data objects defined by the data schema to validate format of information flowing between compoments and tasks.*
+***Figure 2: An example of a simplified acoupi program.** This example program implements the four tasks; audio recording, model, communication and management. Each task is composed of components executing specific actions such as recording an audio file, processing it, sending results, and storing associated metadata. The components input or output data objects defined by the data schema to validate format of information flowing between components and tasks.*
 
 > [!TIP]
 > **Refer to the [**Developer Guide**](docs/developer_guide/index.md) section of the documentation for full details on each of these elements.**

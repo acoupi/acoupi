@@ -14,8 +14,8 @@ from acoupi.components.audio_recorder import MicrophoneConfig
 from acoupi.components.messengers import HTTPConfig
 from acoupi.programs.templates import (
     AudioConfiguration,
-    DataConfiguration,
     MessagingConfig,
+    PathsConfiguration,
 )
 from acoupi.system import Settings
 from acoupi.system.constants import CeleryConfig
@@ -67,7 +67,7 @@ def patched_now(monkeypatch):
     def set_now(time: dt.datetime = _now):
         class fake_datetime:
             @classmethod
-            def now(cls):
+            def now(cls, *args, **kwargs):
                 return time
 
         monkeypatch.setattr(
@@ -106,25 +106,25 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
         tags=[
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value1"),
-                classification_probability=0.8,
+                confidence_score=0.8,
             ),
             data.PredictedTag(
                 tag=data.Tag(key="test", value="value2"),
-                classification_probability=0.8,
+                confidence_score=0.8,
             ),
         ],
         detections=[
             data.Detection(
                 location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
-                detection_probability=0.6,
+                detection_score=0.6,
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="test2", value="value3"),
-                        classification_probability=0.3,
+                        confidence_score=0.3,
                     ),
                     data.PredictedTag(
                         tag=data.Tag(key="test", value="value1"),
-                        classification_probability=0.2,
+                        confidence_score=0.2,
                     ),
                 ],
             )
@@ -178,11 +178,11 @@ def celery_worker_parameters():
 
 
 @pytest.fixture
-def data_config(tmp_path: Path) -> DataConfiguration:
-    return DataConfiguration(
-        tmp=tmp_path / "tmp",
-        audio=tmp_path / "audio",
-        metadata=tmp_path / "metadata.db",
+def data_config(tmp_path: Path) -> PathsConfiguration:
+    return PathsConfiguration(
+        tmp_audio=tmp_path / "tmp",
+        recordings=tmp_path / "audio",
+        db_metadata=tmp_path / "metadata.db",
     )
 
 

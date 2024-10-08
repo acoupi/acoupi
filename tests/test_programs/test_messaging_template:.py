@@ -4,12 +4,14 @@ from unittest.mock import Mock
 import pytest
 from celery import Celery
 
-from acoupi.components.audio_recorder import MicrophoneConfig
+from acoupi.components import MicrophoneConfig
 from acoupi.components.messengers import HTTPConfig, MQTTConfig
 from acoupi.programs.templates import (
+    AudioConfiguration,
     MessagingConfig,
-    MessagingProgramConfiguration,
     MessagingProgram,
+    MessagingProgramConfiguration,
+    PathsConfiguration,
 )
 
 
@@ -19,11 +21,6 @@ class Config(MessagingProgramConfiguration):
 
 class Program(MessagingProgram):
     config_schema = Config
-
-
-def test_messaging_config_fails_if_http_and_mttq_are_not_provided():
-    with pytest.raises(ValueError):
-        MessagingConfig()
 
 
 @pytest.mark.usefixtures("celery_app")
@@ -45,13 +42,16 @@ def test_messaging_config_fails_if_http_and_mttq_are_not_provided():
 )
 def test_basic_program_with_messaging_mixin_runs_health_checks_correctly(
     celery_app: Celery,
-    messaging_config: MessagingConfig,
     tmp_path: Path,
+    messaging_config: MessagingConfig,
+    microphone_config: MicrophoneConfig,
+    paths_config: PathsConfiguration,
+    audio_config: AudioConfiguration,
 ):
     config = Config(
-        microphone=MicrophoneConfig(
-            device_name="default",
-        ),
+        recording=audio_config,
+        paths=paths_config,
+        microphone=microphone_config,
         messaging=messaging_config.model_copy(
             update=dict(messages_db=tmp_path / "messages.db")
         ),
@@ -76,12 +76,16 @@ def test_basic_program_with_messaging_mixin_runs_health_checks_correctly(
 @pytest.mark.usefixtures("celery_app")
 def test_program_has_correct_tasks(
     celery_app,
-    microphone_config: MicrophoneConfig,
     messaging_config: MessagingConfig,
+    microphone_config: MicrophoneConfig,
+    paths_config: PathsConfiguration,
+    audio_config: AudioConfiguration,
 ):
     config = Config(
         microphone=microphone_config,
         messaging=messaging_config,
+        paths=paths_config,
+        recording=audio_config,
     )
     program = Program(
         config,
@@ -90,3 +94,25 @@ def test_program_has_correct_tasks(
 
     assert "send_messages_task" in program.tasks
     assert "heartbeat_task" in program.tasks
+
+
+@pytest.mark.usefixtures("celery_app")
+def test_program_does_not_have_messaging_task_if_messaging_config_is_empty(
+    celery_app,
+    microphone_config: MicrophoneConfig,
+    paths_config: PathsConfiguration,
+    audio_config: AudioConfiguration,
+):
+    config = Config(
+        microphone=microphone_config,
+        messaging=MessagingConfig(),
+        paths=paths_config,
+        recording=audio_config,
+    )
+    program = Program(
+        config,
+        celery_app,
+    )
+
+    assert "send_messages_task" not in program.tasks
+    assert "heartbeat_task" not in program.tasks

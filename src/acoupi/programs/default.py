@@ -17,9 +17,9 @@ from acoupi.programs.templates import BasicProgram, BasicProgramConfiguration
 class SaveRecordingFilter(BaseModel):
     """Recording saving options configuration."""
 
-    starttime: datetime.time = datetime.time(hour=21, minute=30, second=0)
+    starttime: datetime.time = datetime.time(hour=18, minute=30, second=0)
 
-    endtime: datetime.time = datetime.time(hour=23, minute=30, second=0)
+    endtime: datetime.time = datetime.time(hour=20, minute=0, second=0)
 
     before_dawndusk_duration: int = 10
 

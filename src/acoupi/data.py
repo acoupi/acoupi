@@ -154,20 +154,20 @@ class Tag(BaseModel):
 class PredictedTag(BaseModel):
     """A PredictedTag is a label predicted by a model.
 
-    It consists of a key, a value and a probability.
+    It consists of a key, a value and a score.
     """
 
     tag: Tag
     """The tag predicted by the model."""
 
-    classification_probability: float = 1
-    """The probability of the tag prediction."""
+    confidence_score: float = 1
+    """The confidence score of the predicted tag."""
 
-    @field_validator("classification_probability")
-    def validate_probability(cls, value):
-        """Validate that the probability is between 0 and 1."""
+    @field_validator("confidence_score")
+    def validate_score(cls, value):
+        """Validate that the score is between 0 and 1."""
         if value < 0 or value > 1:
-            raise ValueError("probability must be between 0 and 1")
+            raise ValueError("score must be between 0 and 1")
         return value
 
 
@@ -219,17 +219,17 @@ class Detection(BaseModel):
     location: Optional[BoundingBox] = None
     """The location of the detection in the recording."""
 
-    detection_probability: float = 1
-    """The probability of the detection."""
+    detection_score: float = 1
+    """The score of the detection."""
 
     tags: List[PredictedTag] = Field(default_factory=list)
     """The tags predicted by the model for the detection."""
 
-    @field_validator("detection_probability")
-    def validate_probability(cls, value):
-        """Validate that the probability is between 0 and 1."""
+    @field_validator("detection_score")
+    def validate_score(cls, value):
+        """Validate that the score is between 0 and 1."""
         if value < 0 or value > 1:
-            raise ValueError("probability must be between 0 and 1")
+            raise ValueError("score must be between 0 and 1")
         return value
 
     @field_validator("tags")
@@ -238,7 +238,7 @@ class Detection(BaseModel):
         return sorted(
             value,
             key=lambda x: (
-                x.classification_probability,
+                x.confidence_score,
                 x.tag.key,
                 x.tag.value,
             ),
@@ -275,7 +275,7 @@ class ModelOutput(BaseModel):
         return sorted(
             value,
             key=lambda x: (
-                x.classification_probability,
+                x.confidence_score,
                 x.tag.key,
                 x.tag.value,
             ),

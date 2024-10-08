@@ -22,15 +22,15 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
     tags=[
         data.PredictedTag(
             tag=data.Tag(key="species", value="Myotis myotis"),
-            classification_probability=0.9,
+            confidence_score=0.9,
         ),
         data.PredictedTag(
             tag=data.Tag(key="species", value="Eptesicus serotinus"),
-            classification_probability=0.7,
+            confidence_score=0.7,
         ),
         data.PredictedTag(
             tag=data.Tag(key="antropophony", value="Human voice"),
-            classification_probability=0.4,
+            confidence_score=0.4,
         ),
     ],
     detections=[
@@ -38,15 +38,15 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             location=data.BoundingBox(
                 coordinates=(0.1, 15_000, 0.2, 30_000),
             ),
-            detection_probability=0.9,
+            detection_score=0.9,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Myotis myotis"),
-                    classification_probability=0.6,
+                    confidence_score=0.6,
                 ),
                 data.PredictedTag(
                     tag=data.Tag(key="event", value="Echolocation"),
-                    classification_probability=0.8,
+                    confidence_score=0.8,
                 ),
             ],
         ),
@@ -54,15 +54,15 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             location=data.BoundingBox(
                 coordinates=(0.5, 19_000, 0.7, 38_000),
             ),
-            detection_probability=0.6,
+            detection_score=0.6,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Myotis myotis"),
-                    classification_probability=0.5,
+                    confidence_score=0.5,
                 ),
                 data.PredictedTag(
                     tag=data.Tag(key="event", value="Feeding buzz"),
-                    classification_probability=0.4,
+                    confidence_score=0.4,
                 ),
             ],
         ),
@@ -70,11 +70,11 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
             location=data.BoundingBox(
                 coordinates=(0.9, 24_000, 0.95, 41_000),
             ),
-            detection_probability=0.4,
+            detection_score=0.4,
             tags=[
                 data.PredictedTag(
                     tag=data.Tag(key="species", value="Eptesicus serotinus"),
-                    classification_probability=0.7,
+                    confidence_score=0.7,
                 ),
             ],
         ),

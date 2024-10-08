@@ -33,9 +33,9 @@ that inherits from `MessagingProgram` and configure it using the
 """
 
 from pathlib import Path
-from typing import Optional, TypeVar
+from typing import Callable, Optional, TypeVar
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 from acoupi import tasks
 from acoupi.components import SqliteMessageStore, messengers, types
@@ -61,7 +61,7 @@ class MessagingConfig(BaseModel):
     message_send_interval: int = 120
     """Interval between sending messages in seconds."""
 
-    heartbeat_interval: int = 60
+    heartbeat_interval: int = 60 * 60
     """Interval between sending heartbeats in seconds."""
 
     http: Optional[messengers.HTTPConfig] = None
@@ -69,12 +69,6 @@ class MessagingConfig(BaseModel):
 
     mqtt: Optional[messengers.MQTTConfig] = None
     """MQTT messenger configuration."""
-
-    @model_validator(mode="after")
-    def validate_messaging_config(self):
-        if self.http is None and self.mqtt is None:
-            raise ValueError("No messenger configuration provided.")
-        return self
 
 
 class MessagingProgramConfiguration(BasicProgramConfiguration):
@@ -118,7 +112,7 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
     management.
     """
 
-    messenger: types.Messenger
+    messenger: Optional[types.Messenger]
     """The configured messenger instance."""
 
     message_store: types.MessageStore
@@ -127,9 +121,10 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
     def setup(self, config: ProgramConfig):
         """Set up the Messaging Program.
 
-        This method initializes the message store and messenger, registers
+        This method initialises the message store and messenger, registers
         the messaging and heartbeat tasks, and performs any necessary setup.
         """
+        self.validate_dirs(config)
         self.message_store = self.configure_message_store(config)
         self.messenger = self.configure_messenger(config)
         self.register_messaging_task(config)
@@ -190,7 +185,7 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
                 config.messaging.mqtt,
             )
 
-        raise ValueError("No messenger configuration provided.")
+        return None
 
     def create_messaging_task(self, config: ProgramConfig):
         """Create the messaging task.
@@ -202,13 +197,18 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
         Callable
             The messaging task.
         """
+        if self.messenger is None:
+            return
+
         return tasks.generate_send_messages_task(
             message_store=self.message_store,
             messengers=[self.messenger],
             logger=self.logger.getChild("messaging"),
         )
 
-    def create_heartbeat_task(self, config: ProgramConfig):
+    def create_heartbeat_task(
+        self, config: ProgramConfig
+    ) -> Optional[Callable]:
         """Create the heartbeat task.
 
         This method creates the task responsible for sending heartbeats.
@@ -218,6 +218,9 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
         Callable
             The heartbeat task.
         """
+        if self.messenger is None:
+            return
+
         return tasks.generate_heartbeat_task(
             messengers=[self.messenger],
             logger=self.logger.getChild("heartbeat"),
@@ -229,6 +232,10 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
         This method registers the messaging task with the program's scheduler.
         """
         messaging_task = self.create_messaging_task(config)
+
+        if messaging_task is None:
+            return
+
         self.add_task(
             messaging_task,
             schedule=config.messaging.message_send_interval,
@@ -241,8 +248,21 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
         This method registers the heartbeat task with the program's scheduler.
         """
         heartbeat_task = self.create_heartbeat_task(config)
+
+        if heartbeat_task is None:
+            return
+
         self.add_task(
             heartbeat_task,
             schedule=config.messaging.heartbeat_interval,
             queue="celery",
         )
+
+    def validate_dirs(self, config: ProgramConfig):
+        """Validate the directories used by the program.
+
+        This method ensures that the necessary directories for storing audio
+        and metadata exist. If they don't, it creates them.
+        """
+        if not config.messaging.messages_db.parent.exists():
+            config.messaging.messages_db.parent.mkdir(parents=True)

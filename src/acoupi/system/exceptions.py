@@ -16,7 +16,7 @@ class ProgramNotFoundError(Exception):
     """Exception raised when program is not found."""
 
     def __init__(self, program: str):
-        """Initialize ProgramNotFoundError exception."""
+        """Initialise ProgramNotFoundError exception."""
         self.program = program
         super().__init__(program)
 
@@ -25,7 +25,7 @@ class InvalidProgramError(Exception):
     """Exception raised when a program file is invalid."""
 
     def __init__(self, program: str):
-        """Initialize InvalidProgramError exception."""
+        """Initialise InvalidProgramError exception."""
         self.program = program
         super().__init__(program)
 
@@ -34,7 +34,7 @@ class ConfigurationError(Exception):
     """Exception raised when a configuration is invalid."""
 
     def __init__(self, message: str, help: Optional[str] = None):
-        """Initialize ConfigurationError exception.
+        """Initialise ConfigurationError exception.
 
         Parameters
         ----------
@@ -56,7 +56,7 @@ class ParameterError(Exception):
     """Exception raised when a parameter is invalid."""
 
     def __init__(self, value: str, message: str, help: Optional[str] = None):
-        """Initialize ParameterError exception.
+        """Initialise ParameterError exception.
 
         Parameters
         ----------
@@ -81,7 +81,7 @@ class HealthCheckError(Exception):
     """Exception raised when a health check fails."""
 
     def __init__(self, message: str):
-        """Initialize HealthError exception."""
+        """Initialise HealthError exception."""
         self.message = message
         super().__init__(message)
 
@@ -94,7 +94,7 @@ class DeploymentError(Exception):
     """Exception raised when a deployment fails."""
 
     def __init__(self, message: str):
-        """Initialize DeploymentError exception."""
+        """Initialise DeploymentError exception."""
         self.message = message
         super().__init__(message)
 

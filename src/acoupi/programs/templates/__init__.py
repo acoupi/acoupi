@@ -31,7 +31,7 @@ from acoupi.programs.templates.basic import (
     AudioConfiguration,
     BasicProgram,
     BasicProgramConfiguration,
-    DataConfiguration,
+    PathsConfiguration,
 )
 from acoupi.programs.templates.detection import (
     DetectionProgram,
@@ -45,12 +45,13 @@ from acoupi.programs.templates.messaging import (
 
 __all__ = [
     "AudioConfiguration",
-    "BasicProgramConfiguration",
     "BasicProgram",
-    "DataConfiguration",
-    "DetectionProgramConfiguration",
+    "BasicProgram",
+    "BasicProgramConfiguration",
     "DetectionProgram",
+    "DetectionProgramConfiguration",
     "MessagingConfig",
-    "MessagingProgramConfiguration",
     "MessagingProgram",
+    "MessagingProgramConfiguration",
+    "PathsConfiguration",
 ]

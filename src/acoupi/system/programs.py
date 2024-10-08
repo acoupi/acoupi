@@ -16,6 +16,7 @@ from acoupi.system.templates import render_template
 __all__ = [
     "load_program",
     "load_program_class",
+    "load_config_schema",
     "write_program_file",
 ]
 
@@ -29,7 +30,7 @@ def load_program_class(program_name: str) -> Type[programs.AcoupiProgram]:
 
     Parameters
     ----------
-    program
+    program_name
         The name of the module containing the acoupi program class.
 
     Returns
@@ -100,14 +101,9 @@ def load_program(settings: Settings) -> programs.AcoupiProgram:
 
     Parameters
     ----------
-    program_name_file
-        Path to the file containing the program name. Defaults to
-        PROGRAM_NAME_FILE.
-    config_file
-        Path to the configuration file for the acoupi program. Defaults to
-        PROGRAM_CONFIG_FILE.
-    celery_config_file
-        Path to the Celery configuration file. Defaults to CELERY_CONFIG_PATH.
+    settings
+        The settings object containing the paths to the program and celery
+        config files.
 
     Returns
     -------
@@ -135,6 +131,13 @@ def load_program(settings: Settings) -> programs.AcoupiProgram:
     app.config_from_object(celery_config)
 
     return program_class(config, app)
+
+
+def load_config_schema(settings: Settings):
+    """Load the configuration schema for the program."""
+    program_name = settings.program_name_file.read_text().strip()
+    program_class = load_program_class(program_name)
+    return program_class.get_config_schema()
 
 
 def write_program_file(
