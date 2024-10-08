@@ -95,12 +95,6 @@ class AudioConfiguration(BaseModel):
 class PathsConfiguration(BaseModel):
     """Data configuration schema."""
 
-    cprofile: Path = Field(
-        default_factory=lambda: Path.home()
-        / "storages"
-        / "cprofile_output.prof",
-    )
-
     tmp_audio: Path = Field(default_factory=get_temp_dir)
     """Temporary directory for storing audio files."""
 
@@ -445,14 +439,12 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         Callable[[], None]
             The file management task.
         """
-        return tasks.generate_cprofile_management_task(
-            # return tasks.generate_file_management_task(
+        return tasks.generate_file_management_task(
             store=self.store,
             logger=self.logger.getChild("file_management"),
             file_managers=self.get_file_managers(config),
             file_filters=self.get_recording_filters(config),
             required_models=self.get_required_models(config),
-            cprofile_output=config.paths.cprofile,
             tmp_path=config.paths.tmp_audio,
         )
 
@@ -502,3 +494,4 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
         if not config.paths.db_metadata.parent.exists():
             config.paths.db_metadata.parent.mkdir(parents=True)
+
