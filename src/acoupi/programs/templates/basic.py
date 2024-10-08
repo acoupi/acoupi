@@ -95,12 +95,6 @@ class AudioConfiguration(BaseModel):
 class PathsConfiguration(BaseModel):
     """Data configuration schema."""
 
-    cprofile: Path = Field(
-        default_factory=lambda: Path.home()
-        / "storages"
-        / "cprofile_output.prof",
-    )
-
     tmp_audio: Path = Field(default_factory=get_temp_dir)
     """Temporary directory for storing audio files."""
 
@@ -113,6 +107,13 @@ class PathsConfiguration(BaseModel):
         default_factory=lambda: Path.home() / "storages" / "metadata.db",
     )
     """Path to the metadata database."""
+
+    cprofile: Path = Field(
+        default_factory=lambda: Path.home()
+        / "storages"
+        / "cprofile_output.prof",
+    )
+    """Path to the cprofile output."""
 
 
 class BasicProgramConfiguration(BaseModel):
@@ -502,3 +503,6 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
         if not config.paths.db_metadata.parent.exists():
             config.paths.db_metadata.parent.mkdir(parents=True)
+
+        if not config.paths.cprofile.parent.exists():
+            config.paths.cprofile.parent.mkdir(parents=True)
