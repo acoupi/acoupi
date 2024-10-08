@@ -19,7 +19,6 @@ class TestProgram(AcoupiProgram[TestConfigSchema]):
 
     def setup(self, config: TestConfigSchema):
         """Set up Test Program."""
-        print("Setting up test program")
 
         def test_task():
             """Simple task."""
