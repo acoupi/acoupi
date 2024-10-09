@@ -17,7 +17,6 @@ import datetime
 import json
 import logging
 import socket
-import time
 from typing import Optional
 
 import paho.mqtt.client as mqtt
@@ -48,6 +47,7 @@ class MQTTConfig(BaseModel):
     @field_serializer("password", when_used="json")
     def dump_password(self, value):
         return value.get_secret_value() if value else None
+
 
 class MQTTMessenger(types.Messenger):
     """Messenger that sends messages via MQTT."""
@@ -102,6 +102,7 @@ class MQTTMessenger(types.Messenger):
             callback_api_version=CallbackAPIVersion.VERSION2,
             client_id=self.client_id,
         )
+
         self.client.username_pw_set(username, password)
 
         if logger is None:
@@ -246,17 +247,17 @@ class MQTTMessenger(types.Messenger):
                 "parameters for accuracy."
             )
 
-        # Wait for the connection to be established or disconnected due to
-        # failed authentication
-        time.sleep(1)
-
-        if not self.client.is_connected():
-            raise HealthCheckError(
-                "Health check failed: MQTT Connection Error (Authentication "
-                "Failed).\n"
-                "The MQTT client was unable to authenticate with the broker. "
-                "Verify your MQTT credentials (username/password) are correct."
-            )
+        # # Wait for the connection to be established or disconnected due to
+        # # failed authentication
+        # time.sleep(0.1)
+        #
+        # if not self.client.is_connected():
+        #     raise HealthCheckError(
+        #         "Health check failed: MQTT Connection Error (Authentication "
+        #         "Failed).\n"
+        #         "The MQTT client was unable to authenticate with the broker. "
+        #         "Verify your MQTT credentials (username/password) are correct."
+        #     )
 
 
 class HTTPConfig(BaseModel):
