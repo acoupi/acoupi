@@ -128,8 +128,6 @@ The table below provides detailed information about the parameters available whe
 | `recording_saving.after_dawndusk_duration`  | int (min.) | 10 |  Additional duration (in minutes) to save recordings __after__ the dawn/dusk time.| Ensure recording interval covers the dawn and dusk time if using this parameter. |
 | `recording_saving.frequency_duration` | int (min.) | 5 | Length of time in minutes to save recordings for if using frequency based saving paramters.| Set to zero if not using this parameter.|
 | `recording_saving.frequency_interval` | int (min.) | 30 | Interval duration in minutes between period of time to save recordings. | Set to zero if not using this parameter. |
-| `recording_saving.saving_threshold` | float | 0.9| Recording with detection score above or equal to the saving_treshold will be saved. | Set to zero if not using this parameter. |
-
 
 ### acoupi.programs.connected
 
