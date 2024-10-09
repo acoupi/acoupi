@@ -494,3 +494,4 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
         if not config.paths.db_metadata.parent.exists():
             config.paths.db_metadata.parent.mkdir(parents=True)
+
