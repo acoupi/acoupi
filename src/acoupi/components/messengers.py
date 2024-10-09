@@ -101,6 +101,7 @@ class MQTTMessenger(types.Messenger):
         self.client = mqtt.Client(
             callback_api_version=CallbackAPIVersion.VERSION2,
             client_id=self.client_id,
+            clean_session=False,
         )
 
         self.client.username_pw_set(username, password)
