@@ -24,7 +24,7 @@ import paho.mqtt.client as mqtt
 import requests
 from celery.utils.log import get_task_logger
 from paho.mqtt.enums import CallbackAPIVersion, MQTTErrorCode
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, SecretStr, field_serializer
 
 from acoupi import data
 from acoupi.components import types
@@ -45,6 +45,9 @@ class MQTTConfig(BaseModel):
     port: int = 1884
     timeout: int = 5
 
+    @field_serializer("password", when_used="json")
+    def dump_password(self, value):
+        return value.get_secret_value() if value else None
 
 class MQTTMessenger(types.Messenger):
     """Messenger that sends messages via MQTT."""
