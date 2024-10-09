@@ -82,13 +82,13 @@ class SaveIfInInterval(types.RecordingSavingFilter):
 class FrequencySchedule(types.RecordingSavingFilter):
     """A frequency schedule RecordingSavingFilter."""
 
-    duration: float
+    duration: int
     """The duration of time (in minutes) where recordings will be saved."""
 
-    frequency: float
+    frequency: int
     """The frequency of time (in minutes) where recordings will be saved."""
 
-    def __init__(self, duration: float, frequency: float):
+    def __init__(self, duration: int, frequency: int):
         """Initialise the FrequencySchedule RecordingSavingFilter."""
         self.duration = duration
         self.frequency = frequency

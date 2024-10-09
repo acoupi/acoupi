@@ -49,18 +49,7 @@ class AcoupiStatus(BaseModel):
 
 
 def is_configured(settings: Settings) -> bool:
-    """Check if acoupi is configured.
-
-    Parameters
-    ----------
-    settings
-        The current acoupi settings
-
-    Returns
-    -------
-    bool
-        True if all required configuration files are correctly set up.
-    """
+    """Check if acoupi is configured."""
     return (
         settings.program_config_file.exists()
         and settings.program_file.exists()

@@ -17,14 +17,13 @@ import datetime
 import json
 import logging
 import socket
-import time
 from typing import Optional
 
 import paho.mqtt.client as mqtt
 import requests
 from celery.utils.log import get_task_logger
 from paho.mqtt.enums import CallbackAPIVersion, MQTTErrorCode
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, SecretStr, field_serializer
 
 from acoupi import data
 from acoupi.components import types
@@ -44,6 +43,10 @@ class MQTTConfig(BaseModel):
     topic: str = "acoupi"
     port: int = 1884
     timeout: int = 5
+
+    @field_serializer("password", when_used="json")
+    def dump_password(self, value):
+        return value.get_secret_value() if value else None
 
 
 class MQTTMessenger(types.Messenger):
@@ -98,7 +101,9 @@ class MQTTMessenger(types.Messenger):
         self.client = mqtt.Client(
             callback_api_version=CallbackAPIVersion.VERSION2,
             client_id=self.client_id,
+            clean_session=False,
         )
+
         self.client.username_pw_set(username, password)
 
         if logger is None:
@@ -243,17 +248,17 @@ class MQTTMessenger(types.Messenger):
                 "parameters for accuracy."
             )
 
-        # Wait for the connection to be established or disconnected due to
-        # failed authentication
-        time.sleep(1)
-
-        if not self.client.is_connected():
-            raise HealthCheckError(
-                "Health check failed: MQTT Connection Error (Authentication "
-                "Failed).\n"
-                "The MQTT client was unable to authenticate with the broker. "
-                "Verify your MQTT credentials (username/password) are correct."
-            )
+        # # Wait for the connection to be established or disconnected due to
+        # # failed authentication
+        # time.sleep(0.1)
+        #
+        # if not self.client.is_connected():
+        #     raise HealthCheckError(
+        #         "Health check failed: MQTT Connection Error (Authentication "
+        #         "Failed).\n"
+        #         "The MQTT client was unable to authenticate with the broker. "
+        #         "Verify your MQTT credentials (username/password) are correct."
+        #     )
 
 
 class HTTPConfig(BaseModel):

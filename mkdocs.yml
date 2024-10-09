@@ -48,7 +48,6 @@ theme:
     - navigation.sections
     - navigation.top
     - navigation.footer
-    - navigation.tracking
     - toc.follow
   palette:
     - scheme: default
