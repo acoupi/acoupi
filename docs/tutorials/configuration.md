@@ -54,10 +54,10 @@ The database storing the execution of _acoupi_ tasks and recordings of audion fi
     ```json
     {
       "timezone": "Europe/London",
-        "microphone": {
-          "device_name": "UltraMic 250K 16 bit r4",
-          "samplerate": 250000,
-          "audio_channels": 1
+      "microphone": {
+        "device_name": "UltraMic 250K 16 bit r4",
+        "samplerate": 250000,
+        "audio_channels": 1
       },
       "recording": {
         "duration": 10,
@@ -121,13 +121,13 @@ The table below provides detailed information about the parameters available whe
 | `paths.tmp_audio`| string | "/run/shm" | Temporary storage path for audio recordings. | Temporary in-memory path. Do not modify. |
 | `paths.recordings`| string | "/home/pi/storages/recordings" | Path to directory storing recorded audio files.| Modify accordingly. With default paths, recordings are stored on the SDCard, modify if using external usb hardrive. |
 | `paths.db_metadata`| string | "/home/pi/storages/metadata.db" | Path to the database file storing the metadata. | This .db keeps track of recorded files, ML detection results, and system information. |
-| __Recording Saving__ | N/A | - | Configuration for saving recorded audio files. | |
+| __Recording Saving (Optional)__ | N/A | - | Configuration for saving recorded audio files. | |
 | `recording_saving.starttime`| time (HH:MM:SS)| "18:30:00"| Start time for saving recorded audio files (24-hour format).| Insert 00:00:00 to not use this parameter to save audio recordings.|
 | `recording_saving.endtime`| time (HH:MM:SS)| "20:00:00"| End time for saving recorded audio files (24-hour format)| Insert 00:00:00 to not use this parameter to save audio recordings. |
 | `recording_saving.before_dawndusk_duration` | int (min.) | 10 | Additional duration (in minutes) to save recordings __before__ the dawn/dusk time.| Ensure recording interval covers the dawn and dusk time if using this parameter. |
 | `recording_saving.after_dawndusk_duration`  | int (min.) | 10 |  Additional duration (in minutes) to save recordings __after__ the dawn/dusk time.| Ensure recording interval covers the dawn and dusk time if using this parameter. |
-| `recording_saving.frequency_duration` | int (min.) | 5 | Length of time in minutes to save recordings for if using frequency based saving paramters.| Set to zero if not using this parameter.|
-| `recording_saving.frequency_interval` | int (min.) | 30 | Interval duration in minutes between period of time to save recordings. | Set to zero if not using this parameter. |
+| `recording_saving.frequency_duration` | int (min.) | 5 | Duration in minutes for storing recordings when using the frequency filter. | Set to zero if not using this parameter.|
+| `recording_saving.frequency_interval` | int (min.) | 30 | eriodic interval in minutes between two periods of storing recordings. | Set to zero if not using this parameter. |
 
 ### acoupi.programs.connected
 
@@ -158,7 +158,7 @@ The `message_send_interval` parameter controls how frequently the _acoupi_ progr
         "mqtt": {
           "host": "test_acoupi.mqtt.org",
           "username": "test_username",
-          "password": "**********",
+          "password": "mqtt_password",
           "topic": "acoupi",
           "port": 1884,
           "timeout": 5
@@ -178,13 +178,13 @@ The table below provides detailed information about the supplementary parameters
 | `messaging.message_send_interval`| int (sec.) | 120 | Interval in seconds for sending messages to the remote server. | Adjust for network performance and data bandwidth. |
 | `messaging.heartbeat_interval` | int (sec.) | 600 | Interval in seconds for sending heartbeat messages to the server. | Heartbeat message provides information about the device status (i.e., the correct functioning of the device). |
 | __Messaging HTTP__| | | Configuration for sending messages via HTTP.| |
-| `messaging.http.base_url` | string | - | URL of the HTTP server to which messages are sent. | Configure according to your server setup. |
-| `messaging.http.content_type` | string | - | Content type of the HTTP messages. | Messages to be sent are formated into a `json` object. |
+| `messaging.http.base_url` | str | - | URL of the HTTP server to which messages are sent. | Configure according to your server setup. |
+| `messaging.http.content_type` | str | application/json | Content type of the HTTP messages. | Messages to be sent are formated into a `json` object. |
 | `messaging.http.timeout` | int (sec) | - | Timeout for HTTP requres in seconds.. | |
 | __Messaging MQTT__| | | Configuration for sending messages via MQTT.| |
-| `messaging.mqtt.host` | string | - | MQTT server hostname for message transmission. | Configure according to your server setup. |
-| `messaging.mqtt.username` | string | - | Username for authentication with the MQTT broker. | Replace with your server username. |
-| `messaging.mqtt.password` | string | - | Password for authentication with the MQTT broker. | Replace with your server password. |
-| `messaging.mqtt.topic` | string | "acoupi" | Topic on the MQTT broker to publish messages | Replace with your server setup. |
+| `messaging.mqtt.host` | str | - | MQTT server hostname for message transmission. | Configure according to your server setup. |
+| `messaging.mqtt.username` | str | - | Username for authentication with the MQTT broker. | Replace with your server username. |
+| `messaging.mqtt.password` | str | - | Password for authentication with the MQTT broker. | Replace with your server password. |
+| `messaging.mqtt.topic` | str | "acoupi" | Topic on the MQTT broker to publish messages | Replace with your server setup. |
 | `messaging.mqtt.port`| int | 1884 |  Port number of the MQTT broker. | Default port is usually fine unless other setup on your server. |
 | `messaging.mqtt.timeout` | int (sec) | 5 | Timeout for connecting to the MQTT broker in seconds. | |
