@@ -54,11 +54,3 @@ To start using it, enter the command:
 ??? tip "Using _acoupi_ from the command line"
 
     To check what are the available commands for _acoupi_, enter `acoupi --help`. Also look at the [CLI documentation](../reference/cli.md) for further info.
-
-## Other _acoupi_ installation
-
-Sometimes the programs might have some additional or different installation requirements.
-Please refer to the following links, if you wish to setup _acoupi_ with one of the pre-built bioacoustics classifiers model.
-
-- [acoupi-batdetect2](https://github.com/acoupi/acoupi_batdetect2) (Classifiers for UK bats species)
-- [acoupi-birdnet](https://github.com/acoupi/acoupi_birdnet) (Classifiers for bird species)

@@ -118,9 +118,9 @@ The table below provides detailed information about the parameters available whe
 | `schedule_end`| time (HH:MM:SS)| 18:00:00 | Time of day when recordings will end (24-hour format). | Adjust according to specific monitoring needs (e.g., nightime hours). |
 | `timezone`| string | "Europe/London" | Timezone of the sensor location. | Configure this according to your deployment region.|
 | __Paths__| | | Configuration for file paths.| |
-| `paths.tmp_audio`| string | "/run/shm" | Temporary storage path for audio recordings. | Temporary in-memory path. Do not modify. |
-| `paths.recordings`| string | "/home/pi/storages/recordings" | Path to directory storing recorded audio files.| Modify accordingly. With default paths, recordings are stored on the SDCard, modify if using external usb hardrive. |
-| `paths.db_metadata`| string | "/home/pi/storages/metadata.db" | Path to the database file storing the metadata. | This .db keeps track of recorded files, ML detection results, and system information. |
+| `paths.tmp_audio`| str | "/run/shm" | Temporary storage path for audio recordings. | Temporary in-memory path. Do not modify. |
+| `paths.recordings`| str | "/home/pi/storages/recordings" | Path to directory storing recorded audio files.| Modify accordingly. With default paths, recordings are stored on the SDCard, modify if using external usb hardrive. |
+| `paths.db_metadata`| str | "/home/pi/storages/metadata.db" | Path to the database file storing the metadata. | This .db keeps track of recorded files, ML detection results, and system information. |
 | __Recording Saving (Optional)__ | N/A | - | Configuration for saving recorded audio files. | |
 | `recording_saving.starttime`| time (HH:MM:SS)| "18:30:00"| Start time for saving recorded audio files (24-hour format).| Insert 00:00:00 to not use this parameter to save audio recordings.|
 | `recording_saving.endtime`| time (HH:MM:SS)| "20:00:00"| End time for saving recorded audio files (24-hour format)| Insert 00:00:00 to not use this parameter to save audio recordings. |
@@ -173,7 +173,7 @@ The table below provides detailed information about the supplementary parameters
 | Parameter | Type | Default Value | Definition | Comment |
 |---|---|---|---|---|
 | __Paths__| | | Configuration for file paths.| |
-| `messaging.messages_db`| string | "/home/pi/storages/messages.db" | Path to the database file storing messages. | This .db keeps track of the messages to be sent to a remote server and their sending/receiving status. |
+| `messaging.messages_db`| str | "/home/pi/storages/messages.db" | Path to the database file storing messages. | This .db keeps track of the messages to be sent to a remote server and their sending/receiving status. |
 | __Messaging__| | | Configuration for sending messages to remote server.| Will require access to network connectivity at the location of your device deployment. |
 | `messaging.message_send_interval`| int (sec.) | 120 | Interval in seconds for sending messages to the remote server. | Adjust for network performance and data bandwidth. |
 | `messaging.heartbeat_interval` | int (sec.) | 600 | Interval in seconds for sending heartbeat messages to the server. | Heartbeat message provides information about the device status (i.e., the correct functioning of the device). |

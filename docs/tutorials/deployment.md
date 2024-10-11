@@ -14,7 +14,6 @@ After installing and configuring an _acoupi_ program, users can proceed to deplo
     For more details about the system background processes and the management of a deployment, refer to the [_Explanation: System_](../explanation/system.md) section.
 
 
-
 ## Managing the deployment of _acoupi_ programs via the CLI
 
 The video shows how a user can start, stop, and get the status of _acoupi_ programs.
@@ -50,11 +49,7 @@ When ready to start a program, use the `acoupi deployment start` command. This w
 
 ### Getting the status of a deployment
 
-After starting a deployment, it’s good practice to check the status of the program by running the `acoupi deployment status` command. This command can show the following outputs: 
-
-- _`active (running)`_ in green meaning that everything is working well
-- _`inactive (dead)`_ colourless meaning that the program is not running. Run the start command to active it. 
-- _`failed (Result: exit-code)`_ in red meanting that there is an error with running the program. Read the error messages to troubleshoot the issue. 
+After starting a deployment, it’s good practice to check the status of the program by running the `acoupi deployment status` command. This command provides a status report for system services, Celery workers, the program, and the overall deployment.
 
 !!! Example "CLI Command: viewing the status of an acoupi program"
 
@@ -71,3 +66,24 @@ Stopping the deployment can be necessary if you need to modify the program’s c
     ```bash
     acoupi deployment stop
     ```
+
+## Understanding _acoupi_ status
+
+- __System Services__: Refer to the background processes that keep your acoupi installation running. These are the core services that manage the overall execution of the program and heartbeat monitoring. Two critical files handle these: the `acoupi.service` responsible for starting and stopping the program and the `acoupi-beat.service` that ensure the system's health at regular interval (hearbeats).
+
+    - `status: inactive`: the system services are not running. This happen when the program has not been deployed.
+    - `status: active`: the system services are running normally.
+    - `status: failed`: an error has occured, and the services have stopped. The error message will provide information about the error.
+
+- __Celery__: Celery is the task manager that coordinates the execution of background jobs, indlucing tasks like audio recording and file management. By default, _acoupi_ uses two workers: the `recording` worker manages audio recording tasks, the `default` worker handles any other tasks.  
+    - `status: unavailable`: Celery hasn't started or has stopped. The program isn't processing tasks. 
+    - `status: available` and `workers: ok` : Celery is up and running, with workers active and processing tasks normally. 
+    - `status: available` and `workers: notok` : Celery is up and running, but one or both workers are encountering problems or is not available. Check the log to identify the issue. 
+
+- __Program__: Refer to the configuration and execution of the _acoupi_ program. 
+    - `status: ok` : the program has been configured correctly, and no issues have been detected. 
+    - `status: unhealthy` : there is an issue with the configuration of the program. This suggests that you might need to review the program's configuration setup.  
+
+- __Deployment__: Refer to the overall state of your active _acoupi_ instance, indicating whether everything is currently running as expected.
+    - `status: active`: the deployment is running successfuly, the program is active and tasks are being executed.
+    - `status: inactive`: the deployment has stopped or hasn't been started.
