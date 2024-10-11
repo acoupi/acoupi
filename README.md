@@ -89,7 +89,7 @@ _acoupi_ simplifies the use and implementation of open-source AI bioacoustics mo
 > 
 > Before using a pre-trained AI bioacoustic classifier, review its license to ensure it aligns with your intended use.
 > `acoupi` programs built with these models inherit the corresponding model licenses.
-> For further licensing details, refer to the [FAQ](faq.md#licensing) section.
+> For further licensing details, refer to the [FAQ](https://acoupi.github.io/acoupi/faq/#licensing) section.
 
 > [!WARNING]
 > **Model Output Reliability**
@@ -103,7 +103,7 @@ _acoupi_ simplifies the use and implementation of open-source AI bioacoustics mo
 ### BatDetect2
 
 The BatDetect2 bioacoustics DL model has been trained to detect and classify UK bats species.
-The [*acoupi_batdetect2*](https://github.com/acoupi/acoupi_batdetect2) repository provides users with a pre-built _acoupi_ program that can be configured and tailored to their use cases.
+The [*acoupi_batdetect2*](https://acoupi.github.io/acoupi_batdetect2/) repository provides users with a pre-built _acoupi_ program that can be configured and tailored to their use cases.
 
 Step 1: Install _acoupi_batdetect2_ program.
 
@@ -120,7 +120,7 @@ acoupi setup --program acoupi_batdetect2.program
 ### BirdNET-Lite (COMING SOON!)
 
 The BirdNET-Lite bioacoustics DL model has been trained to detect and classify a large number of bird species.
-The [*acoupi_birdnet*](https://github.com/acoupi/acoupi_birdnet) repository provides users with a pre-build _acoupi_ program that can be configured and tailored to their use cases of birds monitoring.
+The [*acoupi_birdnet*](https://acoupi.github.io/acoupi_birdnet/) repository provides users with a pre-build _acoupi_ program that can be configured and tailored to their use cases of birds monitoring.
 
 Install _acoupi_birdnet_ program.
 
@@ -157,7 +157,7 @@ The figure below provides a simplified example of an acoupi program. This progra
 
 
 > [!TIP]
-> **Refer to the [**Explanation**](docs/explanation/index.md) section of the documentation for full details on each of these elements.**
+> **Refer to the [**Explanation**](https://acoupi.github.io/acoupi/explanation/section) of the documentation for full details on each of these elements.**
 
 ### _acoupi_ Application
 An _acoupi_ application consists of the full set of code that runs at the deployment stage. This includes a set of scripts made of an acoupi program with user configurations, celery files to organise queues and workers, and bash scripts to start, stop, and reboot the application processes. An acoupi application requires the acoupi package and related dependencies to be installed before a user can configure and run it. The figure below gives an overview of key stages related to the installation, configuration and runtime of an acoupi application.
