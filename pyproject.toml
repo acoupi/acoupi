@@ -9,7 +9,6 @@ authors = [
 dependencies = [
   "pony>=0.7.16",
   "pyaudio>=0.2.13",
-  "sounddevice>=0.4.6",
   "pyyaml>=6.0",
   "paho-mqtt>=1.6.1",
   "pydantic>=1.10.8",
