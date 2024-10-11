@@ -18,9 +18,9 @@ The _How-To Guide_ have more in-depth detail information than the tutorials and 
     <tbody>
       <tr>
         <td>
-          <a href="Data_Schema">Create new data objects</a>
+          <a href="Programs">Create custom programs</a>
         </td>
-        <td>Learn how to create new data objects</td>
+        <td>Learn how to create a custom program</td>
       </tr>
       <tr>
         <td>
@@ -29,10 +29,11 @@ The _How-To Guide_ have more in-depth detail information than the tutorials and 
         <td>Learn how to create new components</td>
       </tr>
       <tr>
+      <tr>
         <td>
-          <a href="Programs">Create custom programs</a>
+          <a href="Data_Schema">Create new data objects</a>
         </td>
-        <td>Learn how to create a custom program</td>
+        <td>Learn how to create new data objects</td>
       </tr>
     </tbody>
   </table>
