@@ -1,0 +1,99 @@
+name: Publish PyPI
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Install Hatch
+        uses: pypa/hatch@install
+
+      - name: Build a binary wheel and source tarball
+        run: hatch build
+
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'release'
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/acoupi
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: Upload to GitHub release
+    needs: [publish-to-pypi]
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'release'
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Download the dists
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Upload artifact to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload '${{ github.ref_name }}' dist/** --repo '${{github.repository }}'
+
+  publish-to-testpypi:
+    name: Publish to TestPyPI
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'workflow_dispatch'
+
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/acoupi
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
