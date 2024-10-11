@@ -13,7 +13,6 @@ sudo apt install -y \
 # and if so run sudo loginctl enable-linger
 if [ -z "$CI" ] && [ -z "$GITHUB_RUN_ID" ]; then
     sudo loginctl enable-linger
+    pip install --upgrade pip
+    pip install acoupi
 fi
-
-pip install --upgrade pip
-pip install acoupi
