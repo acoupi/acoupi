@@ -138,7 +138,7 @@ acoupi setup --program acoupi_birdnet.program
 
 > [!TIP]
 > **Interested in sharing your AI bioacoustics model with the community?**
-
+>
 >_acoupi_ allows you to integrate your own bioacoustics classifier model. If you already have a model and would like to share it with the community, we'd  love to hear from you! We are happy to offer guidance and support to help include your classifier in the _acoupi_ list of "ready-to-use" AI bioacoustics classifiers. 
 
 ## _acoupi_ Software
