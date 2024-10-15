@@ -128,3 +128,7 @@ markdown_extensions:
 watch:
   - docs
   - src
+extra:
+  analytics:
+    provider: google
+    property: G-0NZT4X5LY6
