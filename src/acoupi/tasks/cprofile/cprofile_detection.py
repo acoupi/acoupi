@@ -15,7 +15,6 @@ logger.setLevel(logging.INFO)
 
 
 def cprofile_create_detection_task(
-    recording: data.Recording,
     store: types.Store,
     model: types.Model,
     message_store: types.MessageStore,
@@ -37,6 +36,7 @@ def cprofile_create_detection_task(
         The output file for the cProfile statistics, by default "cprofile_detection.prof".
     """
     # Create the detection task
+
     detection_task = generate_detection_task(
         store=store,
         model=model,
@@ -47,21 +47,25 @@ def cprofile_create_detection_task(
         message_factories=message_factories,
     )
 
-    # Create the cProfile object
-    profiler = cProfile.Profile()
+    def cprofile_detection_task(recording) -> None:
+        """Run the detection task with the cProfile."""
+        profiler = cProfile.Profile()
 
-    # Run the detection task with the profiler
-    logger.info("Running the detection_task through the profiler.")
-    profiler.runcall(detection_task, recording)
+        # Run the detection task with the profiler
+        logger.info("Running the detection_task through the profiler.")
 
-    # Save the cProfile statistics to a file
-    profiler.dump_stats(cprofile_output)
+        profiler.enable()
+        detection_task(recording)
+        profiler.disable()
 
-    if cprofile_output:
+        # Save the cProfile statistics to a file
         profiler.dump_stats(cprofile_output)
-        logger.info(f"cProfile output saved to {cprofile_output}")
-    else:
-        stats = pstats.Stats(profiler)
-        stats.strip_dirs().sort_stats("cumulative").print_stats()
 
-    return detection_task
+        if cprofile_output:
+            profiler.dump_stats(cprofile_output)
+            logger.info(f"cProfile output saved to {cprofile_output}")
+        else:
+            stats = pstats.Stats(profiler)
+            stats.strip_dirs().sort_stats("cumulative").print_stats()
+
+    return cprofile_detection_task
