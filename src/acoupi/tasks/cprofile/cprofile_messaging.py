@@ -35,21 +35,26 @@ def cprofile_create_messaging_task(
         logger=logger,
     )
 
-    # Create the cProfile object
-    profiler = cProfile.Profile()
+    def cprofile_messaging_task() -> None:
+        """Run the messaging task with the cProfile."""
+        profiler = cProfile.Profile()
 
-    # Run the detection task with the profiler
-    logger.info("Running the messaging_task through the profiler.")
-    profiler.runcall(messaging_task)
+        # Run the detection task with the profiler
+        logger.info("Running the messaging_task through the profiler.")
 
-    # Save the cProfile statistics to a file
-    profiler.dump_stats(cprofile_output)
+        profiler.enable()
+        messaging_task()
+        profiler.disable()
 
-    if cprofile_output:
+        # Save the cProfile statistics to a file
         profiler.dump_stats(cprofile_output)
-        logger.info(f"cProfile output saved to {cprofile_output}")
-    else:
-        stats = pstats.Stats(profiler)
-        stats.strip_dirs().sort_stats("cumulative").print_stats()
 
-    return messaging_task
+        if cprofile_output:
+            profiler.dump_stats(cprofile_output)
+            logger.info(f"cProfile output saved to {cprofile_output}")
+
+        else:
+            stats = pstats.Stats(profiler)
+            stats.strip_dirs().sort_stats("cumulative").print_stats()
+
+    return cprofile_messaging_task

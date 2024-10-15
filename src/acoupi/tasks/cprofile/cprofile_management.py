@@ -41,21 +41,25 @@ def cprofile_create_management_task(
         tmp_path=tmp_path,
     )
 
-    # Create the cProfile object
-    profiler = cProfile.Profile()
+    def cprofile_management_task() -> None:
+        """Run the management task with the cProfile."""
+        profiler = cProfile.Profile()
 
-    # Run the detection task with the profiler
-    logger.info("Running the management_task through the profiler.")
-    profiler.runcall(management_task)
+        # Run the detection task with the profiler
+        logger.info("Running the management_task through the profiler.")
 
-    # Save the cProfile statistics to a file
-    profiler.dump_stats(cprofile_output)
+        profiler.enable()
+        management_task()
+        profiler.disable()
 
-    if cprofile_output:
+        # Save the cProfile statistics to a file
         profiler.dump_stats(cprofile_output)
-        logger.info(f"cProfile output saved to {cprofile_output}")
-    else:
-        stats = pstats.Stats(profiler)
-        stats.strip_dirs().sort_stats("cumulative").print_stats()
 
-    return management_task
+        if cprofile_output:
+            profiler.dump_stats(cprofile_output)
+            logger.info(f"cProfile output saved to {cprofile_output}")
+        else:
+            stats = pstats.Stats(profiler)
+            stats.strip_dirs().sort_stats("cumulative").print_stats()
+
+    return cprofile_management_task
