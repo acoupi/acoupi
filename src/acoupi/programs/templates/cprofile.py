@@ -100,7 +100,6 @@ class cProfileProgram_Configuration(BaseModel):
     recording: AudioConfiguration = AudioConfiguration()
     saving_filters: Optional[SaveRecordingFilter] = None
     saving_managers: Optional[SaveRecordingManager] = None
-    saving_interval: int = 30
     paths: PathsConfiguration = Field(default_factory=PathsConfiguration)
     messaging: MessagingConfig = MessagingConfig()
 
@@ -259,7 +258,7 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
 
         self.add_task(
             function=cprofile_management_task,
-            schedule=datetime.timedelta(seconds=config.saving_interval),
+            schedule=datetime.timedelta(seconds=120),
             queue="celery",
         )
 
