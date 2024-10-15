@@ -1,6 +1,6 @@
 import datetime
 import zoneinfo
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from pathlib import Path
 from typing import Annotated, Callable, List, Optional, TypeVar
 
@@ -25,8 +25,8 @@ from acoupi.system.files import get_temp_dir
 class AudioConfiguration(BaseModel):
     """Audio recording configuration schema."""
 
-    duration: int = 10
-    interval: int = 10
+    duration: int = 3
+    interval: int = 12
     chunksize: Annotated[int, NoUserPrompt] = 8192
     schedule_start: datetime.time = Field(
         default=datetime.time(hour=8, minute=0, second=0)
@@ -84,7 +84,7 @@ class cProfileProgram_Configuration(BaseModel):
 ProgramConfig = TypeVar("ProgramConfig", bound=cProfileProgram_Configuration)
 
 
-class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
+class cProfileProgram(AcoupiProgram[ProgramConfig]):
 
     worker_config = DEFAULT_WORKER_CONFIG
     model: types.Model
