@@ -4,7 +4,7 @@ import cProfile
 import logging
 import pstats
 from pathlib import Path
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from acoupi.components import types
 from acoupi.system.files import TEMP_PATH
@@ -22,7 +22,7 @@ def cprofile_create_management_task(
     required_models: Optional[List[str]] = None,
     tmp_path: Path = TEMP_PATH,
     cprofile_output: Path = Path("home/pi/cprofile_management.prof"),
-):
+) -> Callable[[], None]:
     """Run and profile the management task.
 
     Parameters
@@ -45,6 +45,7 @@ def cprofile_create_management_task(
     profiler = cProfile.Profile()
 
     # Run the detection task with the profiler
+    logger.info("Running the management_task through the profiler.")
     profiler.runcall(management_task)
 
     # Save the cProfile statistics to a file
@@ -56,3 +57,5 @@ def cprofile_create_management_task(
     else:
         stats = pstats.Stats(profiler)
         stats.strip_dirs().sort_stats("cumulative").print_stats()
+
+    return management_task

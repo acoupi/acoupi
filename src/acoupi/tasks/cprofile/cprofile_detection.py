@@ -4,7 +4,7 @@ import cProfile
 import logging
 import pstats
 from pathlib import Path
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from acoupi import data
 from acoupi.components import types
@@ -24,7 +24,7 @@ def cprofile_create_detection_task(
     processing_filters: Optional[List[types.ProcessingFilter]] = None,
     message_factories: Optional[List[types.MessageBuilder]] = None,
     cprofile_output: Path = Path("home/pi/cprofile_detection.prof"),
-):
+) -> Callable[[data.Recording], None]:
     """Run and profile the detection task.
 
     Parameters
@@ -51,6 +51,7 @@ def cprofile_create_detection_task(
     profiler = cProfile.Profile()
 
     # Run the detection task with the profiler
+    logger.info("Running the detection_task through the profiler.")
     profiler.runcall(detection_task, recording)
 
     # Save the cProfile statistics to a file
@@ -62,3 +63,5 @@ def cprofile_create_detection_task(
     else:
         stats = pstats.Stats(profiler)
         stats.strip_dirs().sort_stats("cumulative").print_stats()
+
+    return detection_task
