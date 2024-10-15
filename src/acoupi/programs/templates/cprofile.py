@@ -81,6 +81,8 @@ class cProfileProgram_Configuration(BaseModel):
     messaging: MessagingConfig = MessagingConfig()
 
 
+ModelConfig = TypeVar("ModelConfig", bound=BaseModel)
+
 ProgramConfig = TypeVar("ProgramConfig", bound=cProfileProgram_Configuration)
 
 
@@ -161,78 +163,7 @@ class cProfileProgram(AcoupiProgram[ProgramConfig]):
             return components.MQTTMessenger.from_config(config.messaging.mqtt)
         return None
 
-    ## ---------- Step 5 - Create and regsiter tasks ---------- ##
-    def register_recording_task(self, config: ProgramConfig):
-
-        recording_task = tasks.generate_recording_task(
-            recorder=self.recorder,
-            store=self.store,
-            logger=self.logger.getChild("recording"),
-            recording_conditions=self.get_recording_conditions(config),
-        )
-
-        self.add_task(
-            function=recording_task,
-            schedule=datetime.timedelta(seconds=config.recording.interval),
-            callbacks=self.get_recording_callback(config),
-            queue="recording",
-        )
-
-    def create_detection_task(self, config: ProgramConfig):
-        # cprofile_detection_task = tasks.cprofile_create_detection_task(
-        detection_task = tasks.generate_detection_task(
-            store=self.store,
-            model=self.model,
-            message_store=self.message_store,
-            logger=self.logger.getChild("detection"),
-            output_cleaners=self.get_output_cleaners(config),
-            processing_filters=self.get_processing_filters(config),
-            message_factories=self.get_message_factories(config),
-        )
-
-        # return cprofile_detection_task
-        return detection_task
-
-    def get_recording_callback(self, config) -> list[Callable]:
-        return [self.create_detection_task(config)]
-
-    def register_messaging_task(self, config: ProgramConfig):
-        if self.messenger is None:
-            return
-
-        # cprofile_messaging_task = tasks.cprofile_create_messaging_task(
-        messaging_task = tasks.generate_send_messages_task(
-            message_store=self.message_store,
-            messengers=[self.messenger],
-            logger=self.logger.getChild("messaging"),
-            # cprofile_output=config.paths.cprofile_messaging,
-        )
-
-        self.add_task(
-            # function=cprofile_messaging_task,
-            function=messaging_task,
-            schedule=config.messaging.message_send_interval,
-            queue="celery",
-        )
-
-    def register_file_management_task(self, config: ProgramConfig):
-        cprofile_management_task = tasks.cprofile_create_management_task(
-            store=self.store,
-            logger=self.logger.getChild("file_management"),
-            file_managers=self.get_recording_saving_managers(config),
-            file_filters=self.get_recording_saving_filters(config),
-            required_models=self.get_required_models(config),
-            tmp_path=config.paths.tmp_audio,
-            cprofile_output=config.paths.cprofile_management,
-        )
-
-        self.add_task(
-            function=cprofile_management_task,
-            schedule=datetime.timedelta(seconds=120),
-            queue="celery",
-        )
-
-    ## ---------- Get specific conditions for tasks  ---------- ##
+    ## ---------- Step 5 - Provide specific config to tasks ---------- ##
     def get_recording_conditions(
         self, config: ProgramConfig
     ) -> List[types.RecordingCondition]:
@@ -289,3 +220,76 @@ class cProfileProgram(AcoupiProgram[ProgramConfig]):
         self, config: ProgramConfig
     ) -> List[types.RecordingSavingManager]:
         return []
+
+    ## ---------- Step 6 - Create and regsiter tasks ---------- ##
+    def register_recording_task(self, config: ProgramConfig):
+
+        recording_task = tasks.generate_recording_task(
+            recorder=self.recorder,
+            store=self.store,
+            logger=self.logger.getChild("recording"),
+            recording_conditions=self.get_recording_conditions(config),
+        )
+
+        self.add_task(
+            function=recording_task,
+            schedule=datetime.timedelta(seconds=config.recording.interval),
+            callbacks=self.get_recording_callback(config),
+            queue="recording",
+        )
+
+    def create_detection_task(
+        self, config: ProgramConfig
+    ) -> Callable[[data.Recording], None]:
+        # cprofile_detection_task = tasks.cprofile_create_detection_task(
+        return tasks.generate_detection_task(
+            store=self.store,
+            model=self.model,
+            message_store=self.message_store,
+            logger=self.logger.getChild("detection"),
+            output_cleaners=self.get_output_cleaners(config),
+            processing_filters=self.get_processing_filters(config),
+            message_factories=self.get_message_factories(config),
+        )
+
+    def get_recording_callback(self, config) -> list[Callable]:
+        return [self.create_detection_task(config)]
+
+    def register_messaging_task(self, config: ProgramConfig):
+        if self.messenger is None:
+            return
+
+        # cprofile_messaging_task = tasks.cprofile_create_messaging_task(
+        messaging_task = tasks.generate_send_messages_task(
+            message_store=self.message_store,
+            messengers=[self.messenger],
+            logger=self.logger.getChild("messaging"),
+            # cprofile_output=config.paths.cprofile_messaging,
+        )
+
+        if messaging_task is None:
+            return
+
+        self.add_task(
+            # function=cprofile_messaging_task,
+            function=messaging_task,
+            schedule=config.messaging.message_send_interval,
+            queue="celery",
+        )
+
+    def register_file_management_task(self, config: ProgramConfig):
+        cprofile_management_task = tasks.cprofile_create_management_task(
+            store=self.store,
+            logger=self.logger.getChild("file_management"),
+            file_managers=self.get_recording_saving_managers(config),
+            file_filters=self.get_recording_saving_filters(config),
+            required_models=self.get_required_models(config),
+            tmp_path=config.paths.tmp_audio,
+            cprofile_output=config.paths.cprofile_management,
+        )
+
+        self.add_task(
+            function=cprofile_management_task,
+            schedule=datetime.timedelta(seconds=120),
+            queue="celery",
+        )
