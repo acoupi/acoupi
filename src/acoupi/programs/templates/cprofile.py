@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Annotated, Callable, List, Optional, TypeVar
 
-import pytz
 from pydantic import BaseModel, Field
 from pydantic_extra_types.timezone_name import TimeZoneName
 
@@ -37,17 +36,6 @@ class AudioConfiguration(BaseModel):
     )
 
 
-class SaveRecordingFilter(BaseModel):
-    """Recording saving options configuration."""
-
-    starttime: datetime.time = datetime.time(hour=8, minute=0, second=0)
-    endtime: datetime.time = datetime.time(hour=20, minute=0, second=0)
-    before_dawndusk_duration: int = 0
-    after_dawndusk_duration: int = 0
-    frequency_duration: int = 0
-    frequency_interval: int = 0
-
-
 class MessagingConfig(BaseModel):
     """Message configuration schema."""
 
@@ -67,26 +55,17 @@ class PathsConfiguration(BaseModel):
         default_factory=lambda: Path.home() / "storages" / "recordings",
     )
     cprofile_detection: Path = Field(
-        default_factory=lambda: Path.home() / "cprofile_detection.prof",
+        default_factory=lambda: Path.home() / "storages" / "cprofile_detection.prof",
     )
     cprofile_management: Path = Field(
-        default_factory=lambda: Path.home() / "cprofile_management.prof",
+        default_factory=lambda: Path.home() / "storages" / "cprofile_management.prof",
     )
     cprofile_messaging: Path = Field(
-        default_factory=lambda: Path.home() / "cprofile_messaging.prof",
+        default_factory=lambda: Path.home() / "storages" / "cprofile_messaging.prof",
     )
     db_metadata: Path = Field(
         default_factory=lambda: Path.home() / "storages" / "metadata.db",
     )
-
-
-class SaveRecordingManager(BaseModel):
-    """Configruation options to manage saving recordings."""
-
-    true_dir: str = "true_detections"
-    false_dir: str = "false_detections"
-    timeformat: str = "%Y%m%d_%H%M%S"
-    saving_threshold: float = 0.2
 
 
 ## ---------- Step 2 - Program Configuration ---------- ##
@@ -98,8 +77,6 @@ class cProfileProgram_Configuration(BaseModel):
     timezone: TimeZoneName = Field(default=TimeZoneName("Europe/London"))
     microphone: MicrophoneConfig
     recording: AudioConfiguration = AudioConfiguration()
-    saving_filters: Optional[SaveRecordingFilter] = None
-    saving_managers: Optional[SaveRecordingManager] = None
     paths: PathsConfiguration = Field(default_factory=PathsConfiguration)
     messaging: MessagingConfig = MessagingConfig()
 
@@ -231,10 +208,6 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
             # cprofile_output=config.paths.cprofile_messaging,
         )
 
-        # if cprofile_messaging_task is None:
-        if messaging_task is None:
-            return
-
         self.add_task(
             # function=cprofile_messaging_task,
             function=messaging_task,
@@ -242,7 +215,7 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
             queue="celery",
         )
 
-    def register_file_management_task(self, config: ProgramConfig) -> None:
+    def register_file_management_task(self, config: ProgramConfig):
         cprofile_management_task = tasks.cprofile_create_management_task(
             store=self.store,
             logger=self.logger.getChild("file_management"),
@@ -310,66 +283,7 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
     def get_recording_saving_filters(
         self, config: ProgramConfig
     ) -> List[types.RecordingSavingFilter]:
-        if not config.saving_filters:
-            # No saving filters defined
-            return []
-
-        saving_filters = []
-        timezone = pytz.timezone(config.timezone)
-        recording_saving_filters = config.saving_filters
-
-        # Main filter
-        # Will only save recordings if the recording time is in the
-        # interval defined by the start and end time.
-        if (
-            recording_saving_filters.starttime is not None
-            and recording_saving_filters.endtime is not None
-        ):
-            saving_filters.append(
-                components.SaveIfInInterval(
-                    interval=data.TimeInterval(
-                        start=recording_saving_filters.starttime,
-                        end=recording_saving_filters.endtime,
-                    ),
-                    timezone=timezone,
-                )
-            )
-
-        # Additional filters
-        if (
-            recording_saving_filters.frequency_duration != 0
-            and recording_saving_filters.frequency_interval != 0
-        ):
-            # This filter will only save recordings at a frequency defined
-            # by the duration and interval.
-            saving_filters.append(
-                components.FrequencySchedule(
-                    duration=recording_saving_filters.frequency_duration,
-                    frequency=recording_saving_filters.frequency_interval,
-                )
-            )
-
-        if recording_saving_filters.before_dawndusk_duration != 0:
-            # This filter will only save recordings if the recording time
-            # is before dawn or dusk.
-            saving_filters.append(
-                components.Before_DawnDuskTimeInterval(
-                    duration=recording_saving_filters.before_dawndusk_duration,
-                    timezone=timezone,
-                )
-            )
-
-        if recording_saving_filters.after_dawndusk_duration != 0:
-            # This filter will only save recordings if the recording time
-            # is after dawn or dusk.
-            saving_filters.append(
-                components.After_DawnDuskTimeInterval(
-                    duration=recording_saving_filters.after_dawndusk_duration,
-                    timezone=timezone,
-                )
-            )
-
-        return saving_filters
+        return []
 
     def get_recording_saving_managers(
         self, config: ProgramConfig
