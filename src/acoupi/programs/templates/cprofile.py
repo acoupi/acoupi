@@ -150,6 +150,9 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
         recorder_check = getattr(self.recorder, "check", None)
         if callable(recorder_check):
             recorder_check()
+        model_check = getattr(self.model, "check", None)
+        if model_check and callable(model_check):
+            model_check()
         super().check(config)
 
     ## ---------- Step 4 - Assign Config to each components ---------- ##
@@ -198,11 +201,9 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
             queue="recording",
         )
 
-    def register_detection_task(self, config: ProgramConfig):
-        if self.model is None:
-            return None
-
-        cprofile_detection_task = tasks.cprofile_create_detection_task(
+    def create_detection_task(self, config: ProgramConfig):
+        # cprofile_detection_task = tasks.cprofile_create_detection_task(
+        detection_task = tasks.generate_detection_task(
             store=self.store,
             model=self.model,
             message_store=self.message_store,
@@ -212,35 +213,36 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
             message_factories=self.get_message_factories(config),
         )
 
-        return cprofile_detection_task
+        # return cprofile_detection_task
+        return detection_task
 
     def get_recording_callback(self, config) -> list[Callable]:
-        detection_task = self.register_detection_task(config)
-        if detection_task is not None:
-            return [detection_task]
-        return []
+        return [self.create_detection_task(config)]
 
     def register_messaging_task(self, config: ProgramConfig):
         if self.messenger is None:
             return
 
-        cprofile_messaging_task = tasks.cprofile_create_messaging_task(
+        # cprofile_messaging_task = tasks.cprofile_create_messaging_task(
+        messaging_task = tasks.generate_send_messages_task(
             message_store=self.message_store,
             messengers=[self.messenger],
             logger=self.logger.getChild("messaging"),
-            cprofile_output=config.paths.cprofile_messaging,
+            # cprofile_output=config.paths.cprofile_messaging,
         )
 
-        if cprofile_messaging_task is None:
+        # if cprofile_messaging_task is None:
+        if messaging_task is None:
             return
 
         self.add_task(
-            function=cprofile_messaging_task,
-            schedule=datetime.timedelta(seconds=config.messaging.message_send_interval),
+            # function=cprofile_messaging_task,
+            function=messaging_task,
+            schedule=config.messaging.message_send_interval,
             queue="celery",
         )
 
-    def register_file_management_task(self, config: ProgramConfig):
+    def register_file_management_task(self, config: ProgramConfig) -> None:
         cprofile_management_task = tasks.cprofile_create_management_task(
             store=self.store,
             logger=self.logger.getChild("file_management"),
@@ -250,9 +252,6 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
             tmp_path=config.paths.tmp_audio,
             cprofile_output=config.paths.cprofile_management,
         )
-
-        if cprofile_management_task is None:
-            return
 
         self.add_task(
             function=cprofile_management_task,
