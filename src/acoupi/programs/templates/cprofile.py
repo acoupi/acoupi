@@ -2,7 +2,7 @@ import datetime
 import zoneinfo
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Annotated, List, Optional, TypeVar
+from typing import Annotated, Callable, List, Optional, TypeVar
 
 import pytz
 from pydantic import BaseModel, Field
@@ -194,33 +194,31 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
         self.add_task(
             function=recording_task,
             schedule=datetime.timedelta(seconds=config.recording.interval),
-            callbacks=self.register_detection_task(config),
+            callbacks=self.get_recording_callback(config),
             queue="recording",
         )
 
     def register_detection_task(self, config: ProgramConfig):
         if self.model is None:
-            return
+            return None
 
-        def detection_task_callback(recording: data.Recording):
-            self.logger.info(f"Running detection on recording: {recording.path}")
+        cprofile_detection_task = tasks.cprofile_create_detection_task(
+            store=self.store,
+            model=self.model,
+            message_store=self.message_store,
+            logger=self.logger.getChild("detection"),
+            output_cleaners=self.get_output_cleaners(config),
+            processing_filters=self.get_processing_filters(config),
+            message_factories=self.get_message_factories(config),
+        )
 
-            cprofile_detection_task = tasks.cprofile_create_detection_task(
-                recording=recording,
-                store=self.store,
-                model=self.model,
-                message_store=self.message_store,
-                logger=self.logger.getChild("detection"),
-                output_cleaners=self.get_output_cleaners(config),
-                processing_filters=self.get_processing_filters(config),
-                message_factories=self.get_message_factories(config),
-                cprofile_output=config.paths.cprofile_detection,
-            )
+        return cprofile_detection_task
 
-            if cprofile_detection_task is None:
-                return
-
-            return detection_task_callback
+    def get_recording_callback(self, config) -> list[Callable]:
+        detection_task = self.register_detection_task(config)
+        if detection_task is not None:
+            return [detection_task]
+        return []
 
     def register_messaging_task(self, config: ProgramConfig):
         if self.messenger is None:
