@@ -1,11 +1,12 @@
-"""CProfile Detection Task."""
+"""CProfile Messaging Task."""
 
 import cProfile
 import logging
 import pstats
 from pathlib import Path
-from typing import Callable
+from typing import List, Optional
 
+from acoupi.components import types
 from acoupi.tasks.messaging import generate_send_messages_task
 
 logger = logging.getLogger(__name__)
@@ -13,9 +14,11 @@ logger.setLevel(logging.INFO)
 
 
 def cprofile_create_messaging_task(
+    message_store: types.MessageStore,
+    messengers: Optional[List[types.Messenger]] = None,
+    logger: logging.Logger = logger,
     cprofile_output: Path = Path("home/pi/cprofile_messaging.prof"),
-    **kwargs,
-) -> Callable:
+):
     """Run and profile the management task.
 
     Parameters
@@ -26,7 +29,11 @@ def cprofile_create_messaging_task(
         The output file for the cProfile statistics, by default "cprofile_detection.prof".
     """
     # Create the detection task
-    messaging_task = generate_send_messages_task(**kwargs)
+    messaging_task = generate_send_messages_task(
+        message_store=message_store,
+        messengers=messengers,
+        logger=logger,
+    )
 
     # Create the cProfile object
     profiler = cProfile.Profile()
@@ -43,5 +50,3 @@ def cprofile_create_messaging_task(
     else:
         stats = pstats.Stats(profiler)
         stats.strip_dirs().sort_stats("cumulative").print_stats()
-
-    return messaging_task

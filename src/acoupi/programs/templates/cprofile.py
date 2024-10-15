@@ -166,7 +166,7 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
 
     @abstractmethod
     def configure_model(self, config: ProgramConfig) -> types.Model:
-        """ ""Configure the detection model."""
+        """Configure the detection model."""
 
     def configure_store(self, config: ProgramConfig) -> types.Store:
         return components.SqliteStore(config.paths.db_metadata)
@@ -202,26 +202,23 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
         if self.model is None:
             return
 
-        detection_task = tasks.generate_detection_task(
-            store=self.store,
-            model=self.model,
-            message_store=self.message_store,
-            logger=self.logger.getChild("detection"),
-            output_cleaners=self.get_output_cleaners(config),
-            processing_filters=self.get_processing_filters(config),
-            message_factories=self.get_message_factories(config),
-        )
-
         def detection_task_callback(recording: data.Recording):
             self.logger.info(f"Running detection on recording: {recording.path}")
 
             cprofile_detection_task = tasks.cprofile_create_detection_task(
-                recording=lambda: recording,
+                recording=recording,
+                store=self.store,
+                model=self.model,
+                message_store=self.message_store,
+                logger=self.logger.getChild("detection"),
+                output_cleaners=self.get_output_cleaners(config),
+                processing_filters=self.get_processing_filters(config),
+                message_factories=self.get_message_factories(config),
                 cprofile_output=config.paths.cprofile_detection,
-                detection_task=detection_task,
             )
 
-            cprofile_detection_task(recording)
+            if cprofile_detection_task is None:
+                return
 
             return detection_task_callback
 
@@ -229,16 +226,15 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
         if self.messenger is None:
             return
 
-        messaging_task = tasks.generate_send_messages_task(
+        cprofile_messaging_task = tasks.cprofile_create_messaging_task(
             message_store=self.message_store,
             messengers=[self.messenger],
             logger=self.logger.getChild("messaging"),
+            cprofile_output=config.paths.cprofile_messaging,
         )
 
-        cprofile_messaging_task = tasks.cprofile_create_messaging_task(
-            cprofile_output=config.paths.cprofile_messaging,
-            messaging_task=messaging_task,
-        )
+        if cprofile_messaging_task is None:
+            return
 
         self.add_task(
             function=cprofile_messaging_task,
@@ -247,19 +243,18 @@ class cProfileProgram(AcoupiProgram[ProgramConfig], ABC):
         )
 
     def register_file_management_task(self, config: ProgramConfig):
-        file_management_task = tasks.generate_file_management_task(
+        cprofile_management_task = tasks.cprofile_create_management_task(
             store=self.store,
             logger=self.logger.getChild("file_management"),
             file_managers=self.get_recording_saving_managers(config),
             file_filters=self.get_recording_saving_filters(config),
             required_models=self.get_required_models(config),
             tmp_path=config.paths.tmp_audio,
+            cprofile_output=config.paths.cprofile_management,
         )
 
-        cprofile_management_task = tasks.cprofile_create_management_task(
-            cprofile_output=config.paths.cprofile_management,
-            management_task=file_management_task,
-        )
+        if cprofile_management_task is None:
+            return
 
         self.add_task(
             function=cprofile_management_task,
