@@ -33,6 +33,10 @@ from acoupi.programs.templates.basic import (
     BasicProgramConfiguration,
     PathsConfiguration,
 )
+from acoupi.programs.templates.cprofile import (
+    cProfileProgram,
+    cProfileProgram_Configuration,
+)
 from acoupi.programs.templates.detection import (
     DetectionProgram,
     DetectionProgramConfiguration,
@@ -46,8 +50,9 @@ from acoupi.programs.templates.messaging import (
 __all__ = [
     "AudioConfiguration",
     "BasicProgram",
-    "BasicProgram",
     "BasicProgramConfiguration",
+    "cProfileProgram",
+    "cProfileProgram_Configuration",
     "DetectionProgram",
     "DetectionProgramConfiguration",
     "MessagingConfig",
