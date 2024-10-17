@@ -16,7 +16,7 @@ With various components and templates, **acoupi** simplifies the creation of cus
 Acoupi has been designed to run on single-board computer devices like the [Raspberry Pi](https://www.raspberrypi.org/) (RPi).
 Users should be able to download and test acoupi software on any Linux-based machines with Python version >=3.8,<3.12 installed.
 
-- A Linux-based single board computer such as the Raspberry Pi 4B.
+- A Linux-based single-board computer such as the Raspberry Pi 4B.
 - A SD Card with 64-bit Lite OS version installed.
 - A USB Microphone such as an [AudioMoth USB Microphone](https://www.openacousticdevices.info/audiomoth) or an Ultramic 192K/250K.
 
