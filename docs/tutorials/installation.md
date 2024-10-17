@@ -7,7 +7,7 @@ Users should be able to download and test _acoupi_ software on any Linux-based m
 
 We recommend the following hardware elements to install and run _acoupi_.
 
-- A Linux-based single board computer such as the Raspberry Pi 4B.
+- A Linux-based single-board computer such as the Raspberry Pi 4B.
 - A SD Card with 64-bit Lite OS version installed.
 - A USB Microphone such as an [AudioMoth USB Microphone](https://www.openacousticdevices.info/audiomoth) or an Ultramic 192K/250K.
 
