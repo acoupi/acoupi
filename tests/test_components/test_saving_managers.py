@@ -14,7 +14,8 @@ from acoupi.components import saving_managers
 def create_test_recording():
     """Fixture for creating random recording.
 
-    Will create a recording with a path, duration, samplerate, deployment and datetime.
+    Will create a recording with a path, duration, samplerate, deployment and
+    datetime.
     """
     deployment = data.Deployment(
         name="test_deployment",
@@ -223,7 +224,7 @@ def test_save_recording_with_unconfident_detections(
     assert new_path.parent == tmp_dirpath_false
 
 
-def test_recording_is_saved_in_default_dir_if_not_true_or_false_class(
+def test_none_is_returned_if_not_true_or_false_class(
     tmp_path: Path,
     create_test_recording,
     create_test_detection,
@@ -275,8 +276,7 @@ def test_recording_is_saved_in_default_dir_if_not_true_or_false_class(
 
     # Assert saves in the root folder and not in any of the true or false
     # subdirectories
-    assert new_path is not None
-    assert new_path.parent == tmp_audio_dirpath
+    assert new_path is None
 
 
 def test_date_file_manager_save_recording(
