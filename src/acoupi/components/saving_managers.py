@@ -98,7 +98,7 @@ class SaveRecordingManager(types.RecordingSavingManager):
     def get_saving_recording_path(
         self,
         model_outputs: Optional[List[data.ModelOutput]],
-    ) -> Path:
+    ) -> Optional[Path]:
         """Determine where the recording should be saved.
 
         Parameters
@@ -140,15 +140,13 @@ class SaveRecordingManager(types.RecordingSavingManager):
             ):
                 return self.dirpath_false
 
-        return (
-            self.dirpath
-        )  # Default path if any of the above conditions are not met.
+        return None
 
     def save_recording(
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
-    ) -> Path:
+    ) -> Optional[Path]:
         """Save a recording to a file.
 
         Examples
@@ -174,10 +172,11 @@ class SaveRecordingManager(types.RecordingSavingManager):
             raise ValueError("Recording has no path")
 
         sdir = self.get_saving_recording_path(model_outputs)
-        srec_filename = recording.created_on.strftime(self.timeformat)
 
         if sdir is None:
-            raise ValueError("No directory to save recording.")
+            return None
+
+        srec_filename = recording.created_on.strftime(self.timeformat)
 
         # Move recording to the path it should be saved
         new_path = sdir / f"{srec_filename}.wav"
