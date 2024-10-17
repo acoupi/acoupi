@@ -153,5 +153,6 @@ def generate_file_management_task(
                     "No file manager was able to save recording %s",
                     recording,
                 )
+                delete_recording(recording)
 
     return file_management_task
