@@ -110,18 +110,19 @@ def generate_file_management_task(
                 continue
 
             # Which files should be saved?
-            for file_filter in file_filters or []:
-                if not file_filter.should_save_recording(
+            if file_filters and not any(
+                file_filter.should_save_recording(
                     recording,
                     model_outputs=model_outputs,
-                ):
-                    logger.info(
-                        "Recording %s does not pass filter: %s",
-                        recording,
-                        file_filter,
-                    )
-                    delete_recording(recording)
-                    break
+                )
+                for file_filter in file_filters
+            ):
+                logger.info(
+                    "Recording %s does not pass filters",
+                    recording,
+                )
+                delete_recording(recording)
+                continue
 
             # Has the file already been deleted?
             if not recording.path.exists():
