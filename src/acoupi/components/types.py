@@ -272,7 +272,7 @@ class RecordingSavingManager(ABC):
         self,
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
-    ) -> Path:
+    ) -> Optional[Path]:
         """Save the recording.
 
         Parameters
@@ -285,8 +285,9 @@ class RecordingSavingManager(ABC):
 
         Returns
         -------
-        Path
-            The path to the saved recording.
+        Optional[Path]
+            The path to the saved recording. Returns None if this
+            manager is not responsible for saving the recording.
         """
 
 
