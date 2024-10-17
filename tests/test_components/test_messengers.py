@@ -482,15 +482,3 @@ def test_mqtt_check_fails_with_bad_host():
     # Act
     with pytest.raises(HealthCheckError):
         messenger.check()
-
-
-def test_mqtt_messenger_can_send_message_to_test_server():
-    # Arrange
-    messenger = messengers.MQTTMessenger(
-        host="test.mosquitto.org",
-        port=1883,
-        topic="acoupi",
-    )
-    # Act
-    response = messenger.send_message(data.Message(content='"Hello, world!"'))
-    assert response.status == data.ResponseStatus.SUCCESS
