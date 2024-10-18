@@ -5,9 +5,8 @@ the tasks of the currently configured acoupi program.
 """
 
 import cProfile
-from pathlib import Path
 from pstats import Stats
-from typing import List, Optional
+from typing import List
 
 from acoupi.programs import AcoupiProgram
 

@@ -29,8 +29,7 @@ def test_list_of_tasks_does_not_show_default_celery_tasks(
     assert not any("celery" in task for task in tasks)
 
 
-@pytest.mark.usefixtures("celery_app")
-def test_can_run_a_task(celery_app: Celery):
+def test_can_run_a_task():
     task = mock.Mock()
 
     class Program(AcoupiProgram):
@@ -39,11 +38,11 @@ def test_can_run_a_task(celery_app: Celery):
         def setup(self, config):
             self.add_task(task, name="test_task")
 
-    program = Program(Config(), celery_app)
+    program = Program(Config(), Celery())
 
     system.run_task(program, "test_task")
 
-    assert task.called
+    task.assert_called()
 
 
 def test_profile_returns_the_full_profile(

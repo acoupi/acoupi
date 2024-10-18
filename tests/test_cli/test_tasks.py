@@ -9,12 +9,13 @@ from acoupi import system
 from acoupi.cli import acoupi
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def setup_program(settings: system.Settings):
     system.setup_program(settings, "acoupi.programs.test", prompt=False)
 
 
 def test_can_get_the_full_list_of_test_program_tasks(
+    setup_program,
     settings: system.Settings,
 ):
     runner = CliRunner()
@@ -28,6 +29,7 @@ def test_can_get_the_full_list_of_test_program_tasks(
 
 
 def test_can_save_the_task_profile_to_a_file(
+    setup_program,
     settings: system.Settings,
     tmp_path: Path,
 ):
