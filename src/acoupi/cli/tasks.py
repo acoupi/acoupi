@@ -15,7 +15,11 @@ __all__ = [
 @acoupi.group()
 @click.pass_context
 def task(ctx):
-    """Manage acoupi tasks."""
+    """Manage acoupi tasks.
+
+    Provides commands to list, run, and profile tasks within
+    your configured acoupi program.
+    """
     settings = ctx.obj["settings"]
     if not system.is_configured(settings):
         click.echo("Acoupi is not setup. Run `acoupi setup` first.")
@@ -25,6 +29,7 @@ def task(ctx):
 @task.command()
 @click.pass_context
 def list(ctx):
+    """List all available tasks in the current acoupi program."""
     program = system.load_program(ctx.obj["settings"])
     task_list = system.get_task_list(program)
 
@@ -42,6 +47,13 @@ def list(ctx):
 @click.argument("task_name", type=str)
 @click.pass_context
 def run(ctx, task_name: str):
+    """Run a specified task.
+
+    Parameters
+    ----------
+    task_name : str
+        The name of the task to run.
+    """
     program = system.load_program(ctx.obj["settings"])
     task_list = system.get_task_list(program)
 
@@ -58,16 +70,22 @@ def run(ctx, task_name: str):
 
 @task.command()
 @click.argument("task_name", type=str)
-@click.option("--output", type=Path)
+@click.option(
+    "--output",
+    type=Path,
+    help="Path to save profiling output.",
+)
 @click.option(
     "--quiet",
     type=bool,
     default=False,
+    help="Suppress printing profiling output to the console.",
 )
 @click.option(
     "--log-level",
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
     default="WARNING",
+    help="Set the logging level.",
 )
 @click.pass_context
 def profile(
@@ -77,6 +95,13 @@ def profile(
     quiet: bool,
     log_level: str,
 ):
+    """Profile a specified task.
+
+    Parameters
+    ----------
+    task_name : str
+        The name of the task to profile.
+    """
     program = system.load_program(ctx.obj["settings"])
     task_list = system.get_task_list(program)
 
