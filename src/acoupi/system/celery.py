@@ -123,6 +123,22 @@ def start_workers(
         Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     ] = None,
 ):
+    """Start the Celery workers.
+
+    Parameters
+    ----------
+    settings : Settings
+        The current acoupi settings.
+    pool : Literal, optional
+        The pool type for the workers, by default "threads".
+    log_level : Optional[Literal], optional
+        The log level for the workers, by default None.
+
+    Returns
+    -------
+    CompletedProcess
+        The result of the subprocess.run function.
+    """
     cwd = settings.home.absolute()
     app_path = settings.program_file.relative_to(settings.home)
     app = ".".join(app_path.parts).replace(".py", "")
@@ -150,6 +166,20 @@ def restart_workers(
         Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     ] = None,
 ):
+    """Restart the Celery workers.
+
+    Parameters
+    ----------
+    settings : Settings
+        The current acoupi settings.
+    log_level : Optional[Literal], optional
+        The log level for the workers, by default None.
+
+    Returns
+    -------
+    CompletedProcess
+        The result of the subprocess.run function.
+    """
     cwd = settings.home.absolute()
     app_path = settings.program_file.relative_to(settings.home)
     app = ".".join(app_path.parts).replace(".py", "")
@@ -176,6 +206,20 @@ def stop_workers(
         Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     ] = None,
 ):
+    """Stop the Celery workers.
+
+    Parameters
+    ----------
+    settings : Settings
+        The current acoupi settings.
+    log_level : Optional[Literal], optional
+        The log level for the workers, by default None.
+
+    Returns
+    -------
+    CompletedProcess
+        The result of the subprocess.run function.
+    """
     cwd = settings.home.absolute()
     app_path = settings.program_file.relative_to(settings.home)
     app = ".".join(app_path.parts).replace(".py", "")
