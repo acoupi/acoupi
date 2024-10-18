@@ -47,7 +47,7 @@ def get_task_list(
 def run_task(
     program: AcoupiProgram,
     task_name: str,
-) -> None:
+):
     """Run a task from the current program.
 
     Parameters
@@ -73,7 +73,7 @@ def run_task(
     if task_name not in app.tasks:
         raise ValueError(f"Task {task_name} not found.")
     task = app.tasks[task_name]
-    task()
+    return task.apply().get()
 
 
 def profile_task(

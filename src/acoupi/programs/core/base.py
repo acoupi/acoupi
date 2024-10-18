@@ -213,17 +213,18 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
             if result is None:
                 # the task did not return anything do not run the callbacks
-                return
+                return result
 
             if not callback_tasks:
                 # there are no callbacks to run
-                return
+                return result
 
             logger.debug("Queueing callbacks with result: %s", result)
 
             # run the callbacks as a group
             callback_group = group(task.s(result) for task in callback_tasks)
             callback_group.apply_async()
+            return result
 
         # register the task with the app
         task = self.app.task(decorated_function, name=name)

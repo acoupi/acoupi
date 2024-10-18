@@ -1,7 +1,6 @@
 """Task suite for acoupi.system.tasks module."""
 
 from pstats import Stats
-from unittest import mock
 
 import pytest
 from celery import Celery
@@ -29,20 +28,27 @@ def test_list_of_tasks_does_not_show_default_celery_tasks(
     assert not any("celery" in task for task in tasks)
 
 
-def test_can_run_a_task():
-    task = mock.Mock()
-
-    class Program(AcoupiProgram):
+@pytest.mark.usefixtures("celery_app")
+def test_can_run_a_task(celery_app: Celery):
+    class DummyProgram(AcoupiProgram):
         config_schema = Config
 
         def setup(self, config):
-            self.add_task(task, name="test_task")
+            def dummy_task():
+                # NOTE: Strangely enough this test only works if the
+                # print statement is here. If the test is run
+                # individually without the print statement it does pass,
+                # but when run with the rest of the tests it fails.
+                print("Huh?")
+                return "done"
 
-    program = Program(Config(), Celery())
+            self.add_task(dummy_task, name="test_task")
 
-    system.run_task(program, "test_task")
+    program = DummyProgram(Config(), celery_app)
 
-    task.assert_called()
+    output = system.run_task(program, "test_task")
+
+    assert output == "done"
 
 
 def test_profile_returns_the_full_profile(
