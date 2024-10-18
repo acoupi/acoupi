@@ -6,6 +6,7 @@ the tasks of the currently configured acoupi program.
 
 import cProfile
 from pathlib import Path
+from pstats import Stats
 from typing import List, Optional
 
 from acoupi.programs import AcoupiProgram
@@ -79,8 +80,7 @@ def run_task(
 def profile_task(
     program: AcoupiProgram,
     task_name: str,
-    output: Optional[Path] = None,
-) -> None:
+) -> Stats:
     """Profile a task from the current program.
 
     Parameters
@@ -114,7 +114,5 @@ def profile_task(
     with cProfile.Profile() as profiler:
         task()
 
-        if output is not None:
-            profiler.dump_stats(str(output))
-        else:
-            profiler.print_stats()
+        profiler.create_stats()
+        return Stats(profiler)

@@ -117,4 +117,8 @@ def profile(
 
     if not quiet:
         click.echo(f"Profiling task {click.style(task_name, fg='green')}")
-    system.profile_task(program, task_name, output=output)
+
+    stats = system.profile_task(program, task_name)
+
+    if output:
+        stats.dump_stats(output)
