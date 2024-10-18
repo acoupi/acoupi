@@ -5,11 +5,13 @@ import sys
 from enum import Enum
 from pathlib import Path
 from subprocess import CompletedProcess, run
-from typing import List
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
+from acoupi.programs.core.workers import WorkerConfig
 from acoupi.system.constants import Settings
+from acoupi.system.programs import load_worker_config
 
 __all__ = [
     "run_celery_command",
@@ -19,6 +21,9 @@ __all__ = [
     "WorkerState",
     "WorkerStatus",
     "CeleryStatus",
+    "start_workers",
+    "restart_workers",
+    "stop_workers",
 ]
 
 
@@ -107,3 +112,108 @@ def get_celery_status(settings: Settings) -> CeleryStatus:
             for worker_name, _ in status.items()
         ],
     )
+
+
+def start_workers(
+    settings: Settings,
+    pool: Literal[
+        "threads", "prefork", "eventlet", "gevent", "solo", "processes"
+    ] = "threads",
+    log_level: Optional[
+        Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    ] = None,
+):
+    cwd = settings.home.absolute()
+    app_path = settings.program_file.relative_to(settings.home)
+    app = ".".join(app_path.parts).replace(".py", "")
+    worker_config = load_worker_config(settings)
+    return run(
+        [
+            "celery",
+            "-A",
+            str(app),
+            "multi",
+            "start",
+            *_get_worker_options(worker_config),
+            f"--pool={pool}",
+            f"--loglevel={log_level or settings.log_level}",
+            f"--pidfile={settings.run_dir}/%n.pid",
+            f"--logfile={settings.log_dir}/%n%I.log",
+        ],
+        cwd=str(cwd),
+    )
+
+
+def restart_workers(
+    settings: Settings,
+    log_level: Optional[
+        Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    ] = None,
+):
+    cwd = settings.home.absolute()
+    app_path = settings.program_file.relative_to(settings.home)
+    app = ".".join(app_path.parts).replace(".py", "")
+    worker_config = load_worker_config(settings)
+    return run(
+        [
+            "celery",
+            "-A",
+            str(app),
+            "multi",
+            "restart",
+            *_get_worker_options(worker_config),
+            f"--loglevel={log_level or settings.log_level}",
+            f"--pidfile={settings.run_dir}/%n.pid",
+            f"--logfile={settings.log_dir}/%n%I.log",
+        ],
+        cwd=str(cwd),
+    )
+
+
+def stop_workers(
+    settings: Settings,
+    log_level: Optional[
+        Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    ] = None,
+):
+    cwd = settings.home.absolute()
+    app_path = settings.program_file.relative_to(settings.home)
+    app = ".".join(app_path.parts).replace(".py", "")
+    worker_config = load_worker_config(settings)
+    return run(
+        [
+            "celery",
+            "-A",
+            str(app),
+            "multi",
+            "stopwait",
+            *[worker.name for worker in worker_config.workers],
+            f"--loglevel={log_level or settings.log_level}",
+            f"--pidfile={settings.run_dir}/%n.pid",
+            f"--logfile={settings.log_dir}/%n%I.log",
+        ],
+        cwd=str(cwd),
+    )
+
+
+def _get_worker_options(worker_config: WorkerConfig) -> list[str]:
+    worker_options = []
+    for worker in worker_config.workers:
+        worker_options.append(worker.name)
+
+        if worker.queues:
+            worker_options.extend(
+                [
+                    f"-Q:{worker.name}",
+                    ",".join(worker.queues),
+                ]
+            )
+
+        if worker.concurrency:
+            worker_options.extend(
+                [
+                    f"-c:{worker.name}",
+                    str(worker.concurrency),
+                ]
+            )
+    return worker_options
