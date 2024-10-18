@@ -7,8 +7,10 @@ from importlib import import_module
 from typing import Type
 
 from celery import Celery
+from pydantic import BaseModel
 
 from acoupi.programs.core import base as programs
+from acoupi.programs.core.workers import DEFAULT_WORKER_CONFIG, WorkerConfig
 from acoupi.system import exceptions
 from acoupi.system.config import load_config
 from acoupi.system.constants import CeleryConfig, Settings
@@ -129,16 +131,22 @@ def load_program(settings: Settings) -> programs.AcoupiProgram:
 
     celery_config = load_config(settings.celery_config_file, CeleryConfig)
     app = Celery()
-    app.config_from_object(celery_config)
-
+    app.config_from_object(celery_config.model_dump())
     return program_class(config, app)
 
 
-def load_config_schema(settings: Settings):
+def load_config_schema(settings: Settings) -> type[BaseModel]:
     """Load the configuration schema for the program."""
     program_name = settings.program_name_file.read_text().strip()
     program_class = load_program_class(program_name)
     return program_class.get_config_schema()
+
+
+def load_worker_config(settings: Settings) -> WorkerConfig:
+    """Load the configuration schema for the program."""
+    program_name = settings.program_name_file.read_text().strip()
+    program_class = load_program_class(program_name)
+    return program_class.worker_config or DEFAULT_WORKER_CONFIG
 
 
 def write_program_file(
