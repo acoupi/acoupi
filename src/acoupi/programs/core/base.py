@@ -142,10 +142,14 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         callbacks: Optional[List[Callable[[Optional[B]], None]]] = None,
         schedule: Union[int, datetime.timedelta, crontab, None] = None,
         queue: Optional[str] = None,
+        name: Optional[str] = None,
     ):
         """Add a task to the program."""
         if not callbacks:
             callbacks = []
+
+        if name is None:
+            name = function.__name__
 
         callback_tasks = []
         for callback in callbacks:
@@ -160,15 +164,15 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
             callback_tasks.append(callback_task)
 
         # Add the task to the list of tasks
-        task = self._add_task(function, callback_tasks)
+        task = self._add_task(function, callback_tasks, name=name)
 
         if queue:
             # add the task to the queue
-            self.add_task_to_queue(function.__name__, queue)
+            self.add_task_to_queue(name, queue)
 
         if schedule:
             # configure the app to schedule the task
-            self.app.add_periodic_task(schedule, task, name=task.__name__)
+            self.app.add_periodic_task(schedule, task, name=name)
 
     def add_task_to_queue(self, task_name: str, queue: str):
         """Add a task to a queue."""
@@ -188,11 +192,13 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         self,
         function: Callable[[], Optional[B]],
         callback_tasks: Optional[List[Task]] = None,
+        name: Optional[str] = None,
     ) -> Task:
         # TODO: Check Celery docs for best callback practices
 
         # Use the function name as the task name
-        name = function.__name__
+        if name is None:
+            name = function.__name__
 
         logger = self.logger.getChild(name)
 
@@ -207,17 +213,18 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
             if result is None:
                 # the task did not return anything do not run the callbacks
-                return
+                return result
 
             if not callback_tasks:
                 # there are no callbacks to run
-                return
+                return result
 
             logger.debug("Queueing callbacks with result: %s", result)
 
             # run the callbacks as a group
             callback_group = group(task.s(result) for task in callback_tasks)
             callback_group.apply_async()
+            return result
 
         # register the task with the app
         task = self.app.task(decorated_function, name=name)

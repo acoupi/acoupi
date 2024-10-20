@@ -48,6 +48,7 @@ from acoupi.system.services import (
     stop_services,
 )
 from acoupi.system.state import AcoupiStatus, get_status, is_configured
+from acoupi.system.tasks import get_task_list, profile_task, run_task
 
 __all__ = [
     "AcoupiStatus",
@@ -61,6 +62,7 @@ __all__ = [
     "get_config_field",
     "get_current_deployment",
     "get_status",
+    "get_task_list",
     "get_temp_file_id",
     "get_temp_files",
     "is_configured",
@@ -70,8 +72,10 @@ __all__ = [
     "load_program_class",
     "move_recording",
     "parse_config_from_args",
+    "profile_task",
     "restart_workers",
     "run_celery_command",
+    "run_task",
     "services_are_installed",
     "set_config_field",
     "setup_program",
