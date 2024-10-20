@@ -80,7 +80,9 @@ def run_task(
         return task.apply().get()
 
     if task_name == "detection_task" and recording is None:
-        raise ValueError("Can't instantiate detection_task, no recording object is given. Provide a valid data.Recording object.")
+        raise ValueError(
+            "Can't instantiate detection_task, no recording object is given. Provide a valid data.Recording object."
+        )
     if task_name == "detection_task" and recording is not None:
         return task.apply((recording,)).get()
 
