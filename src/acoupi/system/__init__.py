@@ -7,6 +7,7 @@ such as loading programs and getting celery apps from programs.
 from acoupi.system.apps import get_celery_app
 from acoupi.system.celery import (
     get_celery_status,
+    purge_queues,
     restart_workers,
     run_celery_command,
     start_workers,
@@ -59,6 +60,7 @@ __all__ = [
     "enable_services",
     "end_deployment",
     "get_celery_app",
+    "get_celery_status",
     "get_config_field",
     "get_current_deployment",
     "get_status",
@@ -73,6 +75,7 @@ __all__ = [
     "move_recording",
     "parse_config_from_args",
     "profile_task",
+    "purge_queues",
     "restart_workers",
     "run_celery_command",
     "run_task",
@@ -89,5 +92,4 @@ __all__ = [
     "stop_workers",
     "write_config",
     "write_program_file",
-    "get_celery_status",
 ]

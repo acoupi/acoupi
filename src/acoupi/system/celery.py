@@ -139,15 +139,10 @@ def start_workers(
     CompletedProcess
         The result of the subprocess.run function.
     """
-    cwd = settings.home.absolute()
-    app_path = settings.program_file.relative_to(settings.home)
-    app = ".".join(app_path.parts).replace(".py", "")
     worker_config = load_worker_config(settings)
-    return run(
-        [
-            "celery",
-            "-A",
-            str(app),
+    return run_celery_command(
+        settings,
+        args=[
             "multi",
             "start",
             *_get_worker_options(worker_config),
@@ -156,7 +151,6 @@ def start_workers(
             f"--pidfile={settings.run_dir}/%n.pid",
             f"--logfile={settings.log_dir}/%n%I.log",
         ],
-        cwd=str(cwd),
     )
 
 
@@ -180,15 +174,10 @@ def restart_workers(
     CompletedProcess
         The result of the subprocess.run function.
     """
-    cwd = settings.home.absolute()
-    app_path = settings.program_file.relative_to(settings.home)
-    app = ".".join(app_path.parts).replace(".py", "")
     worker_config = load_worker_config(settings)
-    return run(
-        [
-            "celery",
-            "-A",
-            str(app),
+    return run_celery_command(
+        settings,
+        args=[
             "multi",
             "restart",
             *_get_worker_options(worker_config),
@@ -196,7 +185,6 @@ def restart_workers(
             f"--pidfile={settings.run_dir}/%n.pid",
             f"--logfile={settings.log_dir}/%n%I.log",
         ],
-        cwd=str(cwd),
     )
 
 
@@ -220,15 +208,10 @@ def stop_workers(
     CompletedProcess
         The result of the subprocess.run function.
     """
-    cwd = settings.home.absolute()
-    app_path = settings.program_file.relative_to(settings.home)
-    app = ".".join(app_path.parts).replace(".py", "")
     worker_config = load_worker_config(settings)
-    return run(
-        [
-            "celery",
-            "-A",
-            str(app),
+    return run_celery_command(
+        settings,
+        args=[
             "multi",
             "stopwait",
             *[worker.name for worker in worker_config.workers],
@@ -236,8 +219,55 @@ def stop_workers(
             f"--pidfile={settings.run_dir}/%n.pid",
             f"--logfile={settings.log_dir}/%n%I.log",
         ],
-        cwd=str(cwd),
     )
+
+
+def purge_queue(settings: Settings, queue_name: str) -> CompletedProcess:
+    """
+    Purge all messages from the specified queue.
+
+    Parameters
+    ----------
+    settings : Settings
+        The settings object containing configuration for Celery.
+    queue_name : str
+        The name of the queue to purge.
+
+    Returns
+    -------
+    CompletedProcess
+        The result of the command execution.
+    """
+    return run_celery_command(
+        settings,
+        args=[
+            "amqp",
+            "queue.purge",
+            queue_name,
+        ],
+        capture_output=True,
+    )
+
+
+def purge_queues(settings: Settings):
+    """Purge all messages from all queues.
+
+    Parameters
+    ----------
+    settings : Settings
+        The settings object containing configuration for Celery.
+
+    Returns
+    -------
+    CompletedProcess
+        The result of the command execution.
+    """
+    worker_config = load_worker_config(settings)
+    queues = {
+        queue for worker in worker_config.workers for queue in worker.queues
+    }
+    for queue in queues:
+        purge_queue(settings, queue)
 
 
 def _get_worker_options(worker_config: WorkerConfig) -> list[str]:
