@@ -34,6 +34,7 @@ from acoupi.system.files import (
 )
 from acoupi.system.lifecycle import setup_program, start_program, stop_program
 from acoupi.system.programs import (
+    end_program,
     load_config_schema,
     load_program,
     load_program_class,
@@ -58,6 +59,7 @@ __all__ = [
     "dump_config",
     "enable_services",
     "end_deployment",
+    "end_program",
     "get_celery_app",
     "get_config_field",
     "get_current_deployment",
