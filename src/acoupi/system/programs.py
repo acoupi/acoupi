@@ -202,10 +202,10 @@ def end_program(settings: Settings) -> None:
     recordings = list(tmp_audio_path.glob("*"))
 
     if len(recordings) > 0:
-        run_task(load_program(settings), "file_management_task")
         print(
             f"{len(recordings)} files in the temporary directory, running file_management_task."
         )
+        run_task(load_program(settings), "file_management_task")
 
         remaining_recordings = list(tmp_audio_path.glob("*"))
         print(
@@ -219,6 +219,12 @@ def end_program(settings: Settings) -> None:
             for recording, _ in recordings:
                 print(f"Detection running on recording: {recording.path}")
                 run_task(load_program(settings), "detection_task", recording)
+
+            run_task(load_program(settings), "file_management_task")
+            check_remaining_files = list(tmp_audio_path.glob("*"))
+            print(
+                f"Remaining files in temp_directory: {len(check_remaining_files)}."
+            )
 
 
 class ProgramState(str, Enum):
