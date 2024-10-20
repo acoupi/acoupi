@@ -77,3 +77,11 @@ def stop(ctx):
     """
     settings: system.Settings = ctx.obj["settings"]
     system.stop_workers(settings)
+
+
+@workers.command()
+@click.pass_context
+def purge(ctx):
+    """Purge all pending tasks from the Celery queue."""
+    settings: system.Settings = ctx.obj["settings"]
+    system.purge_queues(settings)
