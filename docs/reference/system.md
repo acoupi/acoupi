@@ -24,4 +24,6 @@
 
 ::: acoupi.system.state
 
+::: acoupi.system.tasks
+
 ::: acoupi.system.templates
