@@ -249,7 +249,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         program_tasks = get_task_list(self, include_celery_tasks=True)
 
         if len(tmp_files) > 0:
-            self.logger.info(
+            print(
                 f"{len(tmp_files)} files in the temporary directory, "
                 "running file_management_task."
             )
@@ -258,7 +258,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
             if "detection_task" in program_tasks:
 
                 remaining_files = list(tmp_audio_path.glob("*"))
-                self.logger.info(
+                print(
                     f"Remaining files in temp_directory: {len(remaining_files)}."
                     "Run detection task."
                 )
@@ -267,9 +267,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
                     # Get data.Recording for the remaining files
                     recordings = self.store.get_recordings_by_path(remaining_files)
                     for recording, _ in recordings:
-                        self.logger.info(
-                            f"Detection running on recording: {recording.path}"
-                        )
+                        print(f"Detection running on recording: {recording.path}")
                         run_task(self, "detection_task", recording)
 
                     run_task(self, "file_management_task")
@@ -278,8 +276,8 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
                         run_task(self, "messaging_task")
 
                         check_remaining_files = list(tmp_audio_path.glob("*"))
-                        self.logger.info(
-                            f"Remaining files in temp_directory: "
+                        print(
+                            "Remaining files in temp_directory: "
                             f"{len(check_remaining_files)}."
                         )
 
