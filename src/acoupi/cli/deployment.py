@@ -54,6 +54,7 @@ def start(ctx, name, latitude, longitude, check):
         ctx.invoke(check_command)
 
     click.secho("Starting acoupi...", fg="green")
+    system.purge_queues(settings)
     system.start_program(settings, name, latitude, longitude)
     click.secho("Acoupi started.", fg="green")
 

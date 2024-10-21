@@ -36,13 +36,69 @@ class Settings(BaseSettings):
 
 
 class CeleryConfig(BaseModel):
-    """Celery config."""
+    """Configuration settings for Celery in Acoupi.
+
+    This class defines the settings used to configure the Celery
+    task queue specifically for the Acoupi application.
+    """
 
     enable_utc: bool = True
+    """Whether to enable UTC for Celery.
+
+    It's generally recommended to keep this enabled for consistency across
+    different Acoupi deployments.
+    """
+
     timezone: str = "UTC"
+    """The timezone to use for Celery."""
+
     broker_url: str = "pyamqp://guest@localhost//"
+    """The URL of the message broker used by Celery.
+
+    Acoupi uses RabbitMQ with the default guest user. You may need to
+    update this if your RabbitMQ setup is different.
+    """
+
     result_backend: str = "rpc://"
+    """ The URL for storing task results. 
+
+    'rpc://' indicates that results are sent back directly to the client.
+    """
+
     result_persistent: bool = False
+    """Whether to persist task results. 
+
+    In Acoupi deployments, task results are not typically needed after the task
+    has completed, as all essential data is stored in an independent database.
+    This setting helps to avoid unnecessary storage overhead.
+    """
+
     task_serializer: str = "pickle"
     result_serializer: str = "pickle"
     accept_content: List[str] = Field(default_factory=lambda: ["pickle"])
+
+    worker_prefetch_multiplier: int = 1
+    """The number of tasks a worker can prefetch.
+
+    Setting this to 1 prevents tasks from being delayed due to other tasks in
+    the queue. Celery defaults to prefetching tasks in batches, which can cause
+    a fast task to wait for a slower one in the same batch.
+    """
+
+    task_soft_time_limit: int = 30
+    """The soft time limit (in seconds) for task execution.
+
+    If a task exceeds this limit, it will receive a warning.
+
+    If you have tasks that are expected to run longer than this limit,
+    you should increase this value or specify the time limit directly.
+    """
+
+    task_time_limit: int = 60
+    """The hard time limit (in seconds) for task execution.
+
+    If a task exceeds this limit, it will be terminated.
+
+    If you have tasks that are expected to run longer than this limit,
+    you should increase this value or specify the time limit directly.
+    """
