@@ -239,49 +239,20 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         Tasks to check are:
         - file_management_task (if implemented). Check if there are remaining
         files in the temporary directory and move them to the correct directory.
-        - detection_task (if implemented). Check if there are remaining files
-        to be processed and process them.
         """
         self.store.update_deployment(deployment)
+        super().on_end(deployment)
 
         tmp_audio_path = self.config.paths.tmp_audio
         tmp_files = list(tmp_audio_path.glob("*"))
-        program_tasks = get_task_list(self, include_celery_tasks=True)
 
         if len(tmp_files) > 0:
             print(
-                f"{len(tmp_files)} files in the temporary directory, "
-                "running file_management_task."
+                f"Running file_management_task to manage {len(tmp_files)}"
+                " remaining files in the temporary directory."
             )
+            self.tasks["file_management_task"].apply()
             run_task(self, "file_management_task")
-
-            if "detection_task" in program_tasks:
-
-                remaining_files = list(tmp_audio_path.glob("*"))
-                print(
-                    f"Remaining files in temp_directory: {len(remaining_files)}."
-                    "Run detection task."
-                )
-
-                if len(remaining_files) > 0:
-                    # Get data.Recording for the remaining files
-                    recordings = self.store.get_recordings_by_path(remaining_files)
-                    for recording, _ in recordings:
-                        print(f"Detection running on recording: {recording.path}")
-                        run_task(self, "detection_task", recording)
-
-                    run_task(self, "file_management_task")
-                    if "messaging_task" in program_tasks:
-                        self.logger.info("Check for remaining messages to be sent.")
-                        run_task(self, "messaging_task")
-
-                        check_remaining_files = list(tmp_audio_path.glob("*"))
-                        print(
-                            "Remaining files in temp_directory: "
-                            f"{len(check_remaining_files)}."
-                        )
-
-        super().on_end(deployment)
 
     def check(self, config: ProgramConfig):
         """Check the program's components.

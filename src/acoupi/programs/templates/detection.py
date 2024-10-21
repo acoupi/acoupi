@@ -189,6 +189,37 @@ class DetectionProgram(MessagingProgram[C], ABC):
         self.model = self.configure_model(config)
         super().setup(config)
 
+    def on_end(self, deployment: data.Deployment) -> None:
+        """Handle program end event.
+
+        This method is called when the program ends. It updates the
+        deployment information in the metadata store, and ensure that
+        remaining tasks are completed before the program is stopped.
+
+        Tasks to check are:
+        - file_management_task (if implemented). Check if there are remaining
+        files in the temporary directory and move them to the correct directory.
+        - detection_task (if implemented). Check if there are remaining files
+        to be processed and process them.
+        """
+        super().on_end(deployment)
+
+        tmp_audio_path = self.config.paths.tmp_audio
+        remaining_files = list(tmp_audio_path.glob("*"))
+
+        if len(remaining_files) > 0:
+            print(f"Running detection_task on remaining {len(remaining_files)}.")
+            recordings = self.store.get_recordings_by_path(remaining_files)
+            for recording, _ in recordings:
+                self.tasks["detection_task"].apply((recording,))
+            print("Running final file_management_task.")
+            self.tasks["file_management_task"].apply()
+
+            if self.messenger is None:
+                return
+            print("Ending program. Running final messaging task.")
+            self.tasks["file_management_task"].apply()
+
     def check(self, config: C):
         """Check the program's components.
 
