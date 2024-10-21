@@ -144,7 +144,7 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
             return
 
         print("Running messaging task to send remaining messages.")
-        self.tasks["messaging_task"].apply()
+        self.tasks["send_messages_task"].apply()
 
     def check(self, config: ProgramConfig) -> None:
         """Check the messenger connection.
