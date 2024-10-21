@@ -218,7 +218,7 @@ class DetectionProgram(MessagingProgram[C], ABC):
             if self.messenger is None:
                 return
             print("Ending program. Running final messaging task.")
-            self.tasks["file_management_task"].apply()
+            self.tasks["send_messages_task"].apply()
 
     def check(self, config: C):
         """Check the program's components.
