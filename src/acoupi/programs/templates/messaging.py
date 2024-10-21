@@ -37,7 +37,7 @@ from typing import Callable, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 
-from acoupi import tasks
+from acoupi import data, tasks
 from acoupi.components import SqliteMessageStore, messengers, types
 from acoupi.programs.templates.basic import (
     BasicProgram,
@@ -131,6 +131,21 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
         self.register_heartbeat_task(config)
         super().setup(config)
 
+    def on_end(self, deployment: data.Deployment) -> None:
+        """End a deployment.
+
+        This method is called when the program is stopped. It updates the
+        deployment information in the metadata store, and ensure and performs
+        any necessary cleanup tasks (i.e., file_management_task, messaging_task).
+        """
+        super().on_end(deployment)
+
+        if self.messenger is None:
+            return
+
+        print("Running messaging task to send remaining messages.")
+        self.tasks["messaging_task"].apply()
+
     def check(self, config: ProgramConfig) -> None:
         """Check the messenger connection.
 
@@ -143,9 +158,7 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
 
         super().check(config)
 
-    def configure_message_store(
-        self, config: ProgramConfig
-    ) -> types.MessageStore:
+    def configure_message_store(self, config: ProgramConfig) -> types.MessageStore:
         """Configure the message store.
 
         This method creates and configures an instance of the
@@ -206,9 +219,7 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
             logger=self.logger.getChild("messaging"),
         )
 
-    def create_heartbeat_task(
-        self, config: ProgramConfig
-    ) -> Optional[Callable]:
+    def create_heartbeat_task(self, config: ProgramConfig) -> Optional[Callable]:
         """Create the heartbeat task.
 
         This method creates the task responsible for sending heartbeats.

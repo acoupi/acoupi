@@ -244,7 +244,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
         tmp_audio_path = self.config.paths.tmp_audio
         tmp_files = list(tmp_audio_path.glob("*"))
- 
+
         if len(tmp_files) > 0:
             print(
                 f"Running file_management_task to manage {len(tmp_files)}"
