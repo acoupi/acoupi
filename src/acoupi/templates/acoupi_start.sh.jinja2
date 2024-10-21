@@ -16,7 +16,7 @@
     -c:{{ worker.name }} {{ worker.concurrency }} \
 {%- endif %}
 {%- endfor %}
-    --pool=threads \
+    --pool={{ pool_type }} \
     --loglevel={{ log_level }} \
     --pidfile={{ run_dir }}/%n.pid \
     --logfile={{ log_dir }}/%n%I.log

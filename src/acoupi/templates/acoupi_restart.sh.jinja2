@@ -5,7 +5,7 @@
 
 {{ celery_bin }} \
     -A {{ app_name }} \
-	multi \
+    multi \
     restart \
 {%- for worker in config.workers %}
     {{ worker.name }} \
@@ -16,6 +16,7 @@
     -c:{{ worker.name }} {{ worker.concurrency }} \
 {%- endif %}
 {%- endfor %}
-	--pidfile={{ run_dir }}/%n.pid \
-    --logfile={{ log_dir }}/%n%I.log \
-	--loglevel="{{ log_level }}"
+    --pool={{ pool_type }} \
+    --loglevel={{ log_level }} \
+    --pidfile={{ run_dir }}/%n.pid \
+    --logfile={{ log_dir }}/%n%I.log

@@ -1,7 +1,7 @@
 """Path constants for acoupi system."""
 
 from pathlib import Path
-from typing import List
+from typing import List, Literal
 
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -33,6 +33,14 @@ class Settings(BaseSettings):
     beat_script_path: Path = home / "bin" / "acoupi-beat.sh"
     acoupi_service_file: str = "acoupi.service"
     acoupi_beat_service_file: str = "acoupi-beat.service"
+    celery_pool_type: Literal[
+        "threads",
+        "prefork",
+        "eventlet",
+        "gevent",
+        "solo",
+        "processes",
+    ] = "threads"
 
 
 class CeleryConfig(BaseModel):

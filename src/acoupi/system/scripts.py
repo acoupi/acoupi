@@ -56,6 +56,7 @@ def write_workers_start_script(
             log_level=settings.log_level,
             run_dir=settings.run_dir,
             log_dir=settings.log_dir,
+            pool_type=settings.celery_pool_type,
             now=datetime.datetime.now(),
         )
     )
@@ -114,6 +115,7 @@ def write_workers_restart_script(
             log_level=settings.log_level,
             run_dir=settings.run_dir,
             log_dir=settings.log_dir,
+            pool_type=settings.celery_pool_type,
             now=datetime.datetime.now(),
         )
     )
