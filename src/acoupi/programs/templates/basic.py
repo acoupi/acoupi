@@ -69,7 +69,7 @@ from acoupi.system.files import get_temp_dir
 __all__ = []
 
 
-class AudioConfiguration(BaseModel):
+class AudioConfiguration(BsaseModel):
     """Audio configuration schema."""
 
     duration: int = 3
