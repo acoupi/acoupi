@@ -65,6 +65,7 @@ from acoupi.programs.core import (
     NoUserPrompt,
 )
 from acoupi.system.files import get_temp_dir
+from acoupi.system.tasks import run_task
 
 __all__ = []
 
@@ -231,10 +232,50 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
     def on_end(self, deployment: data.Deployment) -> None:
         """Handle program end event.
 
-        This method is called when the program ends and updates the
-        deployment information in the metadata store.
+        This method is called when the program ends. It updates the
+        deployment information in the metadata store, and ensure that
+        remaining tasks are completed before the program is stopped.
+
+        Tasks to check are:
+        - file_management_task (if implemented). Check if there are remaining
+        files in the temporary directory and move them to the correct directory.
+        - detection_task (if implemented). Check if there are remaining files
+        to be processed and process them.
         """
         self.store.update_deployment(deployment)
+
+        tmp_audio_path = self.config.paths.tmp_audio
+        tmp_files = list(tmp_audio_path.glob("*"))
+
+        if len(tmp_files) > 0:
+            self.logger.info(
+                f"{len(tmp_files)} files in the temporary directory, "
+                "running file_management_task."
+            )
+            run_task(self, "file_management_task")
+
+            remaining_files = list(tmp_audio_path.glob("*"))
+            self.logger.info(
+                f"Remaining files in temp_directory: {len(remaining_files)}."
+                "Run detection task."
+            )
+
+            if len(remaining_files) > 0:
+                # Get data.Recording for the remaining files
+                recordings = self.store.get_recordings_by_path(remaining_files)
+                for recording, _ in recordings:
+                    self.logger.info(
+                        f"Detection running on recording: {recording.path}"
+                    )
+                    run_task(self, "detection_task", recording)
+
+                run_task(self, "file_management_task")
+                check_remaining_files = list(tmp_audio_path.glob("*"))
+                self.logger.info(
+                    f"Remaining files in temp_directory: "
+                    f"{len(check_remaining_files)}."
+                )
+
         super().on_end(deployment)
 
     def check(self, config: ProgramConfig):
@@ -339,14 +380,10 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
                 intervals=[
                     data.TimeInterval(
                         start=config.recording.schedule_start,
-                        end=datetime.datetime.strptime(
-                            "23:59:59", "%H:%M:%S"
-                        ).time(),
+                        end=datetime.datetime.strptime("23:59:59", "%H:%M:%S").time(),
                     ),
                     data.TimeInterval(
-                        start=datetime.datetime.strptime(
-                            "00:00:00", "%H:%M:%S"
-                        ).time(),
+                        start=datetime.datetime.strptime("00:00:00", "%H:%M:%S").time(),
                         end=config.recording.schedule_end,
                     ),
                 ],
