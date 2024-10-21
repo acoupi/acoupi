@@ -65,7 +65,7 @@ from acoupi.programs.core import (
     NoUserPrompt,
 )
 from acoupi.system.files import get_temp_dir
-from acoupi.system.tasks import run_task
+from acoupi.system.tasks import get_task_list, run_task
 
 __all__ = []
 
@@ -246,6 +246,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
         tmp_audio_path = self.config.paths.tmp_audio
         tmp_files = list(tmp_audio_path.glob("*"))
+        program_tasks = get_task_list(self, include_celery_tasks=True)
 
         if len(tmp_files) > 0:
             self.logger.info(
@@ -254,27 +255,33 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
             )
             run_task(self, "file_management_task")
 
-            remaining_files = list(tmp_audio_path.glob("*"))
-            self.logger.info(
-                f"Remaining files in temp_directory: {len(remaining_files)}."
-                "Run detection task."
-            )
+            if "detection_task" in program_tasks:
 
-            if len(remaining_files) > 0:
-                # Get data.Recording for the remaining files
-                recordings = self.store.get_recordings_by_path(remaining_files)
-                for recording, _ in recordings:
-                    self.logger.info(
-                        f"Detection running on recording: {recording.path}"
-                    )
-                    run_task(self, "detection_task", recording)
-
-                run_task(self, "file_management_task")
-                check_remaining_files = list(tmp_audio_path.glob("*"))
+                remaining_files = list(tmp_audio_path.glob("*"))
                 self.logger.info(
-                    f"Remaining files in temp_directory: "
-                    f"{len(check_remaining_files)}."
+                    f"Remaining files in temp_directory: {len(remaining_files)}."
+                    "Run detection task."
                 )
+
+                if len(remaining_files) > 0:
+                    # Get data.Recording for the remaining files
+                    recordings = self.store.get_recordings_by_path(remaining_files)
+                    for recording, _ in recordings:
+                        self.logger.info(
+                            f"Detection running on recording: {recording.path}"
+                        )
+                        run_task(self, "detection_task", recording)
+
+                    run_task(self, "file_management_task")
+                    if "messaging_task" in program_tasks:
+                        self.logger.info("Check for remaining messages to be sent.")
+                        run_task(self, "messaging_task")
+
+                        check_remaining_files = list(tmp_audio_path.glob("*"))
+                        self.logger.info(
+                            f"Remaining files in temp_directory: "
+                            f"{len(check_remaining_files)}."
+                        )
 
         super().on_end(deployment)
 
