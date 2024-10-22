@@ -158,7 +158,9 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
 
         super().check(config)
 
-    def configure_message_store(self, config: ProgramConfig) -> types.MessageStore:
+    def configure_message_store(
+        self, config: ProgramConfig
+    ) -> types.MessageStore:
         """Configure the message store.
 
         This method creates and configures an instance of the
@@ -219,7 +221,9 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
             logger=self.logger.getChild("messaging"),
         )
 
-    def create_heartbeat_task(self, config: ProgramConfig) -> Optional[Callable]:
+    def create_heartbeat_task(
+        self, config: ProgramConfig
+    ) -> Optional[Callable]:
         """Create the heartbeat task.
 
         This method creates the task responsible for sending heartbeats.
