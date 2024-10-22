@@ -208,7 +208,9 @@ class DetectionProgram(MessagingProgram[C], ABC):
         remaining_files = list(tmp_audio_path.glob("*"))
 
         if len(remaining_files) > 0:
-            print(f"Running detection_task on remaining {len(remaining_files)}.")
+            print(
+                f"Running detection_task on remaining {len(remaining_files)}."
+            )
             recordings = self.store.get_recordings_by_path(remaining_files)
             for recording, _ in recordings:
                 self.tasks["detection_task"].apply((recording,))

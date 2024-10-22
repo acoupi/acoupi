@@ -356,10 +356,14 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
                 intervals=[
                     data.TimeInterval(
                         start=config.recording.schedule_start,
-                        end=datetime.datetime.strptime("23:59:59", "%H:%M:%S").time(),
+                        end=datetime.datetime.strptime(
+                            "23:59:59", "%H:%M:%S"
+                        ).time(),
                     ),
                     data.TimeInterval(
-                        start=datetime.datetime.strptime("00:00:00", "%H:%M:%S").time(),
+                        start=datetime.datetime.strptime(
+                            "00:00:00", "%H:%M:%S"
+                        ).time(),
                         end=config.recording.schedule_end,
                     ),
                 ],
