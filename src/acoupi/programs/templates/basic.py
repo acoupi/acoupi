@@ -230,9 +230,11 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
     def on_end(self, deployment: data.Deployment) -> None:
         """Handle program end event.
+        
         This method is called when the program ends. It updates the
         deployment information in the metadata store, and ensure that
         remaining tasks are completed before the program is stopped.
+        
         Tasks to check are:
         - file_management_task (if implemented). Check if there are remaining
         files in the temporary directory and move them to the correct directory.
@@ -242,7 +244,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
         tmp_audio_path = self.config.paths.tmp_audio
         tmp_files = list(tmp_audio_path.glob("*"))
-
+ 
         if len(tmp_files) > 0:
             print(
                 f"Running file_management_task to manage {len(tmp_files)}"
