@@ -37,6 +37,7 @@ def stop_program(settings: Settings) -> None:
     services.stop_services(settings)
     services.disable_services(settings)
     deployment = end_deployment(settings)
+    programs.end_program(settings)
     program = programs.load_program(settings)
     program.on_end(deployment)
 
