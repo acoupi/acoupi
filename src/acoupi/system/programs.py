@@ -1,28 +1,22 @@
 """System functions for managing Acoupi programs."""
 
 import inspect
-import json
 import warnings
 from enum import Enum
 from importlib import import_module
-from pathlib import Path
 from typing import Type
 
 from celery import Celery
 from pydantic import BaseModel
 
-from acoupi.components import types
-from acoupi.components.stores import SqliteStore
 from acoupi.programs.core import base as programs
 from acoupi.programs.core.workers import DEFAULT_WORKER_CONFIG, WorkerConfig
 from acoupi.system import exceptions
 from acoupi.system.config import load_config
 from acoupi.system.constants import CeleryConfig, Settings
-from acoupi.system.tasks import run_task
 from acoupi.system.templates import render_template
 
 __all__ = [
-    "end_program",
     "load_program",
     "load_program_class",
     "load_config_schema",
@@ -172,59 +166,6 @@ def write_program_file(
             settings=settings,
         )
     )
-
-
-def get_program_store(settings: Settings) -> types.Store:
-    """Get the store for the program."""
-    db_path = Path(
-        json.load(settings.program_config_file.open())["paths"]["db_metadata"]
-    )
-    store = SqliteStore(db_path=db_path)
-    return store
-
-
-def end_program(settings: Settings) -> None:
-    """End the current program.
-
-    After stopping and disabling the systemd services, the deployment is ended.
-    To ensure the correct restarting of the next program, the end_program() function
-    ensure that remaining tasks are completed when the program is stopped.
-
-    The tasks to check are:
-    - file_management_task (if implemented). Check if there are remaning files in the
-    temprary directory and move them to the correct directory.
-    - detection_task (if implemented). Check if there are remaning files to be processed
-    and process them.
-    """
-    tmp_audio_path = Path(
-        json.load(settings.program_config_file.open())["paths"]["tmp_audio"]
-    )
-    recordings = list(tmp_audio_path.glob("*"))
-
-    if len(recordings) > 0:
-        print(
-            f"{len(recordings)} files in the temporary directory, running file_management_task."
-        )
-        run_task(load_program(settings), "file_management_task")
-
-        remaining_recordings = list(tmp_audio_path.glob("*"))
-        print(
-            f"Remaining files in temp_directory: {len(remaining_recordings)}. Run detection task."
-        )
-
-        if len(remaining_recordings) > 0:
-            # Get data.Recording for the remaining files
-            store = get_program_store(settings)
-            recordings = store.get_recordings_by_path(remaining_recordings)
-            for recording, _ in recordings:
-                print(f"Detection running on recording: {recording.path}")
-                run_task(load_program(settings), "detection_task", recording)
-
-            run_task(load_program(settings), "file_management_task")
-            check_remaining_files = list(tmp_audio_path.glob("*"))
-            print(
-                f"Remaining files in temp_directory: {len(check_remaining_files)}."
-            )
 
 
 class ProgramState(str, Enum):
