@@ -65,7 +65,6 @@ from acoupi.programs.core import (
     NoUserPrompt,
 )
 from acoupi.system.files import get_temp_dir
-from acoupi.system.tasks import get_task_list, run_task
 
 __all__ = []
 
@@ -252,7 +251,6 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
                 " remaining files in the temporary directory."
             )
             self.tasks["file_management_task"].apply()
-            run_task(self, "file_management_task")
 
     def check(self, config: ProgramConfig):
         """Check the program's components.
@@ -356,14 +354,10 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
                 intervals=[
                     data.TimeInterval(
                         start=config.recording.schedule_start,
-                        end=datetime.datetime.strptime(
-                            "23:59:59", "%H:%M:%S"
-                        ).time(),
+                        end=datetime.datetime.strptime("23:59:59", "%H:%M:%S").time(),
                     ),
                     data.TimeInterval(
-                        start=datetime.datetime.strptime(
-                            "00:00:00", "%H:%M:%S"
-                        ).time(),
+                        start=datetime.datetime.strptime("00:00:00", "%H:%M:%S").time(),
                         end=config.recording.schedule_end,
                     ),
                 ],
