@@ -12,12 +12,12 @@ When configuring _acoupi_, users configure the set of _acoupi_ components that s
 ### What _acoupi_ isn't?
 
 While _acoupi_ provides modular components to build your own autonomous recording and classification units, it is not a tool for training bioacoustic AI classifiers.
-_acoupi_ integrates already trained and well-tested AI bioacoustics models through its pre-built programs that you can use to perform on-device bioacoustics classification.
+_acoupi_ integrates already trained and well-tested AI bioacoustic models through its pre-built programs that you can use to perform on-device bioacousticclassification.
 
 ### Why _acoupi_?
 
 Passive acoustic monitoring (PAM) has emerged as a practical and helpful tool for biodiversity monitoring and conservation.
-Combining PAM with on-device domain-specific deep-learning bioacoustics classifiers provides opportunities for extending the scale and length of data collection while alleviating downstream data storage and processing burdens.
+Combining PAM with on-device domain-specific deep-learning bioacoustic classifiers provides opportunities for extending the scale and length of data collection while alleviating downstream data storage and processing burdens.
 However, deploying and adapting existing solutions for its own use still requires substantial technical expertise.
 
 _acoupi_ aims to provide an all-in-one Python toolkit to make it easy to create your smart bioacoustic sensors on edge devices like the Raspberry Pi.
@@ -58,7 +58,7 @@ Please do check the license for more detailed information.
 
 ### Can I use _acoupi_ for commercial purposes?
 
-Yes, absolutely! _acoupi_ is licensed under the [GNU GPL-3.0](lincense.md), which explicitly permits commercial use.
+Yes, absolutely! _acoupi_ is licensed under the [GNU GPL-3.0](license.md), which explicitly permits commercial use.
 However, the GPL-3.0 is a "copyleft" license.
 This means that if you modify _acoupi_ or create a new work based on it (whether for commercial or non-commercial purposes), you must make your derived work available under the same GPL-3.0 license.
 Essentially, this requires you to keep your source code open and freely available.

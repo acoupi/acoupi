@@ -51,7 +51,7 @@ A recording can be created by instantiating the [**`data.Recording`**][acoupi.da
 
 ### Tag, Predicted Tag, BoundingBox, and Detection
 
-AI bioacoustics models have different methods of handling audio files.
+AI bioacoustic models have different methods of handling audio files.
 
 A **bounding box** object represents the location of a sound event in time and frequency.
 It contains information about the start time and end time in seconds and the low frequency and high frequency in Hz of a sound event.

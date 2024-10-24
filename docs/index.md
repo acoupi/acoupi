@@ -7,7 +7,7 @@ It integrates and standardises the entire bioacoustic monitoring workflow, from 
 With various components and templates, _acoupi_ simplifies the creation of custom sensors, handling audio recordings, processing, classifications, detections, communication, and data management.
 
 <figure markdown="span">
-    ![Figure 1: Overview of where the acoupi software package fits in the toolbox of bioacoustics research](img/acoupi_software_overview.jpeg){ width="50%" }
+    ![Figure 1: Overview of where the acoupi software package fits in the toolbox of bioacousticresearch](img/acoupi_software_overview.jpeg){ width="50%" }
     <figcaption><b>An overview of <i>acoupi</i> software.</b> Input your recording settings and deep learning model of choice, and <i>acoupi</i> handles the rest, sending detections where you need them.
 </figure>
 
@@ -73,9 +73,9 @@ The `connected` program is similar to the `default` program but with the added c
 
     To check what are the available commands for acoupi, enter `acoupi --help`. Also look at the [CLI documentation](reference/cli.md) for further info.
 
-## Ready to use AI Bioacoustics Classifiers 🚀
+## Ready to use AI Bioacoustic Classifiers 🚀
 
-_acoupi_ simplifies the use and implementation of open-source AI bioacoustics models.
+_acoupi_ simplifies the use and implementation of open-source AI bioacoustic models.
 Currently, it supports two classifiers: the `BatDetect2`, developed by [@macodha and al.](https://doi.org/10.1101/2022.12.14.520490), and the `BirdNET-Lite`, developed by [@kahst and al.](https://github.com/kahst).
 
 ??? warning "Licenses and Usage"
@@ -91,7 +91,7 @@ Currently, it supports two classifiers: the `BatDetect2`, developed by [@macodha
 
 ### BatDetect2 🦇
 
-The BatDetect2 bioacoustics DL model has been trained to detect and classify UK bats species.
+The BatDetect2 bioacousticDL model has been trained to detect and classify UK bats species.
 The [**acoupi_batdetect2**](https://github.com/acoupi/acoupi_batdetect2) repository provides users with a pre-built _acoupi_ program that can be configured and tailored to their use cases.
 
 !!! Example "CLI Command: Install _acoupi_batdetect2_ program."
@@ -107,7 +107,7 @@ The [**acoupi_batdetect2**](https://github.com/acoupi/acoupi_batdetect2) reposit
 
 ### BirdNET-Lite 🦜 (COMING SOON!)
 
-The BirdNET-Lite bioacoustics DL model has been trained to detect and classify a large number of bird species.
+The BirdNET-Lite bioacoustic DL model has been trained to detect and classify a large number of bird species.
 The [**acoupi_birdnet**](https://github.com/acoupi/acoupi_birdnet) repository provides users with a pre-build _acoupi_ program that can be configured and tailored to their use cases of birds monitoring.
 
 !!! Example "CLI Command: Install _acoupi_birdnet_ program."
@@ -122,9 +122,9 @@ The [**acoupi_birdnet**](https://github.com/acoupi/acoupi_birdnet) repository pr
     ```
 
 ###  In development 🐳🐘🐝
-!!! Tip "Interested in sharing your AI bioacoustics model with the community?"
+!!! Tip "Interested in sharing your AI bioacoustic model with the community?"
 
-    _acoupi_ allows you to integrate your own bioacoustics classifier model. If you already have a model and would like to share it with the community, we'd  love to hear from you! We are happy to offer guidance and support to help include your classifier in the _acoupi_ list of "ready-to-use" AI bioacoustics classifiers. 
+    _acoupi_ allows you to integrate your own bioacousticclassifier model. If you already have a model and would like to share it with the community, we'd  love to hear from you! We are happy to offer guidance and support to help include your classifier in the _acoupi_ list of "ready-to-use" AI bioacoustic classifiers. 
 
 
 ## Navigate the docs 📖
@@ -138,7 +138,7 @@ Get to know _acoupi_ better by exploring the following sections of the documenta
             <p>Step-by-step information on how to install, configure and deploy <i>acoupi</i> for new users.</p>
         </td>
         <td>
-            <a href="how_to_guide">How-to Guides</a>
+            <a href="howtoguide">How-To Guides</a>
             <p>Guides to learn how to customise and built key elements of <i>acoupi</i>.</p>
         </td>
     </tr>

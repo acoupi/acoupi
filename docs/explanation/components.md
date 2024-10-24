@@ -4,14 +4,14 @@ The **components** are the building blocks of all **acoupi** functionality.
 Each component is designed to perform a specific action, such as recording audio, processing recordings, or sending messages to a remote server.
 They have a single responsibility and are designed to be reusable and modular.
 
-The set of components available in the acoupi software package was chosen to reflect the diversity of configurations across bioacoustics surveys.
-When researchers plan a bioacoustic survey, they are confronted with a series of questions related to the workflow of their bioacoustics sensors.
+The set of components available in the acoupi software package was chosen to reflect the diversity of configurations across bioacousticsurveys.
+When researchers plan a bioacoustic survey, they are confronted with a series of questions related to the workflow of their bioacousticsensors.
 Examples of questions assigned to acoupi components are:
 
 - [**RecordingConditions**](#recording_conditions): “At what time of the day should audio recordings be collected?”
 - [**RecordingSchedulers**](#recording_schedulers): “How long should the audio recordings last?”
 - [**AudioRecorder**](#audio_recorder): “What type of microphone should be used?”, “At which frequency should the recordings be recorded?”
-- [**Models**](#model): “How will audio files be processed?”, “What kind of automated bioacoustics classifiers can be used?”
+- [**Models**](#model): “How will audio files be processed?”, “What kind of automated bioacousticclassifiers can be used?”
 - [**ModelOutputCleaners**](#model_output_cleaners): “Which information should be kept? ”, “What detection threshold should be used?”
 - [**Messengers**](#messengers): "What type of network connectivity is available: WiFi, Ethernet, LoRa, Satellite?”, “What messaging protocol is used: HTTP, MQTT?”, “When should connectivity be enabled: one an hour/day/week, every positive detection?”
 - [**Saving Managers**](#recording_saving_managers): “Should all the audio recordings be saved?”
@@ -56,7 +56,7 @@ The class and subclass implement the `record()` method.
 The [types.Model][acoupi.components.types.Model] component is in charge of processing a recording and generating predictions.
 This includes running machine learning models to detect specific sounds or patterns in the audio.
 Define the model that is employed to analyse audio recordings.
-Here, the class name refers to the bioacoustics model name that detect, classify or identify related species in audio recordings.
+Here, the class name refers to the bioacousticmodel name that detect, classify or identify related species in audio recordings.
 Acoupi comes with two pre-built models [**BatDetect2**](https://github.com/macaodha/batdetect2) for UK Bat species detection and [**BirdNET**](https://github.com/kahst/BirdNET-Lite) for bird species classification.
 The `Model` class should implement the `run()` method that takes the path of the audio recording files.
 
