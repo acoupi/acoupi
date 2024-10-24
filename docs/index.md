@@ -7,7 +7,7 @@ It integrates and standardises the entire bioacoustic monitoring workflow, from 
 With various components and templates, _acoupi_ simplifies the creation of custom sensors, handling audio recordings, processing, classifications, detections, communication, and data management.
 
 <figure markdown="span">
-    ![Figure 1: Overview of where the acoupi software package fits in the toolbox of bioacousticresearch](img/acoupi_software_overview.jpeg){ width="50%" }
+    ![Figure 1: Overview of where the acoupi software package fits in the toolbox of bioacoustic research](img/acoupi_software_overview.jpeg){ width="50%" }
     <figcaption><b>An overview of <i>acoupi</i> software.</b> Input your recording settings and deep learning model of choice, and <i>acoupi</i> handles the rest, sending detections where you need them.
 </figure>
 
@@ -91,7 +91,7 @@ Currently, it supports two classifiers: the `BatDetect2`, developed by [@macodha
 
 ### BatDetect2 🦇
 
-The BatDetect2 bioacousticDL model has been trained to detect and classify UK bats species.
+The BatDetect2 bioacoustic DL model has been trained to detect and classify UK bats species.
 The [**acoupi_batdetect2**](https://github.com/acoupi/acoupi_batdetect2) repository provides users with a pre-built _acoupi_ program that can be configured and tailored to their use cases.
 
 !!! Example "CLI Command: Install _acoupi_batdetect2_ program."
@@ -124,7 +124,7 @@ The [**acoupi_birdnet**](https://github.com/acoupi/acoupi_birdnet) repository pr
 ###  In development 🐳🐘🐝
 !!! Tip "Interested in sharing your AI bioacoustic model with the community?"
 
-    _acoupi_ allows you to integrate your own bioacousticclassifier model. If you already have a model and would like to share it with the community, we'd  love to hear from you! We are happy to offer guidance and support to help include your classifier in the _acoupi_ list of "ready-to-use" AI bioacoustic classifiers. 
+    _acoupi_ allows you to integrate your own bioacoustic classifier model. If you already have a model and would like to share it with the community, we'd  love to hear from you! We are happy to offer guidance and support to help include your classifier in the _acoupi_ list of "ready-to-use" AI bioacoustic classifiers. 
 
 
 ## Navigate the docs 📖
