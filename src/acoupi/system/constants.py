@@ -97,3 +97,30 @@ class CeleryConfig(BaseModel):
     True means that tasks are acknowledged after they have been executed, 
     not right before.
     """
+
+    worker_prefetch_multiplier: int = 1
+    """The number of tasks a worker can prefetch.
+
+    Setting this to 1 prevents tasks from being delayed due to other tasks in
+    the queue. Celery defaults to prefetching tasks in batches, which can cause
+    a fast task to wait for a slower one in the same batch.
+    """
+
+    task_soft_time_limit: int = 30
+    """The soft time limit (in seconds) for task execution.
+
+    If a task exceeds this limit, it will receive a warning.
+
+    If you have tasks that are expected to run longer than this limit,
+    you should increase this value or specify the time limit directly.
+    """
+
+    task_time_limit: int = 60
+    """The hard time limit (in seconds) for task execution.
+
+    If a task exceeds this limit, it will be terminated.
+
+    If you have tasks that are expected to run longer than this limit,
+    you should increase this value or specify the time limit directly.
+    """
+
