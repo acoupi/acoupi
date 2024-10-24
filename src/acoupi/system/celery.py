@@ -146,7 +146,7 @@ def start_workers(
             "multi",
             "start",
             *_get_worker_options(worker_config),
-            # f"--pool={pool}",
+            f"--pool={pool}",
             f"--loglevel={log_level or settings.log_level}",
             f"--pidfile={settings.run_dir}/%n.pid",
             f"--logfile={settings.log_dir}/%n%I.log",
@@ -263,7 +263,9 @@ def purge_queues(settings: Settings):
         The result of the command execution.
     """
     worker_config = load_worker_config(settings)
-    queues = {queue for worker in worker_config.workers for queue in worker.queues}
+    queues = {
+        queue for worker in worker_config.workers for queue in worker.queues
+    }
     for queue in queues:
         purge_queue(settings, queue)
 

@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     env_file: Path = home / "config" / "env"
     run_dir: Path = home / "run"
     log_dir: Path = home / "log"
-    log_level: str = "DEBUG"
+    log_level: str = "INFO"
     start_script_path: Path = home / "bin" / "acoupi-workers-start.sh"
     stop_script_path: Path = home / "bin" / "acoupi-workers-stop.sh"
     restart_script_path: Path = home / "bin" / "acoupi-workers-restart.sh"
@@ -123,4 +123,3 @@ class CeleryConfig(BaseModel):
     If you have tasks that are expected to run longer than this limit,
     you should increase this value or specify the time limit directly.
     """
-
