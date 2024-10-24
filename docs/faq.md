@@ -12,7 +12,7 @@ When configuring _acoupi_, users configure the set of _acoupi_ components that s
 ### What _acoupi_ isn't?
 
 While _acoupi_ provides modular components to build your own autonomous recording and classification units, it is not a tool for training bioacoustic AI classifiers.
-_acoupi_ integrates already trained and well-tested AI bioacoustic models through its pre-built programs that you can use to perform on-device bioacousticclassification.
+_acoupi_ integrates already trained and well-tested AI bioacoustic models through its pre-built programs that you can use to perform on-device bioacoustic classification.
 
 ### Why _acoupi_?
 
