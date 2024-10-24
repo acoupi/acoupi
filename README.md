@@ -21,7 +21,7 @@ It integrates and standardises the entire bioacoustic monitoring workflow, from 
 With various components and templates, _acoupi_ simplifies the creation of custom sensors, handling audio recordings, processing, classifications, detections, communication, and data management.
 
 <figure>
-    <img src="docs/img/acoupi_software_overview.jpeg" alt="Figure 1: Overview of where the acoupi software package fits in the toolbox of bioacousticresearch" width="60%">
+    <img src="docs/img/acoupi_software_overview.jpeg" alt="Figure 1: Overview of where the acoupi software package fits in the toolbox of bioacoustic research" width="60%">
     <figcaption><b>Figure 1: An overview of <i>acoupi</i> software.</b> Input your recording settings and deep learning model of choice, and <i>acoupi</i> handles the rest, sending detections where you need them.
 </figcaption>
 </figure>
@@ -102,7 +102,7 @@ _acoupi_ simplifies the use and implementation of open-source AI bioacoustic mod
 
 ### BatDetect2
 
-The BatDetect2 bioacousticDL model has been trained to detect and classify UK bats species.
+The BatDetect2 bioacoustic DL model has been trained to detect and classify UK bats species.
 The [*acoupi_batdetect2*](https://acoupi.github.io/acoupi_batdetect2/) repository provides users with a pre-built _acoupi_ program that can be configured and tailored to their use cases.
 
 Step 1: Install _acoupi_batdetect2_ program.
@@ -119,7 +119,7 @@ acoupi setup --program acoupi_batdetect2.program
 
 ### BirdNET-Lite (COMING SOON!)
 
-The BirdNET-Lite bioacousticDL model has been trained to detect and classify a large number of bird species.
+The BirdNET-Lite bioacoustic DL model has been trained to detect and classify a large number of bird species.
 The [*acoupi_birdnet*](https://acoupi.github.io/acoupi_birdnet/) repository provides users with a pre-build _acoupi_ program that can be configured and tailored to their use cases of birds monitoring.
 
 Install _acoupi_birdnet_ program.
@@ -137,9 +137,9 @@ acoupi setup --program acoupi_birdnet.program
 ### In development 🐳🐘🐝
 
 > [!TIP]
-> **Interested in sharing your AI bioacousticmodel with the community?**
+> **Interested in sharing your AI bioacoustic model with the community?**
 >
->_acoupi_ allows you to integrate your own bioacousticclassifier model. If you already have a model and would like to share it with the community, we'd  love to hear from you! We are happy to offer guidance and support to help include your classifier in the _acoupi_ list of "ready-to-use" AI bioacousticclassifiers. 
+>_acoupi_ allows you to integrate your own bioacoustic classifier model. If you already have a model and would like to share it with the community, we'd  love to hear from you! We are happy to offer guidance and support to help include your classifier in the _acoupi_ list of "ready-to-use" AI bioacoustic classifiers. 
 
 ## _acoupi_ Software
 
