@@ -67,6 +67,12 @@ class CeleryConfig(BaseModel):
     update this if your RabbitMQ setup is different.
     """
 
+    broker_connection_retry_on_startup: bool = True
+    """Retry to establish the connection to the AMQP broker on startup.
+
+    Automatically try to re-establish the connection to the AMQP broke
+    if lost after the initial connection is made."""
+
     result_backend: str = "rpc://"
     """ The URL for storing task results. 
 
@@ -84,6 +90,13 @@ class CeleryConfig(BaseModel):
     task_serializer: str = "pickle"
     result_serializer: str = "pickle"
     accept_content: List[str] = Field(default_factory=lambda: ["pickle"])
+
+    task_acks_late: bool = True
+    """Whether to acknowledge tasks after they have been executed. 
+    
+    True means that tasks are acknowledged after they have been executed, 
+    not right before.
+    """
 
     worker_prefetch_multiplier: int = 1
     """The number of tasks a worker can prefetch.
