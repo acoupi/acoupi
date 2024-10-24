@@ -3,6 +3,7 @@ echo "Installing system dependencies."
 sudo apt update
 sudo apt install -y \
     alsa-utils \
+    libsndfile1 \
     libasound2-dev \
     libffi-dev \
     python3-dev \
