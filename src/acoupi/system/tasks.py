@@ -99,9 +99,6 @@ def profile_task(
         The AcoupiProgram instance to profile the task from.
     task_name : str
         The name of the task to profile.
-    output : Optional[Path], optional
-        The path to save the profiling output. If not provided,
-        the output will be printed to the console. Defaults to None.
 
     Raises
     ------
