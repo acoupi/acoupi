@@ -6,8 +6,9 @@ the tasks of the currently configured acoupi program.
 
 import cProfile
 from pstats import Stats
-from typing import List
+from typing import List, Optional
 
+from acoupi import data
 from acoupi.programs import AcoupiProgram
 
 
@@ -47,6 +48,7 @@ def get_task_list(
 def run_task(
     program: AcoupiProgram,
     task_name: str,
+    recording: Optional[data.Recording] = None,
 ):
     """Run a task from the current program.
 
@@ -73,7 +75,16 @@ def run_task(
     if task_name not in app.tasks:
         raise ValueError(f"Task {task_name} not found.")
     task = app.tasks[task_name]
-    return task.apply().get()
+
+    if task_name != "detection_task":
+        return task.apply().get()
+
+    if task_name == "detection_task" and recording is None:
+        raise ValueError(
+            "Can't instantiate detection_task, no recording object is given. Provide a valid data.Recording object."
+        )
+    if task_name == "detection_task" and recording is not None:
+        return task.apply((recording,)).get()
 
 
 def profile_task(
@@ -88,9 +99,6 @@ def profile_task(
         The AcoupiProgram instance to profile the task from.
     task_name : str
         The name of the task to profile.
-    output : Optional[Path], optional
-        The path to save the profiling output. If not provided,
-        the output will be printed to the console. Defaults to None.
 
     Raises
     ------
