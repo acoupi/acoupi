@@ -129,7 +129,7 @@ More generally, the functions used to manage celery are all located in the [`aco
 
 Celery workers execute tasks by fetching them from queues, ensuring balanced workload distribution.
 Typically, one worker per machine suffices as each worker can handle multiple tasks concurrently.
-However, in bioacousticsensor systems, certain tasks might necessitate exclusive hardware resources, like microphone inputs, precluding simultaneous execution.
+However, in bioacoustic sensor systems, certain tasks might necessitate exclusive hardware resources, like microphone inputs, precluding simultaneous execution.
 
 To address this, Celery allows the creation of multiple queues, enabling specific workers to fetch tasks from designated queues.
 This approach grants flexibility by permitting sequential task processing within a particular queue (concurrency of 1), while other workers handle tasks concurrently in other queues.
