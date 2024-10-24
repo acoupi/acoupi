@@ -18,20 +18,20 @@ The _How-To Guide_ have more in-depth detail information than the tutorials and 
     <tbody>
       <tr>
         <td>
-          <a href="Programs">Create custom programs</a>
+          <a href="programs">Create custom programs</a>
         </td>
         <td>Learn how to create a custom program</td>
       </tr>
       <tr>
         <td>
-          <a href="Components">Create new components</a>
+          <a href="components">Create new components</a>
         </td>
         <td>Learn how to create new components</td>
       </tr>
       <tr>
       <tr>
         <td>
-          <a href="Data_Schema">Create new data objects</a>
+          <a href="data_schema">Create new data objects</a>
         </td>
         <td>Learn how to create new data objects</td>
       </tr>
