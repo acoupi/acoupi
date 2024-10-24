@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     env_file: Path = home / "config" / "env"
     run_dir: Path = home / "run"
     log_dir: Path = home / "log"
-    log_level: str = "INFO"
+    log_level: str = "DEBUG"
     start_script_path: Path = home / "bin" / "acoupi-workers-start.sh"
     stop_script_path: Path = home / "bin" / "acoupi-workers-stop.sh"
     restart_script_path: Path = home / "bin" / "acoupi-workers-restart.sh"
@@ -67,6 +67,12 @@ class CeleryConfig(BaseModel):
     update this if your RabbitMQ setup is different.
     """
 
+    broker_connection_retry_on_startup: bool = True
+    """Retry to establish the connection to the AMQP broker on startup.
+
+    Automatically try to re-establish the connection to the AMQP broke
+    if lost after the initial connection is made."""
+
     result_backend: str = "rpc://"
     """ The URL for storing task results. 
 
@@ -85,28 +91,9 @@ class CeleryConfig(BaseModel):
     result_serializer: str = "pickle"
     accept_content: List[str] = Field(default_factory=lambda: ["pickle"])
 
-    worker_prefetch_multiplier: int = 1
-    """The number of tasks a worker can prefetch.
-
-    Setting this to 1 prevents tasks from being delayed due to other tasks in
-    the queue. Celery defaults to prefetching tasks in batches, which can cause
-    a fast task to wait for a slower one in the same batch.
-    """
-
-    task_soft_time_limit: int = 30
-    """The soft time limit (in seconds) for task execution.
-
-    If a task exceeds this limit, it will receive a warning.
-
-    If you have tasks that are expected to run longer than this limit,
-    you should increase this value or specify the time limit directly.
-    """
-
-    task_time_limit: int = 60
-    """The hard time limit (in seconds) for task execution.
-
-    If a task exceeds this limit, it will be terminated.
-
-    If you have tasks that are expected to run longer than this limit,
-    you should increase this value or specify the time limit directly.
+    task_acks_late: bool = True
+    """Whether to acknowledge tasks after they have been executed. 
+    
+    True means that tasks are acknowledged after they have been executed, 
+    not right before.
     """
