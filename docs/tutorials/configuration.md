@@ -112,7 +112,7 @@ The table below provides detailed information about the parameters available whe
 |`microphone.audio_channels`| int | - | Number of audio channels (i.e., 1 for mono).| Configure according to the microphone's capabilities.|
 | __Recording__| | | Microphone configuration.| |
 | `recording.duration`| int (sec.) | 3 | Duration in seconds for each audio recording. | Best kept at 3 seconds when using acoupi with ML classifiers models (e.g., batdetect2, birdnet) for optimal performance.|
-| `recording.interval`| int (sec.) | 12 | Interval in seconds between recordings. | Some pre-built programs with ML models (e.g., batdetect2) require processing time. This interval helps maintain good performance.|
+| `recording.interval`| int (sec.) | 10 | Interval in seconds between recordings. | Some pre-built programs with ML models (e.g., batdetect2) require processing time. This interval helps maintain good performance.|
 | `recording.chunksize`| int | 8192 | Chunksize of the audio recording.| An error will occur if the chunksize is too small for the audio device. |
 | `schedule_start`| time (HH:MM:SS)| 06:00:00 | Time of day when recordings will start (24-hour format).| Adjust according to specific monitoring needs (e.g., nightime hours). |
 | `schedule_end`| time (HH:MM:SS)| 18:00:00 | Time of day when recordings will end (24-hour format). | Adjust according to specific monitoring needs (e.g., nightime hours). |
