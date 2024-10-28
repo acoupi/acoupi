@@ -230,11 +230,11 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
 
     def on_end(self, deployment: data.Deployment) -> None:
         """Handle program end event.
-        
+
         This method is called when the program ends. It updates the
         deployment information in the metadata store, and ensure that
         remaining tasks are completed before the program is stopped.
-        
+
         Tasks to check are:
         - file_management_task (if implemented). Check if there are remaining
         files in the temporary directory and move them to the correct directory.
