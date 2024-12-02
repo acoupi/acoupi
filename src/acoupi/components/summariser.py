@@ -16,6 +16,7 @@ takes a datetime.datetime object and returns a message in JSON format.
 
 import datetime
 import json
+import sqlite3
 from statistics import mean
 from typing import Union
 
@@ -48,6 +49,7 @@ class StatisticsDetectionsSummariser(types.Summariser):
             interval = datetime.timedelta(seconds=interval)
 
         self.store = store
+        self.connection = sqlite3.connect(self.store.db_path)
         self.interval = interval
 
     def build_summary(self, now: datetime.datetime) -> data.Message:
@@ -57,9 +59,6 @@ class StatisticsDetectionsSummariser(types.Summariser):
         ----------
         now : datetime.datetime
             The current time to get the detections from.
-        self.store.get_predicted_tags : List[data.PredictedTag]
-            The predicted tags from the store associated with the audio recordings that falls
-            within the time interval (current_time - interval_minute).
 
         Returns
         -------
@@ -91,29 +90,37 @@ class StatisticsDetectionsSummariser(types.Summariser):
         ...     }'
         ... )
         """
-        predicted_tags = self.store.get_predicted_tags(
-            before=now,
-            after=now - self.interval,
-        )
+        start_time = now - self.interval
 
-        db_species_name = set(t.tag.value for t in predicted_tags)
-        db_species_stats = {}
+        # SQL query to summarize detections by confidence min, max, avg bands
+        query = """
+        SELECT 
+            tag.value AS species_name,
+            MIN(confidence_score) AS min_confidence,
+            MAX(confidence_score) AS max_confidence,
+            AVG(confidence_score) AS avg_confidence,
+            COUNT(*) AS count_confidence
+        FROM 
+            predicted_tag
+        WHERE 
+            datetime >= ? AND datetime <= ?          -- Time interval for detections
+        GROUP BY 
+            tag.value
+        """
 
-        for species_name in db_species_name:
-            species_probabilities = [
-                t.confidence_score
-                for t in predicted_tags
-                if t.tag.value == species_name
-            ]
+        cursor = self.connection.cursor()
+        cursor.execute(query, (start_time, now))
+        results = cursor.fetchall()
 
-            stats = {
-                "mean": round(mean(species_probabilities), 3),
-                "min": min(species_probabilities),
-                "max": max(species_probabilities),
-                "count": len(species_probabilities),
+        db_species_stats = {
+            row["species_name"]: {
+                "mean": round(row["avg_confidence"], 3),
+                "min": row["min_confidence"],
+                "max": row["max_confidence"],
+                "count": row["count_confidence"],
             }
-
-            db_species_stats[species_name] = stats
+            for row in results
+        }
 
         db_species_stats["timeinterval"] = {
             "starttime": (now - self.interval).isoformat(),
@@ -152,6 +159,7 @@ class ThresholdsDetectionsSummariser(types.Summariser):
             The higher threshold for the classification score, by default 0.9.
         """
         self.store = store
+        self.connection = sqlite3.connect(self.store.db_path)
 
         if isinstance(interval, (float, int)):
             interval = datetime.timedelta(seconds=interval)
@@ -199,87 +207,46 @@ class ThresholdsDetectionsSummariser(types.Summariser):
         ...    }'
         ... )
         """
-        predicted_tags = self.store.get_predicted_tags(
-            before=now,
-            after=now - self.interval,
+        start_time = now - self.interval
+
+        # SQL query to summarize detections by confidence bands
+        query = """
+        SELECT 
+            tag.value AS species_name,
+            SUM(CASE WHEN confidence_score >= ? AND confidence_score < ? THEN 1 ELSE 0 END) AS low_band_count,
+            SUM(CASE WHEN confidence_score >= ? AND confidence_score < ? THEN 1 ELSE 0 END) AS mid_band_count,
+            SUM(CASE WHEN confidence_score >= ? THEN 1 ELSE 0 END) AS high_band_count
+        FROM 
+            predicted_tag
+        WHERE 
+            datetime >= ? AND datetime <= ?           -- Time interval for detections
+        GROUP BY 
+            tag.value                                
+        """
+
+        cursor = self.connection.cursor()
+        cursor.execute(
+            query,
+            (
+                self.low_band_threshold,
+                self.mid_band_threshold,
+                self.mid_band_threshold,
+                self.high_band_threshold,
+                self.high_band_threshold,
+                start_time,
+                now,
+            ),
         )
+        results = cursor.fetchall()
 
-        db_species_name = set(t.tag.value for t in predicted_tags)
-        db_species_stats = {}
-
-        for species_name in db_species_name:
-            species_probabilities = [
-                t.confidence_score
-                for t in predicted_tags
-                if t.tag.value == species_name
-            ]
-
-            stats = {
-                "count_low_threshold": len(
-                    [
-                        d
-                        for d in species_probabilities
-                        if d <= self.low_band_threshold
-                    ]
-                ),
-                "count_mid_threshold": len(
-                    [
-                        d
-                        for d in species_probabilities
-                        if self.low_band_threshold
-                        < d
-                        <= self.mid_band_threshold
-                    ]
-                ),
-                "count_high_threshold": len(
-                    [
-                        d
-                        for d in species_probabilities
-                        if self.mid_band_threshold < d
-                    ]
-                ),
-                "mean_low_threshold": round(
-                    mean(
-                        [
-                            d
-                            for d in species_probabilities
-                            if d <= self.low_band_threshold
-                        ]
-                    ),
-                    3,
-                ),
-                "mean_mid_threshold": round(
-                    mean(
-                        [
-                            d
-                            for d in species_probabilities
-                            if self.low_band_threshold
-                            < d
-                            <= self.mid_band_threshold
-                        ]
-                    ),
-                    3,
-                ),
-                "mean_high_threshold": round(
-                    mean(
-                        [
-                            d
-                            for d in species_probabilities
-                            if self.mid_band_threshold < d
-                        ]
-                    ),
-                    3,
-                ),
+        db_species_stats = {
+            row["species_name"]: {
+                "low_band_count": row["low_band_count"],
+                "mid_band_count": row["mid_band_count"],
+                "high_band_count": row["high_band_count"],
             }
-
-            db_species_stats[species_name] = {
-                "count_low_threshold": stats["count_low_threshold"],
-                "count_mid_threshold": stats["count_mid_threshold"],
-                "count_high_threshold": stats["count_high_threshold"],
-                "mean_low_threshold": stats["mean_low_threshold"],
-                "mean_mid_threshold": stats["mean_mid_threshold"],
-                "mean_high_threshold": stats["mean_high_threshold"],
-            }
+            for row in results
+        }
 
         db_species_stats["timeinterval"] = {
             "starttime": (now - self.interval).isoformat(),
