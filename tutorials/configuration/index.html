@@ -1,0 +1,1778 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://acoupi.github.io/acoupi/tutorials/configuration/">
+      
+      
+        <link rel="prev" href="../installation/">
+      
+      
+        <link rel="next" href="../deployment/">
+      
+      
+      <link rel="icon" href="../../assets/favicon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>Configuration - acoupi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Mulish";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../css/style.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-0NZT4X5LY6"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-0NZT4X5LY6",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-0NZT4X5LY6",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="acoupi" class="md-header__button md-logo" aria-label="acoupi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            acoupi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="acoupi" class="md-nav__button md-logo" aria-label="acoupi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    acoupi
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuring_acoupi_programs_via_the_cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuring acoupi programs via the CLI
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration_parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Parameters
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acoupiprogramsdefault" class="md-nav__link">
+    <span class="md-ellipsis">
+      acoupi.programs.default
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#acoupiprogramsconnected" class="md-nav__link">
+    <span class="md-ellipsis">
+      acoupi.programs.connected
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../howtoguide/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    How-To Guides
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../howtoguide/programs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create a custom program
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../howtoguide/components/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create new components
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../howtoguide/data_schema/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create new data schema
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../explanation/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Explanation
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Explanation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/data_schema/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Schema
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/components/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Components
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/tasks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tasks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/programs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Programs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    System
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/components/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Components
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/tasks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tasks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/programs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Programs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    System
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CLI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../terms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Terminology
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    About the Project
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            About the Project
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authors/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Authors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    License
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_of_conduct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Code of Conduct
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuring_acoupi_programs_via_the_cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuring acoupi programs via the CLI
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration_parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Parameters
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acoupiprogramsdefault" class="md-nav__link">
+    <span class="md-ellipsis">
+      acoupi.programs.default
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#acoupiprogramsconnected" class="md-nav__link">
+    <span class="md-ellipsis">
+      acoupi.programs.connected
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<div><h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h1>
+<p>Once <em>acoupi</em> has been installed on a device, users can configure a pre-built program.
+<em>acoupi</em> comes with default settings, which users can either accept or customise through the command line interface (CLI). </p>
+<h2 id="configuring_acoupi_programs_via_the_cli">Configuring <em>acoupi</em> programs via the CLI<a class="headerlink" href="#configuring_acoupi_programs_via_the_cli" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>default program</strong>: The <em>acoupi default</em> program is the most simplest program, handling only two tasks: recording and managing audio files.</li>
+<li><strong>connected program</strong>: The <em>acoupi connected</em> program extends the default program by adding messaging capabilities, allowing users to send messages to a remote server.</li>
+</ul>
+<p>To select and configure your prefered <em>acoupi</em> program,  use of the following commands:</p>
+<div class="admonition example">
+<p class="admonition-title">CLI Command: <em>acoupi default</em> program</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>acoupi<span class="w"> </span>setup<span class="w"> </span>--program<span class="w"> </span>acoupi.programs.default
+</span></code></pre></div>
+</div>
+<div class="admonition example">
+<p class="admonition-title">CLI Command: <em>acoupi connected</em> program</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>acoupi<span class="w"> </span>setup<span class="w"> </span>--program<span class="w"> </span>acoupi.programs.connected
+</span></code></pre></div>
+</div>
+<p>Based on the selected program, users will be prompted with several questions during setup. 
+To <strong>accept</strong> the default values, press the keyboard letter <code>y</code> or the key <code>Enter</code>. 
+To <strong>reject and modify</strong> a setting, press the keyboard letter <code>n</code> and input a new value.</p>
+<p>The video shows the configuration process for the <em>acoupi default</em> program via the CLI.  </p>
+<p><div class="video-container"><video style="width: 100%" loop muted controls autoplay alt="type:video"><source src="../../img/acoupi_configuration.mp4" type="video/mp4"></source></video></div></p>
+<h2 id="configuration_parameters">Configuration Parameters<a class="headerlink" href="#configuration_parameters" title="Permanent link">#</a></h2>
+<h3 id="acoupiprogramsdefault">acoupi.programs.default<a class="headerlink" href="#acoupiprogramsdefault" title="Permanent link">#</a></h3>
+<p>Below is an example of the configured parameters for the <em>default</em> program in JSON format.</p>
+<p>Audio recordings have a duration of 10 seconds and occur every 30 seconds between 4am and 11pm.
+However, recordings are only saved between 11am and 3pm, and during a 30-minute window before and after dawn and dusk.</p>
+<p>The values <code>0</code> for <code>frequency_duration</code> and <code>frequency_interval</code> indicate that no frequency filter is applied to save recordings.</p>
+<p>The database storing the execution of <em>acoupi</em> tasks and recordings of audion files is located in the <code>storages/</code> folder in the home directory.</p>
+<div class="admonition example">
+<p class="admonition-title">CLI Command: view program configuration after setup</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>acoupi<span class="w"> </span>config<span class="w"> </span>get
+</span></code></pre></div>
+</div>
+<div class="admonition example">
+<p class="admonition-title">CLI Output: <em>acoupi config get</em></p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"timezone"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Europe/London"</span><span class="p">,</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">"microphone"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">"device_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"UltraMic 250K 16 bit r4"</span><span class="p">,</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nt">"samplerate"</span><span class="p">:</span><span class="w"> </span><span class="mi">250000</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">"audio_channels"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="nt">"recording"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="nt">"duration"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="nt">"interval"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">    </span><span class="nt">"chunksize"</span><span class="p">:</span><span class="w"> </span><span class="mi">8192</span><span class="p">,</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">    </span><span class="nt">"schedule_start"</span><span class="p">:</span><span class="w"> </span><span class="s2">"04:00:00"</span><span class="p">,</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">    </span><span class="nt">"schedule_end"</span><span class="p">:</span><span class="w"> </span><span class="s2">"23:00:00"</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">  </span><span class="nt">"paths"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">    </span><span class="nt">"tmp_audio"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/run/shm"</span><span class="p">,</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="nt">"recordings"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/home/pi/storages/recordings"</span><span class="p">,</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">    </span><span class="nt">"db_metadata"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/home/pi/storages/metadata.db"</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">  </span><span class="nt">"recording_saving"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">    </span><span class="nt">"starttime"</span><span class="p">:</span><span class="w"> </span><span class="s2">"11:00:00"</span><span class="p">,</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">    </span><span class="nt">"endtime"</span><span class="p">:</span><span class="w"> </span><span class="s2">"15:00:00"</span><span class="p">,</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">    </span><span class="nt">"before_dawndusk_duration"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="w">    </span><span class="nt">"after_dawndusk_duration"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="w">    </span><span class="nt">"frequency_duration"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="w">    </span><span class="nt">"frequency_interval"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="p">}</span>
+</span></code></pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">How to modify a value after setup?</p>
+<p>You can modify the value of a parameter after an <em>acoupi</em> program has been set up. This can be necessary either due to
+a misconfiguration or to make changes to the current program. To modify a parameter, use the command:</p>
+<div class="admonition example">
+<p class="admonition-title">CLI Command: modify a configuration parameter after setup</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>acoupi<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>--field<span class="w"> </span>&lt;parameter_name&gt;<span class="w"> </span>&lt;new_value&gt;
+</span></code></pre></div>
+</div>
+<p>Replace the <em><code>parameter_name</code></em> with the full name of the parameter to modified. For example, to update the recording start time to 10am, the CLI command would be as follow:</p>
+<div class="admonition example">
+<p class="admonition-title">CLI Command: modify recording start time</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>acoupi<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>--field<span class="w"> </span>recording.schedule_start<span class="w"> </span><span class="m">10</span>:00:00
+</span></code></pre></div>
+</div>
+</div>
+<p>The table below provides detailed information about the parameters available when setting up <em>acoupi</em> <em>default</em> program.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default Value</th>
+<th>Definition</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Microphone</strong></td>
+<td></td>
+<td></td>
+<td>Microphone configuration.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>microphone.device_name</code></td>
+<td>string</td>
+<td>-</td>
+<td>Will show the name of the connected usb microphone.</td>
+<td>Ensure it matches the device in use.</td>
+</tr>
+<tr>
+<td><code>microphone.samplerate</code></td>
+<td>int (Hz)</td>
+<td>-</td>
+<td>Sampling rate of the microphone in Hz.</td>
+<td>Set the sampling rate according to the microphone's specifications.</td>
+</tr>
+<tr>
+<td><code>microphone.audio_channels</code></td>
+<td>int</td>
+<td>-</td>
+<td>Number of audio channels (i.e., 1 for mono).</td>
+<td>Configure according to the microphone's capabilities.</td>
+</tr>
+<tr>
+<td><strong>Recording</strong></td>
+<td></td>
+<td></td>
+<td>Microphone configuration.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>recording.duration</code></td>
+<td>int (sec.)</td>
+<td>3</td>
+<td>Duration in seconds for each audio recording.</td>
+<td>Best kept at 3 seconds when using acoupi with ML classifiers models (e.g., batdetect2, birdnet) for optimal performance.</td>
+</tr>
+<tr>
+<td><code>recording.interval</code></td>
+<td>int (sec.)</td>
+<td>10</td>
+<td>Interval in seconds between recordings.</td>
+<td>Some pre-built programs with ML models (e.g., batdetect2) require processing time. This interval helps maintain good performance.</td>
+</tr>
+<tr>
+<td><code>recording.chunksize</code></td>
+<td>int</td>
+<td>8192</td>
+<td>Chunksize of the audio recording.</td>
+<td>An error will occur if the chunksize is too small for the audio device.</td>
+</tr>
+<tr>
+<td><code>schedule_start</code></td>
+<td>time (HH:MM:SS)</td>
+<td>06:00:00</td>
+<td>Time of day when recordings will start (24-hour format).</td>
+<td>Adjust according to specific monitoring needs (e.g., nightime hours).</td>
+</tr>
+<tr>
+<td><code>schedule_end</code></td>
+<td>time (HH:MM:SS)</td>
+<td>18:00:00</td>
+<td>Time of day when recordings will end (24-hour format).</td>
+<td>Adjust according to specific monitoring needs (e.g., nightime hours).</td>
+</tr>
+<tr>
+<td><code>timezone</code></td>
+<td>string</td>
+<td>"Europe/London"</td>
+<td>Timezone of the sensor location.</td>
+<td>Configure this according to your deployment region.</td>
+</tr>
+<tr>
+<td><strong>Paths</strong></td>
+<td></td>
+<td></td>
+<td>Configuration for file paths.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>paths.tmp_audio</code></td>
+<td>str</td>
+<td>"/run/shm"</td>
+<td>Temporary storage path for audio recordings.</td>
+<td>Temporary in-memory path. Do not modify.</td>
+</tr>
+<tr>
+<td><code>paths.recordings</code></td>
+<td>str</td>
+<td>"/home/pi/storages/recordings"</td>
+<td>Path to directory storing recorded audio files.</td>
+<td>Modify accordingly. With default paths, recordings are stored on the SDCard, modify if using external usb hardrive.</td>
+</tr>
+<tr>
+<td><code>paths.db_metadata</code></td>
+<td>str</td>
+<td>"/home/pi/storages/metadata.db"</td>
+<td>Path to the database file storing the metadata.</td>
+<td>This .db keeps track of recorded files, ML detection results, and system information.</td>
+</tr>
+<tr>
+<td><strong>Recording Saving (Optional)</strong></td>
+<td>N/A</td>
+<td>-</td>
+<td>Configuration for saving recorded audio files.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>recording_saving.starttime</code></td>
+<td>time (HH:MM:SS)</td>
+<td>"18:30:00"</td>
+<td>Start time for saving recorded audio files (24-hour format).</td>
+<td>Insert 00:00:00 to not use this parameter to save audio recordings.</td>
+</tr>
+<tr>
+<td><code>recording_saving.endtime</code></td>
+<td>time (HH:MM:SS)</td>
+<td>"20:00:00"</td>
+<td>End time for saving recorded audio files (24-hour format)</td>
+<td>Insert 00:00:00 to not use this parameter to save audio recordings.</td>
+</tr>
+<tr>
+<td><code>recording_saving.before_dawndusk_duration</code></td>
+<td>int (min.)</td>
+<td>10</td>
+<td>Additional duration (in minutes) to save recordings <strong>before</strong> the dawn/dusk time.</td>
+<td>Ensure recording interval covers the dawn and dusk time if using this parameter.</td>
+</tr>
+<tr>
+<td><code>recording_saving.after_dawndusk_duration</code></td>
+<td>int (min.)</td>
+<td>10</td>
+<td>Additional duration (in minutes) to save recordings <strong>after</strong> the dawn/dusk time.</td>
+<td>Ensure recording interval covers the dawn and dusk time if using this parameter.</td>
+</tr>
+<tr>
+<td><code>recording_saving.frequency_duration</code></td>
+<td>int (min.)</td>
+<td>5</td>
+<td>Duration in minutes for storing recordings when using the frequency filter.</td>
+<td>Set to zero if not using this parameter.</td>
+</tr>
+<tr>
+<td><code>recording_saving.frequency_interval</code></td>
+<td>int (min.)</td>
+<td>30</td>
+<td>eriodic interval in minutes between two periods of storing recordings.</td>
+<td>Set to zero if not using this parameter.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="acoupiprogramsconnected">acoupi.programs.connected<a class="headerlink" href="#acoupiprogramsconnected" title="Permanent link">#</a></h3>
+<p>The <em>acoupi connected</em> program extends the  <em>acoupi default</em> program by adding configuration options for sending messages to a remote server. It retains all the settings from the <em>acoupi default</em> program but introduces new parameters for network communication.</p>
+<p>Messages can be sent using either the HTTP or MQTT protocol. At least one of these protocols must be configured. If neither protocol is setup, the program will raise an error. </p>
+<p>The messages and their statuses, indicating if they have been sent, and whether this was a success or a failure, are stored in a database called <code>messages.db</code>. By default, this file is located in the <code>storages/</code> folder in the home directory.</p>
+<p>The <code>message_send_interval</code> parameter controls how frequently the <em>acoupi</em> program checks for new messages to send (i.e., 120 seconds by default). Similarly, the <code>heartbeat_interval</code> determines how often a <code>heartbeat_message</code>is sent (i.e., 10 minutes by default).</p>
+<div class="admonition example">
+<p class="admonition-title">CLI Output: <em>acoupi config get</em></p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">"recording"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">"paths"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nt">"messaging"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="nt">"messages_db"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/home/pi/storages/messages.db"</span><span class="p">,</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="nt">"message_send_interval"</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="nt">"heartbeat_interval"</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="nt">"http"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">      </span><span class="nt">"base_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://test_acoupi.org/"</span><span class="p">,</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">      </span><span class="nt">"content_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"application/json"</span><span class="p">,</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">      </span><span class="nt">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">    </span><span class="nt">"mqtt"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">      </span><span class="nt">"host"</span><span class="p">:</span><span class="w"> </span><span class="s2">"test_acoupi.mqtt.org"</span><span class="p">,</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">      </span><span class="nt">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"test_username"</span><span class="p">,</span>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">      </span><span class="nt">"password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"mqtt_password"</span><span class="p">,</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">      </span><span class="nt">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"acoupi"</span><span class="p">,</span>
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">      </span><span class="nt">"port"</span><span class="p">:</span><span class="w"> </span><span class="mi">1884</span><span class="p">,</span>
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">      </span><span class="nt">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">  </span><span class="nt">"recording_saving"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+</span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="p">}</span>
+</span></code></pre></div>
+</div>
+<p>The table below provides detailed information about the supplementary parameters available when setting up <em>acoupi</em> <em>connected</em> program.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default Value</th>
+<th>Definition</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Paths</strong></td>
+<td></td>
+<td></td>
+<td>Configuration for file paths.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>messaging.messages_db</code></td>
+<td>str</td>
+<td>"/home/pi/storages/messages.db"</td>
+<td>Path to the database file storing messages.</td>
+<td>This .db keeps track of the messages to be sent to a remote server and their sending/receiving status.</td>
+</tr>
+<tr>
+<td><strong>Messaging</strong></td>
+<td></td>
+<td></td>
+<td>Configuration for sending messages to remote server.</td>
+<td>Will require access to network connectivity at the location of your device deployment.</td>
+</tr>
+<tr>
+<td><code>messaging.message_send_interval</code></td>
+<td>int (sec.)</td>
+<td>120</td>
+<td>Interval in seconds for sending messages to the remote server.</td>
+<td>Adjust for network performance and data bandwidth.</td>
+</tr>
+<tr>
+<td><code>messaging.heartbeat_interval</code></td>
+<td>int (sec.)</td>
+<td>600</td>
+<td>Interval in seconds for sending heartbeat messages to the server.</td>
+<td>Heartbeat message provides information about the device status (i.e., the correct functioning of the device).</td>
+</tr>
+<tr>
+<td><strong>Messaging HTTP</strong></td>
+<td></td>
+<td></td>
+<td>Configuration for sending messages via HTTP.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>messaging.http.base_url</code></td>
+<td>str</td>
+<td>-</td>
+<td>URL of the HTTP server to which messages are sent.</td>
+<td>Configure according to your server setup.</td>
+</tr>
+<tr>
+<td><code>messaging.http.content_type</code></td>
+<td>str</td>
+<td>application/json</td>
+<td>Content type of the HTTP messages.</td>
+<td>Messages to be sent are formated into a <code>json</code> object.</td>
+</tr>
+<tr>
+<td><code>messaging.http.timeout</code></td>
+<td>int (sec)</td>
+<td>-</td>
+<td>Timeout for HTTP requres in seconds..</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Messaging MQTT</strong></td>
+<td></td>
+<td></td>
+<td>Configuration for sending messages via MQTT.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>messaging.mqtt.host</code></td>
+<td>str</td>
+<td>-</td>
+<td>MQTT server hostname for message transmission.</td>
+<td>Configure according to your server setup.</td>
+</tr>
+<tr>
+<td><code>messaging.mqtt.username</code></td>
+<td>str</td>
+<td>-</td>
+<td>Username for authentication with the MQTT broker.</td>
+<td>Replace with your server username.</td>
+</tr>
+<tr>
+<td><code>messaging.mqtt.password</code></td>
+<td>str</td>
+<td>-</td>
+<td>Password for authentication with the MQTT broker.</td>
+<td>Replace with your server password.</td>
+</tr>
+<tr>
+<td><code>messaging.mqtt.topic</code></td>
+<td>str</td>
+<td>"acoupi"</td>
+<td>Topic on the MQTT broker to publish messages</td>
+<td>Replace with your server setup.</td>
+</tr>
+<tr>
+<td><code>messaging.mqtt.port</code></td>
+<td>int</td>
+<td>1884</td>
+<td>Port number of the MQTT broker.</td>
+<td>Default port is usually fine unless other setup on your server.</td>
+</tr>
+<tr>
+<td><code>messaging.mqtt.timeout</code></td>
+<td>int (sec)</td>
+<td>5</td>
+<td>Timeout for connecting to the MQTT broker in seconds.</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../installation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Installation">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Installation
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../deployment/" class="md-footer__link md-footer__link--next" aria-label="Next: Deployment">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Deployment
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy", "navigation.tracking", "navigation.indexes", "navigation.sections", "navigation.top", "navigation.footer", "toc.follow"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+    
+  </body>
+</html>
