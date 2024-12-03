@@ -1,17 +1,20 @@
 """ModelOutput cleaners for acoupi.
 
-ModelOutput Cleaners are responsible for cleaning the outputs of a model (i.e., detections) that
-does not meet certain criteria. This can include removing low confidence tags and detections, or
-detections and tags that have a specific labels. The ThresholdDetectionCleaner removes any predictions
+Model Output Cleaners are responsible for cleaning the outputs of a model (i.e.,
+detections) that do not meet certain criteria. This can include removing low
+confidence tags and detections, or detections and tags that have a specific
+labels. For example, the ThresholdDetectionCleaner removes any predictions
 (i.e., detections and tags) with a score below a threshold.
 
-The ModelOutputCleaner is implemented as a class that inherits from ModelOutputCleaner. The class
-should implement the clean method, which takes a data.ModelOutput object and returns
-a cleaned data.ModelOutput object. The modeloutput that does not meet the criteria are removed.
+The ModelOutputCleaner is implemented as a class that inherits from
+ModelOutputCleaner. The class should implement the clean method, which takes a
+data.ModelOutput object and returns a cleaned data.ModelOutput object. The
+modeloutput that does not meet the criteria are removed.
 
-The ModelOutputCleaner is used in the detection task to clean the outputs of the model BEFORE storing
-them in the store. The ModelOutputCleaner is passed to the detection task as a list of ModelOutputCleaner
-objects. This allows to use multiple ModelOutputCleaners to clean the model output.
+The ModelOutputCleaner is used in the detection task to clean the outputs of
+the model BEFORE storing them in the store. The ModelOutputCleaner is passed to
+the detection task as a list of ModelOutputCleaner objects. This allows to use
+multiple ModelOutputCleaners to clean the model output.
 """
 
 from typing import List
@@ -29,40 +32,11 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
     """
 
     detection_threshold: float
-    """The threshold to use to define when a detection is confident vs. unconfident."""
+    """The threshold to use to define when a detection is stored."""
 
     def __init__(self, detection_threshold: float):
         """Initiatlise the filter."""
         self.detection_threshold = detection_threshold
-
-    def get_clean_tags(
-        self, tags: List[data.PredictedTag]
-    ) -> List[data.PredictedTag]:
-        """Remove tags with low score."""
-        return [
-            tag
-            for tag in tags
-            if tag.confidence_score >= self.detection_threshold
-        ]
-
-    def get_clean_detections(
-        self, detections: List[data.Detection]
-    ) -> List[data.Detection]:
-        """Remove detections with low score."""
-        return [
-            self.clean_detection(detection)
-            for detection in detections
-            if detection.detection_score >= self.detection_threshold
-        ]
-
-    def clean_detection(self, detection: data.Detection) -> data.Detection:
-        """Remove tags with low score from detection."""
-        return data.Detection(
-            id=detection.id,
-            location=detection.location,
-            detection_score=detection.detection_score,
-            tags=self.get_clean_tags(detection.tags),
-        )
 
     def clean(self, model_output: data.ModelOutput) -> data.ModelOutput:
         """Clean the model output.
@@ -125,4 +99,33 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
             recording=model_output.recording,
             tags=self.get_clean_tags(model_output.tags),
             detections=self.get_clean_detections(model_output.detections),
+        )
+
+    def get_clean_tags(
+        self, tags: List[data.PredictedTag]
+    ) -> List[data.PredictedTag]:
+        """Remove tags with low score."""
+        return [
+            tag
+            for tag in tags
+            if tag.confidence_score >= self.detection_threshold
+        ]
+
+    def get_clean_detections(
+        self, detections: List[data.Detection]
+    ) -> List[data.Detection]:
+        """Remove detections with low score."""
+        return [
+            self.clean_detection(detection)
+            for detection in detections
+            if detection.detection_score >= self.detection_threshold
+        ]
+
+    def clean_detection(self, detection: data.Detection) -> data.Detection:
+        """Remove tags with low score from detection."""
+        return data.Detection(
+            id=detection.id,
+            location=detection.location,
+            detection_score=detection.detection_score,
+            tags=self.get_clean_tags(detection.tags),
         )

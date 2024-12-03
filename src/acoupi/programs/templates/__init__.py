@@ -36,6 +36,7 @@ from acoupi.programs.templates.basic import (
 from acoupi.programs.templates.detection import (
     DetectionProgram,
     DetectionProgramConfiguration,
+    DetectionsConfiguration,
 )
 from acoupi.programs.templates.messaging import (
     MessagingConfig,
@@ -50,6 +51,7 @@ __all__ = [
     "BasicProgramConfiguration",
     "DetectionProgram",
     "DetectionProgramConfiguration",
+    "DetectionsConfiguration",
     "MessagingConfig",
     "MessagingProgram",
     "MessagingProgramConfiguration",

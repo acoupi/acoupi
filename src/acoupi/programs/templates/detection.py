@@ -13,7 +13,7 @@ Tasks:
 
 - **Detection Task:** Runs the detection model on audio recordings and
   processes the results, including generating messages based on detected
-  events.
+events. Detections below a specified threshold are ignored.
 
 Features:
 
@@ -49,17 +49,30 @@ To create an Acoupi program with audio detection capabilities:
 from abc import ABC, abstractmethod
 from typing import Callable, List, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from acoupi import data
-from acoupi.components import types
+from acoupi.components import ThresholdDetectionCleaner, types
 from acoupi.programs.templates.messaging import (
     MessagingProgram,
     MessagingProgramConfiguration,
 )
 from acoupi.tasks import generate_detection_task
 
+__all__ = [
+    "DetectionProgram",
+    "DetectionProgramConfiguration",
+    "DetectionsConfiguration",
+]
+
 ModelConfig = TypeVar("ModelConfig", bound=BaseModel)
+
+
+class DetectionsConfiguration(BaseModel):
+    """Detection settings schema."""
+
+    threshold: float = 0.2
+    """Detections with a score below this threshold will be ignored."""
 
 
 class DetectionProgramConfiguration(
@@ -70,6 +83,11 @@ class DetectionProgramConfiguration(
     This schema extends the `MessagingProgramConfiguration` to include any
     additional settings required for detection programs.
     """
+
+    detections: DetectionsConfiguration = Field(
+        default_factory=DetectionsConfiguration
+    )
+    """Detection settings."""
 
 
 C = TypeVar("C", bound=DetectionProgramConfiguration)
@@ -92,7 +110,9 @@ class DetectionProgram(MessagingProgram[C], ABC):
 
     - **Detection Task:** Runs the detection model on audio recordings and
       processes the results, including:
-        - Cleaning the model output using `get_output_cleaners`.
+        - Cleaning the model output using `get_output_cleaners`. By default
+        this includes a threshold cleaner that filters out detections below a
+        specified threshold.
         - Filtering the processed output using `get_processing_filters`.
         - Generating messages based on the results using
           `get_message_factories`.
@@ -137,7 +157,9 @@ class DetectionProgram(MessagingProgram[C], ABC):
 
     - `configure_model`:  **Required.** Implement this method to configure
       and return an instance of your detection model.
-    - `get_output_cleaners`:  To clean up the model's raw output.
+    - `get_output_cleaners`:  To clean up the model's raw output. Either
+      override this method completely or call `super().get_output_cleaners()`
+      to include the default threshold cleaner.
     - `get_processing_filters`:  To filter recordings before processing.
     - `get_message_factories`:  To customise the messages generated based on
       detection results.
@@ -262,7 +284,8 @@ class DetectionProgram(MessagingProgram[C], ABC):
 
         This method can be overridden to define a list of output cleaners that
         will be applied to the model's raw output to clean it up or extract
-        relevant information.
+        relevant information. By default, it includes a threshold cleaner that
+        filters out detections below a specified threshold.
 
         Parameters
         ----------
@@ -274,7 +297,14 @@ class DetectionProgram(MessagingProgram[C], ABC):
         List[types.ModelOutputCleaner]
             A list of model output cleaners.
         """
-        return []
+        if not config.detections.threshold:
+            return []
+
+        return [
+            ThresholdDetectionCleaner(
+                detection_threshold=config.detections.threshold
+            )
+        ]
 
     def get_processing_filters(
         self,
