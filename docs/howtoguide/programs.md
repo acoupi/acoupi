@@ -412,6 +412,11 @@ class CustomProgram(DetectionProgram):
 ```
 
 - `get_output_cleaners`: Override this method to define a list of output cleaners that will be applied to the model's raw output to clean it up or extract relevant information.
+    By default, a single cleaner is included: a threshold cleaner.
+    This cleaner removes all detections with a confidence score below a specified threshold.
+    This threshold is configurable via the detections.
+    threshold field in your DetectionProgramConfiguration, enabling you to fine-tune the sensitivity of your detection program at deployment time.
+    You can override this method to add or customize output cleaners according to your specific needs.
 
 - `get_processing_filters`: Override this method to define a list of processing filters that will be applied to each recording before it is processed by the model.
     These filters determine whether a recording should be processed at all.
@@ -421,8 +426,8 @@ For more info on how this program can be configured have a look at its [referenc
 
 ### Predefined Configuration Schemas
 
-Defining a robust configuration schema is crucial for designing effective and adaptable _acoupi_ programs.
-A well-structured schema enhances program flexibility, provides clear guidance to users on configurable options, and ensures that configurations are validated before deployment, preventing potential issues.
+Defining a clear configuration schema is important when designing effective and adaptable _acoupi_ programs.
+A well-structured schema promotes program flexibility, provides clear guidance to users on configurable options, and ensures that configurations are validated before deployment, preventing potential issues.
 
 While you'll need to create custom schemas for program-specific behaviours, _acoupi_ strongly encourages reusing predefined schemas for common components.
 This approach not only saves you time and effort but also ensures compatibility with program templates and benefits from carefully designed and validated schema structures.
