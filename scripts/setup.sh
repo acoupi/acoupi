@@ -12,6 +12,9 @@ sudo apt install -y \
     portaudio19-dev \
     rabbitmq-server
 
+# Rust installation
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
 # Exit early if running in CI.
 if [ -n "$CI" ] && [ -n "$GITHUB_RUN_ID" ]; then
     exit 0
