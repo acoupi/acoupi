@@ -35,6 +35,12 @@ The _How-To Guide_ have more in-depth detail information than the tutorials and 
         </td>
         <td>Learn how to create new data objects</td>
       </tr>
+      <tr>
+        <td>
+          <a href="share_configurations">Share Configurations</a>
+        </td>
+        <td>Learn how to share configurations between devices</td>
+      </tr>
     </tbody>
   </table>
 </div>
