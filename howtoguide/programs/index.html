@@ -1,0 +1,2095 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://acoupi.github.io/acoupi/howtoguide/programs/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../components/">
+      
+      
+      <link rel="icon" href="../../assets/favicon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>Create a custom program - acoupi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mulish:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Mulish";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../css/style.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-0NZT4X5LY6"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-0NZT4X5LY6",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-0NZT4X5LY6",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#create_a_custom_program" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="acoupi" class="md-header__button md-logo" aria-label="acoupi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            acoupi
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Create a custom program
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="acoupi" class="md-nav__button md-logo" aria-label="acoupi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    acoupi
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../tutorials/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deployment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    How-To Guides
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            How-To Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Create a custom program
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Create a custom program
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding_acoupi_programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding acoupi Programs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building_a_program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Building a Program
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Building a Program">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inherit_from_the_base_class" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inherit from the Base Class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create_a_configuration_schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create a Configuration Schema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provide_a_worker_configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provide a Worker Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define_tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Define Tasks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Define Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scheduling_options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduling Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task_dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Task dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tools_for_program_creation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tools for Program Creation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tools for Program Creation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#program_templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Program Templates
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Program Templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic_program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Program
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messaging_program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Messaging Program
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detection_program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Detection Program
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#predefined_configuration_schemas" class="md-nav__link">
+    <span class="md-ellipsis">
+      Predefined Configuration Schemas
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task_templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Task Templates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component_selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Component Selection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create new components
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data_schema/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create new data schema
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../explanation/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Explanation
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Explanation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/data_schema/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Schema
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/components/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Components
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/tasks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tasks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/programs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Programs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    System
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/components/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Components
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/tasks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tasks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/programs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Programs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    System
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CLI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../terms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Terminology
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    About the Project
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            About the Project
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authors/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Authors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    License
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_of_conduct/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Code of Conduct
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding_acoupi_programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding acoupi Programs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building_a_program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Building a Program
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Building a Program">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inherit_from_the_base_class" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inherit from the Base Class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create_a_configuration_schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create a Configuration Schema
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provide_a_worker_configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provide a Worker Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#define_tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Define Tasks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Define Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scheduling_options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduling Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task_dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Task dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tools_for_program_creation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tools for Program Creation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tools for Program Creation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#program_templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Program Templates
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Program Templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic_program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Program
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messaging_program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Messaging Program
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detection_program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Detection Program
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#predefined_configuration_schemas" class="md-nav__link">
+    <span class="md-ellipsis">
+      Predefined Configuration Schemas
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task_templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Task Templates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component_selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Component Selection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<div><h1 id="create_a_custom_program">Create a custom Program<a class="headerlink" href="#create_a_custom_program" title="Permanent link">#</a></h1>
+<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">#</a></h2>
+<p>While <em>acoupi</em> offers a variety of <a href="../../explanation/programs/#pre-built_programs"><em>pre-built programs</em></a> and community contributions, you might need to create a custom program for your specific needs.
+This guide provides a comprehensive overview of how to create a custom program using the <em>acoupi</em> framework.</p>
+<p>Here's what we'll cover:</p>
+<ol>
+<li><strong>Building a Program</strong>: You'll learn the essential steps involved in creating a custom program.</li>
+<li><strong>Tools for Program Creation</strong>: Discover the tools and features <em>acoupi</em> provides to simplify the development process.</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Before diving in!</p>
+<p>This section is aimed at individuals interested in developing their own program. Make sure you have read the sections of the <a href="../../explanation/">Explanation</a> of the documentation before going through this technical how-to guide. </p>
+</div>
+<h2 id="understanding_acoupi_programs">Understanding <em>acoupi</em> Programs<a class="headerlink" href="#understanding_acoupi_programs" title="Permanent link">#</a></h2>
+<p>An <em>acoupi</em> program is of a set of instructions that dictate how a smart bioacoustic sensor behaves.
+It defines the tasks the sensor performs, how those tasks are configured, and the underlying execution environment.</p>
+<p>To define an <em>acoupi</em> program, you need to specify three key elements:</p>
+<ul>
+<li><strong>Tasks</strong>: The individual units of work carried out by your program. </li>
+<li><strong>Configuration Schema</strong>: A "blueprint" establishing the parameters and options that users can configured to adjust the program behaviour.</li>
+<li><strong>Worker Configuration</strong>: The lower-level settings defining how to orchestrate the tasks and runs the program on a device. </li>
+</ul>
+<p>To represent these program elements in code, <em>acoupi</em> defines a Python class called <code>AcoupiProgram</code> (<a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.AcoupiProgram"><code>acoupi.programs.AcoupiProgram</code></a>).
+This class encapsulates all the necessary information for <em>acoupi</em> to execute a program on a device.</p>
+<h2 id="building_a_program">Building a Program<a class="headerlink" href="#building_a_program" title="Permanent link">#</a></h2>
+<p>To create a custom program in <em>acoupi</em>, you'll define a new Python class that inherits from the <code>AcoupiProgram</code> class.
+This new class will encapsulate the tasks, configuration schema, and worker configuration for your program.</p>
+<p>Here's a basic example of a custom program:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">acoupi.programs</span> <span class="kn">import</span> <span class="n">AcoupiProgram</span><span class="p">,</span> <span class="n">DEFAULT_WORKER_CONFIG</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">class</span> <span class="nc">MyProgramConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"acoupi"</span>  <span class="c1"># Define a configuration option named 'name'</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="k">class</span> <span class="nc">MyCustomProgram</span><span class="p">(</span><span class="n">AcoupiProgram</span><span class="p">):</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">worker_config</span> <span class="o">=</span> <span class="n">DEFAULT_WORKER_CONFIG</span>  <span class="c1"># Use the default worker config</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">config_schema</span> <span class="o">=</span> <span class="n">MyProgramConfig</span>  <span class="c1"># Specify the configuration schema</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>  <span class="c1"># Define the program's tasks</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        <span class="k">def</span> <span class="nf">my_custom_task</span><span class="p">():</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hello </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!"</span><span class="p">)</span>  <span class="c1"># Access config values within tasks</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">my_custom_task</span><span class="p">,</span> <span class="n">schedule</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>  <span class="c1"># Add a task that runs every 60 seconds</span>
+</span></code></pre></div>
+<p>Let's break down the key elements:</p>
+<h3 id="inherit_from_the_base_class">Inherit from the Base Class<a class="headerlink" href="#inherit_from_the_base_class" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">class</span> <span class="nc">MyCustomProgram</span><span class="p">(</span><span class="n">AcoupiProgram</span><span class="p">):</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="o">...</span>
+</span></code></pre></div>
+<p>This line indicates that <code>MyCustomProgram</code> is a specialised type of <code>AcoupiProgram</code>, inheriting its core functionality and structure.
+This is essential for <em>acoupi</em> to recognise and execute your custom program.</p>
+<h3 id="create_a_configuration_schema">Create a Configuration Schema<a class="headerlink" href="#create_a_configuration_schema" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">class</span> <span class="nc">MyProgramConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"acoupi"</span>
+</span></code></pre></div>
+<p>We use Pydantic's <code>BaseModel</code> to define the configuration schema.
+This schema specifies the options users can adjust to customise the program's behaviour.
+In this example, the schema includes a single field called <code>name</code> (of type <code>str</code>) with a default value of "acoupi".
+Pydantic offers valuable features like data validation and type hints, ensuring that configuration values are valid and match the expected types.</p>
+<p>To link your configuration schema to your custom program, you'll need to define the <code>config_schema</code> attribute within your <code>AcoupiProgram</code> subclass.
+This tells <em>acoupi</em> which schema to use when validating and processing configuration values for your program.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">class</span> <span class="nc">MyCustomProgram</span><span class="p">(</span><span class="n">AcoupiProgram</span><span class="p">):</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="o">...</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">config_schema</span> <span class="o">=</span> <span class="n">MyProgramConfig</span>  <span class="c1"># &lt;- This indicates that this is the configuration schema for this program</span>
+</span></code></pre></div>
+<h3 id="provide_a_worker_configuration">Provide a Worker Configuration<a class="headerlink" href="#provide_a_worker_configuration" title="Permanent link">#</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="o">...</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span> <span class="nn">acoupi.programs</span> <span class="kn">import</span> <span class="n">DEFAULT_WORKER_CONFIG</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="o">...</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">class</span> <span class="nc">MyProgramConfig</span><span class="p">(</span><span class="n">AcoupiProgram</span><span class="p">):</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="o">...</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">worker_config</span> <span class="o">=</span> <span class="n">DEFAULT_WORKER_CONFIG</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="o">...</span>
+</span></code></pre></div>
+<p>This line sets the <code>worker_config</code> attribute to <code>DEFAULT_WORKER_CONFIG</code>, utilising the standard worker configuration provided by <em>acoupi</em>.
+The worker configuration handles lower-level aspects of program execution, which we'll keep at their default settings for now.</p>
+<h3 id="define_tasks">Define Tasks<a class="headerlink" href="#define_tasks" title="Permanent link">#</a></h3>
+<p>The core of your <em>acoupi</em> program lies in its tasks – the individual units of work that define the sensor's behaviour.
+You define these tasks within the setup method of your <code>AcoupiProgram</code> subclass.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>    <span class="o">...</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="k">def</span> <span class="nf">my_custom_task</span><span class="p">():</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hello </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!"</span><span class="p">)</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>            <span class="n">my_custom_task</span><span class="p">,</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>            <span class="n">schedule</span><span class="o">=</span><span class="mi">10</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<p>The <code>setup</code> method is where you define the tasks your program performs.
+It receives the program's configuration (<code>config</code>) as an argument, allowing tasks to access and utilise those settings.</p>
+<p>In this example, we define a function called <code>my_custom_task</code>.
+This function encapsulates the logic for a single task.
+Here, it simply prints a greeting using the <code>name</code> value from the program's configuration.</p>
+<p><a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.AcoupiProgram.add_task"><code>self.add_task(...)</code></a> is the method that registers your task with the program.
+It takes two key arguments: The first argument is the function that defines the task's logic (e.g., <code>my_custom_task</code>).
+The second argument, schedule, determines how the task is executed.
+In this case, <code>schedule=60</code> instructs <em>acoupi</em> to run this task every 60 seconds.</p>
+<h4 id="scheduling_options">Scheduling Options<a class="headerlink" href="#scheduling_options" title="Permanent link">#</a></h4>
+<p><em>acoupi</em> provides flexible options for scheduling tasks:</p>
+<ul>
+<li><strong>Intervals</strong>:</li>
+</ul>
+<p>Specify a number (in seconds) to run the task at regular intervals.
+For more fine-grained control over intervals, use <code>datetime.timedelta</code> objects:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span> <span class="nn">datetime</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="o">...</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>        <span class="o">...</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>            <span class="n">my_custom_task</span><span class="p">,</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>            <span class="n">schedule</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">34</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">15</span><span class="p">),</span>  <span class="c1"># Run every 34 minutes and 15 seconds</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<ul>
+<li><strong>Cron Expressions</strong></li>
+</ul>
+<p>If you're familiar with cron jobs, you can use cron syntax for more complex scheduling:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span> <span class="nn">celery.schedules</span> <span class="kn">import</span> <span class="n">crontab</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="o">...</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>        <span class="o">...</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>            <span class="n">my_custom_task</span><span class="p">,</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>            <span class="n">schedule</span><span class="o">=</span><span class="n">crontab</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">day_of_week</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>  <span class="c1"># Run every Monday at 7:30 AM</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<h4 id="task_dependencies">Task dependencies<a class="headerlink" href="#task_dependencies" title="Permanent link">#</a></h4>
+<p>Often, tasks within a program need to execute in a specific order or depend on the output of other tasks.
+<em>acoupi</em> enables this through callbacks.</p>
+<p>Callbacks are functions that are executed immediately after a task completes.
+The output of the preceding task is passed as an argument to the callback function.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span> <span class="nn">random</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="o">...</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="o">...</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="k">def</span> <span class="nf">task1</span><span class="p">():</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>        <span class="n">random_number</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>        <span class="k">return</span> <span class="n">random_number</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>    <span class="k">def</span> <span class="nf">task2</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>        <span class="k">if</span> <span class="n">number</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>            <span class="nb">print</span><span class="p">(</span><span class="s2">"you are lucky!"</span><span class="p">)</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"No luck yet."</span><span class="p">)</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span>
+</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>        <span class="n">task1</span><span class="p">,</span>
+</span><span id="__span-8-21"><a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a>        <span class="n">schedule</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+</span><span id="__span-8-22"><a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a>        <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">task2</span><span class="p">]</span>
+</span><span id="__span-8-23"><a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a>    <span class="p">)</span>
+</span><span id="__span-8-24"><a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a>
+</span><span id="__span-8-25"><a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a>    <span class="o">...</span>
+</span></code></pre></div>
+<p>In this example, <code>task2</code> acts as a callback for <code>task1</code>.
+It receives the random number generated by <code>task1</code> and prints a message accordingly.
+This ensures that <code>task2</code> always runs after <code>task1</code> and has access to its output.</p>
+<p>This provides a basic framework for building an <em>acoupi</em> program.
+In the following sections, we'll explore more advanced concepts and tools to enhance your custom programs.</p>
+<h2 id="tools_for_program_creation">Tools for Program Creation<a class="headerlink" href="#tools_for_program_creation" title="Permanent link">#</a></h2>
+<p>Now that you understand the fundamentals of program creation, let's explore the tools <em>acoupi</em> provides to facilitate your development process and help you to build meaningful bioacoustic monitoring solutions.</p>
+<p><em>acoupi</em> offers several approaches to simplify and accelerate the creation of custom programs:</p>
+<ul>
+<li><strong>Program Templates</strong>: Leverage pre-defined templates with commonly used tasks and components to expedite development.</li>
+<li><strong>Predefined Configuration Schemas</strong>: Utilise existing schemas for typical program components, saving time and effort in defining configuration options.</li>
+<li><strong>Task Templates</strong>: Employ templates for frequently used tasks, such as recording audio or sending data, as building blocks for your program.</li>
+<li><strong>Component Selection</strong>: Modify existing tasks by replacing default components with alternatives or custom implementations to tailor functionality.</li>
+</ul>
+<p>Now we will explore each of these methods, giving insight into how to create custom programs within the <em>acoupi</em> framework.</p>
+<h3 id="program_templates">Program Templates<a class="headerlink" href="#program_templates" title="Permanent link">#</a></h3>
+<p>When building a program, you often need to incorporate basic functionality, such as audio recording and management.
+<em>acoupi</em> provides program templates that serve as foundational building blocks, saving you time and effort.</p>
+<h4 id="basic_program">Basic Program<a class="headerlink" href="#basic_program" title="Permanent link">#</a></h4>
+<p>The <a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.BasicProgram"><code>BasicProgram</code></a> provides a convenient starting point for programs that require fundamental audio recording and management capabilities.
+By incorporating this template, you can quickly set up a program that captures audio data and organises recordings efficiently.</p>
+<p>To use the <code>BasicProgram</code>, define your custom program class that inherits from it:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span> <span class="nn">acoupi.programs.templates</span> <span class="kn">import</span> <span class="n">BasicProgram</span><span class="p">,</span> <span class="n">BasicProgramConfiguration</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">class</span> <span class="nc">CustomProgram</span><span class="p">(</span><span class="n">BasicProgram</span><span class="p">):</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">config_schema</span> <span class="o">=</span> <span class="n">BasicProgramConfiguration</span>
+</span></code></pre></div>
+<p>This automatically equips your <code>CustomProgram</code> with two essential tasks:</p>
+<ul>
+<li>
+<p><strong>Recording Task</strong>: This task handles the core audio recording functionality.
+    It checks recording conditions, captures audio segments of a defined duration at specified intervals, and temporarily stores the recordings.
+    This task utilises the <code>generate_recording_task</code> template (<a class="autorefs autorefs-internal" href="../../reference/tasks/#acoupi.tasks.generate_recording_task"><code>acoupi.tasks.generate_recording_task</code></a>) for its implementation.</p>
+</li>
+<li>
+<p><strong>File Management Task</strong>: This task manages the recorded audio files.
+    It processes the temporary recordings, determining which recordings to save permanently based on predefined criteria (by default, all recordings are saved).
+    Saved recordings are organised in a structured folder hierarchy: <code>&lt;base_directory&gt;/&lt;year&gt;/&lt;month&gt;/&lt;day&gt;/&lt;time&gt;_&lt;recording_id&gt;.wav</code>.
+    This task is based on the <code>generate_file_management_task</code> template (<a class="autorefs autorefs-internal" href="../../reference/tasks/#acoupi.tasks.generate_file_management_task"><code>acoupi.tasks.generate_file_management_task</code></a>).</p>
+</li>
+</ul>
+<p>The <code>BasicProgram</code> uses the <code>BasicProgramConfiguration</code> schema (<a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.BasicProgramConfiguration"><code>acoupi.programs.templates.BasicProgramConfiguration</code></a>) to define its configurable parameters.
+To extend these parameters, you can create a new configuration class that inherits from <code>BasicConfiguration</code> and adds your custom fields:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">class</span> <span class="nc">ExpandedConfigurations</span><span class="p">(</span><span class="n">BasicConfiguration</span><span class="p">):</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="n">other_field</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="c1"># ... your additional fields ...</span>
+</span></code></pre></div>
+<p>While the <code>BasicProgram</code> provides a solid foundation, you can further customise its behaviour by overriding specific methods.
+For instance, you can modify the recording conditions to control when audio recording occurs:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span> <span class="nn">acoupi.components.types</span> <span class="kn">import</span> <span class="n">RecordingCondition</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="k">class</span> <span class="nc">IsWarmEnough</span><span class="p">(</span><span class="n">RecordingCondition</span><span class="p">):</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    <span class="k">def</span> <span class="nf">should_record</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>        <span class="c1"># This is a hypothetical sensor, not included in acoupi</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>        <span class="n">temperature</span> <span class="o">=</span> <span class="n">sensor</span><span class="o">.</span><span class="n">get_current_temperature</span><span class="p">()</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>        <span class="k">return</span> <span class="n">temperature</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="k">class</span> <span class="nc">CustomProgram</span><span class="p">(</span><span class="n">BasicProgram</span><span class="p">):</span>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>    <span class="c1"># ... other parts of your program ...</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>    <span class="k">def</span> <span class="nf">get_recording_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>        <span class="c1"># Get the default conditions (e.g., recording interval)</span>
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>        <span class="n">default_conditions</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_recording_conditions</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>        <span class="k">return</span> <span class="p">[</span>
+</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>            <span class="o">*</span><span class="n">default_conditions</span><span class="p">,</span>
+</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>            <span class="n">IsWarmEnough</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">temperature_threshold</span><span class="p">)</span>  <span class="c1"># Add your custom condition</span>
+</span><span id="__span-11-21"><a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>        <span class="p">]</span>
+</span></code></pre></div>
+<p>For a complete understanding of the <code>BasicProgram</code>'s capabilities and customisation options, refer to its <a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.BasicProgram">reference documentation</a>.</p>
+<h4 id="messaging_program">Messaging Program<a class="headerlink" href="#messaging_program" title="Permanent link">#</a></h4>
+<p>The <a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.MessagingProgram"><code>MessagingProgram</code></a> extends the <code>BasicProgram</code> to add messaging capabilities.
+This allows your programs to send messages and heartbeats to remote servers via HTTP or MQTT.</p>
+<p>To incorporate messaging functionality into your program, define your custom program class that inherits from <code>MessagingProgram</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span> <span class="nn">acoupi.programs.templates</span> <span class="kn">import</span> <span class="n">MessagingProgram</span><span class="p">,</span> <span class="n">MessagingProgramConfig</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">class</span> <span class="nc">CustomConfig</span><span class="p">(</span><span class="n">MessagingProgramConfig</span><span class="p">):</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="c1"># ... your custom configuration fields ...</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="k">class</span> <span class="nc">CustomProgram</span><span class="p">(</span><span class="n">MessagingProgram</span><span class="p">):</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>    <span class="n">config_schema</span> <span class="o">=</span> <span class="n">CustomConfig</span>
+</span></code></pre></div>
+<p>This equips your program with the following messaging features:</p>
+<ul>
+<li><strong>Messenger</strong>: A <a class="autorefs autorefs-internal" href="../../reference/components/#acoupi.components.types.Messenger"><code>Messenger</code></a> object is created, allowing you to choose between HTTP or MQTT protocols for message delivery.</li>
+<li><strong>Message Store</strong>: A dedicated message store is initialised to keep track of all messages generated by your device, including their delivery status.</li>
+<li><strong>Send Messages Task</strong>: This periodic task (running every 2 minutes by default, but configurable) checks the message store for pending messages and attempts to deliver them.
+    It leverages the <a class="autorefs autorefs-internal" href="../../reference/tasks/#acoupi.tasks.generate_send_messages_task"><code>generate_send_messages_task</code></a> template for its implementation.</li>
+<li><strong>Heartbeat Task</strong>: This task periodically sends a heartbeat message (every 30 minutes by default, configurable) containing information about the device's status, ID, and the current time.
+    This provides a regular indication that the device is active and functioning correctly.</li>
+</ul>
+<p>By default, the <code>MessagingProgram</code> doesn't generate any messages on its own.
+Its primary purpose is to provide the underlying framework for sending messages.
+You can easily create and send messages from your custom tasks using the <code>message_store</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span> <span class="nn">acoupi.data</span> <span class="kn">import</span> <span class="n">Message</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="kn">import</span> <span class="nn">datetime</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="k">class</span> <span class="nc">CustomProgram</span><span class="p">(</span><span class="n">MessagingProgram</span><span class="p">):</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>  <span class="c1"># Initialise the messaging components</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>        <span class="k">def</span> <span class="nf">random_task</span><span class="p">():</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>            <span class="n">current_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>            <span class="n">message</span> <span class="o">=</span> <span class="n">Message</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Hi! The current time is </span><span class="si">{</span><span class="n">current_time</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">message_store</span><span class="o">.</span><span class="n">store_message</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>  <span class="c1"># Add the message to the store</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span>  <span class="c1"># Register the task in your program</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>            <span class="n">random_task</span><span class="p">,</span>
+</span><span id="__span-13-16"><a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>            <span class="n">schedule</span><span class="o">=</span><span class="mi">3600</span> <span class="c1"># Every hour</span>
+</span><span id="__span-13-17"><a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>        <span class="p">)</span>
+</span><span id="__span-13-18"><a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>
+</span><span id="__span-13-19"><a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>        <span class="c1"># ... your other tasks ...</span>
+</span></code></pre></div>
+<p>In this example, <code>random_task</code> creates a simple message and stores it in the <code>message_store</code>.
+The <strong>Send Messages Task</strong> will then handle delivering this message at its next scheduled execution.</p>
+<p>For detailed information about the configuration options and customisation possibilities of the <code>MessagingProgram</code>, consult its comprehensive <a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.MessagingProgram">reference documentation</a>.</p>
+<h4 id="detection_program">Detection Program<a class="headerlink" href="#detection_program" title="Permanent link">#</a></h4>
+<p>To create an Acoupi program that performs audio detection and sends detection information to a remote server, you can use the <a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.DetectionProgram"><code>DetectionProgram</code></a> template.
+This template builds upon the <code>BasicProgram</code> and <code>MessagingProgram</code> templates, inheriting their functionality for audio recording, file management, heartbeats, and sending messages.</p>
+<p>The <code>DetectionProgram</code> adds a detection task that runs a detection model on recorded audio segments.
+This allows you to create "smart" bioacoustic detectors that can automatically identify sounds or events of interest.</p>
+<p>To use the <code>DetectionProgram</code> template, define your custom program class that inherits from <code>DetectionProgram</code> and implement the <code>configure_model</code> method:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span> <span class="nn">acoupi.programs.templates</span> <span class="kn">import</span> <span class="n">DetectionProgram</span><span class="p">,</span> <span class="n">DetectionProgramConfig</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kn">from</span> <span class="nn">acoupi_birdnet.models</span> <span class="kn">import</span> <span class="n">BirdNET</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="k">class</span> <span class="nc">CustomConfig</span><span class="p">(</span><span class="n">DetectionProgramConfig</span><span class="p">):</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>    <span class="c1"># ... your custom fields ...</span>
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>
+</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="k">class</span> <span class="nc">CustomProgram</span><span class="p">(</span><span class="n">DetectionProgram</span><span class="p">):</span>
+</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>
+</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>    <span class="n">config_schema</span> <span class="o">=</span> <span class="n">CustomConfig</span>
+</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>
+</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>    <span class="c1">#</span>
+</span><span id="__span-14-15"><a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>    <span class="k">def</span> <span class="nf">configure_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+</span><span id="__span-14-16"><a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>        <span class="c1"># create a model instance with your configurations</span>
+</span><span id="__span-14-17"><a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>        <span class="k">return</span> <span class="n">BirdNET</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">threshold</span><span class="p">)</span>
+</span></code></pre></div>
+<p>The <code>configure_model</code> method should return any component that inherits from the <a class="autorefs autorefs-internal" href="../../reference/components/#acoupi.components.types.Model">types.Model</a> class.
+This allows you to use any compatible detection model with your program.</p>
+<p>By defining a program like this, it will automatically create a new task called "detection_task" that will be triggered whenever a recording has been successfully finalised.</p>
+<p>The <code>DetectionProgram</code> template offers several customisation options:</p>
+<ul>
+<li><code>get_message_factories</code>: Override this method to customise the messages generated based on the detection results.
+    For example, you can create messages that are sent whenever a particular species is detected or when there is a high level of acoustic diversity.</li>
+</ul>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">from</span> <span class="nn">acoupi.components</span> <span class="kn">import</span> <span class="n">DetectionThresholdMessageBuilder</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="k">class</span> <span class="nc">CustomProgram</span><span class="p">(</span><span class="n">DetectionProgram</span><span class="p">):</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="o">...</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>    <span class="k">def</span> <span class="nf">get_message_factories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>        <span class="k">return</span> <span class="p">[</span>
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>            <span class="c1"># This message factory will remove any detections below 0.8 score</span>
+</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>            <span class="c1"># but otherwise will send everything</span>
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>            <span class="n">DetectionThresholdMessageBuilder</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>        <span class="p">]</span>
+</span></code></pre></div>
+<ul>
+<li>
+<p><code>get_output_cleaners</code>: Override this method to define a list of output cleaners that will be applied to the model's raw output to clean it up or extract relevant information.
+    By default, a single cleaner is included: a threshold cleaner.
+    This cleaner removes all detections with a confidence score below a specified threshold.
+    This threshold is configurable via the detections.
+    threshold field in your DetectionProgramConfiguration, enabling you to fine-tune the sensitivity of your detection program at deployment time.
+    You can override this method to add or customize output cleaners according to your specific needs.</p>
+</li>
+<li>
+<p><code>get_processing_filters</code>: Override this method to define a list of processing filters that will be applied to each recording before it is processed by the model.
+    These filters determine whether a recording should be processed at all.
+    This can be useful to avoid unnecessary model processing when it is not required by the context or based on simple heuristics on the recording content.</p>
+</li>
+</ul>
+<p>For more info on how this program can be configured have a look at its <a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.DetectionProgram">reference documentation</a>.</p>
+<h3 id="predefined_configuration_schemas">Predefined Configuration Schemas<a class="headerlink" href="#predefined_configuration_schemas" title="Permanent link">#</a></h3>
+<p>Defining a clear configuration schema is important when designing effective and adaptable <em>acoupi</em> programs.
+A well-structured schema promotes program flexibility, provides clear guidance to users on configurable options, and ensures that configurations are validated before deployment, preventing potential issues.</p>
+<p>While you'll need to create custom schemas for program-specific behaviours, <em>acoupi</em> strongly encourages reusing predefined schemas for common components.
+This approach not only saves you time and effort but also ensures compatibility with program templates and benefits from carefully designed and validated schema structures.</p>
+<p><em>acoupi</em> provides a collection of predefined schemas for common components:</p>
+<ol>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/components/#acoupi.components.audio_recorder.MicrophoneConfig"><strong>MicrophoneConfig</strong></a>: This schema facilitates configuration of the microphone device, including device selection, sampling rate, and the number of channels.
+      It's highly customised for ease of use during setup, so utilising it is recommended for streamlined microphone configuration.</p>
+</li>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/components/#acoupi.components.messengers.MQTTConfig"><strong>MQTTConfig</strong></a> and <a class="autorefs autorefs-internal" href="../../reference/components/#acoupi.components.messengers.HTTPConfig"><strong>HTTPConfig</strong></a>: These schemas streamline the configuration of MQTT and HTTP messengers, respectively, for programs that require communication capabilities.</p>
+</li>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.PathsConfiguration"><strong>PathsConfiguration</strong></a>: This schema defines options for configuring storage locations for audio recordings and metadata.
+      By default, temporary recordings are stored in memory (if available) and permanent recordings are saved in <code>$HOME/audio/</code>, but you can customise these paths according to your needs.</p>
+</li>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.AudioConfiguration"><strong>RecordingConfiguration</strong></a>: This schema covers the essential parameters for the recording task, such as recording duration, recording interval, and scheduling options.</p>
+</li>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.MessagingConfig"><strong>MessagingConfiguration</strong></a>: This schema encompasses all the necessary settings for configuring the messaging task.</p>
+</li>
+</ol>
+<p>These predefined schemas are further grouped into higher-level schemas for broader functionalities:</p>
+<ol>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.BasicProgramConfiguration"><strong>BasicConfiguration</strong></a>: This schema combines <code>MicrophoneConfig</code>, <code>PathsConfiguration</code>, and <code>RecordingConfiguration</code>, providing all the essential configurations for a basic <em>acoupi</em> program.</p>
+</li>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/programs/#acoupi.programs.templates.MessagingProgramConfiguration"><strong>MessagingProgramConfiguration</strong></a>: This schema includes the necessary configurations for using the <code>MessagingProgram</code>, enabling message sending capabilities in your programs.</p>
+</li>
+</ol>
+<p>Leverage these predefined schemas as building blocks to construct comprehensive configuration schemas tailored to your specific program requirements.
+This modular approach promotes consistency, reduces redundancy, and ensures your programs are well-structured and easily configurable.</p>
+<h3 id="task_templates">Task Templates<a class="headerlink" href="#task_templates" title="Permanent link">#</a></h3>
+<p>For more granular control over your program's tasks and components, <em>acoupi</em> offers task templates.
+These templates are functions that generate pre-built tasks with customisable components, allowing you to assemble program logic efficiently while maintaining flexibility.</p>
+<ol>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/tasks/#acoupi.tasks.generate_recording_task"><strong><code>generate_recording_task</code></strong></a>: This template creates a task that handles the fundamental aspects of audio recording.
+      It allows you to define custom recording conditions to specify when recording should occur and automatically stores recording metadata for future reference.</p>
+</li>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/tasks/#acoupi.tasks.generate_file_management_task"><strong><code>generate_file_management_task</code></strong></a>: This template generates a task that manages temporary audio recordings.
+      It ensures recordings are ready to be moved (e.g., after processing), selects which recordings to save permanently, and organises them in the designated storage location.</p>
+</li>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/tasks/#acoupi.tasks.generate_send_messages_task"><strong><code>generate_send_messages_task</code></strong></a>: This template creates a task responsible for sending pending messages to remote endpoints using the configured messengers (e.g. HTTP or MQTT).</p>
+</li>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/tasks/#acoupi.tasks.generate_detection_task"><strong><code>generate_detection_task</code></strong></a>: This template generates a task that performs audio analysis using a specified model.
+      It includes preliminary checks to determine if the model should be run on a given recording, executes the model, post-processes the results, generates messages based on detections, and stores detection information in the metadata store.</p>
+</li>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/tasks/#acoupi.tasks.generate_heartbeat_task"><strong><code>generate_heartbeat_task</code></strong></a>: This template creates a task that periodically sends heartbeat messages via the configured messengers, providing status updates and ensuring the device remains connected.</p>
+</li>
+<li>
+<p><a class="autorefs autorefs-internal" href="../../reference/tasks/#acoupi.tasks.generate_summariser_task"><strong><code>generate_summariser_task</code></strong></a>: This template generates tasks that analyse the metadata store to produce meaningful summaries of recorded data and detections.
+      These summaries are then packaged as messages for remote delivery.</p>
+</li>
+</ol>
+<p>Each task template requires specific components as arguments.
+However, this requirement is flexible in that you need to provide components of the correct type rather than specific instances.
+This allows you to integrate custom components into the pre-built task workflows.</p>
+<p>For example, the <code>generate_detection_task</code> function requires components such as a <a class="autorefs autorefs-internal" href="../../reference/components/#acoupi.components.types.Store"><code>Store</code></a>, <a class="autorefs autorefs-internal" href="../../reference/components/#acoupi.components.types.Model"><code>Model</code></a>, <a class="autorefs autorefs-internal" href="../../reference/components/#acoupi.components.types.MessageStore"><code>MessageStore</code></a>, etc.:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">def</span> <span class="nf">generate_detection_task</span><span class="p">(</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="n">store</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Store</span><span class="p">,</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="n">model</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">Model</span><span class="p">,</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>    <span class="n">message_store</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">MessageStore</span><span class="p">,</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>    <span class="c1"># ... other optional components ...</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">data</span><span class="o">.</span><span class="n">Recording</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>    <span class="o">...</span>
+</span></code></pre></div>
+<p>As long as you provide components that adhere to the specified types, the generated task will function correctly within the defined workflow.</p>
+<p>To understand the specific requirements and workflows of each task template, consult their respective documentation for detailed information.
+This will guide you in selecting the appropriate components and customising the tasks to suit your program's needs.</p>
+<h3 id="component_selection">Component Selection<a class="headerlink" href="#component_selection" title="Permanent link">#</a></h3>
+<p><em>acoupi</em> offers a wide array of pre-built components to streamline your program and task development.
+These components cover essential functionalities such as messaging, metadata storage, file management, and more.
+Refer to the reference documentation for a comprehensive <a class="autorefs autorefs-internal" href="../../reference/components/#acoupi.components">list of available components</a>.</p>
+<p>You can readily swap these pre-built components within default implementations or when creating custom tasks.
+As long as your chosen components adhere to the required type specifications, they should integrate seamlessly.</p>
+<p>Beyond the built-in components, you can also leverage community-created components.
+For instance, the <code>acoupi_batdetect2</code> and <code>acoupi_birdnet</code> modules provide ready-to-use <code>Batdetect2</code> and <code>BirdNET</code> models (of type <a class="autorefs autorefs-internal" href="../../reference/components/#acoupi.components.types.Model"><code>acoupi.components.types.Model</code></a>) for your custom programs.
+If you develop your own components that you believe would benefit the <em>acoupi</em> community, please reach out to us for guidance on sharing them.</p>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">#</a></h2>
+<p>Here we covered what you need to get started for building your custom program.
+Dive into the reference documentation to see the details of the individual parts that were covered here.
+If you have a question, it might already be covered by our <a href="../../faq/">FAQ</a>, but you can also reach out through our <a href="https://github.com/acoupi/acoupi">GitHub</a> repository.</p></div>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: How-To Guides">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                How-To Guides
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../components/" class="md-footer__link md-footer__link--next" aria-label="Next: Create new components">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Create new components
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy", "navigation.tracking", "navigation.indexes", "navigation.sections", "navigation.top", "navigation.footer", "toc.follow"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+    
+  </body>
+</html>

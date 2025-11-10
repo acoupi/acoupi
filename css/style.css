@@ -1,0 +1,33 @@
+/* Indentation. */
+div.doc-contents:not(.first) {
+  padding-left: 25px;
+  border-left: .05rem solid rgba(200, 200, 200, 0.2);
+}
+
+.doc h3 {
+  font-size: 1.2rem;
+}
+
+.doc-class h4 code {
+  font-size: 0.78rem;
+  font-weight: 200;
+}
+
+.doc-class h6 code {
+  font-size: 0.7rem;
+  font-weight: 200;
+}
+
+.doc-md-description {
+  font-size: 0.62rem;
+}
+
+.doc-md-table {
+  border: 0;
+  border-collapse: collapse;
+  caption-side: bottom;
+  line-height: 1.5rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  width: 100%;
+}
