@@ -12,6 +12,7 @@ from typing import (
     get_origin,
 )
 
+from omegaconf import OmegaConf
 from pydantic import BaseModel, ValidationError
 
 from acoupi.system import exceptions
@@ -143,7 +144,7 @@ def get_config_field(config: BaseModel, field: str) -> Any:
     if field is None or field == "":
         return config
 
-    fields = config.model_fields
+    fields = type(config).model_fields
     prefix, *rest = field.split(".", 1)
 
     if prefix not in fields:
@@ -284,11 +285,6 @@ def set_config_field(
     >>> 3
 
     """
-    if is_json and not isinstance(value, str):
-        raise ValueError(
-            "Value must be a string when setting a field from JSON."
-        )
-
     if not field:
         if isinstance(value, type(config)):
             return value
@@ -302,57 +298,21 @@ def set_config_field(
             from_attributes=from_attributes,
         )
 
-    new_config = config.model_copy(deep=True)
+    base = OmegaConf.create(config.model_dump(), flags={"allow_objects": True})
 
-    # Make sure that the assignment is valid
-    new_config.model_config["validate_assignment"] = True
-    new_config.model_config["strict"] = True
+    if is_json:
+        value = json.loads(value)
 
-    prefix, *rest = field.split(".", 1)
+    OmegaConf.update(base, field, value)
 
-    if prefix not in config.model_fields:
-        valid_fields = "\n\t - ".join(config.model_fields.keys())
-        raise AttributeError(
-            f"The field '{prefix}' is not part of the configuration schema.\n"
-            f"Valid fields are:\n    - {valid_fields}",
-        )
-
-    subconfig = getattr(new_config, prefix)
-    subfield = config.model_fields[prefix]
-    type_ = subfield.rebuild_annotation()
-    origin = get_origin(type_)
-
-    if not rest:
-        if is_json:
-            value = json.loads(value)
-
-        setattr(new_config, prefix, value)
-        return new_config
-
-    if origin is not None and issubclass(origin, (list, tuple)):
-        new_subconfig = _set_config_field_in_sequence(
-            subconfig,
-            value=value,
-            field=rest[0],
-            is_json=is_json,
-            type_=type_,
-        )
-        setattr(new_config, prefix, new_subconfig)
-        return new_config
-
-    if issubclass(type_, BaseModel):
-        new_subconfig = set_config_field(
-            subconfig,
-            field=rest[0],
-            value=value,
-            is_json=is_json,
-            strict=strict,
-            from_attributes=from_attributes,
-        )
-        setattr(config, prefix, new_subconfig)
-        return config
-
-    raise NotImplementedError(f"Cannot set field in {type_}.")
+    try:
+        return type(config).model_validate(base, extra="forbid")
+    except ValidationError as error:
+        raise exceptions.ParameterError(
+            value=field,
+            message=f"Invalid field {field} in {type(config)}.",
+            help="Check the field name and the type of the value.",
+        ) from error
 
 
 class PydanticJSONEncoder(json.JSONEncoder):
@@ -408,56 +368,3 @@ def _get_config_field_from_sequence(
         return get_config_field(config[index], rest[0])
 
     raise NotImplementedError(f"Cannot get field from list of {args[0]}")
-
-
-def _set_config_field_in_sequence(
-    config: List[Any],
-    value: Any,
-    field: str,
-    is_json: bool,
-    type_: Type,
-) -> List[Any]:
-    prefix, *rest = field.split(".", 1)
-
-    if not prefix.isdigit():
-        raise ValueError("Field is not an index.")
-
-    index = int(prefix)
-    if index >= len(config) or index < 0:
-        raise IndexError("Index out of range.")
-
-    if not rest:
-        if is_json:
-            value = json.loads(value)
-
-        config[index] = value
-        return config
-
-    args = get_args(type_)
-    origin = get_origin(type_)
-
-    if args is None:
-        raise NotImplementedError(
-            "Cannot set field in list of non-models.",
-        )
-
-    assert origin is not None
-
-    if issubclass(origin, list):
-        subtype = args[0]
-    elif issubclass(origin, tuple):
-        subtype = args[index]
-    else:
-        raise NotImplementedError(f"Cannot set field in {origin}.")
-
-    if issubclass(subtype, BaseModel):
-        new_subconfig = set_config_field(
-            config[index],
-            field=rest[0],
-            value=value,
-            is_json=is_json,
-        )
-        config[index] = new_subconfig
-        return config
-
-    raise NotImplementedError("Setting fields in lists is not supported.")

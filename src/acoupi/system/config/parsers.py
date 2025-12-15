@@ -195,7 +195,7 @@ def parse_list_field_from_args(
     ]
 
     if not value and field.default_factory:
-        return field.default_factory()
+        return field.default_factory()  # type: ignore
 
     return value
 

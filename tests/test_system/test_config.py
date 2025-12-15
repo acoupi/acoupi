@@ -1,12 +1,13 @@
 """Test suite for the acoupi system config module."""
 
 import datetime
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import pytest
 from pydantic import BaseModel, ValidationError
 
 from acoupi.system.config import get_config_field, set_config_field
+from acoupi.system.exceptions import ParameterError
 
 
 def test_get_simple_config_field_value():
@@ -155,7 +156,7 @@ def test_set_field_should_fail_if_validation_fails():
 
     config = Config(a=1, b="2")
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ParameterError):
         set_config_field(config, "a", "foo")
 
 
@@ -236,7 +237,7 @@ def test_set_nested_config_with_invalid_json_fails():
 
     config = Config(c=NestedConfig(a=3, b="4"))
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ParameterError):
         set_config_field(
             config,
             "c",
@@ -266,7 +267,7 @@ def test_set_list_field_fails_if_types_do_not_match():
 
     config = Config(a=[1, 2, 3])
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ParameterError):
         set_config_field(config, "a", [4, "a"])
 
 
@@ -291,7 +292,7 @@ def test_set_field_item_fails_if_validation_fails():
 
     config = Config(a=[1, 2, 3])
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ParameterError):
         set_config_field(config, "a.1", "foo")
 
 
@@ -332,5 +333,19 @@ def test_set_field_should_fail_if_not_in_schema():
 
     config = Config(a=1)
 
-    with pytest.raises(AttributeError):
+    with pytest.raises(ParameterError):
         set_config_field(config, "b", 3)
+
+
+def test_set_field_in_nested_optional_config():
+    class NestedConfig(BaseModel):
+        a: int
+
+    class Config(BaseModel):
+        c: Optional[NestedConfig] = None
+
+    config = Config()
+
+    new_config = set_config_field(config, "c.a", 3)
+
+    assert new_config.c.a == 3
