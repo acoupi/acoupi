@@ -13,6 +13,7 @@ corresponds to the index of the USB port the device is connected to. The
 audio recorder return a temporary .wav file.
 """
 
+import argparse
 import datetime
 import math
 import wave
@@ -27,6 +28,7 @@ from pydantic import BaseModel
 from acoupi import data
 from acoupi.components.types import AudioRecorder
 from acoupi.devices.audio import get_input_device_by_name, get_input_devices
+from acoupi.system.config.parsers import parse_field_from_args
 from acoupi.system.exceptions import HealthCheckError, ParameterError
 
 TMP_PATH = Path("/run/shm/")
@@ -93,7 +95,7 @@ class PyAudioRecorder(AudioRecorder):
         data.Recording: A Recording object containing the temporary path of the file.
         """
         now = datetime.datetime.now()
-        temp_path = self.audio_dir / f'{now.strftime("%Y%m%d_%H%M%S")}.wav'
+        temp_path = self.audio_dir / f"{now.strftime('%Y%m%d_%H%M%S')}.wav"
         frames = self.get_recording_data(duration=self.duration)
         self.save_recording(frames, temp_path)
         return data.Recording(
@@ -261,6 +263,56 @@ def parse_microphone_config(
             value="device_index",
             message="No compatible audio device found.",
             help="Check if the microphone is connected.",
+        )
+
+    if not prompt:
+        try:
+            device_name = parse_field_from_args(
+                "device_name",
+                MicrophoneConfig.model_fields["device_name"],
+                args,
+                prompt=False,
+                prefix=prefix,
+            )
+
+        except argparse.ArgumentError:
+            device_name = available_devices[0].name
+
+        try:
+            device = next(
+                d for d in available_devices if d.name == device_name
+            )
+        except StopIteration as error:
+            raise ParameterError(
+                value="device_name",
+                message=f"No audio device with the name {device_name} found.",
+                help="Check if the microphone is connected or review the "
+                "available audio devices.",
+            ) from error
+
+        samplerate = parse_field_from_args(
+            "samplerate",
+            MicrophoneConfig.model_fields["samplerate"],
+            args,
+            prompt=False,
+            prefix=prefix,
+        )
+
+        if not samplerate:
+            samplerate = int(device.default_samplerate)
+
+        channels = parse_field_from_args(
+            "audio_channels",
+            MicrophoneConfig.model_fields["audio_channels"],
+            args,
+            prompt=False,
+            prefix=prefix,
+        )
+
+        return MicrophoneConfig(
+            device_name=device.name,
+            samplerate=int(samplerate),  # type: ignore
+            audio_channels=channels or 1,  # type: ignore
         )
 
     click.secho("Available audio devices:\n", fg="green", bold=True)
