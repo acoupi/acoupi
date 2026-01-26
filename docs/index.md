@@ -105,9 +105,9 @@ The [**acoupi_batdetect2**](https://github.com/acoupi/acoupi_batdetect2) reposit
     acoupi setup --program acoupi_batdetect2.program
     ```
 
-### BirdNET-Lite 🦜 (COMING SOON!)
+### BirdNET 🦜
 
-The BirdNET-Lite bioacoustic DL model has been trained to detect and classify a large number of bird species.
+The BirdNET bioacoustic DL model has been trained to detect and classify a large number of bird species.
 The [**acoupi_birdnet**](https://github.com/acoupi/acoupi_birdnet) repository provides users with a pre-build _acoupi_ program that can be configured and tailored to their use cases of birds monitoring.
 
 !!! Example "CLI Command: Install _acoupi_birdnet_ program."
