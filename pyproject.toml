@@ -22,8 +22,9 @@ dependencies = [
   "eventlet>=0.36.1",
   "pygments>=2.18.0",
   "pydantic-extra-types>=2.9.0",
+  "omegaconf>=2.3.0",
 ]
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.9,<3.14"
 readme = "README.md"
 license = { text = "GPL-3.0" }
 
@@ -34,8 +35,8 @@ acoupi = "acoupi.cli:acoupi"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
   "pytest>=7.4.4",
   "pony-stubs>=0.5.2",
   "coverage[toml]>=7.2.2",
