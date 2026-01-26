@@ -35,9 +35,15 @@ def acoupi(ctx):
     )
 )
 @click.option("--program", type=str, default="acoupi.programs.test")
+@click.option("--prompt/--no-prompt", default=True)
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
 @click.pass_context
-def setup(ctx, program: str, args: List[str]):
+def setup(
+    ctx,
+    program: str,
+    args: List[str],
+    prompt: bool = True,
+):
     """Set up acoupi."""
     click.echo(
         "Collecting program files. It will take a minute or so, be patient..."
@@ -46,7 +52,7 @@ def setup(ctx, program: str, args: List[str]):
     settings = ctx.obj["settings"]
 
     try:
-        system.setup_program(settings, program, args=args, prompt=True)
+        system.setup_program(settings, program, args=args, prompt=prompt)
 
     except exceptions.ProgramNotFoundError as err:
         # TODO: Improve this messages

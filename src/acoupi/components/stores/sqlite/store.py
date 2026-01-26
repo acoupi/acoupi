@@ -421,7 +421,7 @@ class SqliteStore(types.Store):
 
         if db_deployment is None:
             now = datetime.datetime.now()
-            name = f'Deployment {now.strftime("%Y-%m-%d %H:%M:%S")}'
+            name = f"Deployment {now.strftime('%Y-%m-%d %H:%M:%S')}"
             db_deployment = self.models.Deployment(
                 started_on=now,
                 name=name,
