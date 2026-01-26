@@ -12,6 +12,7 @@ nav:
       - Create a custom program: howtoguide/programs.md
       - Create new components: howtoguide/components.md
       - Create new data schema: howtoguide/data_schema.md
+      - Share Configurations: howtoguide/share_configurations.md
   - Explanation:
       - explanation/index.md
       - Architecture: explanation/architecture.md

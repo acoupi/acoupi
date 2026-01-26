@@ -30,6 +30,10 @@ The video shows the configuration process for the _acoupi default_ program via t
 
 ![type:video](../img/acoupi_configuration.mp4){: style='width: 100%'}
 
+!!! tip "Sharing Configurations"
+
+    Once you have configured your program, you may want to share this configuration with other devices or keep a backup for future use. To learn how to do this, check out the [Share Configuration How-To-Guide](../howtoguide/share_configurations.md).
+
 ## Configuration Parameters
 
 ### acoupi.programs.default
