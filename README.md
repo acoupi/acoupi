@@ -39,6 +39,11 @@ Users should be able to download and test _acoupi_ software on any Linux-based m
 > 
 > The software has been extensively developed and tested with the RPi 4B. We advise users to select the RPi 4B or a device featuring similar specifications.
 
+> [!IMPORTANT]
+> 
+> Although acoupi has been tested across a range of Python versions, using external programs such as those provided by acoupi-birdnet and acoupi-batdetect2 may require a Python version that is compatible with those tools as well.
+> Please refer to their respective documentation for specific installation requirements.
+
 ## Installation
 
 To install and use the bare-bone framework of acoupi on your embedded device follow these steps: 
@@ -108,7 +113,7 @@ The [*acoupi_batdetect2*](https://acoupi.github.io/acoupi_batdetect2/) repositor
 Step 1: Install _acoupi_batdetect2_ program.
 
 ```bash
-uv tool install -w acoupi-batdetect2 -p 3.11 acoupi
+uv tool install -w acoupi-batdetect2 -p 3.12 acoupi
 ```
 
 Step 2: Setup and configure _acoupi_batdetect2_ program.
