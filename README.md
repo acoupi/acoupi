@@ -108,7 +108,7 @@ The [*acoupi_batdetect2*](https://acoupi.github.io/acoupi_batdetect2/) repositor
 Step 1: Install _acoupi_batdetect2_ program.
 
 ```bash
-uv tool install -w acoupi-batdetect2 -p 3.12 acoupi
+uv tool install -w acoupi-batdetect2 -p 3.11 acoupi
 ```
 
 Step 2: Setup and configure _acoupi_batdetect2_ program.
