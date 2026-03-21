@@ -108,7 +108,7 @@ The [*acoupi_batdetect2*](https://acoupi.github.io/acoupi_batdetect2/) repositor
 Step 1: Install _acoupi_batdetect2_ program.
 
 ```bash
-pip install acoupi_batdetect2
+uv tool install -w acoupi-batdetect2 -p 3.12 acoupi
 ```
 
 Step 2: Setup and configure _acoupi_batdetect2_ program.
@@ -125,7 +125,7 @@ The [*acoupi_birdnet*](https://acoupi.github.io/acoupi_birdnet/) repository prov
 Install _acoupi_birdnet_ program.
 
 ```bash
-pip install acoupi_birdnet
+uv tool install -w acoupi-birdnet -p 3.11 acoupi
 ```
 
 Setup and configure _acoupi_birdnet_ program.
