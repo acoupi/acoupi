@@ -97,7 +97,7 @@ The [**acoupi_batdetect2**](https://github.com/acoupi/acoupi_batdetect2) reposit
 !!! Example "CLI Command: Install _acoupi_batdetect2_ program."
 
     ```bash
-    pip install acoupi_batdetect2
+    uv tool install -w acoupi-batdetect2 -p 3.12 acoupi
     ```
 !!! Example "CLI Command: Setup and configure _acoupi_batdetect2_ program."
 
@@ -113,7 +113,7 @@ The [**acoupi_birdnet**](https://github.com/acoupi/acoupi_birdnet) repository pr
 !!! Example "CLI Command: Install _acoupi_birdnet_ program."
 
     ```bash
-    pip install acoupi_birdnet
+    uv tool install -w acoupi-birdnet -p 3.11 acoupi
     ```
 !!! Example "CLI Command: Setup and configure _acoupi_birdnet_ program."
 
