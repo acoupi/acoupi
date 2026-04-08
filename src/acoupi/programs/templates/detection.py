@@ -46,6 +46,7 @@ To create an Acoupi program with audio detection capabilities:
       detection results.
 """
 
+import datetime
 from abc import ABC, abstractmethod
 from typing import Callable, List, TypeVar
 
@@ -53,6 +54,7 @@ from pydantic import BaseModel, Field
 
 from acoupi import data
 from acoupi.components import ThresholdDetectionCleaner, types
+from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
 from acoupi.programs.templates.messaging import (
     MessagingProgram,
     MessagingProgramConfiguration,
@@ -199,8 +201,44 @@ class DetectionProgram(MessagingProgram[C], ABC):
     ```
     """
 
+    worker_config = WorkerConfig(
+        workers=[
+            AcoupiWorker(
+                name="recording",
+                queues=["recording"],
+                concurrency=1,
+            ),
+            AcoupiWorker(
+                name="detection",
+                queues=["detection"],
+                concurrency=1,
+            ),
+            AcoupiWorker(
+                name="default",
+                queues=["celery"],
+            ),
+        ]
+    )
+
     model: types.Model
     """The configured detection model instance."""
+
+    def register_recording_task(
+        self,
+        config: C,
+    ) -> None:
+        """Register the recording task.
+
+        This method registers the recording task with the program's scheduler.
+        """
+        recording_task = self.create_recording_task(config)
+        self.add_task(
+            function=recording_task,
+            schedule=datetime.timedelta(seconds=config.recording.interval),
+            callbacks=self.get_recording_callbacks(config),
+            queue="recording",
+            callback_queue="detection",
+        )
 
     def setup(self, config: C) -> None:
         """Set up the Detection Program.

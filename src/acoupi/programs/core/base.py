@@ -142,6 +142,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         callbacks: Optional[List[Callable[[Optional[B]], None]]] = None,
         schedule: Union[int, datetime.timedelta, crontab, None] = None,
         queue: Optional[str] = None,
+        callback_queue: Optional[str] = None,
         name: Optional[str] = None,
     ):
         """Add a task to the program."""
@@ -159,6 +160,10 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
             # get the task from the list of tasks
             callback_task = self.tasks[callback.__name__]
+
+            if callback_queue:
+                # route the callback task to the callback queue
+                self.add_task_to_queue(callback_task.name, callback_queue)
 
             # add the task to the list of callback tasks
             callback_tasks.append(callback_task)
