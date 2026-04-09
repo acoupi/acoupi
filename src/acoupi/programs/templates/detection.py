@@ -229,7 +229,13 @@ class DetectionProgram(MessagingProgram[C], ABC):
     ) -> None:
         """Register the recording task.
 
-        This method registers the recording task with the program's scheduler.
+        Overrides ``BasicProgram.register_recording_task`` to route detection
+        callbacks to the dedicated ``"detection"`` worker (concurrency=1),
+        preventing OOM from parallel model loads.
+
+        Note: intentionally does not call ``super()`` — the base
+        implementation would register the same recording task without the
+        ``callback_queue`` argument, leaving callbacks unrouted.
         """
         recording_task = self.create_recording_task(config)
         self.add_task(
