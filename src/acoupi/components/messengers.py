@@ -100,6 +100,7 @@ class MQTTMessenger(types.Messenger):
         self.host = host
         self.port = port
         self.client_id = get_device_id()
+        self.use_tls = use_tls
 
         self.client = mqtt.Client(
             callback_api_version=CallbackAPIVersion.VERSION2,
