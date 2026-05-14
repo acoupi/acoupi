@@ -21,7 +21,7 @@ wheels = [
 
 [[package]]
 name = "acoupi"
-version = "0.3.0"
+version = "0.3.2"
 source = { editable = "." }
 dependencies = [
     { name = "astral" },
@@ -29,6 +29,7 @@ dependencies = [
     { name = "click", version = "8.1.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "click", version = "8.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "eventlet" },
+    { name = "guano" },
     { name = "jinja2" },
     { name = "omegaconf" },
     { name = "paho-mqtt" },
@@ -83,6 +84,7 @@ requires-dist = [
     { name = "celery", specifier = ">=5.4.0" },
     { name = "click", specifier = ">=8.1.3" },
     { name = "eventlet", specifier = ">=0.36.1" },
+    { name = "guano", specifier = ">=1.0.16" },
     { name = "jinja2", specifier = ">=3.1.2" },
     { name = "omegaconf", specifier = ">=2.3.0" },
     { name = "paho-mqtt", specifier = ">=1.6.1" },
@@ -995,6 +997,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0d/0c/3a471b6e31951dce2360477420d0a8d1e00dea6cf33b70f3e8c3ab6e28e1/griffe-1.15.0.tar.gz", hash = "sha256:7726e3afd6f298fbc3696e67958803e7ac843c1cfe59734b6251a40cdbfb5eea", size = 424112, upload-time = "2025-11-10T15:03:15.52Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9c/83/3b1d03d36f224edded98e9affd0467630fc09d766c0e56fb1498cbb04a9b/griffe-1.15.0-py3-none-any.whl", hash = "sha256:6f6762661949411031f5fcda9593f586e6ce8340f0ba88921a0f2ef7a81eb9a3", size = 150705, upload-time = "2025-11-10T15:03:13.549Z" },
+]
+
+[[package]]
+name = "guano"
+version = "1.0.16"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1e/44/86b184759934b224699f24769c95c8ea8e22c1216f07f1828bc721ce5418/guano-1.0.16.tar.gz", hash = "sha256:59b418bf15f858f5708ab81d8c8503c757f9b52875d3ab5873ad9663b220f636", size = 19515, upload-time = "2025-03-09T05:21:27.837Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a3/7b/c5a4ccb080bb3a19b2392bff4856fff750ee29ae3cc401a331aedfb633cb/guano-1.0.16-py2.py3-none-any.whl", hash = "sha256:e0038732d26466e641db221b74a3560cd5ac956150077d1efccb9427a0d02158", size = 21645, upload-time = "2025-03-09T05:21:26.076Z" },
 ]
 
 [[package]]

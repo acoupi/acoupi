@@ -13,8 +13,12 @@ The recording process contains the following steps:
 import logging
 from typing import Callable, List, Optional, TypeVar
 
+from guano import GuanoFile
+from importlib_metadata import version
+
 from acoupi import data
 from acoupi.components import types
+from acoupi.devices import get_rpi_serial_number
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -93,6 +97,9 @@ def generate_recording_task(
         logger.info("Recording audio")
         recording = recorder.record(deployment)
 
+        logger.info("Adding GUANO metadata")
+        add_guano_metadata(recording)
+
         # Store recording metadata
         store.store_recording(recording)
         logger.info("Recording metadata stored")
@@ -100,3 +107,25 @@ def generate_recording_task(
         return recording
 
     return recording_task
+
+
+def add_guano_metadata(recording: data.Recording) -> None:
+    g = GuanoFile(str(recording.path))
+
+    g["GUANO|Version"] = "1.0"
+    g["Timestamp"] = recording.created_on
+    g["Acoupi|Deployment Name"] = recording.deployment.name
+    g["Firmware Version"] = version("acoupi")
+    g["Make"] = "acoupi"
+    g["Serial"] = get_rpi_serial_number()
+
+    if (
+        recording.deployment.longitude is not None
+        and recording.deployment.latitude is not None
+    ):
+        g["Loc Position"] = (
+            recording.deployment.latitude,
+            recording.deployment.longitude,
+        )
+
+    g.write()
