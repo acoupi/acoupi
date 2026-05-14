@@ -71,6 +71,7 @@ class MQTTMessenger(types.Messenger):
         username: Optional[str] = None,
         password: Optional[str] = None,
         timeout: int = 5,
+        use_tls: bool = False,
         logger: Optional[logging.Logger] = None,
     ) -> None:
         """Initialise the MQTT messenger.
@@ -87,6 +88,8 @@ class MQTTMessenger(types.Messenger):
             The port to connect to, by default 1884.
         password : Optional[SecretStr], optional
             The password to authenticate with, by default None.
+        use_tls: bool
+            Use TLS is host requires this with local certs (eg. HiveHQ) - default sets to false
 
         Notes
         -----
@@ -103,6 +106,11 @@ class MQTTMessenger(types.Messenger):
             client_id=self.client_id,
             clean_session=False,
         )
+
+        if use_tls:
+            # Calling tls_set() without arguments uses the system's 
+            # default CA certificates, which works for HiveHQ
+            self.client.tls_set()
 
         self.client.username_pw_set(username, password)
 
