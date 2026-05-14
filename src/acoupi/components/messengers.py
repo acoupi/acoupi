@@ -43,6 +43,7 @@ class MQTTConfig(BaseModel):
     topic: str = "acoupi"
     port: int = 1884
     timeout: int = 5
+    use_tls: bool = False
 
     @field_serializer("password", when_used="json")
     def dump_password(self, value):
@@ -137,6 +138,7 @@ class MQTTMessenger(types.Messenger):
             else None,
             topic=config.topic,
             timeout=config.timeout,
+            use_tls=config.use_tls,
             logger=logger,
         )
 
