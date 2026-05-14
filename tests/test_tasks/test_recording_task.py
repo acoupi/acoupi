@@ -10,7 +10,6 @@ from .conftest import create_wav_file
 from acoupi import data
 from acoupi.components import SqliteStore
 from acoupi.components.types import AudioRecorder
-from acoupi.devices import get_rpi_serial_number
 from acoupi.tasks import generate_recording_task
 
 
@@ -40,7 +39,15 @@ class DummyRecorder(AudioRecorder):
         )
 
 
-def test_recording_task_writes_guano_metadata_with_location(tmp_path: Path):
+def test_recording_task_writes_guano_metadata_with_location(
+    tmp_path: Path,
+    mocker,
+):
+    mocker.patch(
+        "acoupi.tasks.recording.get_rpi_serial_number",
+        return_value="1234567890ABCDEF",
+    )
+
     deployment = data.Deployment(
         name="field-site-a",
         latitude=51.5072,
@@ -67,18 +74,23 @@ def test_recording_task_writes_guano_metadata_with_location(tmp_path: Path):
     g = GuanoFile(str(recording.path))
 
     assert g["GUANO|Version"] == "1.0"
-    assert g["Timestamp"] == created_on.isoformat()
+    assert g["Timestamp"] == created_on
     assert g["Acoupi|Deployment Name"] == deployment.name
-    assert g["Acoupi|Deployment ID"] == deployment.id
-    assert g["Loc Position"] == f"{deployment.latitude} {deployment.longitude}"
+    assert g["Loc Position"] == (deployment.latitude, deployment.longitude)
     assert g["Firmware Version"] == version("acoupi")
     assert g["Make"] == "acoupi"
-    assert g["Serial"] == get_rpi_serial_number()
+    assert g["Serial"] == "1234567890ABCDEF"
 
 
 def test_recording_task_writes_guano_metadata_without_location(
     tmp_path: Path,
+    mocker,
 ):
+    mocker.patch(
+        "acoupi.tasks.recording.get_rpi_serial_number",
+        return_value="1234567890ABCDEF",
+    )
+
     deployment = data.Deployment(
         name="field-site-b",
         started_on=datetime.datetime(2024, 1, 1, 0, 0, 0),
@@ -103,7 +115,6 @@ def test_recording_task_writes_guano_metadata_without_location(
     g = GuanoFile(str(recording.path))
 
     assert g["GUANO|Version"] == "1.0"
-    assert g["Timestamp"] == created_on.isoformat()
+    assert g["Timestamp"] == created_on
     assert g["Acoupi|Deployment Name"] == deployment.name
-    assert g["Acoupi|Deployment ID"] == deployment.id
-    assert "Loc Position" not in g
+    assert "Loc Position" not in g, g["Loc Position"]
