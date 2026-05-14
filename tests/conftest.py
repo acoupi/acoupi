@@ -15,6 +15,23 @@ from acoupi.system import Settings
 pytest_plugins = ("celery.contrib.pytest",)
 
 
+@pytest.fixture(scope="session")
+def celery_config():
+    return {
+        "broker_url": "memory://",
+        "result_backend": "rpc://",
+        "broker_transport_options": {"polling_interval": 0.05},
+    }
+
+
+@pytest.fixture(scope="session")
+def celery_parameters():
+    return {
+        "broker_url": "memory://",
+        "result_backend": "rpc://",
+    }
+
+
 @pytest.fixture
 def patched_rpi_serial_number(monkeypatch) -> str:
     """Patch the RPi serial number.

@@ -142,9 +142,32 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         callbacks: Optional[List[Callable[[Optional[B]], None]]] = None,
         schedule: Union[int, datetime.timedelta, crontab, None] = None,
         queue: Optional[str] = None,
+        callback_queue: Optional[str] = None,
         name: Optional[str] = None,
     ):
-        """Add a task to the program."""
+        """Add a task to the program.
+
+        Parameters
+        ----------
+        function :
+            The callable to run as a Celery task.
+        callbacks :
+            Optional list of callables to run after the task completes,
+            receiving the task's return value as their argument.
+        schedule :
+            How often to run the task (timedelta, seconds, or crontab).
+        queue :
+            Name of the queue the task itself should be routed to. Must be
+            declared in the program's ``worker_config``.
+        callback_queue :
+            Name of the queue all callbacks should be routed to. Must be
+            declared in the program's ``worker_config``. When set, every
+            callback is registered in ``app.conf.task_routes`` so that
+            ``apply_async()`` dispatches it to the correct worker without
+            needing an explicit queue argument at call-site.
+        name :
+            Celery task name. Defaults to ``function.__name__``.
+        """
         if not callbacks:
             callbacks = []
 
@@ -159,6 +182,10 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
             # get the task from the list of tasks
             callback_task = self.tasks[callback.__name__]
+
+            if callback_queue:
+                # route the callback task to the callback queue
+                self.add_task_to_queue(callback_task.name, callback_queue)
 
             # add the task to the list of callback tasks
             callback_tasks.append(callback_task)
