@@ -23,6 +23,7 @@ dependencies = [
   "pygments>=2.18.0",
   "pydantic-extra-types>=2.9.0",
   "omegaconf>=2.3.0",
+  "questionary>=2.1.1",
 ]
 requires-python = ">=3.9,<3.14"
 readme = "README.md"
