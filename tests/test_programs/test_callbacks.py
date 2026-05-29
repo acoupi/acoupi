@@ -66,7 +66,7 @@ def test_does_run_callbacks(
     output.get(timeout=3)
 
     wait_for_condition(path.exists, timeout=3)
-    wait_for_condition(path.read_text() == message, timeout=3)
+    wait_for_condition(lambda: path.read_text() == message, timeout=3)
 
     assert path.exists()
     assert path.read_text() == message
@@ -130,6 +130,7 @@ def test_does_run_callbacks_in_other_queues(
     output.get(timeout=3)
 
     wait_for_condition(path.exists)
+    wait_for_condition(lambda: path.read_text() == message, timeout=3)
 
     assert path.exists()
     assert path.read_text() == message
