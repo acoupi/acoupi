@@ -451,7 +451,8 @@ class Summariser(ABC):
         Returns
         -------
         data.Message
-            The summary as a data.Message object. The message should be in JSON format.
+            The summary as a data.Message object. Built-in summarisers emit
+            JSON text, but custom summarisers may emit raw bytes.
         """
 
 
@@ -486,6 +487,12 @@ class Messenger(ABC):
         -------
         data.Response
             A response containing the message, status, content, and received time.
+
+        Raises
+        ------
+        MessageSendError
+            Raised when the message could not be sent locally and no remote
+            response was received.
         """
 
 

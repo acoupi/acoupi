@@ -11,7 +11,7 @@ The message output by the Summarisers is then used by the Messenger to send the 
 to a remote server. Summarisers are implemented as classes that inherit from Summariser.
 Implemntation of the Summarisers should refer to the database, where the classifications
 probabilities are stored. The class should implement the build_summary method, which
-takes a datetime.datetime object and returns a message in JSON format.
+takes a datetime.datetime object and returns a message payload.
 """
 
 import datetime

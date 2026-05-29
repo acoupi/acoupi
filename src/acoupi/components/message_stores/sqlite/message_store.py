@@ -1,7 +1,7 @@
 """Message store Sqlite implementation."""
 
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from pony import orm
 
@@ -9,6 +9,7 @@ from . import types as db_types
 from .database import create_message_models
 from acoupi import data
 from acoupi.components import types
+from acoupi.system.exceptions import MessageStoreError
 
 
 class SqliteMessageStore(types.MessageStore):
@@ -77,7 +78,9 @@ class SqliteMessageStore(types.MessageStore):
         try:
             db_message = self.models.Message[response.message.id]
         except orm.ObjectNotFound:
-            db_message = self._create_message(response.message)
+            raise MessageStoreError(
+                f"Cannot store response for unknown message {response.message.id}."
+            )
 
         self.models.Response(
             message=db_message,
@@ -95,8 +98,16 @@ class SqliteMessageStore(types.MessageStore):
         """Create a Pony ORM message object."""
         db_message = self.models.Message(
             id=message.id,
-            content=message.content,
+            content=self._as_bytes(message.content),
             created_on=message.created_on,
         )
         orm.commit()
         return db_message
+
+    @staticmethod
+    def _as_bytes(content: Union[str, bytes]) -> bytes:
+        """Normalise message content to bytes for storage."""
+        if isinstance(content, bytes):
+            return content
+
+        return content.encode("utf-8")

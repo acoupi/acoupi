@@ -10,8 +10,8 @@ when connectivity is limited. For example, message factories
 can be used to filter detections with low score.
 
 Message factories are implemented as classes that inherit from MessageBuilder. The class should
-implement the build_message method, which takes a model output and returns a message. The message
-should be a JSON string containing the information to be sent to the remote server.
+implement the build_message method, which takes a model output and returns a message. Built-in
+message factories emit JSON text, but custom factories may emit raw bytes for binary transports.
 """
 
 from typing import List, Optional
@@ -29,7 +29,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
     """A MessageBuilder that builds message from model outputs.
 
     This message builder builds a message from a model output. The created
-    message will contain the full model output as a JSON string. This
+    message will contain the full model output as JSON text. This
     includes information about the model used, the recording including deployment info,
     and the detections and predicted tags that meet the threshold.
     """
@@ -125,7 +125,7 @@ class FullModelOutputMessageBuilder(types.MessageBuilder):
     """A MessageBuilder that builds message from model outputs.
 
     This message builder builds a message from a model output. The created
-    message will contain the full model output as a JSON string.
+    message will contain the full model output as JSON text.
     """
 
     def build_message(self, model_output: data.ModelOutput) -> data.Message:
