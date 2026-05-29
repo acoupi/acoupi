@@ -2,7 +2,7 @@
 
 import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Sequence
 
 import pytest
 
@@ -14,6 +14,27 @@ from acoupi.components.types import (
     RecordingSavingManager,
 )
 from acoupi.tasks import generate_file_management_task
+
+
+def always_manage(
+    recording: data.Recording,
+    model_outputs: Sequence[data.ModelOutput],
+) -> bool:
+    return True
+
+
+def never_manage(
+    recording: data.Recording,
+    model_outputs: Sequence[data.ModelOutput],
+) -> bool:
+    return False
+
+
+def manage_if_any_model_output(
+    recording: data.Recording,
+    model_outputs: Sequence[data.ModelOutput],
+) -> bool:
+    return bool(model_outputs)
 
 
 class DummyRecordingManager(RecordingSavingManager):
@@ -245,3 +266,152 @@ def test_file_management_preserves_existing_guano_metadata(
     guano_text = read_guano_chunk(saved_recording.path)
     assert guano_text is not None
     assert "Hi from acoupi!" in guano_text
+
+
+def test_file_management_moves_files_when_conditions_are_met(
+    target_dir: Path,
+    recording: data.Recording,
+    temp_audio_dir: Path,
+    dummy_manager: DummyRecordingManager,
+    store: SqliteStore,
+):
+    store.store_recording(recording)
+
+    task = generate_file_management_task(
+        store=store,
+        file_managers=[dummy_manager],
+        tmp_path=temp_audio_dir,
+        management_conditions=[always_manage],
+    )
+
+    task()
+
+    # Then
+    recording, _ = store.get_recordings([recording.id])[0]
+    assert recording.path is not None
+    assert recording.path.exists()
+    assert recording.path.is_relative_to(target_dir)
+
+
+def test_file_management_keeps_recordings_when_condition_fails(
+    recording: data.Recording,
+    temp_audio_dir: Path,
+    dummy_manager: DummyRecordingManager,
+    store: SqliteStore,
+):
+    store.store_recording(recording)
+
+    task = generate_file_management_task(
+        store=store,
+        file_managers=[dummy_manager],
+        tmp_path=temp_audio_dir,
+        management_conditions=[never_manage],
+    )
+
+    task()
+
+    assert recording.path is not None
+    assert recording.path.exists()
+    assert recording.path.is_relative_to(temp_audio_dir)
+
+
+def test_file_management_moves_files_when_all_conditions_pass(
+    target_dir: Path,
+    recording: data.Recording,
+    temp_audio_dir: Path,
+    model_output: data.ModelOutput,
+    dummy_manager: DummyRecordingManager,
+    store: SqliteStore,
+):
+    store.store_recording(recording)
+    store.store_model_output(model_output)
+
+    task = generate_file_management_task(
+        store=store,
+        file_managers=[dummy_manager],
+        tmp_path=temp_audio_dir,
+        management_conditions=[always_manage, manage_if_any_model_output],
+    )
+
+    task()
+
+    recording, _ = store.get_recordings([recording.id])[0]
+    assert recording.path is not None
+    assert recording.path.exists()
+    assert recording.path.is_relative_to(target_dir)
+
+
+def test_file_management_keeps_recordings_when_one_condition_fails(
+    recording: data.Recording,
+    temp_audio_dir: Path,
+    model_output: data.ModelOutput,
+    dummy_manager: DummyRecordingManager,
+    store: SqliteStore,
+):
+    store.store_recording(recording)
+    store.store_model_output(model_output)
+
+    task = generate_file_management_task(
+        store=store,
+        file_managers=[dummy_manager],
+        tmp_path=temp_audio_dir,
+        management_conditions=[always_manage, never_manage],
+    )
+
+    task()
+
+    assert recording.path is not None
+    assert recording.path.exists()
+    assert recording.path.is_relative_to(temp_audio_dir)
+
+
+def test_file_management_moves_files_when_models_and_conditions_pass(
+    target_dir: Path,
+    recording: data.Recording,
+    temp_audio_dir: Path,
+    model_output: data.ModelOutput,
+    dummy_manager: DummyRecordingManager,
+    store: SqliteStore,
+):
+    store.store_recording(recording)
+    store.store_model_output(model_output)
+
+    task = generate_file_management_task(
+        store=store,
+        file_managers=[dummy_manager],
+        tmp_path=temp_audio_dir,
+        required_models=["test_model"],
+        management_conditions=[always_manage],
+    )
+
+    task()
+
+    recording, _ = store.get_recordings([recording.id])[0]
+    assert recording.path is not None
+    assert recording.path.exists()
+    assert recording.path.is_relative_to(target_dir)
+
+
+def test_file_management_keeps_recordings_when_models_pass_but_condition_fails(
+    recording: data.Recording,
+    temp_audio_dir: Path,
+    model_output: data.ModelOutput,
+    dummy_manager: DummyRecordingManager,
+    store: SqliteStore,
+):
+    store.store_recording(recording)
+    store.store_model_output(model_output)
+
+    task = generate_file_management_task(
+        store=store,
+        file_managers=[dummy_manager],
+        tmp_path=temp_audio_dir,
+        required_models=["test_model"],
+        management_conditions=[never_manage],
+    )
+
+    task()
+
+    assert recording.path is not None
+    assert recording.path.exists()
+    assert recording.path.is_relative_to(temp_audio_dir)

@@ -488,7 +488,7 @@ def parse_secret_str_field(
     )
 
     if not prompt:
-        return SecretStr(value)  # Return the parsed value as SecretStr
+        return SecretStr(str(value))  # Return the parsed value as SecretStr
 
     if value is not None:
         if click.confirm(

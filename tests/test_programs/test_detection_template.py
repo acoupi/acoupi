@@ -144,6 +144,63 @@ class MockModel(Model):
         )
 
 
+def test_worker_config_has_dedicated_detection_worker():
+    workers = {w.name: w for w in DetectionProgram.worker_config.workers}
+    assert "detection" in workers, "DetectionProgram must declare a 'detection' worker"
+    assert workers["detection"].concurrency == 1, (
+        "detection worker must have concurrency=1 to prevent OOM from parallel model loads"
+    )
+    assert workers["recording"].concurrency == 1, (
+        "recording worker must have concurrency=1 (audio device is not thread-safe)"
+    )
+
+
+@pytest.mark.usefixtures("celery_app")
+def test_detection_task_is_routed_to_detection_queue(
+    celery_app: Celery,
+    config: Config,
+):
+    class Program(DetectionProgram):
+        config_schema = Config
+
+        def configure_model(self, config):
+            return Mock()
+
+    Program(config, celery_app)
+
+    routes = celery_app.conf.task_routes or {}
+    assert routes.get("detection_task") == {"queue": "detection"}, (
+        "detection_task must be routed to the 'detection' queue so that "
+        "apply_async() dispatches it to the concurrency=1 worker"
+    )
+
+
+@pytest.mark.usefixtures("celery_app")
+def test_unknown_callback_queue_raises_at_setup(
+    celery_app: Celery,
+    config: Config,
+):
+    """Passing a callback_queue not in worker_config must fail early."""
+
+    class Program(DetectionProgram):
+        config_schema = Config
+
+        def configure_model(self, config):
+            return Mock()
+
+        def register_recording_task(self, config):
+            recording_task = self.create_recording_task(config)
+            self.add_task(
+                function=recording_task,
+                callbacks=self.get_recording_callbacks(config),
+                queue="recording",
+                callback_queue="nonexistent_queue",
+            )
+
+    with pytest.raises(ValueError, match="nonexistent_queue"):
+        Program(config, celery_app)
+
+
 def test_program_only_stores_detections_with_high_threshold(
     celery_app: Celery,
     celery_worker: TestWorkController,

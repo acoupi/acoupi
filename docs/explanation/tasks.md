@@ -1,6 +1,7 @@
 # Tasks (acoupi framework)
 
-Tasks are individual units of work performing a set of specific actions. These are built as a sequence of one or more _acoupi_ components. 
+Tasks are individual units of work performing a set of specific actions.
+These are built as a sequence of one or more _acoupi_ components.
 The _acoupi_ framework defines 6 tasks recording, detection, messaging, management, summary, and heartbeat. 
 
 ## Overview Tasks
@@ -97,6 +98,8 @@ It uses the `Messenger` component to define the communication protocol for sendi
 
 The [Management](../reference/tasks.md) task is responsible for managing recording files.
 It handles the saving, deletion, and movement of files using the `SavingFilters` and `SavingManagers` components, and keep track of files movements by updating the store.
+The task can also wait until one or more management conditions are met before a recording is moved or deleted.
+This is useful when a recording should stay in temporary storage until other tasks have finished working on it.
 
 
 <figure markdown="span">
@@ -106,13 +109,16 @@ It handles the saving, deletion, and movement of files using the `SavingFilters`
 
 #### Summary
 
-The [Summary](../reference/tasks.md) task is responsible for generating summary messages to be sent to a remote server. It uses the `Summariser` component along with the `Messenger` component to define the communication protocol for sending these messages. 
+The [Summary](../reference/tasks.md) task is responsible for generating summary messages to be sent to a remote server.
+It uses the `Summariser` component along with the `Messenger` component to define the communication protocol for sending these messages. 
 
 The summary task is useful for providing aggregated information on detections over specific time periods such as hourly, daily, or weekly.
 
 #### Heartbeat
 
-The [Heartbeat](../reference/tasks.md) task is responsible for creating and sending heartbeat to a remote server. Heartbeat messages confirm that a remotely deployed device is up and running. They are sent at regular intervals so that if a message isn't received as expected, the user is alerted that there might be an issue with the system, such as a power outage or loss of connectivity.
+The [Heartbeat](../reference/tasks.md) task is responsible for creating and sending heartbeat to a remote server.
+Heartbeat messages confirm that a remotely deployed device is up and running.
+They are sent at regular intervals so that if a message isn't received as expected, the user is alerted that there might be an issue with the system, such as a power outage or loss of connectivity.
 
 By default, a heartbeat message contains two key pieces of information: the device ID and the timestamp when the message was created and sent. The task uses the `Messenger` component to define the communication protocol for sending these messages.
 

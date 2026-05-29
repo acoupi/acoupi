@@ -13,7 +13,7 @@ class Message(core.EntityMeta):
     id: UUID
     """Unique ID of the message"""
 
-    content: str
+    content: bytes
     """Message content"""
 
     created_on: datetime

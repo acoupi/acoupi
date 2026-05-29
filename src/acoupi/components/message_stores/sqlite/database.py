@@ -20,7 +20,7 @@ def create_message_models(
         id = orm.PrimaryKey(UUID, auto=True)
         """Unique ID of the message status"""
 
-        content = orm.Required(str)
+        content = orm.Required(bytes)
         """Message content."""
 
         created_on = orm.Required(datetime)

@@ -3,7 +3,7 @@
 import datetime
 from enum import IntEnum
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, field_validator
@@ -297,8 +297,8 @@ class Message(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the message."""
 
-    content: str
-    """The message to be sent. Usually a JSON string."""
+    content: Union[str, bytes]
+    """The message to be sent. Usually JSON text, but may be raw bytes."""
 
     created_on: datetime.datetime = Field(
         default_factory=datetime.datetime.now

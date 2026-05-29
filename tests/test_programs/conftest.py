@@ -13,11 +13,6 @@ from acoupi.system.constants import CeleryConfig
 
 
 @pytest.fixture(scope="session")
-def celery_config():
-    return CeleryConfig().model_dump()
-
-
-@pytest.fixture(scope="session")
 def celery_worker_parameters():
     """Redefine this fixture to change the init parameters of Celery workers.
 
@@ -28,6 +23,7 @@ def celery_worker_parameters():
     """
     return {
         "loglevel": "WARN",
+        "queues": ("celery", "default", "special"),
     }
 
 

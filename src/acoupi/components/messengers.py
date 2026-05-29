@@ -28,7 +28,7 @@ from pydantic import BaseModel, SecretStr, field_serializer
 from acoupi import data
 from acoupi.components import types
 from acoupi.devices import get_device_id
-from acoupi.system.exceptions import HealthCheckError
+from acoupi.system.exceptions import HealthCheckError, MessageSendError
 
 __all__ = [
     "MQTTMessenger",
@@ -43,6 +43,7 @@ class MQTTConfig(BaseModel):
     topic: str = "acoupi"
     port: int = 1884
     timeout: int = 5
+    use_tls: bool = False
 
     @field_serializer("password", when_used="json")
     def dump_password(self, value):
@@ -71,6 +72,7 @@ class MQTTMessenger(types.Messenger):
         username: Optional[str] = None,
         password: Optional[str] = None,
         timeout: int = 5,
+        use_tls: bool = False,
         logger: Optional[logging.Logger] = None,
     ) -> None:
         """Initialise the MQTT messenger.
@@ -87,6 +89,8 @@ class MQTTMessenger(types.Messenger):
             The port to connect to, by default 1884.
         password : Optional[SecretStr], optional
             The password to authenticate with, by default None.
+        use_tls: bool
+            Use TLS is host requires this with local certs (eg. HiveHQ) - default sets to false
 
         Notes
         -----
@@ -97,6 +101,7 @@ class MQTTMessenger(types.Messenger):
         self.host = host
         self.port = port
         self.client_id = get_device_id()
+        self.use_tls = use_tls
 
         self.client = mqtt.Client(
             callback_api_version=CallbackAPIVersion.VERSION2,
@@ -110,6 +115,12 @@ class MQTTMessenger(types.Messenger):
             logger = get_task_logger(__name__)
 
         self.logger = logger
+
+        if self.use_tls:
+            # Calling tls_set() without arguments uses the system's
+            # default CA certificates, which works for HiveHQ
+            self.logger.info("Using TLS Connection.")
+            self.client.tls_set()
 
     @classmethod
     def from_config(
@@ -127,6 +138,7 @@ class MQTTMessenger(types.Messenger):
             else None,
             topic=config.topic,
             timeout=config.timeout,
+            use_tls=config.use_tls,
             logger=logger,
         )
 
@@ -179,11 +191,8 @@ class MQTTMessenger(types.Messenger):
         mqtt_status = self.check_connection()
 
         if mqtt_status != MQTTErrorCode.MQTT_ERR_SUCCESS:
-            self.logger.warning(f"MQTT connection error: {mqtt_status}")
-            return data.Response(
-                message=message,
-                status=data.ResponseStatus.ERROR,
-                received_on=datetime.datetime.now(),
+            raise MessageSendError(
+                f"MQTT connection error: {MQTTErrorCode(mqtt_status).name}"
             )
 
         response = self.client.publish(
@@ -195,16 +204,15 @@ class MQTTMessenger(types.Messenger):
         try:
             response.wait_for_publish(timeout=5)
         except ValueError as e:
-            status = data.ResponseStatus.ERROR
-            logging.debug(f"Message not sent: {message.content}. Error: {e}")
+            raise MessageSendError(
+                f"MQTT publish failed for message {message.id}: {e}"
+            ) from e
         except RuntimeError as e:
-            status = data.ResponseStatus.FAILED
-            logging.debug(f"Message not sent: {message.content}. Error: {e}")
+            raise MessageSendError(
+                f"MQTT publish failed for message {message.id}: {e}"
+            ) from e
 
         if response.rc != MQTTErrorCode.MQTT_ERR_SUCCESS:
-            logging.debug(
-                f"Message not sent: {message.content}. Error: {response.rc}"
-            )
             status = data.ResponseStatus.ERROR
 
         received_on = datetime.datetime.now()
@@ -349,10 +357,13 @@ class HTTPMessenger(types.Messenger):
         status = data.ResponseStatus.SUCCESS
         response_content = None
 
-        message_content = message.content
-        content_json = json.loads(message_content)
-
         try:
+            message_content = message.content
+            if isinstance(message_content, bytes):
+                message_content = message_content.decode("utf-8")
+
+            content_json = json.loads(message_content)
+
             if self.content_type == "application/json":
                 response = requests.post(
                     self.base_url,
@@ -376,10 +387,18 @@ class HTTPMessenger(types.Messenger):
             if not response.ok:
                 status = data.ResponseStatus.ERROR
 
-        except ValueError:
-            status = data.ResponseStatus.ERROR
-        except RuntimeError:
-            status = data.ResponseStatus.FAILED
+        except (UnicodeDecodeError, ValueError) as error:
+            raise MessageSendError(
+                f"Invalid HTTP message payload for message {message.id}: {error}"
+            ) from error
+        except requests.exceptions.RequestException as error:
+            raise MessageSendError(
+                f"HTTP request failed for message {message.id}: {error}"
+            ) from error
+        except RuntimeError as error:
+            raise MessageSendError(
+                f"HTTP send failed for message {message.id}: {error}"
+            ) from error
 
         received_on = datetime.datetime.now()
 

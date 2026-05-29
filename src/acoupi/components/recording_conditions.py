@@ -12,17 +12,22 @@ which returns a boolean indicating if a recording should be made.
 """
 
 import datetime
-from typing import List
+import shutil
+from pathlib import Path
+from typing import List, Literal
 
 from astral import LocationInfo
 from astral.sun import sun
 
 from acoupi import data
 from acoupi.components import types
+from acoupi.components.audio_recorder import TMP_PATH
 
 __all__ = [
     "IsInInterval",
     "IsInIntervals",
+    "DawnTimeInterval",
+    "HasSufficientSpace",
 ]
 
 
@@ -190,3 +195,60 @@ class DawnTimeInterval(types.RecordingCondition):
         return (
             start_dawninterval.time() <= now.time() <= end_dawninterval.time()
         )
+
+
+class HasSufficientSpace(types.RecordingCondition):
+    """A RecordingCondition that checks available disk space."""
+
+    def __init__(
+        self,
+        path: Path = TMP_PATH,
+        min_space: int = 1024,
+        unit: Literal["B", "KB", "MB", "GB"] = "MB",
+        binary: bool = False,
+    ):
+        """Initialise the storage-space recording condition.
+
+        Parameters
+        ----------
+        path : Path
+            The path whose filesystem free space should be checked.
+        min_space : int
+            The minimum free space required to allow recording.
+        unit : Literal["B", "KB", "MB", "GB"]
+            The unit used for ``min_space``. By default MB.
+        binary : bool
+            Whether to use powers of 1024 instead of 1000 when converting units.
+        """
+        self.path = path
+        self.unit = unit
+
+        self.min_space = _to_bytes(min_space, unit, binary=binary)
+
+    def should_record(self) -> bool:
+        """Return whether the target filesystem has enough free space."""
+        info = shutil.disk_usage(self.path)
+        return info.free > self.min_space
+
+
+def _to_bytes(
+    size: int,
+    unit: Literal["B", "KB", "MB", "GB"],
+    binary: bool = False,
+) -> int:
+    """Convert a size value in the given unit to bytes."""
+    if unit == "B":
+        return size
+
+    base = 1024 if binary else 1000
+
+    if unit == "KB":
+        return size * base
+
+    if unit == "MB":
+        return size * base**2
+
+    if unit == "GB":
+        return size * base**3
+
+    raise ValueError(f"Invalid unit {unit}")
