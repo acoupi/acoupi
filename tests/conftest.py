@@ -5,7 +5,9 @@ It contains fixtures that are can be used in multiple test files.
 """
 
 import datetime as dt
+import time
 from pathlib import Path
+from typing import Callable
 
 import pytest
 
@@ -30,6 +32,30 @@ def celery_parameters():
         "broker_url": "memory://",
         "result_backend": "rpc://",
     }
+
+
+def celery_enable_logging():
+    return True
+
+
+@pytest.fixture
+def wait_for_condition() -> Callable[[Callable[[], bool], float, float], None]:
+    def wait(
+        condition: Callable[[], bool],
+        timeout: float = 3.0,
+        interval: float = 0.05,
+    ) -> None:
+        deadline = time.time() + timeout
+
+        while time.time() < deadline:
+            if condition():
+                return
+
+            time.sleep(interval)
+
+        raise AssertionError("Timed out waiting for condition")
+
+    return wait
 
 
 @pytest.fixture
