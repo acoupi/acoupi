@@ -13,25 +13,22 @@ import pytest
 
 from acoupi import data
 from acoupi.system import Settings
+from acoupi.system.constants import CeleryConfig
 
 pytest_plugins = ("celery.contrib.pytest",)
 
 
 @pytest.fixture(scope="session")
 def celery_config():
-    return {
-        "broker_url": "memory://",
-        "result_backend": "rpc://",
-        "broker_transport_options": {"polling_interval": 0.05},
-    }
+    return CeleryConfig(
+        broker_url="memory://",
+        result_backend="cache+memory://",
+    ).model_dump()
 
 
 @pytest.fixture(scope="session")
 def celery_parameters():
-    return {
-        "broker_url": "memory://",
-        "result_backend": "rpc://",
-    }
+    return {"broker_url": "memory://", "result_backend": "cache+memory://"}
 
 
 def celery_enable_logging():
