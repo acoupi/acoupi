@@ -18,6 +18,22 @@ pytest_plugins = ("celery.contrib.pytest",)
 
 
 @pytest.fixture(scope="session")
+def celery_config():
+    return {
+        "broker_url": "memory://",
+        "result_backend": "rpc://",
+        "broker_transport_options": {"polling_interval": 0.05},
+    }
+
+
+@pytest.fixture(scope="session")
+def celery_parameters():
+    return {
+        "broker_url": "memory://",
+        "result_backend": "rpc://",
+    }
+
+
 def celery_enable_logging():
     return True
 
