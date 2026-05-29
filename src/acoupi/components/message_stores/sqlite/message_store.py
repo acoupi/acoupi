@@ -77,10 +77,10 @@ class SqliteMessageStore(types.MessageStore):
         """Store a response to a message."""
         try:
             db_message = self.models.Message[response.message.id]
-        except orm.ObjectNotFound:
+        except orm.ObjectNotFound as error:
             raise MessageStoreError(
                 f"Cannot store response for unknown message {response.message.id}."
-            )
+            ) from error
 
         self.models.Response(
             message=db_message,
