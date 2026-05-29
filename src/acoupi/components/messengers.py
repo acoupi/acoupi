@@ -119,7 +119,7 @@ class MQTTMessenger(types.Messenger):
         if self.use_tls:
             # Calling tls_set() without arguments uses the system's 
             # default CA certificates, which works for HiveHQ
-            self.logger.info(f"Using TLS Connection.")
+            self.logger.info("Using TLS Connection.")
             self.client.tls_set()
 
     @classmethod
