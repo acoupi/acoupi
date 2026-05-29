@@ -305,4 +305,6 @@ def test_date_file_manager_save_recording(
 
     # Assert
     assert tmp_audio_dirpath.exists()
-    assert file_path == Path("2024") / "8" / "1" / f"203000_{recording.id}.wav"
+    assert file_path == (
+        Path("2024") / "8" / "1" / f"20240801_203000_{recording.id}.wav"
+    )

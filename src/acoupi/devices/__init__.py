@@ -7,7 +7,9 @@ like serial numbers and hostnames.
 """
 
 import uuid
+from functools import cache
 
+from acoupi.data import DeviceInfo
 from acoupi.devices.rpi import get_rpi_host_name, get_rpi_serial_number, is_rpi
 
 
@@ -36,9 +38,26 @@ def get_device_id() -> str:
     return str(uuid.getnode())
 
 
+@cache
+def get_device_info() -> DeviceInfo:
+    """Get cached runtime information about the current device.
+
+    Returns
+    -------
+    DeviceInfo
+        Device information for the current process. If the device identifier
+        cannot be resolved, the returned object contains an empty ``id``.
+    """
+    try:
+        return DeviceInfo(id=get_device_id())
+    except Exception:
+        return DeviceInfo(id="")
+
+
 __all__ = [
     "get_rpi_serial_number",
     "get_rpi_host_name",
     "get_device_id",
+    "get_device_info",
     "is_rpi",
 ]

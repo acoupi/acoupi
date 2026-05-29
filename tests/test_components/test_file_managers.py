@@ -2,10 +2,12 @@
 
 import datetime
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from acoupi import components, data
+from acoupi.components import saving_managers
 
 
 def test_save_recording_manager_fails_if_recording_has_no_path(
@@ -140,8 +142,99 @@ def test_date_file_manager_save_recording(
     # Assert
     assert directory.exists()
     assert file_path == (
-        directory / "2023" / "4" / "15" / f"180930_{recording.id}.wav"
+        directory / "2023" / "4" / "15" / f"20230415_180930_{recording.id}.wav"
     )
+
+
+def test_date_file_manager_supports_custom_filename_template(
+    tmp_path: Path,
+    deployment: data.Deployment,
+):
+    path = tmp_path / "test.wav"
+    directory = tmp_path / "recordings"
+    recording = data.Recording(
+        path=path,
+        duration=1.5,
+        samplerate=48000,
+        audio_channels=2,
+        created_on=datetime.datetime(2023, 4, 15, 18, 9, 30),
+        deployment=data.Deployment(
+            name="My Site/1",
+            latitude=51.5,
+            longitude=-0.1,
+            started_on=deployment.started_on,
+        ),
+    )
+    path.touch()
+
+    with patch(
+        "acoupi.components.saving_managers.get_device_info",
+        return_value=data.DeviceInfo(id=""),
+    ):
+        file_manager = components.DateFileManager(
+            directory,
+            filename_template=(
+                "{deployment.name}_{device.id}_{recording.created_on:%H%M}.wav"
+            ),
+        )
+        file_path = file_manager.save_recording(recording)
+
+    assert file_path == (
+        directory / "2023" / "4" / "15" / "My Site_1__1809.wav"
+    )
+
+
+def test_date_file_manager_uses_empty_device_id_when_unavailable(
+    tmp_path: Path,
+):
+    path = tmp_path / "test.wav"
+    directory = tmp_path / "recordings"
+    recording = data.Recording(
+        path=path,
+        duration=1,
+        samplerate=48000,
+        created_on=datetime.datetime(2023, 4, 15, 18, 9, 30),
+        deployment=data.Deployment(name="site-a"),
+    )
+    path.touch()
+
+    with patch(
+        "acoupi.devices.get_device_id",
+        side_effect=RuntimeError("device unavailable"),
+    ):
+        from acoupi.devices import get_device_info
+
+        get_device_info.cache_clear()
+        file_path = components.DateFileManager(
+            directory,
+            filename_template="{device.id}_{recording.created_on:%H%M}.wav",
+        ).save_recording(recording)
+
+    assert file_path == directory / "2023" / "4" / "15" / "_1809.wav"
+
+
+def test_date_file_manager_fails_with_invalid_filename_template(
+    tmp_path: Path,
+    deployment: data.Deployment,
+):
+    path = tmp_path / "test.wav"
+    directory = tmp_path / "recordings"
+    recording = data.Recording(
+        path=path,
+        duration=1,
+        samplerate=8000,
+        created_on=datetime.datetime(2023, 4, 15, 18, 9, 30),
+        deployment=deployment,
+    )
+    path.touch()
+
+    file_manager = components.DateFileManager(
+        directory,
+        filename_template="{recording.hour:02d}.wav",
+    )
+
+    with pytest.raises(ValueError, match="Invalid filename template"):
+        file_manager.save_recording(recording)
 
 
 def test_date_file_manager_fails_if_recording_has_no_path(

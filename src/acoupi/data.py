@@ -32,6 +32,17 @@ class TimeInterval(BaseModel):
     """End time of the interval."""
 
 
+class DeviceInfo(BaseModel):
+    """Runtime information about the current device.
+
+    This object is intentionally small and currently only exposes the device
+    identifier used in filename templates and heartbeat-style messages.
+    """
+
+    id: str
+    """Unique identifier for the current device, if available."""
+
+
 class Deployment(BaseModel):
     """A Deployment captures information about the device deployment.
 
