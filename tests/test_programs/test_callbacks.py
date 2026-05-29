@@ -9,7 +9,6 @@ from pydantic import BaseModel
 from acoupi.programs.core.base import AcoupiProgram
 from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
 
-
 WaitForCondition = Callable[..., None]
 
 
@@ -66,7 +65,8 @@ def test_does_run_callbacks(
     output = program.tasks["task_1"].delay()
     output.get(timeout=3)
 
-    wait_for_condition(path.exists)
+    wait_for_condition(path.exists, timeout=3)
+    wait_for_condition(path.read_text() == message, timeout=3)
 
     assert path.exists()
     assert path.read_text() == message
