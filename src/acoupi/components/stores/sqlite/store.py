@@ -248,16 +248,14 @@ class SqliteStore(types.Store):
             List of tuples of the recording and the corresponding model outputs.
         """
         paths_str = [str(path) for path in paths]
-        db_recordings = (
-            orm.select(r for r in self.models.Recording if r.path in paths_str)
-            .order_by(orm.desc(self.models.Recording.datetime))
-            .prefetch(
-                self.models.Recording.deployment,
-                self.models.Recording.model_outputs,
-                self.models.ModelOutput.tags,
-                self.models.ModelOutput.detections,
-                self.models.Detection.tags,
-            )
+        db_recordings = orm.select(
+            r for r in self.models.Recording if r.path in paths_str
+        ).prefetch(
+            self.models.Recording.deployment,
+            self.models.Recording.model_outputs,
+            self.models.ModelOutput.tags,
+            self.models.ModelOutput.detections,
+            self.models.Detection.tags,
         )
         return _to_recordings_and_outputs(db_recordings)
 
@@ -649,8 +647,12 @@ def _to_deployment(db_deployment: db_types.Deployment) -> data.Deployment:
     )
 
 
-def _to_recording(db_recording: db_types.Recording) -> data.Recording:
-    deployment = _to_deployment(db_recording.deployment)
+def _to_recording(
+    db_recording: db_types.Recording,
+    deployment: Optional[data.Deployment] = None,
+) -> data.Recording:
+    if deployment is None:
+        deployment = _to_deployment(db_recording.deployment)
     return data.Recording(
         id=db_recording.id,
         deployment=deployment,
@@ -697,8 +699,10 @@ def _to_detection(db_detection: db_types.Detection) -> data.Detection:
 
 def _to_model_output(
     db_model_output: db_types.ModelOutput,
+    recording: Optional[data.Recording] = None,
 ) -> data.ModelOutput:
-    recording = _to_recording(db_model_output.recording)
+    if recording is None:
+        recording = _to_recording(db_model_output.recording)
     return data.ModelOutput(
         id=db_model_output.id,
         name_model=db_model_output.model_name,
@@ -725,12 +729,21 @@ def _to_recordings_and_outputs(
     db_recordings,
 ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
     ret = []
+    deployments = {}
     for db_recording in db_recordings:
-        recording = _to_recording(db_recording)
+        deployment = deployments.get(db_recording.deployment.id)
+        if deployment is None:
+            deployment = _to_deployment(db_recording.deployment)
+            deployments[db_recording.deployment.id] = deployment
+
+        recording = _to_recording(db_recording, deployment=deployment)
 
         outputs = []
         for db_model_output in db_recording.model_outputs:
-            model_output = _to_model_output(db_model_output)
+            model_output = _to_model_output(
+                db_model_output,
+                recording=recording,
+            )
             outputs.append(model_output)
 
         ret.append((recording, outputs))
