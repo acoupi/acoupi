@@ -14,6 +14,7 @@ from . import types as db_types
 from .database import create_base_models
 from acoupi import data
 from acoupi.components import types
+from acoupi.system.exceptions import MetadataStoreError
 
 db_session = orm.db_session()
 
@@ -524,20 +525,27 @@ class SqliteStore(types.Store):
         existing_recording_ids = self._get_existing_recording_ids(
             recording_ids
         )
-        recordings_to_create = [
+        missing_recordings = [
             recording
             for recording_id, recording in recordings_by_id.items()
             if recording_id not in existing_recording_ids
         ]
 
-        if not recordings_to_create:
-            return
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=orm.PonyRuntimeWarning)
-            for recording in recordings_to_create:
-                self._get_or_create_recording(recording)
-            orm.commit()
+        if missing_recordings:
+            missing_descriptions = []
+            for recording in missing_recordings:
+                path = (
+                    "no path"
+                    if recording.path is None
+                    else str(recording.path)
+                )
+                missing_descriptions.append(f"id={recording.id}, path={path}")
+            raise MetadataStoreError(
+                "Cannot store model outputs because the following recordings "
+                "are not present in the metadata store: "
+                + "; ".join(missing_descriptions)
+                + ". Store the recordings first with store_recording()."
+            )
 
     def _get_existing_recording_ids(
         self,

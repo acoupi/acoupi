@@ -9,6 +9,7 @@ import uuid
 import pytest
 
 from acoupi import components, data
+from acoupi.system.exceptions import MetadataStoreError
 
 
 @pytest.fixture(scope="function")
@@ -356,6 +357,7 @@ def test_can_store_model_outputs(
     sqlite_store: components.SqliteStore,
     model_output: data.ModelOutput,
 ):
+    sqlite_store.store_recording(model_output.recording)
     sqlite_store.store_model_output(model_output)
     db_path = sqlite_store.db_path
 
@@ -397,12 +399,28 @@ def test_can_store_multiple_model_outputs(
         )
     )
 
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_recording(second_recording)
     sqlite_store.store_model_outputs([model_output, second_output])
 
     retrieved = sqlite_store.get_recordings(
         [model_output.recording.id, second_output.recording.id]
     )
     assert len(retrieved) == 2
+
+
+def test_store_model_outputs_fails_if_recording_is_missing(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    with pytest.raises(MetadataStoreError) as excinfo:
+        sqlite_store.store_model_outputs([model_output])
+
+    message = str(excinfo.value)
+    assert "not present in the metadata store" in message
+    assert str(model_output.recording.id) in message
+    assert str(model_output.recording.path) in message
+    assert "store_recording()" in message
 
 
 def test_can_update_deployment_info(

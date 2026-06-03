@@ -7,6 +7,7 @@ __all__ = [
     "DeploymentError",
     "HealthCheckError",
     "InvalidProgramError",
+    "MetadataStoreError",
     "MessageSendError",
     "MessageStoreError",
     "ParameterError",
@@ -123,6 +124,19 @@ class MessageStoreError(Exception):
 
     def __init__(self, message: str):
         """Initialise MessageStoreError exception."""
+        self.message = message
+        super().__init__(message)
+
+    def __str__(self):
+        """Return the error message."""
+        return self.message
+
+
+class MetadataStoreError(Exception):
+    """Exception raised when the metadata store state is invalid."""
+
+    def __init__(self, message: str):
+        """Initialise MetadataStoreError exception."""
         self.message = message
         super().__init__(message)
 
