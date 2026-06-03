@@ -329,12 +329,15 @@ class SqliteStore(types.Store):
             detection_rows,
             tags_by_detection_id,
         )
-        return _assemble_model_outputs(
+        outputs_by_recording_id = _assemble_model_outputs(
             model_output_rows,
             recordings_by_id,
             tags_by_model_output_id,
             detections_by_model_output_id,
         )
+        for recording_id in recording_ids:
+            outputs_by_recording_id.setdefault(recording_id, [])
+        return outputs_by_recording_id
 
     @db_session
     def get_recordings(
@@ -784,8 +787,10 @@ class SqliteStore(types.Store):
     def _connect_sqlite(self) -> sqlite3.Connection:
         """Open a sqlite connection to the store database."""
         if str(self.db_path) == ":memory:":
-            raise ValueError(
-                "Bulk sqlite inserts are not supported for in-memory databases."
+            raise MetadataStoreError(
+                "Direct sqlite batch operations are not supported for in-memory "
+                "metadata stores. Use a file-backed sqlite store for batched "
+                "reads and writes."
             )
         return sqlite3.connect(str(self.db_path))
 

@@ -3,7 +3,7 @@
 import datetime
 import sqlite3
 from pathlib import Path
-from typing import Generator
+from typing import Generator, cast
 import uuid
 
 import pytest
@@ -510,6 +510,33 @@ def test_get_recordings_model_outputs_returns_empty_list_for_recording_without_o
     assert retrieved == {recording.id: []}
 
 
+def test_get_recordings_model_outputs_includes_requested_recordings_without_outputs(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    recording_without_outputs = model_output.recording.model_copy(
+        update=dict(
+            id=uuid.uuid4(),
+            path=Path("test/path-without-outputs"),
+            created_on=model_output.recording.created_on
+            + datetime.timedelta(seconds=5),
+        )
+    )
+
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_recording(recording_without_outputs)
+    sqlite_store.store_model_output(model_output)
+
+    retrieved = sqlite_store.get_recordings_model_outputs(
+        [model_output.recording, recording_without_outputs]
+    )
+
+    assert retrieved == {
+        model_output.recording.id: [model_output],
+        recording_without_outputs.id: [],
+    }
+
+
 def test_get_recordings_model_outputs_chunks_large_batches(
     sqlite_store: components.SqliteStore,
     deployment: data.Deployment,
@@ -583,6 +610,27 @@ def test_store_model_outputs_fails_if_recording_is_missing(
     assert str(model_output.recording.id) in message
     assert str(model_output.recording.path) in message
     assert "store_recording()" in message
+
+
+def test_in_memory_store_raises_clear_error_for_batched_model_output_loads(
+    deployment: data.Deployment,
+):
+    sqlite_store = components.SqliteStore(cast(Path, ":memory:"))
+    recording = data.Recording(
+        deployment=deployment,
+        path=Path("test/in-memory.wav"),
+        duration=10.0,
+        samplerate=44100,
+        created_on=datetime.datetime.now(),
+    )
+
+    with pytest.raises(MetadataStoreError) as excinfo:
+        sqlite_store.get_recordings_model_outputs([recording])
+
+    assert "Direct sqlite batch operations are not supported" in str(
+        excinfo.value
+    )
+    assert "file-backed sqlite store" in str(excinfo.value)
 
 
 def test_can_update_deployment_info(
