@@ -3,9 +3,9 @@
 import datetime
 import json
 import sqlite3
-import warnings
+from collections import defaultdict
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 from uuid import UUID
 
 from pony import orm
@@ -237,7 +237,7 @@ class SqliteStore(types.Store):
     def get_recordings_by_path(
         self,
         paths: List[Path],
-    ) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
+    ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
         """Get a list of recordings from the store by their paths.
 
         Args:
@@ -253,8 +253,70 @@ class SqliteStore(types.Store):
         ).prefetch(
             self.models.Recording.deployment,
             self.models.Recording.model_outputs,
+            self.models.ModelOutput.tags,
+            self.models.ModelOutput.detections,
+            self.models.Detection.tags,
+        )
+        return _to_recordings_and_outputs(db_recordings)
+
+    @db_session
+    def get_recordings_info_by_path(
+        self,
+        paths: List[Path],
+    ) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
+        """Get recordings by path with lightweight model-output metadata."""
+        paths_str = [str(path) for path in paths]
+        db_recordings = orm.select(
+            r for r in self.models.Recording if r.path in paths_str
+        ).prefetch(
+            self.models.Recording.deployment,
+            self.models.Recording.model_outputs,
         )
         return _to_recordings_and_output_info(db_recordings)
+
+    @db_session
+    def get_recording_model_outputs(
+        self,
+        recording: data.Recording,
+    ) -> List[data.ModelOutput]:
+        """Get full model outputs associated with a single recording."""
+        return self.get_recordings_model_outputs([recording]).get(
+            recording.id, []
+        )
+
+    def get_recordings_model_outputs(
+        self,
+        recordings: Sequence[data.Recording],
+    ) -> Dict[UUID, List[data.ModelOutput]]:
+        """Get full model outputs associated with multiple recordings."""
+        if not recordings:
+            return {}
+
+        recordings_by_id = {
+            recording.id: recording for recording in recordings
+        }
+        recording_ids = list(recordings_by_id)
+        model_output_rows = self._get_model_output_rows(recording_ids)
+        if not model_output_rows:
+            return {recording_id: [] for recording_id in recording_ids}
+
+        model_output_ids = list(model_output_rows)
+        detection_rows = self._get_detection_rows(model_output_ids)
+        detection_ids = [row[0] for row in detection_rows]
+        tags_by_model_output_id, tags_by_detection_id = (
+            self._get_predicted_tag_rows(model_output_ids, detection_ids)
+        )
+
+        detections_by_model_output_id = _assemble_detections(
+            detection_rows,
+            tags_by_detection_id,
+        )
+        return _assemble_model_outputs(
+            model_output_rows,
+            recordings_by_id,
+            tags_by_model_output_id,
+            detections_by_model_output_id,
+        )
 
     @db_session
     def get_recordings(
@@ -561,6 +623,137 @@ class SqliteStore(types.Store):
 
         return {UUID(bytes=row[0]) for row in rows}
 
+    def _get_model_output_rows(
+        self,
+        recording_ids: List[UUID],
+    ) -> Dict[UUID, List[Tuple[UUID, str, datetime.datetime]]]:
+        """Fetch model outputs grouped by recording id."""
+        placeholders = ", ".join("?" for _ in recording_ids)
+        query = (
+            "SELECT id, recording_id, model_name, created_on "
+            f"FROM model_output WHERE recording_id IN ({placeholders})"
+        )
+
+        grouped: Dict[UUID, List[Tuple[UUID, str, datetime.datetime]]] = (
+            defaultdict(list)
+        )
+        with self._connect_sqlite() as connection:
+            rows = connection.execute(
+                query,
+                [recording_id.bytes for recording_id in recording_ids],
+            ).fetchall()
+
+        for (
+            model_output_id_blob,
+            recording_id_blob,
+            model_name,
+            created_on,
+        ) in rows:
+            grouped[UUID(bytes=recording_id_blob)].append(
+                (
+                    UUID(bytes=model_output_id_blob),
+                    model_name,
+                    datetime.datetime.fromisoformat(created_on),
+                )
+            )
+
+        return grouped
+
+    def _get_detection_rows(
+        self,
+        model_output_ids: List[UUID],
+    ) -> List[Tuple[UUID, str, float, UUID]]:
+        """Fetch detections for the given model outputs."""
+        if not model_output_ids:
+            return []
+
+        placeholders = ", ".join("?" for _ in model_output_ids)
+        query = (
+            "SELECT id, location, detection_score, model_output_id "
+            f"FROM detection WHERE model_output_id IN ({placeholders})"
+        )
+
+        with self._connect_sqlite() as connection:
+            rows = connection.execute(
+                query,
+                [
+                    model_output_id.bytes
+                    for model_output_id in model_output_ids
+                ],
+            ).fetchall()
+
+        return [
+            (
+                UUID(bytes=detection_id_blob),
+                location,
+                detection_score,
+                UUID(bytes=model_output_id_blob),
+            )
+            for detection_id_blob, location, detection_score, model_output_id_blob in rows
+        ]
+
+    def _get_predicted_tag_rows(
+        self,
+        model_output_ids: List[UUID],
+        detection_ids: List[UUID],
+    ) -> Tuple[
+        Dict[UUID, List[data.PredictedTag]],
+        Dict[UUID, List[data.PredictedTag]],
+    ]:
+        """Fetch predicted tags for model outputs and detections."""
+        tags_by_model_output_id: Dict[UUID, List[data.PredictedTag]] = (
+            defaultdict(list)
+        )
+        tags_by_detection_id: Dict[UUID, List[data.PredictedTag]] = (
+            defaultdict(list)
+        )
+
+        clauses = []
+        parameters = []
+        if model_output_ids:
+            placeholders = ", ".join("?" for _ in model_output_ids)
+            clauses.append(f"model_output_id IN ({placeholders})")
+            parameters.extend(
+                model_output_id.bytes for model_output_id in model_output_ids
+            )
+        if detection_ids:
+            placeholders = ", ".join("?" for _ in detection_ids)
+            clauses.append(f"detection_id IN ({placeholders})")
+            parameters.extend(
+                detection_id.bytes for detection_id in detection_ids
+            )
+
+        if not clauses:
+            return tags_by_model_output_id, tags_by_detection_id
+
+        query = (
+            "SELECT key, value, confidence_score, detection_id, model_output_id "
+            "FROM predicted_tag WHERE " + " OR ".join(clauses)
+        )
+
+        with self._connect_sqlite() as connection:
+            rows = connection.execute(query, parameters).fetchall()
+
+        for (
+            key,
+            value,
+            confidence_score,
+            detection_id_blob,
+            model_output_id_blob,
+        ) in rows:
+            tag = data.PredictedTag(
+                tag=data.Tag(key=key, value=value),
+                confidence_score=confidence_score,
+            )
+            if detection_id_blob is not None:
+                tags_by_detection_id[UUID(bytes=detection_id_blob)].append(tag)
+            if model_output_id_blob is not None:
+                tags_by_model_output_id[
+                    UUID(bytes=model_output_id_blob)
+                ].append(tag)
+
+        return tags_by_model_output_id, tags_by_detection_id
+
     def _connect_sqlite(self) -> sqlite3.Connection:
         """Open a sqlite connection to the store database."""
         if str(self.db_path) == ":memory:":
@@ -730,6 +923,58 @@ def _to_model_output_info(
         name_model=db_model_output.model_name,
         created_on=db_model_output.created_on,
     )
+
+
+def _assemble_detections(
+    detection_rows: List[Tuple[UUID, str, float, UUID]],
+    tags_by_detection_id: Dict[UUID, List[data.PredictedTag]],
+) -> Dict[UUID, List[data.Detection]]:
+    """Assemble detections grouped by model output id."""
+    detections_by_model_output_id: Dict[UUID, List[data.Detection]] = (
+        defaultdict(list)
+    )
+    for (
+        detection_id,
+        location,
+        detection_score,
+        model_output_id,
+    ) in detection_rows:
+        location_data = None if location == "" else json.loads(str(location))
+        detections_by_model_output_id[model_output_id].append(
+            data.Detection(
+                id=detection_id,
+                location=location_data,
+                detection_score=detection_score,
+                tags=tags_by_detection_id.get(detection_id, []),
+            )
+        )
+    return detections_by_model_output_id
+
+
+def _assemble_model_outputs(
+    model_output_rows: Dict[UUID, List[Tuple[UUID, str, datetime.datetime]]],
+    recordings_by_id: Dict[UUID, data.Recording],
+    tags_by_model_output_id: Dict[UUID, List[data.PredictedTag]],
+    detections_by_model_output_id: Dict[UUID, List[data.Detection]],
+) -> Dict[UUID, List[data.ModelOutput]]:
+    """Assemble full model outputs grouped by recording id."""
+    outputs_by_recording_id: Dict[UUID, List[data.ModelOutput]] = {}
+    for recording_id, rows in model_output_rows.items():
+        recording = recordings_by_id[recording_id]
+        outputs_by_recording_id[recording_id] = [
+            data.ModelOutput(
+                id=model_output_id,
+                name_model=model_name,
+                recording=recording,
+                created_on=created_on,
+                tags=tags_by_model_output_id.get(model_output_id, []),
+                detections=detections_by_model_output_id.get(
+                    model_output_id, []
+                ),
+            )
+            for model_output_id, model_name, created_on in rows
+        ]
+    return outputs_by_recording_id
 
 
 def _to_recordings_and_outputs(

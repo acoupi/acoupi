@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Callable, List, Optional, Sequence
 
 from acoupi.components import types
-from acoupi.data import ModelOutputInfo, Recording
+from acoupi.data import ModelOutput, ModelOutputInfo, Recording
 from acoupi.system.files import (
     TEMP_PATH,
     delete_recording,
@@ -54,16 +54,12 @@ class ProcessedByRequiredModels:
 
 def manage_recording(
     recording: Recording,
-    model_outputs: List[ModelOutputInfo],
+    model_outputs: List[ModelOutput],
     store: types.Store,
     file_managers: List[types.RecordingSavingManager],
     logger: logging.Logger,
     file_filters: Optional[List[types.RecordingSavingFilter]] = None,
-    management_conditions: Optional[List[RecordingManagementCondition]] = None,
 ):
-    if management_conditions is None:
-        management_conditions = []
-
     logger.info(f"Managing recording: {recording.path}")
 
     if recording.path is None:
@@ -72,16 +68,6 @@ def manage_recording(
             recording.id,
         )
         return
-
-    # Is the recording ready to be managed?
-    for condition in management_conditions:
-        if not condition(recording, model_outputs):
-            logger.info(
-                "Recording %s does not meet condition %s. Skipping.",
-                recording,
-                condition,
-            )
-            return
 
     # Which files should be saved?
     if file_filters and not any(
@@ -195,15 +181,40 @@ def generate_file_management_task(
             *management_conditions,
         ]
 
+    def can_manage_recording(
+        recording: Recording,
+        model_outputs: Sequence[ModelOutputInfo],
+    ) -> bool:
+        for condition in management_conditions:
+            if not condition(recording, model_outputs):
+                logger.info(
+                    "Recording %s does not meet condition %s. Skipping.",
+                    recording,
+                    condition,
+                )
+                return False
+        return True
+
     def file_management_task() -> None:
         """Manage files."""
         logger.info("Starting file management process.")
         temp_wav_files = get_temp_files(path=tmp_path)
 
-        recordings_and_outputs = store.get_recordings_by_path(
+        recordings_and_outputs = store.get_recordings_info_by_path(
             paths=temp_wav_files
         )
-        for recording, model_outputs in recordings_and_outputs:
+        recordings_to_manage = [
+            (recording, model_output_info)
+            for recording, model_output_info in recordings_and_outputs
+            if can_manage_recording(recording, model_output_info)
+        ]
+
+        outputs_by_recording_id = store.get_recordings_model_outputs(
+            [recording for recording, _ in recordings_to_manage]
+        )
+
+        for recording, _ in recordings_to_manage:
+            model_outputs = outputs_by_recording_id.get(recording.id, [])
             manage_recording(
                 recording,
                 model_outputs,
@@ -211,7 +222,6 @@ def generate_file_management_task(
                 file_managers=file_managers,
                 logger=logger,
                 file_filters=file_filters,
-                management_conditions=management_conditions,
             )
 
     return file_management_task

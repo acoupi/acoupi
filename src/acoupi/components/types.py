@@ -4,7 +4,7 @@ import datetime
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Generic, List, Optional, Protocol, Tuple
+from typing import Dict, Generic, List, Optional, Protocol, Sequence, Tuple
 from uuid import UUID
 
 from acoupi import data
@@ -227,7 +227,7 @@ class RecordingSavingFilter(ABC):
     def should_save_recording(
         self,
         recording: data.Recording,
-        model_outputs: Optional[List[data.ModelOutputInfo]] = None,
+        model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
         """Determine if a recording should be saved.
 
@@ -235,7 +235,7 @@ class RecordingSavingFilter(ABC):
         ----------
         recording : data.Recording
             The recording to check.
-        model_outputs : Optional[List[data.ModelOutputInfo]], optional
+        model_outputs : Optional[List[data.ModelOutput]], optional
             The model outputs associated to the recording. Used in
             some implementations when the decision to save a recording
             depends on the model outputs, rather the recording itself.
@@ -271,7 +271,7 @@ class RecordingSavingManager(ABC):
     def save_recording(
         self,
         recording: data.Recording,
-        model_outputs: Optional[List[data.ModelOutputInfo]] = None,
+        model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> Optional[Path]:
         """Save the recording.
 
@@ -279,7 +279,7 @@ class RecordingSavingManager(ABC):
         ----------
         recording : data.Recording
             The recording to save.
-        model_outputs : Optional[List[data.ModelOutputInfo]], optional
+        model_outputs : Optional[List[data.ModelOutput]], optional
             The model outputs associated to the recording. Used to determined
             where and how to save the recording.
 
@@ -364,7 +364,7 @@ class Store(ABC):
     def get_recordings_by_path(
         self,
         paths: List[Path],
-    ) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
+    ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
         """Get a list recordings from the store by their paths.
 
         Each recording is returned with the full list of model outputs
@@ -379,6 +379,27 @@ class Store(ABC):
         -------
             A list of tuples of the recording and the model outputs.
         """
+
+    @abstractmethod
+    def get_recordings_info_by_path(
+        self,
+        paths: List[Path],
+    ) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
+        """Get recordings by path with lightweight model-output metadata."""
+
+    @abstractmethod
+    def get_recording_model_outputs(
+        self,
+        recording: data.Recording,
+    ) -> List[data.ModelOutput]:
+        """Get the full model outputs associated with a single recording."""
+
+    @abstractmethod
+    def get_recordings_model_outputs(
+        self,
+        recordings: Sequence[data.Recording],
+    ) -> Dict[UUID, List[data.ModelOutput]]:
+        """Get the full model outputs associated with multiple recordings."""
 
     @abstractmethod
     def update_recording_path(
