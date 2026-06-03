@@ -409,6 +409,106 @@ def test_can_store_multiple_model_outputs(
     assert len(retrieved) == 2
 
 
+def test_get_recordings_by_path_returns_full_model_outputs(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_model_output(model_output)
+
+    retrieved = sqlite_store.get_recordings_by_path(
+        [model_output.recording.path]
+    )
+
+    assert len(retrieved) == 1
+    recording, outputs = retrieved[0]
+    assert recording == model_output.recording
+    assert outputs == [model_output]
+
+
+def test_get_recordings_info_by_path_returns_lightweight_model_output_info(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_model_output(model_output)
+
+    retrieved = sqlite_store.get_recordings_info_by_path(
+        [model_output.recording.path]
+    )
+
+    assert len(retrieved) == 1
+    recording, outputs = retrieved[0]
+    assert recording == model_output.recording
+    assert len(outputs) == 1
+    assert outputs[0].id == model_output.id
+    assert outputs[0].name_model == model_output.name_model
+    assert outputs[0].created_on == model_output.created_on
+
+
+def test_get_recording_model_outputs_returns_full_outputs(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_model_output(model_output)
+
+    retrieved = sqlite_store.get_recording_model_outputs(
+        model_output.recording
+    )
+
+    assert retrieved == [model_output]
+
+
+def test_get_recordings_model_outputs_returns_outputs_grouped_by_recording(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    second_recording = model_output.recording.model_copy(
+        update=dict(
+            id=uuid.uuid4(),
+            path=Path("test/path-second"),
+            created_on=model_output.recording.created_on
+            + datetime.timedelta(seconds=5),
+        )
+    )
+    second_output = model_output.model_copy(
+        update=dict(
+            id=uuid.uuid4(),
+            recording=second_recording,
+            created_on=model_output.created_on + datetime.timedelta(seconds=5),
+            detections=[
+                detection.model_copy(update=dict(id=uuid.uuid4()))
+                for detection in model_output.detections
+            ],
+        )
+    )
+
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_recording(second_recording)
+    sqlite_store.store_model_outputs([model_output, second_output])
+
+    retrieved = sqlite_store.get_recordings_model_outputs(
+        [model_output.recording, second_recording]
+    )
+
+    assert retrieved == {
+        model_output.recording.id: [model_output],
+        second_recording.id: [second_output],
+    }
+
+
+def test_get_recordings_model_outputs_returns_empty_list_for_recording_without_outputs(
+    sqlite_store: components.SqliteStore,
+    recording: data.Recording,
+):
+    sqlite_store.store_recording(recording)
+
+    retrieved = sqlite_store.get_recordings_model_outputs([recording])
+
+    assert retrieved == {recording.id: []}
+
+
 def test_store_model_outputs_fails_if_recording_is_missing(
     sqlite_store: components.SqliteStore,
     model_output: data.ModelOutput,

@@ -300,7 +300,11 @@ class SqliteStore(types.Store):
         if not model_output_rows:
             return {recording_id: [] for recording_id in recording_ids}
 
-        model_output_ids = list(model_output_rows)
+        model_output_ids = [
+            model_output_id
+            for rows in model_output_rows.values()
+            for model_output_id, _, _ in rows
+        ]
         detection_rows = self._get_detection_rows(model_output_ids)
         detection_ids = [row[0] for row in detection_rows]
         tags_by_model_output_id, tags_by_detection_id = (
