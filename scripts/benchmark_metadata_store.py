@@ -15,8 +15,10 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import statistics
 import time
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 from typing import Callable, Iterable, List, Sequence, TypeVar
 
@@ -77,6 +79,12 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=20,
         help="Number of paths passed to get_recordings_by_path.",
+    )
+    parser.add_argument(
+        "--query-repetitions",
+        type=int,
+        default=20,
+        help="Number of times to repeat the get_recordings_by_path query.",
     )
     parser.add_argument(
         "--tags-per-detection",
@@ -218,6 +226,35 @@ def time_call(
     )
 
 
+def time_repeated_calls(
+    stage: str,
+    operation: str,
+    calls: Sequence[Callable[[], object]],
+    extra: str = "",
+) -> BenchmarkResult:
+    """Measure repeated single-operation calls and report summary stats."""
+    durations = []
+    for call in calls:
+        start = time.perf_counter()
+        call()
+        durations.append(time.perf_counter() - start)
+
+    summary = [
+        f"n={len(durations)}",
+        f"mean={statistics.mean(durations):.4f}s",
+        f"std={statistics.pstdev(durations):.4f}s",
+    ]
+    if extra:
+        summary.append(extra)
+
+    return BenchmarkResult(
+        stage=stage,
+        operation=operation,
+        seconds=sum(durations),
+        extra=", ".join(summary),
+    )
+
+
 def print_results(results: Sequence[BenchmarkResult]) -> None:
     """Print benchmark results grouped by stage."""
     stage_width = max(len(result.stage) for result in results)
@@ -236,6 +273,15 @@ def chunked(values: Sequence[T], size: int) -> Iterable[Sequence[T]]:
         yield values[start : start + size]
 
 
+def store_recordings_compat(
+    store: SqliteStore,
+    recordings: Sequence[data.Recording],
+) -> None:
+    """Store recordings using repeated store_recording calls."""
+    for recording in recordings:
+        store.store_recording(recording)
+
+
 def populate_stage_database(
     store: SqliteStore,
     deployment: data.Deployment,
@@ -250,9 +296,6 @@ def populate_stage_database(
         for recording_index in range(stage.existing_recordings)
     ]
 
-    for recording in recordings:
-        store.store_recording(recording)
-
     model_outputs = [
         make_model_output(
             recording=recording,
@@ -264,8 +307,11 @@ def populate_stage_database(
         for index, recording in enumerate(recordings)
     ]
 
+    store_recordings_compat(store, recordings)
+
     for outputs in chunked(model_outputs, 250):
-        store.store_model_outputs(list(outputs))
+        for model_output in outputs:
+            store.store_model_output(model_output)
 
     return model_outputs
 
@@ -280,6 +326,8 @@ def main() -> None:
         raise SystemExit("--detection-batch-size must be greater than 0")
     if args.management_sample_size <= 0:
         raise SystemExit("--management-sample-size must be greater than 0")
+    if args.query_repetitions <= 0:
+        raise SystemExit("--query-repetitions must be greater than 0")
     if args.tags_per_detection <= 0:
         raise SystemExit("--tags-per-detection must be greater than 0")
     if args.recording_tags < 0:
@@ -293,6 +341,7 @@ def main() -> None:
     print(f"recording_batch_size={args.recording_batch_size}")
     print(f"detection_batch_size={args.detection_batch_size}")
     print(f"management_sample_size={args.management_sample_size}")
+    print(f"query_repetitions={args.query_repetitions}")
     print(f"tags_per_detection={args.tags_per_detection}")
     print(f"recording_tags={args.recording_tags}")
     print()
@@ -305,7 +354,8 @@ def main() -> None:
         store = SqliteStore(db_path)
         deployment = data.Deployment(
             name=f"benchmark-{stage.name}",
-            started_on=dt.datetime(2024, 1, 1, 0, 0, 0),
+            started_on=dt.datetime(2024, 1, 1, 0, 0, 0)
+            + dt.timedelta(days=len(results)),
         )
         store.store_deployment(deployment)
         existing_outputs = populate_stage_database(
@@ -337,11 +387,12 @@ def main() -> None:
         ]
 
         results.append(
-            time_call(
+            time_repeated_calls(
                 stage=stage.name,
                 operation="recording_task store_recording",
-                func=lambda recs=new_recordings: [
-                    store.store_recording(recording) for recording in recs
+                calls=[
+                    partial(store.store_recording, recording)
+                    for recording in new_recordings
                 ],
                 extra=f"batch_size={len(new_recordings)}",
             )
@@ -349,12 +400,13 @@ def main() -> None:
 
         detection_batch = new_outputs[: args.detection_batch_size]
         results.append(
-            time_call(
+            time_repeated_calls(
                 stage=stage.name,
-                operation="detection_task store_model_outputs",
-                func=lambda outputs=detection_batch: store.store_model_outputs(
-                    outputs
-                ),
+                operation="detection_task store_model_output",
+                calls=[
+                    partial(store.store_model_output, model_output)
+                    for model_output in detection_batch
+                ],
                 extra=(
                     f"batch_size={len(detection_batch)}, total_detections="
                     f"{len(detection_batch) * stage.detections_per_output}"
@@ -371,13 +423,17 @@ def main() -> None:
         ]
 
         results.append(
-            time_call(
+            time_repeated_calls(
                 stage=stage.name,
                 operation="file_management_task get_recordings_by_path",
-                func=lambda paths=sample_paths: store.get_recordings_by_path(
-                    paths
+                calls=[
+                    partial(store.get_recordings_by_path, sample_paths)
+                    for _ in range(args.query_repetitions)
+                ],
+                extra=(
+                    f"sample_size={len(sample_paths)}, "
+                    f"query_repetitions={args.query_repetitions}"
                 ),
-                extra=f"sample_size={len(sample_paths)}",
             )
         )
 
