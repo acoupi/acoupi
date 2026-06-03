@@ -17,6 +17,7 @@ from acoupi.components import types
 from acoupi.system.exceptions import MetadataStoreError
 
 db_session = orm.db_session()
+SQLITE_MAX_BOUND_VARIABLES = 900
 
 
 class SqliteStore(types.Store):
@@ -248,14 +249,16 @@ class SqliteStore(types.Store):
             List of tuples of the recording and the corresponding model outputs.
         """
         paths_str = [str(path) for path in paths]
-        db_recordings = orm.select(
-            r for r in self.models.Recording if r.path in paths_str
-        ).prefetch(
-            self.models.Recording.deployment,
-            self.models.Recording.model_outputs,
-            self.models.ModelOutput.tags,
-            self.models.ModelOutput.detections,
-            self.models.Detection.tags,
+        db_recordings = (
+            orm.select(r for r in self.models.Recording if r.path in paths_str)
+            .order_by(orm.desc(self.models.Recording.datetime))
+            .prefetch(
+                self.models.Recording.deployment,
+                self.models.Recording.model_outputs,
+                self.models.ModelOutput.tags,
+                self.models.ModelOutput.detections,
+                self.models.Detection.tags,
+            )
         )
         return _to_recordings_and_outputs(db_recordings)
 
@@ -296,20 +299,31 @@ class SqliteStore(types.Store):
             recording.id: recording for recording in recordings
         }
         recording_ids = list(recordings_by_id)
-        model_output_rows = self._get_model_output_rows(recording_ids)
-        if not model_output_rows:
-            return {recording_id: [] for recording_id in recording_ids}
+        with self._connect_sqlite() as connection:
+            model_output_rows = self._get_model_output_rows(
+                connection,
+                recording_ids,
+            )
+            if not model_output_rows:
+                return {recording_id: [] for recording_id in recording_ids}
 
-        model_output_ids = [
-            model_output_id
-            for rows in model_output_rows.values()
-            for model_output_id, _, _ in rows
-        ]
-        detection_rows = self._get_detection_rows(model_output_ids)
-        detection_ids = [row[0] for row in detection_rows]
-        tags_by_model_output_id, tags_by_detection_id = (
-            self._get_predicted_tag_rows(model_output_ids, detection_ids)
-        )
+            model_output_ids = [
+                model_output_id
+                for rows in model_output_rows.values()
+                for model_output_id, _, _ in rows
+            ]
+            detection_rows = self._get_detection_rows(
+                connection,
+                model_output_ids,
+            )
+            detection_ids = [row[0] for row in detection_rows]
+            tags_by_model_output_id, tags_by_detection_id = (
+                self._get_predicted_tag_rows(
+                    connection,
+                    model_output_ids,
+                    detection_ids,
+                )
+            )
 
         detections_by_model_output_id = _assemble_detections(
             detection_rows,
@@ -616,75 +630,86 @@ class SqliteStore(types.Store):
         if not recording_ids:
             return set()
 
-        placeholders = ", ".join("?" for _ in recording_ids)
-        query = f"SELECT id FROM recording WHERE id IN ({placeholders})"
-
+        rows = []
         with self._connect_sqlite() as connection:
-            rows = connection.execute(
-                query,
-                [recording_id.bytes for recording_id in recording_ids],
-            ).fetchall()
+            for recording_id_chunk in _chunked_uuids(recording_ids):
+                placeholders = ", ".join("?" for _ in recording_id_chunk)
+                query = (
+                    f"SELECT id FROM recording WHERE id IN ({placeholders})"
+                )
+                rows.extend(
+                    connection.execute(
+                        query,
+                        [
+                            recording_id.bytes
+                            for recording_id in recording_id_chunk
+                        ],
+                    ).fetchall()
+                )
 
         return {UUID(bytes=row[0]) for row in rows}
 
     def _get_model_output_rows(
         self,
+        connection: sqlite3.Connection,
         recording_ids: List[UUID],
     ) -> Dict[UUID, List[Tuple[UUID, str, datetime.datetime]]]:
         """Fetch model outputs grouped by recording id."""
-        placeholders = ", ".join("?" for _ in recording_ids)
-        query = (
-            "SELECT id, recording_id, model_name, created_on "
-            f"FROM model_output WHERE recording_id IN ({placeholders})"
-        )
-
         grouped: Dict[UUID, List[Tuple[UUID, str, datetime.datetime]]] = (
             defaultdict(list)
         )
-        with self._connect_sqlite() as connection:
+        for recording_id_chunk in _chunked_uuids(recording_ids):
+            placeholders = ", ".join("?" for _ in recording_id_chunk)
+            query = (
+                "SELECT id, recording_id, model_name, created_on "
+                f"FROM model_output WHERE recording_id IN ({placeholders})"
+            )
             rows = connection.execute(
                 query,
-                [recording_id.bytes for recording_id in recording_ids],
+                [recording_id.bytes for recording_id in recording_id_chunk],
             ).fetchall()
 
-        for (
-            model_output_id_blob,
-            recording_id_blob,
-            model_name,
-            created_on,
-        ) in rows:
-            grouped[UUID(bytes=recording_id_blob)].append(
-                (
-                    UUID(bytes=model_output_id_blob),
-                    model_name,
-                    datetime.datetime.fromisoformat(created_on),
+            for (
+                model_output_id_blob,
+                recording_id_blob,
+                model_name,
+                created_on,
+            ) in rows:
+                grouped[UUID(bytes=recording_id_blob)].append(
+                    (
+                        UUID(bytes=model_output_id_blob),
+                        model_name,
+                        datetime.datetime.fromisoformat(created_on),
+                    )
                 )
-            )
 
         return grouped
 
     def _get_detection_rows(
         self,
+        connection: sqlite3.Connection,
         model_output_ids: List[UUID],
     ) -> List[Tuple[UUID, str, float, UUID]]:
         """Fetch detections for the given model outputs."""
         if not model_output_ids:
             return []
 
-        placeholders = ", ".join("?" for _ in model_output_ids)
-        query = (
-            "SELECT id, location, detection_score, model_output_id "
-            f"FROM detection WHERE model_output_id IN ({placeholders})"
-        )
-
-        with self._connect_sqlite() as connection:
-            rows = connection.execute(
-                query,
-                [
-                    model_output_id.bytes
-                    for model_output_id in model_output_ids
-                ],
-            ).fetchall()
+        rows = []
+        for model_output_id_chunk in _chunked_uuids(model_output_ids):
+            placeholders = ", ".join("?" for _ in model_output_id_chunk)
+            query = (
+                "SELECT id, location, detection_score, model_output_id "
+                f"FROM detection WHERE model_output_id IN ({placeholders})"
+            )
+            rows.extend(
+                connection.execute(
+                    query,
+                    [
+                        model_output_id.bytes
+                        for model_output_id in model_output_id_chunk
+                    ],
+                ).fetchall()
+            )
 
         return [
             (
@@ -698,6 +723,7 @@ class SqliteStore(types.Store):
 
     def _get_predicted_tag_rows(
         self,
+        connection: sqlite3.Connection,
         model_output_ids: List[UUID],
         detection_ids: List[UUID],
     ) -> Tuple[
@@ -712,51 +738,48 @@ class SqliteStore(types.Store):
             defaultdict(list)
         )
 
-        clauses = []
-        parameters = []
-        if model_output_ids:
-            placeholders = ", ".join("?" for _ in model_output_ids)
-            clauses.append(f"model_output_id IN ({placeholders})")
-            parameters.extend(
-                model_output_id.bytes for model_output_id in model_output_ids
-            )
-        if detection_ids:
-            placeholders = ", ".join("?" for _ in detection_ids)
-            clauses.append(f"detection_id IN ({placeholders})")
-            parameters.extend(
-                detection_id.bytes for detection_id in detection_ids
-            )
-
-        if not clauses:
-            return tags_by_model_output_id, tags_by_detection_id
-
-        query = (
-            "SELECT key, value, confidence_score, detection_id, model_output_id "
-            "FROM predicted_tag WHERE " + " OR ".join(clauses)
+        self._append_predicted_tags_for_ids(
+            connection=connection,
+            ids=model_output_ids,
+            column_name="model_output_id",
+            tags_by_id=tags_by_model_output_id,
+        )
+        self._append_predicted_tags_for_ids(
+            connection=connection,
+            ids=detection_ids,
+            column_name="detection_id",
+            tags_by_id=tags_by_detection_id,
         )
 
-        with self._connect_sqlite() as connection:
-            rows = connection.execute(query, parameters).fetchall()
-
-        for (
-            key,
-            value,
-            confidence_score,
-            detection_id_blob,
-            model_output_id_blob,
-        ) in rows:
-            tag = data.PredictedTag(
-                tag=data.Tag(key=key, value=value),
-                confidence_score=confidence_score,
-            )
-            if detection_id_blob is not None:
-                tags_by_detection_id[UUID(bytes=detection_id_blob)].append(tag)
-            if model_output_id_blob is not None:
-                tags_by_model_output_id[
-                    UUID(bytes=model_output_id_blob)
-                ].append(tag)
-
         return tags_by_model_output_id, tags_by_detection_id
+
+    def _append_predicted_tags_for_ids(
+        self,
+        connection: sqlite3.Connection,
+        ids: List[UUID],
+        column_name: str,
+        tags_by_id: Dict[UUID, List[data.PredictedTag]],
+    ) -> None:
+        """Append predicted tags for one foreign-key column."""
+        for id_chunk in _chunked_uuids(ids):
+            placeholders = ", ".join("?" for _ in id_chunk)
+            query = (
+                "SELECT key, value, confidence_score, "
+                f"{column_name} FROM predicted_tag WHERE "
+                f"{column_name} IN ({placeholders})"
+            )
+            rows = connection.execute(
+                query,
+                [id_value.bytes for id_value in id_chunk],
+            ).fetchall()
+
+            for key, value, confidence_score, id_blob in rows:
+                tags_by_id[UUID(bytes=id_blob)].append(
+                    data.PredictedTag(
+                        tag=data.Tag(key=key, value=value),
+                        confidence_score=confidence_score,
+                    )
+                )
 
     def _connect_sqlite(self) -> sqlite3.Connection:
         """Open a sqlite connection to the store database."""
@@ -927,6 +950,14 @@ def _to_model_output_info(
         name_model=db_model_output.model_name,
         created_on=db_model_output.created_on,
     )
+
+
+def _chunked_uuids(ids: List[UUID]) -> List[List[UUID]]:
+    """Split UUID lists into sqlite-safe chunks."""
+    return [
+        ids[index : index + SQLITE_MAX_BOUND_VARIABLES]
+        for index in range(0, len(ids), SQLITE_MAX_BOUND_VARIABLES)
+    ]
 
 
 def _assemble_detections(

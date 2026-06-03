@@ -9,6 +9,7 @@ import uuid
 import pytest
 
 from acoupi import components, data
+from acoupi.components.stores.sqlite import store as sqlite_store_module
 from acoupi.system.exceptions import MetadataStoreError
 
 
@@ -507,6 +508,67 @@ def test_get_recordings_model_outputs_returns_empty_list_for_recording_without_o
     retrieved = sqlite_store.get_recordings_model_outputs([recording])
 
     assert retrieved == {recording.id: []}
+
+
+def test_get_recordings_model_outputs_chunks_large_batches(
+    sqlite_store: components.SqliteStore,
+    deployment: data.Deployment,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setattr(
+        sqlite_store_module,
+        "SQLITE_MAX_BOUND_VARIABLES",
+        2,
+    )
+
+    recordings = []
+    model_outputs = []
+    base_time = datetime.datetime.now()
+    for index in range(5):
+        recording = data.Recording(
+            deployment=deployment,
+            path=Path(f"test/chunked-{index}.wav"),
+            duration=10.0,
+            samplerate=44100,
+            created_on=base_time + datetime.timedelta(seconds=index),
+        )
+        model_output = data.ModelOutput(
+            name_model=f"test_model_{index}",
+            recording=recording,
+            tags=[
+                data.PredictedTag(
+                    tag=data.Tag(key="test", value=f"value-{index}"),
+                    confidence_score=0.8,
+                )
+            ],
+            detections=[
+                data.Detection(
+                    id=uuid.uuid4(),
+                    location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
+                    detection_score=0.6,
+                    tags=[
+                        data.PredictedTag(
+                            tag=data.Tag(key="species", value=f"tag-{index}"),
+                            confidence_score=0.3,
+                        )
+                    ],
+                )
+            ],
+            created_on=recording.created_on,
+        )
+        recordings.append(recording)
+        model_outputs.append(model_output)
+
+    for recording in recordings:
+        sqlite_store.store_recording(recording)
+    sqlite_store.store_model_outputs(model_outputs)
+
+    retrieved = sqlite_store.get_recordings_model_outputs(recordings)
+
+    assert retrieved == {
+        recording.id: [model_output]
+        for recording, model_output in zip(recordings, model_outputs)
+    }
 
 
 def test_store_model_outputs_fails_if_recording_is_missing(
