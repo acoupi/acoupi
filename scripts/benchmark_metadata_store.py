@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import sqlite3
 import statistics
 import time
 from dataclasses import dataclass
@@ -65,13 +66,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--recording-batch-size",
         type=int,
-        default=1,
+        default=20,
         help="Number of new recordings to store for the recording_task benchmark.",
     )
     parser.add_argument(
         "--detection-batch-size",
         type=int,
-        default=1,
+        default=20,
         help="Number of model outputs to store for the detection_task benchmark.",
     )
     parser.add_argument(
@@ -89,7 +90,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--tags-per-detection",
         type=int,
-        default=1,
+        default=5,
         help="Number of predicted tags on each detection.",
     )
     parser.add_argument(
@@ -273,13 +274,102 @@ def chunked(values: Sequence[T], size: int) -> Iterable[Sequence[T]]:
         yield values[start : start + size]
 
 
-def store_recordings_compat(
-    store: SqliteStore,
+def bulk_seed_stage_data(
+    db_path: Path,
+    deployment: data.Deployment,
     recordings: Sequence[data.Recording],
+    model_outputs: Sequence[data.ModelOutput],
 ) -> None:
-    """Store recordings using repeated store_recording calls."""
-    for recording in recordings:
-        store.store_recording(recording)
+    """Seed recordings and model outputs directly with sqlite bulk inserts."""
+    recording_rows = [
+        (
+            recording.id.bytes,
+            None if recording.path is None else str(recording.path),
+            recording.created_on.isoformat(sep=" "),
+            recording.duration,
+            recording.samplerate,
+            recording.audio_channels,
+            deployment.id.bytes,
+        )
+        for recording in recordings
+    ]
+
+    model_output_rows = []
+    detection_rows = []
+    predicted_tag_rows = []
+
+    for model_output in model_outputs:
+        model_output_rows.append(
+            (
+                model_output.id.bytes,
+                model_output.name_model,
+                model_output.recording.id.bytes,
+                model_output.created_on.isoformat(sep=" "),
+            )
+        )
+
+        for tag in model_output.tags:
+            predicted_tag_rows.append(
+                (
+                    tag.tag.key,
+                    tag.tag.value,
+                    tag.confidence_score,
+                    None,
+                    model_output.id.bytes,
+                )
+            )
+
+        for detection in model_output.detections:
+            detection_rows.append(
+                (
+                    detection.id.bytes,
+                    ""
+                    if detection.location is None
+                    else detection.location.model_dump_json(),
+                    detection.detection_score,
+                    model_output.id.bytes,
+                )
+            )
+
+            for tag in detection.tags:
+                predicted_tag_rows.append(
+                    (
+                        tag.tag.key,
+                        tag.tag.value,
+                        tag.confidence_score,
+                        detection.id.bytes,
+                        None,
+                    )
+                )
+
+    with sqlite3.connect(str(db_path)) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute("BEGIN")
+        try:
+            if recording_rows:
+                connection.executemany(
+                    "INSERT INTO recording (id, path, datetime, duration_s, samplerate_hz, audio_channels, deployment_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    recording_rows,
+                )
+            if model_output_rows:
+                connection.executemany(
+                    "INSERT INTO model_output (id, model_name, recording_id, created_on) VALUES (?, ?, ?, ?)",
+                    model_output_rows,
+                )
+            if detection_rows:
+                connection.executemany(
+                    "INSERT INTO detection (id, location, detection_score, model_output_id) VALUES (?, ?, ?, ?)",
+                    detection_rows,
+                )
+            if predicted_tag_rows:
+                connection.executemany(
+                    "INSERT INTO predicted_tag (key, value, confidence_score, detection_id, model_output_id) VALUES (?, ?, ?, ?, ?)",
+                    predicted_tag_rows,
+                )
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
 
 
 def populate_stage_database(
@@ -307,11 +397,12 @@ def populate_stage_database(
         for index, recording in enumerate(recordings)
     ]
 
-    store_recordings_compat(store, recordings)
-
-    for outputs in chunked(model_outputs, 250):
-        for model_output in outputs:
-            store.store_model_output(model_output)
+    bulk_seed_stage_data(
+        db_path=store.db_path,
+        deployment=deployment,
+        recordings=recordings,
+        model_outputs=model_outputs,
+    )
 
     return model_outputs
 
@@ -347,10 +438,13 @@ def main() -> None:
     print()
 
     for stage in stage_definitions():
+        print(f"Starting stage {stage}")
+
         db_path = args.db_dir / f"metadata-{stage.name}.db"
         if db_path.exists():
             db_path.unlink()
 
+        print("Populating stage database...", end="")
         store = SqliteStore(db_path)
         deployment = data.Deployment(
             name=f"benchmark-{stage.name}",
@@ -365,6 +459,7 @@ def main() -> None:
             tags_per_detection=args.tags_per_detection,
             recording_tags=args.recording_tags,
         )
+        print(" done")
 
         base_index = stage.existing_recordings
         new_recordings = [
@@ -386,6 +481,7 @@ def main() -> None:
             for index, recording in enumerate(new_recordings)
         ]
 
+        print("Testing store recording")
         results.append(
             time_repeated_calls(
                 stage=stage.name,
@@ -398,6 +494,7 @@ def main() -> None:
             )
         )
 
+        print("Testing store model output")
         detection_batch = new_outputs[: args.detection_batch_size]
         results.append(
             time_repeated_calls(
@@ -422,12 +519,13 @@ def main() -> None:
             if model_output.recording.path is not None
         ]
 
+        print(f"Testing get {len(sample_paths)} recordings by path")
         results.append(
             time_repeated_calls(
                 stage=stage.name,
                 operation="file_management_task get_recordings_by_path",
                 calls=[
-                    partial(store.get_recordings_by_path, sample_paths)
+                    partial(store.get_recordings_by_path, paths=sample_paths)
                     for _ in range(args.query_repetitions)
                 ],
                 extra=(
