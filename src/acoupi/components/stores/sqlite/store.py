@@ -514,19 +514,21 @@ class SqliteStore(types.Store):
         model_outputs: List[data.ModelOutput],
     ) -> None:
         """Ensure all recordings referenced by model outputs exist."""
-        seen_recording_ids = set()
-        recordings_to_create = []
+        recordings_by_id = {}
 
         for model_output in model_outputs:
             recording = model_output.recording
-            if recording.id in seen_recording_ids:
-                continue
-            seen_recording_ids.add(recording.id)
+            recordings_by_id[recording.id] = recording
 
-            try:
-                self._get_recording_by_id(recording.id)
-            except ValueError:
-                recordings_to_create.append(recording)
+        recording_ids = list(recordings_by_id)
+        existing_recording_ids = self._get_existing_recording_ids(
+            recording_ids
+        )
+        recordings_to_create = [
+            recording
+            for recording_id, recording in recordings_by_id.items()
+            if recording_id not in existing_recording_ids
+        ]
 
         if not recordings_to_create:
             return
@@ -536,6 +538,25 @@ class SqliteStore(types.Store):
             for recording in recordings_to_create:
                 self._get_or_create_recording(recording)
             orm.commit()
+
+    def _get_existing_recording_ids(
+        self,
+        recording_ids: List[UUID],
+    ) -> set[UUID]:
+        """Return the subset of recording ids that already exist."""
+        if not recording_ids:
+            return set()
+
+        placeholders = ", ".join("?" for _ in recording_ids)
+        query = f"SELECT id FROM recording WHERE id IN ({placeholders})"
+
+        with self._connect_sqlite() as connection:
+            rows = connection.execute(
+                query,
+                [recording_id.bytes for recording_id in recording_ids],
+            ).fetchall()
+
+        return {UUID(bytes=row[0]) for row in rows}
 
     def _connect_sqlite(self) -> sqlite3.Connection:
         """Open a sqlite connection to the store database."""
