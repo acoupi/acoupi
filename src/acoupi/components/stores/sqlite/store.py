@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import sqlite3
 import warnings
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -148,44 +149,88 @@ class SqliteStore(types.Store):
     @db_session
     def store_model_output(self, model_output: data.ModelOutput) -> None:
         """Store the model output locally."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=orm.PonyRuntimeWarning)
-            db_recording = self._get_or_create_recording(
-                model_output.recording
-            )
+        self.store_model_outputs([model_output])
 
-        db_model_output = self.models.ModelOutput(
-            id=model_output.id,
-            model_name=model_output.name_model,
-            recording=db_recording,
-            created_on=model_output.created_on,
-        )
+    def store_model_outputs(
+        self,
+        model_outputs: List[data.ModelOutput],
+    ) -> None:
+        """Store multiple model outputs locally using bulk sqlite inserts."""
+        if not model_outputs:
+            return
 
-        for tag in model_output.tags:
-            db_model_output.tags.create(
-                key=tag.tag.key,
-                value=tag.tag.value,
-                confidence_score=tag.confidence_score,
-            )
+        self._ensure_recordings_exist(model_outputs)
 
-        for detection in model_output.detections:
-            location = (
-                ""
-                if detection.location is None
-                else detection.location.model_dump_json()
-            )
-            db_detection = db_model_output.detections.create(
-                id=detection.id,
-                location=location,
-                detection_score=detection.detection_score,
-            )
+        model_output_rows = []
+        predicted_tag_rows = []
+        detection_rows = []
 
-            for tag in detection.tags:
-                db_detection.tags.create(
-                    key=tag.tag.key,
-                    value=tag.tag.value,
-                    confidence_score=tag.confidence_score,
+        for model_output in model_outputs:
+            model_output_rows.append(
+                (
+                    model_output.id.bytes,
+                    model_output.name_model,
+                    model_output.recording.id.bytes,
+                    model_output.created_on.isoformat(sep=" "),
                 )
+            )
+
+            for tag in model_output.tags:
+                predicted_tag_rows.append(
+                    (
+                        tag.tag.key,
+                        tag.tag.value,
+                        tag.confidence_score,
+                        None,
+                        model_output.id.bytes,
+                    )
+                )
+
+            for detection in model_output.detections:
+                detection_rows.append(
+                    (
+                        detection.id.bytes,
+                        ""
+                        if detection.location is None
+                        else detection.location.model_dump_json(),
+                        detection.detection_score,
+                        model_output.id.bytes,
+                    )
+                )
+
+                for tag in detection.tags:
+                    predicted_tag_rows.append(
+                        (
+                            tag.tag.key,
+                            tag.tag.value,
+                            tag.confidence_score,
+                            detection.id.bytes,
+                            None,
+                        )
+                    )
+
+        with self._connect_sqlite() as connection:
+            connection.execute("PRAGMA foreign_keys = ON")
+            connection.execute("BEGIN")
+            try:
+                connection.executemany(
+                    "INSERT INTO model_output (id, model_name, recording_id, created_on) VALUES (?, ?, ?, ?)",
+                    model_output_rows,
+                )
+                if detection_rows:
+                    connection.executemany(
+                        "INSERT INTO detection (id, location, detection_score, model_output_id) VALUES (?, ?, ?, ?)",
+                        detection_rows,
+                    )
+                if predicted_tag_rows:
+                    connection.executemany(
+                        "INSERT INTO predicted_tag (key, value, confidence_score, detection_id, model_output_id) VALUES (?, ?, ?, ?, ?)",
+                        predicted_tag_rows,
+                    )
+                connection.commit()
+            except Exception:
+                connection.rollback()
+                raise
 
     @db_session
     def get_recordings_by_path(
@@ -363,20 +408,25 @@ class SqliteStore(types.Store):
 
         if detection_ids:
             query = query.filter(
-                lambda t: t.detection is not None
-                and t.detection.id in detection_ids
+                lambda t: (
+                    t.detection is not None and t.detection.id in detection_ids
+                )
             )
 
         if after is not None:
             query = query.filter(
-                lambda t: t.detection is not None
-                and t.detection.model_output.created_on >= after
+                lambda t: (
+                    t.detection is not None
+                    and t.detection.model_output.created_on >= after
+                )
             )
 
         if before is not None:
             query = query.filter(
-                lambda t: t.detection is not None
-                and t.detection.model_output.created_on <= before
+                lambda t: (
+                    t.detection is not None
+                    and t.detection.model_output.created_on <= before
+                )
             )
 
         if score_gt is not None:
@@ -458,6 +508,42 @@ class SqliteStore(types.Store):
             return self._get_recording_by_id(recording.id)
         except ValueError:
             return self._create_recording(recording)
+
+    def _ensure_recordings_exist(
+        self,
+        model_outputs: List[data.ModelOutput],
+    ) -> None:
+        """Ensure all recordings referenced by model outputs exist."""
+        seen_recording_ids = set()
+        recordings_to_create = []
+
+        for model_output in model_outputs:
+            recording = model_output.recording
+            if recording.id in seen_recording_ids:
+                continue
+            seen_recording_ids.add(recording.id)
+
+            try:
+                self._get_recording_by_id(recording.id)
+            except ValueError:
+                recordings_to_create.append(recording)
+
+        if not recordings_to_create:
+            return
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=orm.PonyRuntimeWarning)
+            for recording in recordings_to_create:
+                self._get_or_create_recording(recording)
+            orm.commit()
+
+    def _connect_sqlite(self) -> sqlite3.Connection:
+        """Open a sqlite connection to the store database."""
+        if str(self.db_path) == ":memory:":
+            raise ValueError(
+                "Bulk sqlite inserts are not supported for in-memory databases."
+            )
+        return sqlite3.connect(str(self.db_path))
 
     @db_session
     def _get_deployment_by_started_on(

@@ -334,6 +334,13 @@ class Store(ABC):
         """Store the model output locally."""
 
     @abstractmethod
+    def store_model_outputs(
+        self,
+        model_outputs: List[data.ModelOutput],
+    ) -> None:
+        """Store multiple model outputs locally."""
+
+    @abstractmethod
     def get_recordings(
         self,
         ids: List[UUID],

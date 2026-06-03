@@ -451,21 +451,17 @@ def main() -> None:
         )
     )
 
-    write_times: List[float] = []
-    for model_output in model_outputs:
-        started = time.perf_counter()
-        store.store_model_output(model_output)
-        write_times.append(time.perf_counter() - started)
-
-    total_write_seconds = sum(write_times)
+    total_write_result = time_call(
+        "store_model_outputs total",
+        lambda: store.store_model_outputs(model_outputs),
+    )
+    total_write_seconds = total_write_result.seconds
     total_detections = args.recordings * args.detections_per_output
     results.append(
         BenchmarkResult(
-            name="store_model_output total",
+            name=total_write_result.name,
             seconds=total_write_seconds,
             extra=(
-                f"per_output_mean={statistics.mean(write_times):.4f}s"
-                f", per_output_p95={quantile(write_times, 0.95):.4f}s"
                 f", detections_per_sec={safe_rate(total_detections, total_write_seconds):.1f}"
             ),
         )

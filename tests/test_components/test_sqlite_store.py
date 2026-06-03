@@ -4,6 +4,7 @@ import datetime
 import sqlite3
 from pathlib import Path
 from typing import Generator
+import uuid
 
 import pytest
 
@@ -370,6 +371,38 @@ def test_can_store_model_outputs(
 
         cursor.execute("SELECT id FROM detection;")
         assert len(cursor.fetchall()) == 1
+
+
+def test_can_store_multiple_model_outputs(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    second_recording = model_output.recording.model_copy(
+        update=dict(
+            id=uuid.uuid4(),
+            path=Path("test/path-second"),
+            created_on=model_output.recording.created_on
+            + datetime.timedelta(seconds=5),
+        )
+    )
+    second_output = model_output.model_copy(
+        update=dict(
+            id=uuid.uuid4(),
+            recording=second_recording,
+            created_on=model_output.created_on + datetime.timedelta(seconds=5),
+            detections=[
+                detection.model_copy(update=dict(id=uuid.uuid4()))
+                for detection in model_output.detections
+            ],
+        )
+    )
+
+    sqlite_store.store_model_outputs([model_output, second_output])
+
+    retrieved = sqlite_store.get_recordings(
+        [model_output.recording.id, second_output.recording.id]
+    )
+    assert len(retrieved) == 2
 
 
 def test_can_update_deployment_info(
