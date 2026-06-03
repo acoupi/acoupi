@@ -104,6 +104,15 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Keep generated sqlite databases after benchmarking.",
     )
+    parser.add_argument(
+        "--stages",
+        type=str,
+        default="",
+        help=(
+            "Comma-separated list of stages to run, for example 'empty,1d'. "
+            "Default runs all stages."
+        ),
+    )
     return parser
 
 
@@ -139,6 +148,28 @@ def stage_definitions() -> List[StageDefinition]:
             detections_per_output=200,
         ),
     ]
+
+
+def select_stages(stage_filter: str) -> List[StageDefinition]:
+    """Return the requested stages or all stages if no filter is provided."""
+    stages = stage_definitions()
+    if not stage_filter.strip():
+        return stages
+
+    requested = [
+        name.strip() for name in stage_filter.split(",") if name.strip()
+    ]
+    stage_map = {stage.name: stage for stage in stages}
+    unknown = [name for name in requested if name not in stage_map]
+    if unknown:
+        available = ", ".join(stage_map)
+        raise SystemExit(
+            "Unknown stage(s): "
+            + ", ".join(unknown)
+            + f". Available stages: {available}"
+        )
+
+    return [stage_map[name] for name in requested]
 
 
 def make_tag(index: int, score: float) -> data.PredictedTag:
@@ -435,9 +466,10 @@ def main() -> None:
     print(f"query_repetitions={args.query_repetitions}")
     print(f"tags_per_detection={args.tags_per_detection}")
     print(f"recording_tags={args.recording_tags}")
+    print(f"stages={args.stages or 'all'}")
     print()
 
-    for stage in stage_definitions():
+    for stage in select_stages(args.stages):
         print(f"Starting stage {stage}")
 
         db_path = args.db_dir / f"metadata-{stage.name}.db"
