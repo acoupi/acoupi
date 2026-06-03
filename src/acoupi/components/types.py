@@ -227,7 +227,7 @@ class RecordingSavingFilter(ABC):
     def should_save_recording(
         self,
         recording: data.Recording,
-        model_outputs: Optional[List[data.ModelOutput]] = None,
+        model_outputs: Optional[List[data.ModelOutputInfo]] = None,
     ) -> bool:
         """Determine if a recording should be saved.
 
@@ -235,7 +235,7 @@ class RecordingSavingFilter(ABC):
         ----------
         recording : data.Recording
             The recording to check.
-        model_outputs : Optional[List[data.ModelOutput]], optional
+        model_outputs : Optional[List[data.ModelOutputInfo]], optional
             The model outputs associated to the recording. Used in
             some implementations when the decision to save a recording
             depends on the model outputs, rather the recording itself.
@@ -271,7 +271,7 @@ class RecordingSavingManager(ABC):
     def save_recording(
         self,
         recording: data.Recording,
-        model_outputs: Optional[List[data.ModelOutput]] = None,
+        model_outputs: Optional[List[data.ModelOutputInfo]] = None,
     ) -> Optional[Path]:
         """Save the recording.
 
@@ -279,7 +279,7 @@ class RecordingSavingManager(ABC):
         ----------
         recording : data.Recording
             The recording to save.
-        model_outputs : Optional[List[data.ModelOutput]], optional
+        model_outputs : Optional[List[data.ModelOutputInfo]], optional
             The model outputs associated to the recording. Used to determined
             where and how to save the recording.
 
@@ -364,7 +364,7 @@ class Store(ABC):
     def get_recordings_by_path(
         self,
         paths: List[Path],
-    ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
+    ) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
         """Get a list recordings from the store by their paths.
 
         Each recording is returned with the full list of model outputs

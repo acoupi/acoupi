@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Callable, List, Optional, Sequence
 
 from acoupi.components import types
-from acoupi.data import ModelOutput, Recording
+from acoupi.data import ModelOutputInfo, Recording
 from acoupi.system.files import (
     TEMP_PATH,
     delete_recording,
@@ -30,7 +30,7 @@ logger.setLevel(logging.INFO)
 
 
 RecordingManagementCondition = Callable[
-    [Recording, Sequence[ModelOutput]], bool
+    [Recording, Sequence[ModelOutputInfo]], bool
 ]
 
 
@@ -43,7 +43,7 @@ class ProcessedByRequiredModels:
     def __call__(
         self,
         recording: Recording,
-        model_outputs: Sequence[ModelOutput],
+        model_outputs: Sequence[ModelOutputInfo],
     ) -> bool:
         """Return True if all required model outputs exist."""
         missing_models = self.required_model_names - {
@@ -54,7 +54,7 @@ class ProcessedByRequiredModels:
 
 def manage_recording(
     recording: Recording,
-    model_outputs: List[ModelOutput],
+    model_outputs: List[ModelOutputInfo],
     store: types.Store,
     file_managers: List[types.RecordingSavingManager],
     logger: logging.Logger,

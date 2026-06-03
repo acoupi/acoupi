@@ -237,7 +237,7 @@ class SqliteStore(types.Store):
     def get_recordings_by_path(
         self,
         paths: List[Path],
-    ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
+    ) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
         """Get a list of recordings from the store by their paths.
 
         Args:
@@ -253,11 +253,8 @@ class SqliteStore(types.Store):
         ).prefetch(
             self.models.Recording.deployment,
             self.models.Recording.model_outputs,
-            self.models.ModelOutput.tags,
-            self.models.ModelOutput.detections,
-            self.models.Detection.tags,
         )
-        return _to_recordings_and_outputs(db_recordings)
+        return _to_recordings_and_output_info(db_recordings)
 
     @db_session
     def get_recordings(
@@ -725,6 +722,16 @@ def _to_model_output(
     )
 
 
+def _to_model_output_info(
+    db_model_output: db_types.ModelOutput,
+) -> data.ModelOutputInfo:
+    return data.ModelOutputInfo(
+        id=db_model_output.id,
+        name_model=db_model_output.model_name,
+        created_on=db_model_output.created_on,
+    )
+
+
 def _to_recordings_and_outputs(
     db_recordings,
 ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
@@ -746,6 +753,27 @@ def _to_recordings_and_outputs(
             )
             outputs.append(model_output)
 
+        ret.append((recording, outputs))
+
+    return ret
+
+
+def _to_recordings_and_output_info(
+    db_recordings,
+) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
+    ret = []
+    deployments = {}
+    for db_recording in db_recordings:
+        deployment = deployments.get(db_recording.deployment.id)
+        if deployment is None:
+            deployment = _to_deployment(db_recording.deployment)
+            deployments[db_recording.deployment.id] = deployment
+
+        recording = _to_recording(db_recording, deployment=deployment)
+        outputs = [
+            _to_model_output_info(db_model_output)
+            for db_model_output in db_recording.model_outputs
+        ]
         ret.append((recording, outputs))
 
     return ret

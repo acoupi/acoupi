@@ -15,6 +15,7 @@ __all__ = [
     "PredictedTag",
     "Detection",
     "ModelOutput",
+    "ModelOutputInfo",
     "Message",
     "ResponseStatus",
     "Response",
@@ -300,6 +301,21 @@ class ModelOutput(BaseModel):
             value,
             key=lambda x: x.id,
         )
+
+
+class ModelOutputInfo(BaseModel):
+    """Lightweight model-output information for management-style queries."""
+
+    id: UUID = Field(default_factory=uuid4)
+    """The unique ID of the model output."""
+
+    name_model: str
+    """The name of the model that produced the output."""
+
+    created_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now
+    )
+    """The datetime when the model output was created."""
 
 
 class Message(BaseModel):
