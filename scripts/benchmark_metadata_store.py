@@ -551,13 +551,20 @@ def main() -> None:
             if model_output.recording.path is not None
         ]
 
+        def load_recordings_for_management(paths: List[Path]) -> None:
+            recordings_and_info = store.get_recordings_info_by_path(
+                paths=paths
+            )
+            for recording, _ in recordings_and_info:
+                store.get_recording_model_outputs(recording)
+
         print(f"Testing get {len(sample_paths)} recordings by path")
         results.append(
             time_repeated_calls(
                 stage=stage.name,
-                operation="file_management_task get_recordings_by_path",
+                operation="file_management_task load_manageable_recordings",
                 calls=[
-                    partial(store.get_recordings_by_path, paths=sample_paths)
+                    partial(load_recordings_for_management, sample_paths)
                     for _ in range(args.query_repetitions)
                 ],
                 extra=(
