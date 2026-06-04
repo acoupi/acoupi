@@ -316,7 +316,7 @@ class SqliteStore(types.Store):
                 connection,
                 model_output_ids,
             )
-            detection_ids = [row[0] for row in detection_rows]
+            detection_ids = [UUID(bytes=row[0]) for row in detection_rows]
             tags_by_model_output_id, tags_by_detection_id = (
                 self._get_predicted_tag_rows(
                     connection,
@@ -692,7 +692,7 @@ class SqliteStore(types.Store):
         self,
         connection: sqlite3.Connection,
         model_output_ids: List[UUID],
-    ) -> List[Tuple[UUID, str, float, UUID]]:
+    ) -> List[Tuple[bytes, str, float, bytes]]:
         """Fetch detections for the given model outputs."""
         if not model_output_ids:
             return []
@@ -714,15 +714,7 @@ class SqliteStore(types.Store):
                 ).fetchall()
             )
 
-        return [
-            (
-                UUID(bytes=detection_id_blob),
-                location,
-                detection_score,
-                UUID(bytes=model_output_id_blob),
-            )
-            for detection_id_blob, location, detection_score, model_output_id_blob in rows
-        ]
+        return rows
 
     def _get_predicted_tag_rows(
         self,
@@ -730,14 +722,14 @@ class SqliteStore(types.Store):
         model_output_ids: List[UUID],
         detection_ids: List[UUID],
     ) -> Tuple[
-        Dict[UUID, List[data.PredictedTag]],
-        Dict[UUID, List[data.PredictedTag]],
+        Dict[bytes, List[data.PredictedTag]],
+        Dict[bytes, List[data.PredictedTag]],
     ]:
         """Fetch predicted tags for model outputs and detections."""
-        tags_by_model_output_id: Dict[UUID, List[data.PredictedTag]] = (
+        tags_by_model_output_id: Dict[bytes, List[data.PredictedTag]] = (
             defaultdict(list)
         )
-        tags_by_detection_id: Dict[UUID, List[data.PredictedTag]] = (
+        tags_by_detection_id: Dict[bytes, List[data.PredictedTag]] = (
             defaultdict(list)
         )
 
@@ -761,7 +753,7 @@ class SqliteStore(types.Store):
         connection: sqlite3.Connection,
         ids: List[UUID],
         column_name: str,
-        tags_by_id: Dict[UUID, List[data.PredictedTag]],
+        tags_by_id: Dict[bytes, List[data.PredictedTag]],
     ) -> None:
         """Append predicted tags for one foreign-key column."""
         for id_chunk in _chunked_uuids(ids):
@@ -777,7 +769,7 @@ class SqliteStore(types.Store):
             ).fetchall()
 
             for key, value, confidence_score, id_blob in rows:
-                tags_by_id[UUID(bytes=id_blob)].append(
+                tags_by_id[id_blob].append(
                     data.PredictedTag(
                         tag=data.Tag(key=key, value=value),
                         confidence_score=confidence_score,
@@ -966,26 +958,27 @@ def _chunked_uuids(ids: List[UUID]) -> List[List[UUID]]:
 
 
 def _assemble_detections(
-    detection_rows: List[Tuple[UUID, str, float, UUID]],
-    tags_by_detection_id: Dict[UUID, List[data.PredictedTag]],
+    detection_rows: List[Tuple[bytes, str, float, bytes]],
+    tags_by_detection_id: Dict[bytes, List[data.PredictedTag]],
 ) -> Dict[UUID, List[data.Detection]]:
     """Assemble detections grouped by model output id."""
     detections_by_model_output_id: Dict[UUID, List[data.Detection]] = (
         defaultdict(list)
     )
     for (
-        detection_id,
+        detection_id_blob,
         location,
         detection_score,
-        model_output_id,
+        model_output_id_blob,
     ) in detection_rows:
         location_data = None if location == "" else json.loads(str(location))
+        model_output_id = UUID(bytes=model_output_id_blob)
         detections_by_model_output_id[model_output_id].append(
             data.Detection(
-                id=detection_id,
+                id=UUID(bytes=detection_id_blob),
                 location=location_data,
                 detection_score=detection_score,
-                tags=tags_by_detection_id.get(detection_id, []),
+                tags=tags_by_detection_id.get(detection_id_blob, []),
             )
         )
     return detections_by_model_output_id
@@ -994,7 +987,7 @@ def _assemble_detections(
 def _assemble_model_outputs(
     model_output_rows: Dict[UUID, List[Tuple[UUID, str, datetime.datetime]]],
     recordings_by_id: Dict[UUID, data.Recording],
-    tags_by_model_output_id: Dict[UUID, List[data.PredictedTag]],
+    tags_by_model_output_id: Dict[bytes, List[data.PredictedTag]],
     detections_by_model_output_id: Dict[UUID, List[data.Detection]],
 ) -> Dict[UUID, List[data.ModelOutput]]:
     """Assemble full model outputs grouped by recording id."""
@@ -1007,7 +1000,7 @@ def _assemble_model_outputs(
                 name_model=model_name,
                 recording=recording,
                 created_on=created_on,
-                tags=tags_by_model_output_id.get(model_output_id, []),
+                tags=tags_by_model_output_id.get(model_output_id.bytes, []),
                 detections=detections_by_model_output_id.get(
                     model_output_id, []
                 ),
