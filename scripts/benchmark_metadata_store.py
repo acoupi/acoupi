@@ -555,8 +555,9 @@ def main() -> None:
             recordings_and_info = store.get_recordings_info_by_path(
                 paths=paths
             )
-            for recording, _ in recordings_and_info:
-                store.get_recording_model_outputs(recording)
+            store.get_recordings_model_outputs(
+                [recording for recording, _ in recordings_and_info]
+            )
 
         print(f"Testing get {len(sample_paths)} recordings by path")
         results.append(
