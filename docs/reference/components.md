@@ -3,7 +3,7 @@
 ::: acoupi.components
 
     options:
-        members: none
+        members: false
 
 ## Component Types
 

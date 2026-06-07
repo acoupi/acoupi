@@ -48,7 +48,7 @@ format:
 	$(ENV_PREFIX)ruff format $(SRC_DIR) $(TEST_DIR)
 
 clean-docs:
-	$(ENV_PREFIX)rm -rf $(DOCS_BUILD_DIR)
+	rm -rf $(DOCS_BUILD_DIR)
 
 docs: clean-docs
 	$(ENV_PREFIX)mkdocs build --clean
