@@ -17,7 +17,7 @@ import datetime
 import json
 import logging
 import socket
-from typing import Optional
+from typing import Literal, Optional
 
 import paho.mqtt.client as mqtt
 import requests
@@ -44,6 +44,7 @@ class MQTTConfig(BaseModel):
     port: int = 1884
     timeout: int = 5
     use_tls: bool = False
+    transport: Literal["tcp", "websockets", "unix"] = "tcp"
 
     @field_serializer("password", when_used="json")
     def dump_password(self, value):
@@ -74,6 +75,7 @@ class MQTTMessenger(types.Messenger):
         timeout: int = 5,
         use_tls: bool = False,
         logger: Optional[logging.Logger] = None,
+        transport: Literal["tcp", "websockets", "unix"] = "tcp",
     ) -> None:
         """Initialise the MQTT messenger.
 
@@ -102,11 +104,13 @@ class MQTTMessenger(types.Messenger):
         self.port = port
         self.client_id = get_device_id()
         self.use_tls = use_tls
+        self.transport = transport
 
         self.client = mqtt.Client(
             callback_api_version=CallbackAPIVersion.VERSION2,
             client_id=self.client_id,
             clean_session=False,
+            transport=self.transport,
         )
 
         self.client.username_pw_set(username, password)
@@ -139,6 +143,7 @@ class MQTTMessenger(types.Messenger):
             topic=config.topic,
             timeout=config.timeout,
             use_tls=config.use_tls,
+            transport=config.transport,
             logger=logger,
         )
 
