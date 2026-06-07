@@ -4,7 +4,7 @@ import datetime
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Generic, List, Optional, Protocol, Tuple
+from typing import Dict, Generic, List, Optional, Protocol, Sequence, Tuple
 from uuid import UUID
 
 from acoupi import data
@@ -334,6 +334,13 @@ class Store(ABC):
         """Store the model output locally."""
 
     @abstractmethod
+    def store_model_outputs(
+        self,
+        model_outputs: List[data.ModelOutput],
+    ) -> None:
+        """Store multiple model outputs locally."""
+
+    @abstractmethod
     def get_recordings(
         self,
         ids: List[UUID],
@@ -372,6 +379,27 @@ class Store(ABC):
         -------
             A list of tuples of the recording and the model outputs.
         """
+
+    @abstractmethod
+    def get_recordings_info_by_path(
+        self,
+        paths: List[Path],
+    ) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
+        """Get recordings by path with lightweight model-output metadata."""
+
+    @abstractmethod
+    def get_recording_model_outputs(
+        self,
+        recording: data.Recording,
+    ) -> List[data.ModelOutput]:
+        """Get the full model outputs associated with a single recording."""
+
+    @abstractmethod
+    def get_recordings_model_outputs(
+        self,
+        recordings: Sequence[data.Recording],
+    ) -> Dict[UUID, List[data.ModelOutput]]:
+        """Get the full model outputs associated with multiple recordings."""
 
     @abstractmethod
     def update_recording_path(

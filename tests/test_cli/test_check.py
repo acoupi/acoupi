@@ -24,18 +24,20 @@ def mock_celery_bin(monkeypatch):
 def test_can_run_check(settings: Settings):
     """Test that the setup command can be run without arguments."""
     runner = CliRunner()
-    runner.invoke(
+    result = runner.invoke(
         acoupi,
         [
             "setup",
             "--program",
             "acoupi.programs.test",
+            "--no-prompt",
         ],
         obj={"settings": settings},
     )
+    assert result.exit_code == 0, result.output
 
     result = runner.invoke(acoupi, ["check"], obj={"settings": settings})
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
     assert "Health checks passed" in result.output
 
 
@@ -50,6 +52,7 @@ def test_can_run_check_with_failed_checks(settings: Settings):
             "acoupi.programs.test",
             "--name",
             "test",
+            "--no-prompt",
         ],
         obj={"settings": settings},
     )

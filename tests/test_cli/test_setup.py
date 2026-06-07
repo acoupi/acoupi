@@ -24,7 +24,7 @@ def mock_celery_bin(monkeypatch):
 def test_can_run_without_arguments():
     """Test that the setup command can be run without arguments."""
     runner = CliRunner()
-    result = runner.invoke(acoupi, ["setup"])
+    result = runner.invoke(acoupi, ["setup", "--no-prompt"])
     assert result.exit_code == 0
 
 
@@ -46,6 +46,7 @@ def test_can_setup_test_program(settings: Settings):
             "acoupi.programs.test",
             "--name",
             "test",
+            "--no-prompt",
         ],
         obj={"settings": settings},
     )

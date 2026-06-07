@@ -1,12 +1,13 @@
 """Data objects for acoupi System."""
 
 import datetime
+from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 __all__ = [
     "TimeInterval",
@@ -15,6 +16,7 @@ __all__ = [
     "PredictedTag",
     "Detection",
     "ModelOutput",
+    "ModelOutputInfo",
     "Message",
     "ResponseStatus",
     "Response",
@@ -138,7 +140,8 @@ class Recording(BaseModel):
         return value
 
 
-class Tag(BaseModel):
+@dataclass(slots=True, frozen=True)
+class Tag:
     """A Tag is a label for a recording."""
 
     key: str
@@ -147,22 +150,9 @@ class Tag(BaseModel):
     value: str
     """The value of the tag."""
 
-    @field_validator("key")
-    def validate_key(cls, value):
-        """Validate that the key is not empty."""
-        if not value:
-            raise ValueError("key cannot be empty")
-        return value
 
-    @field_validator("value")
-    def validate_value(cls, value):
-        """Validate that the value is not empty."""
-        if not value:
-            raise ValueError("value cannot be empty")
-        return value
-
-
-class PredictedTag(BaseModel):
+@dataclass(slots=True, frozen=True)
+class PredictedTag:
     """A PredictedTag is a label predicted by a model.
 
     It consists of a key, a value and a score.
@@ -174,19 +164,14 @@ class PredictedTag(BaseModel):
     confidence_score: float = 1
     """The confidence score of the predicted tag."""
 
-    @field_validator("confidence_score")
-    def validate_score(cls, value):
-        """Validate that the score is between 0 and 1."""
-        if value < 0 or value > 1:
-            raise ValueError("score must be between 0 and 1")
-        return value
-
 
 class BoundingBox(BaseModel):
     """BoundingBox to locate a sound event in time and frequency.
 
     All time values are in seconds and all frequency values are in Hz.
     """
+
+    model_config = ConfigDict(frozen=True)
 
     type: str = "BoundingBox"
 
@@ -224,6 +209,8 @@ class BoundingBox(BaseModel):
 class Detection(BaseModel):
     """A Detection is a single prediction from a model."""
 
+    model_config = ConfigDict(frozen=True)
+
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the detection"""
 
@@ -243,22 +230,36 @@ class Detection(BaseModel):
             raise ValueError("score must be between 0 and 1")
         return value
 
-    @field_validator("tags")
-    def sort_tags(cls, value):
-        """Sort tags."""
-        return sorted(
-            value,
-            key=lambda x: (
-                x.confidence_score,
-                x.tag.key,
-                x.tag.value,
-            ),
-            reverse=True,
+    def __hash__(self) -> int:
+        return hash(
+            (
+                self.id,
+                self.location,
+                self.detection_score,
+                tuple(sorted(hash(t) for t in self.tags)),
+            )
         )
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Detection):
+            return NotImplemented
+
+        # Check standard fields first by creating a dict copy without the list fields
+        self_dict = self.model_dump(exclude={"tags"})
+        other_dict = other.model_dump(exclude={"tags"})
+
+        if self_dict != other_dict:
+            return False
+
+        self_tags = set(self.tags)
+        other_tags = set(other.tags)
+        return self_tags == other_tags
 
 
 class ModelOutput(BaseModel):
     """The output of a model."""
+
+    model_config = ConfigDict(frozen=True)
 
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the model output."""
@@ -280,26 +281,41 @@ class ModelOutput(BaseModel):
     )
     """The datetime when the model output was created."""
 
-    @field_validator("tags")
-    def sort_tags(cls, value):
-        """Sort tags."""
-        return sorted(
-            value,
-            key=lambda x: (
-                x.confidence_score,
-                x.tag.key,
-                x.tag.value,
-            ),
-            reverse=True,
-        )
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, ModelOutput):
+            return NotImplemented
 
-    @field_validator("detections")
-    def sort_detections(cls, value):
-        """Sort detections by ID."""
-        return sorted(
-            value,
-            key=lambda x: x.id,
-        )
+        # Check standard fields first by creating a dict copy without the list fields
+        self_dict = self.model_dump(exclude={"tags", "detections"})
+        other_dict = other.model_dump(exclude={"tags", "detections"})
+
+        if self_dict != other_dict:
+            return False
+
+        self_tags = set(self.tags)
+        other_tags = set(other.tags)
+
+        if self_tags != other_tags:
+            return False
+
+        self_detections = set(d for d in self.detections)
+        other_detections = set(d for d in other.detections)
+        return self_detections == other_detections
+
+
+class ModelOutputInfo(BaseModel):
+    """Lightweight model-output information for management-style queries."""
+
+    id: UUID = Field(default_factory=uuid4)
+    """The unique ID of the model output."""
+
+    name_model: str
+    """The name of the model that produced the output."""
+
+    created_on: datetime.datetime = Field(
+        default_factory=datetime.datetime.now
+    )
+    """The datetime when the model output was created."""
 
 
 class Message(BaseModel):

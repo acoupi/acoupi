@@ -63,7 +63,11 @@ def create_base_models(database: orm.Database) -> BaseModels:
         audio_channels = orm.Required(int, default=1)
         """Number of audio_channels in the recording"""
 
-        deployment = orm.Required(Deployment, column="deployment_id")
+        deployment = orm.Required(
+            Deployment,
+            column="deployment_id",
+            index=True,
+        )
         """Deployment that the recording belongs to."""
 
         model_outputs = orm.Set("ModelOutput")
@@ -84,9 +88,17 @@ def create_base_models(database: orm.Database) -> BaseModels:
         confidence_score = orm.Required(float)
         """Score of the predicted tag"""
 
-        detection = orm.Optional("Detection", column="detection_id")
+        detection = orm.Optional(
+            "Detection",
+            column="detection_id",
+            index=True,
+        )
 
-        model_output = orm.Optional("ModelOutput", column="model_output_id")
+        model_output = orm.Optional(
+            "ModelOutput",
+            column="model_output_id",
+            index=True,
+        )
 
     class Detection(BaseModel):  # type: ignore
         _table_ = "detection"
@@ -94,8 +106,17 @@ def create_base_models(database: orm.Database) -> BaseModels:
         id = orm.PrimaryKey(UUID, auto=True)
         """Unique ID of the detection"""
 
-        location = orm.Optional(str)
-        """Location of the detection in the recording"""
+        start_time_s = orm.Optional(float)
+        """Detection start time in seconds."""
+
+        end_time_s = orm.Optional(float)
+        """Detection end time in seconds."""
+
+        low_freq_hz = orm.Optional(float)
+        """Detection low frequency in Hz."""
+
+        high_freq_hz = orm.Optional(float)
+        """Detection high frequency in Hz."""
 
         detection_score = orm.Required(float)
         """Score of the detection"""
@@ -103,7 +124,11 @@ def create_base_models(database: orm.Database) -> BaseModels:
         tags = orm.Set(PredictedTag)
         """Predicted tags of the detection"""
 
-        model_output = orm.Required("ModelOutput", column="model_output_id")
+        model_output = orm.Required(
+            "ModelOutput",
+            column="model_output_id",
+            index=True,
+        )
         """Model output that the detection belongs to."""
 
     class ModelOutput(BaseModel):
@@ -115,7 +140,11 @@ def create_base_models(database: orm.Database) -> BaseModels:
         model_name = orm.Required(str)
         """Name of the model that produced the output."""
 
-        recording = orm.Required(Recording, column="recording_id")
+        recording = orm.Required(
+            Recording,
+            column="recording_id",
+            index=True,
+        )
         """Recording that the model output belongs to."""
 
         tags = orm.Set(PredictedTag)

@@ -11,14 +11,19 @@ The recording process contains the following steps:
 """
 
 import logging
+import sys
 from typing import Callable, List, Optional, TypeVar
 
 from guano import GuanoFile
-from importlib_metadata import version
 
 from acoupi import data
 from acoupi.components import types
 from acoupi.devices import get_rpi_serial_number
+
+if sys.version_info < (3, 10):
+    from importlib_metadata import version
+else:
+    from importlib.metadata import version
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
