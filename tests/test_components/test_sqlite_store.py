@@ -2,9 +2,9 @@
 
 import datetime
 import sqlite3
+import uuid
 from pathlib import Path
 from typing import Generator, cast
-import uuid
 
 import pytest
 
@@ -364,7 +364,14 @@ def test_can_store_model_outputs(
 
     retrieved = sqlite_store.get_recordings([model_output.recording.id])
     assert len(retrieved) == 1
-    assert retrieved[0][1][0] == model_output
+
+    _, model_outputs = retrieved[0]
+    assert len(model_outputs) == 1
+
+    retrieved = model_outputs[0]
+
+    assert len(retrieved.detections) == len(model_output.detections)
+    assert retrieved == model_output
 
     # Check that the detections were stored
     with sqlite3.connect(str(db_path)) as conn:
@@ -594,7 +601,11 @@ def test_get_recordings_model_outputs_chunks_large_batches(
 
     assert retrieved == {
         recording.id: [model_output]
-        for recording, model_output in zip(recordings, model_outputs)
+        for recording, model_output in zip(
+            recordings,
+            model_outputs,
+            strict=True,
+        )
     }
 
 
