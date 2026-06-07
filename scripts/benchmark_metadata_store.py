@@ -351,12 +351,26 @@ def bulk_seed_stage_data(
             )
 
         for detection in model_output.detections:
+            location = detection.location
+
+            if location is None:
+                start_time_s, low_freq_hz, end_time_s, high_freq_hz = (
+                    None,
+                    None,
+                    None,
+                    None,
+                )
+            else:
+                start_time_s, low_freq_hz, end_time_s, high_freq_hz = (
+                    location.coordinates
+                )
             detection_rows.append(
                 (
                     detection.id.bytes,
-                    ""
-                    if detection.location is None
-                    else detection.location.model_dump_json(),
+                    start_time_s,
+                    low_freq_hz,
+                    end_time_s,
+                    high_freq_hz,
                     detection.detection_score,
                     model_output.id.bytes,
                 )
@@ -389,7 +403,7 @@ def bulk_seed_stage_data(
                 )
             if detection_rows:
                 connection.executemany(
-                    "INSERT INTO detection (id, location, detection_score, model_output_id) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO detection (id, start_time_s, low_freq_hz, end_time_s, high_freq_hz, detection_score, model_output_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
                     detection_rows,
                 )
             if predicted_tag_rows:
