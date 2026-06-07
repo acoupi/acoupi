@@ -100,7 +100,7 @@ dev = [
     { name = "flower", specifier = ">=2.0.1" },
     { name = "furo", specifier = ">=2023.3.27" },
     { name = "isort", specifier = ">=5.11.5" },
-    { name = "mkdocs", specifier = ">=1.5.3" },
+    { name = "mkdocs", specifier = ">=1.5.3,<2.0" },
     { name = "mkdocs-click", specifier = ">=0.8.1" },
     { name = "mkdocs-gitbook", specifier = ">=0.0.1" },
     { name = "mkdocs-material", specifier = ">=9.2.7" },
