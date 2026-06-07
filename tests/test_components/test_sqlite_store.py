@@ -91,6 +91,28 @@ def test_deployment_table_has_correct_columns(sqlite_store) -> None:
         assert expected_columns == actual_columns
 
 
+def test_detection_table_has_correct_columns(
+    sqlite_store: components.SqliteStore,
+) -> None:
+    """Test that the detection table has the correct columns."""
+    expected_columns = {
+        "id",
+        "start_time_s",
+        "end_time_s",
+        "low_freq_hz",
+        "high_freq_hz",
+        "detection_score",
+        "model_output_id",
+    }
+    db_path = sqlite_store.db_path
+
+    with sqlite3.connect(str(db_path)) as conn:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(detection);")
+        actual_columns = set(row[1] for row in cursor.fetchall())
+        assert expected_columns == actual_columns
+
+
 def test_can_instantiate_multiple_stores_with_the_same_sqlite_file(
     tmp_path: Path,
 ) -> None:
@@ -379,8 +401,15 @@ def test_can_store_model_outputs(
         cursor.execute("SELECT id FROM model_output;")
         assert len(cursor.fetchall()) == 1
 
-        cursor.execute("SELECT id FROM detection;")
-        assert len(cursor.fetchall()) == 1
+        cursor.execute("SELECT * FROM detection;")
+        row = cursor.fetchone()
+        assert row is not None
+        assert row[0] == model_output.detections[0].id.bytes
+        assert row[1] == 1
+        assert row[2] == 2
+        assert row[3] == 1000
+        assert row[4] == 2000
+        assert row[5] == model_output.detections[0].detection_score
 
 
 def test_can_store_multiple_model_outputs(

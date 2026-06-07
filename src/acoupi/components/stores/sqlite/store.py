@@ -1,7 +1,6 @@
 """Module defining the SqliteStore class."""
 
 import datetime
-import json
 import sqlite3
 from collections import defaultdict
 from pathlib import Path
@@ -189,12 +188,14 @@ class SqliteStore(types.Store):
                 )
 
             for detection in model_output.detections:
+                bbox = detection.location
                 detection_rows.append(
                     (
                         detection.id.bytes,
-                        ""
-                        if detection.location is None
-                        else detection.location.model_dump_json(),
+                        None if bbox is None else bbox.coordinates[0],
+                        None if bbox is None else bbox.coordinates[2],
+                        None if bbox is None else bbox.coordinates[1],
+                        None if bbox is None else bbox.coordinates[3],
                         detection.detection_score,
                         model_output.id.bytes,
                     )
@@ -221,7 +222,7 @@ class SqliteStore(types.Store):
                 )
                 if detection_rows:
                     connection.executemany(
-                        "INSERT INTO detection (id, location, detection_score, model_output_id) VALUES (?, ?, ?, ?)",
+                        "INSERT INTO detection (id, start_time_s, end_time_s, low_freq_hz, high_freq_hz, detection_score, model_output_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
                         detection_rows,
                     )
                 if predicted_tag_rows:
@@ -692,7 +693,17 @@ class SqliteStore(types.Store):
         self,
         connection: sqlite3.Connection,
         model_output_ids: List[UUID],
-    ) -> List[Tuple[bytes, str, float, bytes]]:
+    ) -> List[
+        Tuple[
+            bytes,
+            Optional[float],
+            Optional[float],
+            Optional[float],
+            Optional[float],
+            float,
+            bytes,
+        ]
+    ]:
         """Fetch detections for the given model outputs."""
         if not model_output_ids:
             return []
@@ -701,7 +712,7 @@ class SqliteStore(types.Store):
         for model_output_id_chunk in _chunked_uuids(model_output_ids):
             placeholders = ", ".join("?" for _ in model_output_id_chunk)
             query = (
-                "SELECT id, location, detection_score, model_output_id "
+                "SELECT id, start_time_s, end_time_s, low_freq_hz, high_freq_hz, detection_score, model_output_id "
                 f"FROM detection WHERE model_output_id IN ({placeholders})"
             )
             rows.extend(
@@ -889,11 +900,22 @@ def _to_predictedtag(db_tag: db_types.PredictedTag) -> data.PredictedTag:
 
 
 def _to_detection(db_detection: db_types.Detection) -> data.Detection:
-    location = (
-        None
-        if db_detection.location == ""
-        else json.loads(str(db_detection.location))
-    )
+    if (
+        db_detection.start_time_s is None
+        or db_detection.end_time_s is None
+        or db_detection.low_freq_hz is None
+        or db_detection.high_freq_hz is None
+    ):
+        location = None
+    else:
+        location = data.BoundingBox(
+            coordinates=(
+                db_detection.start_time_s,
+                db_detection.low_freq_hz,
+                db_detection.end_time_s,
+                db_detection.high_freq_hz,
+            )
+        )
     return data.Detection(
         id=db_detection.id,
         location=location,
@@ -958,7 +980,17 @@ def _chunked_uuids(ids: List[UUID]) -> List[List[UUID]]:
 
 
 def _assemble_detections(
-    detection_rows: List[Tuple[bytes, str, float, bytes]],
+    detection_rows: List[
+        Tuple[
+            bytes,
+            Optional[float],
+            Optional[float],
+            Optional[float],
+            Optional[float],
+            float,
+            bytes,
+        ]
+    ],
     tags_by_detection_id: Dict[bytes, List[data.PredictedTag]],
 ) -> Dict[UUID, List[data.Detection]]:
     """Assemble detections grouped by model output id."""
@@ -967,11 +999,29 @@ def _assemble_detections(
     )
     for (
         detection_id_blob,
-        location,
+        start_time_s,
+        end_time_s,
+        low_freq_hz,
+        high_freq_hz,
         detection_score,
         model_output_id_blob,
     ) in detection_rows:
-        location_data = None if location == "" else json.loads(str(location))
+        if (
+            start_time_s is None
+            or end_time_s is None
+            or low_freq_hz is None
+            or high_freq_hz is None
+        ):
+            location_data = None
+        else:
+            location_data = data.BoundingBox(
+                coordinates=(
+                    start_time_s,
+                    low_freq_hz,
+                    end_time_s,
+                    high_freq_hz,
+                )
+            )
         model_output_id = UUID(bytes=model_output_id_blob)
         detections_by_model_output_id[model_output_id].append(
             data.Detection(

@@ -106,8 +106,17 @@ def create_base_models(database: orm.Database) -> BaseModels:
         id = orm.PrimaryKey(UUID, auto=True)
         """Unique ID of the detection"""
 
-        location = orm.Optional(str)
-        """Location of the detection in the recording"""
+        start_time_s = orm.Optional(float)
+        """Detection start time in seconds."""
+
+        end_time_s = orm.Optional(float)
+        """Detection end time in seconds."""
+
+        low_freq_hz = orm.Optional(float)
+        """Detection low frequency in Hz."""
+
+        high_freq_hz = orm.Optional(float)
+        """Detection high frequency in Hz."""
 
         detection_score = orm.Required(float)
         """Score of the detection"""

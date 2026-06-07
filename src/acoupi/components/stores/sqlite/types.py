@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List, NamedTuple, Optional
 from uuid import UUID
 
-from pony.orm import Json, core
+from pony.orm import core
 
 __all__ = [
     "BaseModels",
@@ -93,8 +93,17 @@ class Detection(core.EntityMeta):
     id: UUID
     """Unique ID of the detection."""
 
-    location: Json
-    """Location of the detection."""
+    start_time_s: Optional[float]
+    """Detection start time in seconds."""
+
+    end_time_s: Optional[float]
+    """Detection end time in seconds."""
+
+    low_freq_hz: Optional[float]
+    """Detection low frequency in Hz."""
+
+    high_freq_hz: Optional[float]
+    """Detection high frequency in Hz."""
 
     detection_score: float
     """Score of the detection."""
