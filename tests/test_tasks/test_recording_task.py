@@ -1,16 +1,21 @@
 """Test suite for the recording task generator."""
 
 import datetime
+import sys
 from pathlib import Path
 
 from guano import GuanoFile
-from importlib_metadata import version
 
 from .conftest import create_wav_file
 from acoupi import data
 from acoupi.components import SqliteStore
 from acoupi.components.types import AudioRecorder
 from acoupi.tasks import generate_recording_task
+
+if sys.version_info < (3, 10):
+    from importlib_metadata import version
+else:
+    from importlib.metadata import version
 
 
 class DummyRecorder(AudioRecorder):

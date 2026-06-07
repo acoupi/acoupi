@@ -12,7 +12,7 @@ def test_the_config_command_shows_help(settings: Settings):
     """Test that the config command shows help."""
     runner = CliRunner()
     result = runner.invoke(acoupi, ["config"], obj={"settings": settings})
-    assert result.exit_code == 0
+    assert result.exit_code == 2, result.output
     assert "Usage: acoupi config" in result.output
 
 
@@ -43,6 +43,7 @@ def test_can_get_the_current_configuration(settings: Settings):
             "acoupi.programs.test",
             "--name",
             "test_program",
+            "--no-prompt",
         ],
         obj={"settings": settings},
     )
@@ -70,6 +71,7 @@ def test_can_set_configuration(settings: Settings):
             "acoupi.programs.test",
             "--name",
             "test_program",
+            "--no-prompt",
         ],
         obj={"settings": settings},
     )
