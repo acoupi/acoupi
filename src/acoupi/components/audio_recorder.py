@@ -59,6 +59,9 @@ class PyAudioRecorder(AudioRecorder):
     audio_dir: Path
     """The directory where to store the created recordings."""
 
+    time_expansion: float
+    """The time expansion factor for the recording."""
+
     def __init__(
         self,
         duration: float,
@@ -68,6 +71,7 @@ class PyAudioRecorder(AudioRecorder):
         chunksize: int = 2048,
         audio_dir: Path = TMP_PATH,
         logger=None,
+        time_expansion: float = 1,
     ) -> None:
         """Initialise the AudioRecorder with the audio parameters."""
         # Audio Duration
@@ -82,6 +86,7 @@ class PyAudioRecorder(AudioRecorder):
         self.chunksize = chunksize
         self.audio_dir = audio_dir
         self.sample_width = pyaudio.get_sample_size(pyaudio.paInt16)
+        self.time_expansion = time_expansion
 
         if logger is None:
             logger = get_task_logger(__name__)
@@ -98,12 +103,14 @@ class PyAudioRecorder(AudioRecorder):
         temp_path = self.audio_dir / f"{now.strftime('%Y%m%d_%H%M%S')}.wav"
         frames = self.get_recording_data(duration=self.duration)
         self.save_recording(frames, temp_path)
+
         return data.Recording(
             path=temp_path,
             created_on=now,
             duration=self.duration,
             samplerate=self.samplerate,
             audio_channels=self.audio_channels,
+            time_expansion=self.time_expansion,
             chunksize=self.chunksize,
             deployment=deployment,
         )
@@ -162,12 +169,15 @@ class PyAudioRecorder(AudioRecorder):
 
         return data
 
+    def get_expanded_samplerate(self):
+        return int(self.samplerate / self.time_expansion)
+
     def save_recording(self, data: bytes, path: Path) -> None:
         """Save the recording to a file."""
         with wave.open(str(path), "wb") as temp_audio_file:
             temp_audio_file.setnchannels(self.audio_channels)
             temp_audio_file.setsampwidth(self.sample_width)
-            temp_audio_file.setframerate(self.samplerate)
+            temp_audio_file.setframerate(self.get_expanded_samplerate())
             temp_audio_file.writeframes(data)
 
     def get_input_device(self, p: pyaudio.PyAudio):
@@ -231,6 +241,7 @@ class MicrophoneConfig(BaseModel):
     device_name: str
     samplerate: int = 48_000
     audio_channels: int = 1
+    time_expansion_factor: float = 1
 
     @classmethod
     def setup(
@@ -413,8 +424,17 @@ def parse_microphone_config(
                     fg="red",
                 )
 
+    time_expansion_factor = click.prompt(
+        "Adjust the playback speed/duration metadata for downstream analysis.\n"
+        "Example: Enter 10.0 if you recorded at 480kHz but need to process at 48kHz.\n"
+        "Enter the time expansion factor (default: 1.0). \n",
+        type=click.FloatRange(min=0.0, clamp=False),
+        default=1.0,
+    )
+
     return MicrophoneConfig(
         device_name=selected_device.name,
         samplerate=samplerate,
         audio_channels=channels,
+        time_expansion_factor=time_expansion_factor,
     )

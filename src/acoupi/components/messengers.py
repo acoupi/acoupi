@@ -245,6 +245,10 @@ class MQTTMessenger(types.Messenger):
             raise HealthCheckError(
                 "Health check failed: Unable to resolve the MQTT broker host."
             ) from err
+        except socket.timeout as err:
+            raise HealthCheckError(
+                "Health check failed: Timeout connecting to the MQTT broker."
+            ) from err
 
         if mqtt_status != MQTTErrorCode.MQTT_ERR_SUCCESS:
             error_name = MQTTErrorCode(mqtt_status).name

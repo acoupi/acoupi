@@ -123,6 +123,10 @@ def add_guano_metadata(recording: data.Recording) -> None:
     g["Firmware Version"] = version("acoupi")
     g["Make"] = "acoupi"
     g["Serial"] = get_rpi_serial_number()
+    g["Samplerate"] = recording.samplerate
+
+    if recording.time_expansion != 1:
+        g["TE"] = recording.time_expansion
 
     if (
         recording.deployment.longitude is not None

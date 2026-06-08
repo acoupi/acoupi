@@ -115,6 +115,13 @@ class Recording(BaseModel):
     chunksize: Optional[int] = Field(default=4096, repr=False)
     """The chunksize of the audio file in bytes. Defaults to 4096."""
 
+    time_expansion: float = Field(default=1, repr=False)
+    """Factor by which the recording's time scale is multiplied.
+
+    Values > 1.0 indicate time expansion (slowing down playback), while values
+    between 0.0 and 1.0 indicate time compression (speeding up playback).
+    """
+
     id: UUID = Field(default_factory=uuid4, repr=True)
     """The unique ID of the recording"""
 
