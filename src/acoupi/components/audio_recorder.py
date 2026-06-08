@@ -244,7 +244,7 @@ class MicrophoneConfig(BaseModel):
     device_name: str
     samplerate: int = 48_000
     audio_channels: int = 1
-    time_expansion_factor: float = Field(default=1, gt=0)
+    time_expansion: float = Field(default=1, gt=0)
 
     @classmethod
     def setup(
@@ -323,10 +323,19 @@ def parse_microphone_config(
             prefix=prefix,
         )
 
+        time_expansion = parse_field_from_args(
+            "time_expansion",
+            MicrophoneConfig.model_fields["time_expansion"],
+            args,
+            prompt=False,
+            prefix=prefix,
+        )
+
         return MicrophoneConfig(
             device_name=device.name,
             samplerate=int(samplerate),  # type: ignore
             audio_channels=channels or 1,  # type: ignore
+            time_expansion=time_expansion,  # type: ignore
         )
 
     click.secho("Available audio devices:\n", fg="green", bold=True)
@@ -427,11 +436,11 @@ def parse_microphone_config(
                     fg="red",
                 )
 
-    time_expansion_factor = click.prompt(
+    time_expansion = click.prompt(
         "Adjust the playback speed/duration metadata for downstream analysis.\n"
         "Example: Enter 10.0 if you recorded at 480kHz but need to process at 48kHz.\n"
         "Enter the time expansion factor (default: 1.0). \n",
-        type=click.FloatRange(min=0.0, clamp=False),
+        type=click.FloatRange(min=0.0, clamp=False, min_open=True),
         default=1.0,
     )
 
@@ -439,5 +448,5 @@ def parse_microphone_config(
         device_name=selected_device.name,
         samplerate=samplerate,
         audio_channels=channels,
-        time_expansion_factor=time_expansion_factor,
+        time_expansion=time_expansion,
     )
