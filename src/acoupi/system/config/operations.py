@@ -41,7 +41,7 @@ def write_config(
         path.parent.mkdir(parents=True)
 
     with open(path, "w") as file:
-        file.write(config.model_dump_json())
+        file.write(config.model_dump_json(indent=2))
 
 
 def load_config(path: Path, schema: Type[S]) -> S:
