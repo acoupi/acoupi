@@ -4,11 +4,13 @@ import math
 import wave
 from pathlib import Path
 
+import guano
 import pytest
 
 from acoupi import components, data
 from acoupi.devices.audio import get_default_microphone, has_input_audio_device
 from acoupi.system.exceptions import HealthCheckError
+from acoupi.tasks.recording import add_guano_metadata
 
 
 @pytest.mark.skipif(
@@ -44,7 +46,7 @@ def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
     reason="No audio device found.",
 )
 def test_check_is_succesful(tmp_path: Path):
-    """Test check_is_succesful"""
+    """Test check_is_succesful."""
     audio_channels, samplerate, device_name = get_default_microphone()
     recorder = components.PyAudioRecorder(
         duration=0.1,
@@ -178,3 +180,69 @@ def test_recording_duration_is_as_requested(
             wf.getnframes() / samplerate,
             abs_tol=0.01,
         )
+
+
+@pytest.mark.skipif(
+    not has_input_audio_device(),
+    reason="No audio device found.",
+)
+def test_can_record_with_time_expansion(
+    tmp_path: Path, deployment: data.Deployment
+):
+    _, samplerate, device_name = get_default_microphone()
+    recorder = components.PyAudioRecorder(
+        duration=1,
+        samplerate=samplerate,
+        audio_channels=1,
+        device_name=device_name,
+        chunksize=8192,
+        audio_dir=tmp_path,
+        time_expansion=0.1,
+    )
+
+    recording = recorder.record(deployment=deployment)
+
+    # The recording object has the original samplerate
+    assert recording.samplerate == samplerate
+    assert recording.time_expansion == 0.1
+
+    with wave.open(str(recording.path)) as wf:
+        stored_samplerate = wf.getframerate()
+        assert math.isclose(
+            stored_samplerate,
+            recorder.get_expanded_samplerate(),
+            abs_tol=0.01,
+        )
+
+
+@pytest.mark.skipif(
+    not has_input_audio_device(),
+    reason="No audio device found.",
+)
+def test_time_expansion_is_saved_in_guano_metadata(
+    tmp_path: Path, deployment: data.Deployment, mocker
+):
+    mocker.patch(
+        "acoupi.tasks.recording.get_rpi_serial_number",
+        return_value="1234567890ABCDEF",
+    )
+
+    _, samplerate, device_name = get_default_microphone()
+    recorder = components.PyAudioRecorder(
+        duration=1,
+        samplerate=samplerate,
+        audio_channels=1,
+        device_name=device_name,
+        chunksize=8192,
+        audio_dir=tmp_path,
+        time_expansion=0.1,
+    )
+
+    recording = recorder.record(deployment=deployment)
+
+    add_guano_metadata(recording)
+
+    assert recording.path is not None
+    g = guano.GuanoFile(str(recording.path))
+    assert g["TE"] == str(0.1)
+    assert g["Samplerate"] == samplerate
