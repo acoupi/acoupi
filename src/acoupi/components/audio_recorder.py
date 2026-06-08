@@ -23,7 +23,7 @@ from typing import List, Optional
 import click
 import pyaudio
 from celery.utils.log import get_task_logger
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from acoupi import data
 from acoupi.components.types import AudioRecorder
@@ -87,6 +87,9 @@ class PyAudioRecorder(AudioRecorder):
         self.audio_dir = audio_dir
         self.sample_width = pyaudio.get_sample_size(pyaudio.paInt16)
         self.time_expansion = time_expansion
+
+        if self.time_expansion <= 0:
+            raise ValueError("time_expansion must be greater than 0")
 
         if logger is None:
             logger = get_task_logger(__name__)
@@ -241,7 +244,7 @@ class MicrophoneConfig(BaseModel):
     device_name: str
     samplerate: int = 48_000
     audio_channels: int = 1
-    time_expansion_factor: float = 1
+    time_expansion_factor: float = Field(default=1, gt=0)
 
     @classmethod
     def setup(

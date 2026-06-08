@@ -115,7 +115,7 @@ class Recording(BaseModel):
     chunksize: Optional[int] = Field(default=4096, repr=False)
     """The chunksize of the audio file in bytes. Defaults to 4096."""
 
-    time_expansion: float = Field(default=1, repr=False)
+    time_expansion: float = Field(default=1, repr=False, gt=0)
     """Factor by which the recording's time scale is multiplied.
 
     Values > 1.0 indicate time expansion (slowing down playback), while values

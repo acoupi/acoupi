@@ -182,6 +182,10 @@ def test_recording_duration_is_as_requested(
         )
 
 
+@pytest.mark.skipif(
+    not has_input_audio_device(),
+    reason="No audio device found.",
+)
 def test_can_record_with_time_expansion(
     tmp_path: Path, deployment: data.Deployment
 ):
@@ -211,6 +215,10 @@ def test_can_record_with_time_expansion(
         )
 
 
+@pytest.mark.skipif(
+    not has_input_audio_device(),
+    reason="No audio device found.",
+)
 def test_time_expansion_is_saved_in_guano_metadata(
     tmp_path: Path, deployment: data.Deployment, mocker
 ):
@@ -237,3 +245,4 @@ def test_time_expansion_is_saved_in_guano_metadata(
     assert recording.path is not None
     g = guano.GuanoFile(str(recording.path))
     assert g["TE"] == str(0.1)
+    assert g["Samplerate"] == samplerate
