@@ -17,6 +17,7 @@ import datetime
 import json
 import logging
 import socket
+from enum import Enum
 from typing import Literal, Optional
 
 import paho.mqtt.client as mqtt
@@ -36,6 +37,12 @@ __all__ = [
 ]
 
 
+class MQTTTransport(Enum):
+    TCP = "tcp"
+    WEBSOCKETS = "websockets"
+    UNIX = "unix"
+
+
 class MQTTConfig(BaseModel):
     host: str
     username: str
@@ -44,7 +51,7 @@ class MQTTConfig(BaseModel):
     port: int = 1884
     timeout: int = 5
     use_tls: bool = False
-    transport: Literal["tcp", "websockets", "unix"] = "tcp"
+    transport: MQTTTransport = MQTTTransport.TCP
 
     @field_serializer("password", when_used="json")
     def dump_password(self, value):
@@ -143,7 +150,7 @@ class MQTTMessenger(types.Messenger):
             topic=config.topic,
             timeout=config.timeout,
             use_tls=config.use_tls,
-            transport=config.transport,
+            transport=config.transport.value,
             logger=logger,
         )
 

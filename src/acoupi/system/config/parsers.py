@@ -2,6 +2,7 @@
 
 import argparse
 import datetime
+import enum
 import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
@@ -529,6 +530,43 @@ def parse_secret_str_field(
             click.echo(msg)
 
 
+def parse_enum_field(
+    field_name: str,
+    field: FieldInfo,
+    args: List[str],
+    prompt: bool = True,
+    prefix: str = "",
+) -> object:
+    parser = argparse.ArgumentParser()
+    name = f"--{prefix}.{field_name}" if prefix else f"--{field_name}"
+    parser.add_argument(
+        name,
+        dest="value",
+        type=str,
+        default=field.default,
+        help=field.description,
+    )
+    parsed_args, _ = parser.parse_known_args(args)
+
+    field_enum = field.annotation
+
+    if not issubclass(field_enum, enum.Enum):  # type: ignore
+        raise ValueError(f"Field {field} is not an enum.")
+
+    if not prompt:
+        return field_enum(parsed_args.value)
+
+    value = click.prompt(
+        (
+            "Please provide a value for "
+            f"{click.style(name, fg='blue', bold=True)}."
+            f"{field.description}"
+        ),
+        type=click.Choice([m.value for m in field_enum], case_sensitive=False),
+    )
+    return field_enum(value)
+
+
 FIELD_PARSERS: Dict[type, FieldParser] = {
     BaseModel: parse_pydantic_model_field_from_args,
     bool: build_simple_field_parser(cast_to_bool),
@@ -542,4 +580,5 @@ FIELD_PARSERS: Dict[type, FieldParser] = {
     datetime.datetime: build_simple_field_parser(datetime.datetime),
     Path: build_simple_field_parser(Path),
     SecretStr: parse_secret_str_field,
+    enum.Enum: parse_enum_field,
 }

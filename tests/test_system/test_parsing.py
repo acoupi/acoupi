@@ -1,6 +1,7 @@
 """Test suite for config parsing functions."""
 
 import datetime
+import enum
 from argparse import ArgumentError
 from typing import List, Optional
 from unittest.mock import Mock
@@ -496,3 +497,37 @@ def test_custom_setup_parsing():
     assert isinstance(parsed_config, Schema)
     assert parsed_config.c is not None
     assert parsed_config.c.c == datetime.date(2021, 1, 1)
+
+
+def test_parse_enum_field():
+    class TestEnum(enum.Enum):
+        A = "a"
+        B = "b"
+
+    class Schema(BaseModel):
+        c: TestEnum
+
+    parsed_config = parse_config_from_args(
+        Schema,
+        ["--c", "a"],
+        prompt=False,
+    )
+
+    assert isinstance(parsed_config, Schema)
+    assert parsed_config.c == TestEnum.A
+
+
+def test_parse_enum_field_fails_if_not_valid_value():
+    class TestEnum(enum.Enum):
+        A = "a"
+        B = "b"
+
+    class Schema(BaseModel):
+        c: TestEnum
+
+    with pytest.raises(ValueError):
+        parse_config_from_args(
+            Schema,
+            ["--c", "c"],
+            prompt=False,
+        )
