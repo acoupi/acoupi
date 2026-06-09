@@ -287,6 +287,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
             device_name=microphone.device_name,
             chunksize=config.recording.chunksize,
             audio_dir=config.paths.tmp_audio,
+            time_expansion=config.microphone.time_expansion,
         )
 
     def configure_store(
