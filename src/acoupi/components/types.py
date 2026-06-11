@@ -363,7 +363,7 @@ class Store(ABC):
     @abstractmethod
     def get_recordings_by_path(
         self,
-        paths: List[Optional[Path]],
+        paths: Sequence[Optional[Path]],
     ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
         """Get a list recordings from the store by their paths.
 
@@ -383,7 +383,7 @@ class Store(ABC):
     @abstractmethod
     def get_recordings_info_by_path(
         self,
-        paths: List[Optional[Path]],
+        paths: Sequence[Optional[Path]],
     ) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
         """Get recordings by path with lightweight model-output metadata."""
 
