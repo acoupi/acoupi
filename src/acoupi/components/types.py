@@ -1,18 +1,21 @@
 """Module containing the types used by the acoupi."""
 
 import datetime
-import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, Generic, List, Optional, Protocol, Sequence, Tuple
+from typing import (
+    Dict,
+    Generic,
+    List,
+    Optional,
+    ParamSpec,
+    Protocol,
+    Sequence,
+    Tuple,
+)
 from uuid import UUID
 
 from acoupi import data
-
-if sys.version_info >= (3, 10):
-    from typing import ParamSpec
-else:
-    from typing_extensions import ParamSpec
 
 
 class RecordingScheduler(ABC):
@@ -314,7 +317,6 @@ class Store(ABC):
     def store_recording(
         self,
         recording: data.Recording,
-        deployment: Optional[data.Deployment] = None,
     ) -> None:
         """Store the recording locally.
 
@@ -322,8 +324,6 @@ class Store(ABC):
         ----------
         recording : data.Recording
             The recording to store.
-        deployment : Optional[data.Deployment], optional
-            The deployment associated with the recording, by default None.
         """
 
     @abstractmethod
@@ -363,7 +363,7 @@ class Store(ABC):
     @abstractmethod
     def get_recordings_by_path(
         self,
-        paths: List[Path],
+        paths: List[Optional[Path]],
     ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
         """Get a list recordings from the store by their paths.
 
@@ -383,7 +383,7 @@ class Store(ABC):
     @abstractmethod
     def get_recordings_info_by_path(
         self,
-        paths: List[Path],
+        paths: List[Optional[Path]],
     ) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
         """Get recordings by path with lightweight model-output metadata."""
 

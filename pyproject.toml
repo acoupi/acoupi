@@ -7,7 +7,6 @@ authors = [
   { name = "Santiago Martinez Balvanera", email = "santiago.balvanera.20@ucl.uk.ac" },
 ]
 dependencies = [
-  "pony>=0.7.16",
   "pyaudio>=0.2.13",
   "pyyaml>=6.0",
   "paho-mqtt>=1.6.1",
@@ -39,7 +38,6 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
   "pytest>=7.4.4",
-  "pony-stubs>=0.5.2",
   "coverage[toml]>=7.2.2",
   "sphinx>=5.3.0",
   "furo>=2023.3.27",

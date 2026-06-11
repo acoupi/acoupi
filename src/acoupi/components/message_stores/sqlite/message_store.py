@@ -1,12 +1,13 @@
 """Message store Sqlite implementation."""
 
+import sqlite3
+from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
 from typing import List, Union
+from uuid import UUID
 
-from pony import orm
-
-from . import types as db_types
-from .database import create_message_models
+from .database import create_message_schema
 from acoupi import data
 from acoupi.components import types
 from acoupi.system.exceptions import MessageStoreError
@@ -26,83 +27,86 @@ class SqliteMessageStore(types.MessageStore):
     db_path: Path
     """Path to the database file."""
 
-    database: orm.Database
-    """The Pony ORM database object."""
-
-    models: db_types.MessageModels
-    """The Pony ORM models."""
+    _memory_connection: sqlite3.Connection | None
 
     def __init__(self, db_path: Path) -> None:
         """Initialise the message store."""
         self.db_path = db_path
-        self.database = orm.Database()
-        self.models = create_message_models(self.database)
-        self.database.bind(
-            provider="sqlite",
-            filename=str(db_path),
-            create_db=True,
-        )
-        self.database.generate_mapping(create_tables=True)
+        self._memory_connection = None
+        if str(self.db_path) == ":memory:":
+            self._memory_connection = self._create_connection()
 
-    @orm.db_session
+        with self._connect() as connection:
+            create_message_schema(connection)
+
     def store_message(
         self,
         message: data.Message,
     ) -> None:
         """Register a recording message with the store."""
-        return self._create_message(message)
+        with self._connect() as connection:
+            connection.execute(
+                "INSERT INTO message (id, content, created_on) VALUES (?, ?, ?)",
+                (
+                    message.id.bytes,
+                    self._as_bytes(message.content),
+                    _serialise_datetime(message.created_on),
+                ),
+            )
 
-    @orm.db_session
     def get_unsent_messages(self) -> List[data.Message]:
         """Get the messages that have not been synced to the server."""
-        # Get messages that haven't had an OK response
-        unsent_messages = self.models.Message.select(
-            lambda m: not orm.exists(r for r in m.responses if r.status == 0)
-        )
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT m.id, m.content, m.created_on
+                FROM message AS m
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM response AS r
+                    WHERE r.message_id = m.id AND r.status = ?
+                )
+                """,
+                (data.ResponseStatus.SUCCESS.value,),
+            ).fetchall()
 
         return [
             data.Message(
-                id=message.id,
-                content=message.content,
-                created_on=message.created_on,
+                id=UUID(bytes=row["id"]),
+                content=row["content"],
+                created_on=_parse_datetime(row["created_on"]),
             )
-            for message in unsent_messages
+            for row in rows
         ]
 
-    @orm.db_session
     def store_response(
         self,
         response: data.Response,
     ) -> None:
         """Store a response to a message."""
-        try:
-            db_message = self.models.Message[response.message.id]
-        except orm.ObjectNotFound as error:
-            raise MessageStoreError(
-                f"Cannot store response for unknown message {response.message.id}."
-            ) from error
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT 1 FROM message WHERE id = ?",
+                (response.message.id.bytes,),
+            ).fetchone()
+            if row is None:
+                raise MessageStoreError(
+                    "Cannot store response for unknown message "
+                    f"{response.message.id}."
+                )
 
-        self.models.Response(
-            message=db_message,
-            content=response.content or "",
-            status=response.status.value,
-            received_on=response.received_on,
-        )
-        orm.commit()
-
-    @orm.db_session
-    def _create_message(
-        self,
-        message: data.Message,
-    ) -> db_types.Message:
-        """Create a Pony ORM message object."""
-        db_message = self.models.Message(
-            id=message.id,
-            content=self._as_bytes(message.content),
-            created_on=message.created_on,
-        )
-        orm.commit()
-        return db_message
+            connection.execute(
+                """
+                INSERT INTO response (content, message_id, status, received_on)
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    response.content,
+                    response.message.id.bytes,
+                    response.status.value,
+                    _serialise_datetime(response.received_on),
+                ),
+            )
 
     @staticmethod
     def _as_bytes(content: Union[str, bytes]) -> bytes:
@@ -111,3 +115,34 @@ class SqliteMessageStore(types.MessageStore):
             return content
 
         return content.encode("utf-8")
+
+    @contextmanager
+    def _connect(self):
+        if self._memory_connection is not None:
+            yield self._memory_connection
+            return
+
+        connection = self._create_connection()
+        try:
+            yield connection
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def _create_connection(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(str(self.db_path))
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute("PRAGMA busy_timeout = 5000")
+        return connection
+
+
+def _serialise_datetime(value: datetime) -> str:
+    return value.isoformat(sep=" ")
+
+
+def _parse_datetime(value: str) -> datetime:
+    return datetime.fromisoformat(value)

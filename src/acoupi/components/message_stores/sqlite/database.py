@@ -1,53 +1,31 @@
-"""Database models for the acoupi database."""
+"""Schema helpers for the SQLite message store."""
 
-from datetime import datetime
-from uuid import UUID
-
-from pony import orm
-
-from .types import MessageModels
+import sqlite3
 
 
-def create_message_models(
-    database: orm.Database,
-) -> MessageModels:
-    """Create the database models."""
-    BaseModel = database.Entity
+def create_message_schema(connection: sqlite3.Connection) -> None:
+    """Create the message-store schema if it does not exist."""
+    connection.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS message (
+            id BLOB PRIMARY KEY,
+            content BLOB NOT NULL,
+            created_on TEXT NOT NULL
+        );
 
-    class Message(BaseModel):  # type: ignore
-        _table_ = "message"
+        CREATE TABLE IF NOT EXISTS response (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content TEXT,
+            message_id BLOB NOT NULL,
+            status INTEGER NOT NULL,
+            received_on TEXT NOT NULL,
+            FOREIGN KEY (message_id) REFERENCES message(id)
+        );
 
-        id = orm.PrimaryKey(UUID, auto=True)
-        """Unique ID of the message status"""
+        CREATE INDEX IF NOT EXISTS idx_response_message_id
+        ON response(message_id);
 
-        content = orm.Required(bytes)
-        """Message content."""
-
-        created_on = orm.Required(datetime)
-        """Datetime when the message was created."""
-
-        responses = orm.Set("Response")
-        """Responses to the message."""
-
-    class Response(BaseModel):  # type: ignore
-        _table_ = "response"
-
-        id = orm.PrimaryKey(int, auto=True)
-        """Unique ID of the deployment message"""
-
-        content = orm.Optional(str)
-        """Content of the response."""
-
-        message = orm.Required(Message, column="message_id")
-        """Message that the status belongs to."""
-
-        status = orm.Required(int)
-        """Status of the response."""
-
-        received_on = orm.Required(datetime)
-        """Datetime when the response was received."""
-
-    return MessageModels(
-        Message=Message,  # type: ignore
-        Response=Response,  # type: ignore
+        CREATE INDEX IF NOT EXISTS idx_response_status
+        ON response(status);
+        """
     )

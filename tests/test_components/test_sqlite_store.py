@@ -652,7 +652,7 @@ def test_store_model_outputs_fails_if_recording_is_missing(
     assert "store_recording()" in message
 
 
-def test_in_memory_store_raises_clear_error_for_batched_model_output_loads(
+def test_in_memory_store_supports_batched_model_output_loads(
     deployment: data.Deployment,
 ):
     sqlite_store = components.SqliteStore(cast(Path, ":memory:"))
@@ -664,13 +664,11 @@ def test_in_memory_store_raises_clear_error_for_batched_model_output_loads(
         created_on=datetime.datetime.now(),
     )
 
-    with pytest.raises(MetadataStoreError) as excinfo:
-        sqlite_store.get_recordings_model_outputs([recording])
+    sqlite_store.store_recording(recording)
 
-    assert "Direct sqlite batch operations are not supported" in str(
-        excinfo.value
-    )
-    assert "file-backed sqlite store" in str(excinfo.value)
+    assert sqlite_store.get_recordings_model_outputs([recording]) == {
+        recording.id: []
+    }
 
 
 def test_can_update_deployment_info(
