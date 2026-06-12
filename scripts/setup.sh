@@ -6,7 +6,6 @@ sudo apt install -y \
     libsndfile1 \
     libasound2-dev \
     libffi-dev \
-    libsndfile1 \
     python3-dev \
     python3-pyaudio \
     portaudio19-dev \

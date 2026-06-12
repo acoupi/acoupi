@@ -3,13 +3,16 @@
 import datetime
 import sqlite3
 import uuid
+from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import Generator, cast
 
 import pytest
 
 from acoupi import components, data
+from acoupi.components.stores.sqlite import queries as sqlite_queries_module
 from acoupi.components.stores.sqlite import store as sqlite_store_module
+from acoupi.system import database as database_module
 from acoupi.system.exceptions import MetadataStoreError
 
 
@@ -579,7 +582,7 @@ def test_get_recordings_model_outputs_chunks_large_batches(
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setattr(
-        sqlite_store_module,
+        sqlite_queries_module,
         "SQLITE_MAX_BOUND_VARIABLES",
         2,
     )
@@ -652,25 +655,44 @@ def test_store_model_outputs_fails_if_recording_is_missing(
     assert "store_recording()" in message
 
 
-def test_in_memory_store_raises_clear_error_for_batched_model_output_loads(
+def test_in_memory_store_supports_batched_model_output_loads(
     deployment: data.Deployment,
+    monkeypatch: pytest.MonkeyPatch,
 ):
-    sqlite_store = components.SqliteStore(cast(Path, ":memory:"))
-    recording = data.Recording(
-        deployment=deployment,
-        path=Path("test/in-memory.wav"),
-        duration=10.0,
-        samplerate=44100,
-        created_on=datetime.datetime.now(),
-    )
+    with closing(sqlite3.connect(":memory:")) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute("PRAGMA busy_timeout = 5000")
 
-    with pytest.raises(MetadataStoreError) as excinfo:
-        sqlite_store.get_recordings_model_outputs([recording])
+        @contextmanager
+        def connect_memory_db(_path):
+            yield connection
 
-    assert "Direct sqlite batch operations are not supported" in str(
-        excinfo.value
-    )
-    assert "file-backed sqlite store" in str(excinfo.value)
+        monkeypatch.setattr(
+            database_module,
+            "connect_db",
+            connect_memory_db,
+        )
+        monkeypatch.setattr(
+            sqlite_store_module,
+            "connect_db",
+            connect_memory_db,
+        )
+
+        sqlite_store = components.SqliteStore(cast(Path, ":memory:"))
+        recording = data.Recording(
+            deployment=deployment,
+            path=Path("test/in-memory.wav"),
+            duration=10.0,
+            samplerate=44100,
+            created_on=datetime.datetime.now(),
+        )
+
+        sqlite_store.store_recording(recording)
+
+        assert sqlite_store.get_recordings_model_outputs([recording]) == {
+            recording.id: []
+        }
 
 
 def test_can_update_deployment_info(

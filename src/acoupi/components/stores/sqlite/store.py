@@ -1,22 +1,16 @@
 """Module defining the SqliteStore class."""
 
 import datetime
-import sqlite3
-from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 from uuid import UUID
 
-from pony import orm
-
-from . import types as db_types
-from .database import create_base_models
 from acoupi import data
 from acoupi.components import types
+from acoupi.components.stores.sqlite import queries
+from acoupi.components.stores.sqlite.database import create_base_schema
+from acoupi.system.database import connect_db
 from acoupi.system.exceptions import MetadataStoreError
-
-db_session = orm.db_session()
-SQLITE_MAX_BOUND_VARIABLES = 900
 
 
 class SqliteStore(types.Store):
@@ -70,12 +64,6 @@ class SqliteStore(types.Store):
     db_path: Path
     """Path to the database file."""
 
-    database: orm.Database
-    """The Pony ORM database object."""
-
-    models: db_types.BaseModels
-    """The Pony ORM models."""
-
     def __init__(self, db_path: Path) -> None:
         """Initialise the Sqlite Store.
 
@@ -86,16 +74,10 @@ class SqliteStore(types.Store):
                 an in-memory database.
         """
         self.db_path = db_path
-        self.database = orm.Database()
-        self.models = create_base_models(self.database)
-        self.database.bind(
-            provider="sqlite",
-            filename=str(db_path),
-            create_db=True,
-        )
-        self.database.generate_mapping(create_tables=True)
 
-    @db_session
+        with connect_db(self.db_path) as connection:
+            create_base_schema(connection)
+
     def get_current_deployment(self) -> data.Deployment:
         """Get the current deployment.
 
@@ -108,15 +90,21 @@ class SqliteStore(types.Store):
         -------
             The current deployment
         """
-        deployment = self._get_current_deployment()
-        return data.Deployment(
-            id=deployment.id,
-            name=deployment.name,
-            latitude=deployment.latitude,
-            longitude=deployment.longitude,
-            started_on=deployment.started_on,
-            ended_on=deployment.ended_on,
-        )
+        with connect_db(self.db_path) as connection:
+            deployment = queries.get_current_deployment(connection)
+
+            if deployment is not None:
+                return deployment
+
+            now = datetime.datetime.now()
+            deployment = data.Deployment(
+                started_on=now,
+                name=f"Deployment {now.strftime('%Y-%m-%d %H:%M:%S')}",
+                latitude=None,
+                longitude=None,
+            )
+            queries.create_deployment(connection, deployment)
+            return deployment
 
     def store_deployment(self, deployment: data.Deployment) -> None:
         """Store the deployment locally.
@@ -124,30 +112,52 @@ class SqliteStore(types.Store):
         Args:
             deployment: The deployment to store
         """
-        self._get_or_create_deployment(deployment)
+        with connect_db(self.db_path) as connection:
+            try:
+                queries.get_deployment_by_id(connection, deployment.id)
+            except ValueError:
+                queries.create_deployment(connection, deployment)
 
-    @db_session
     def update_deployment(self, deployment: data.Deployment) -> None:
-        db_deployment = self._get_deployment_by_id(deployment.id)
-        db_deployment.name = deployment.name
-        db_deployment.latitude = deployment.latitude
-        db_deployment.longitude = deployment.longitude
+        with connect_db(self.db_path) as connection:
+            queries.update_deployment(connection, deployment)
 
-        if deployment.ended_on is not None:
-            db_deployment.ended_on = deployment.ended_on
-
-    @db_session
-    def store_recording(self, recording: data.Recording) -> None:
+    def store_recording(
+        self,
+        recording: data.Recording,
+        deployment: Optional[data.Deployment] = None,
+    ) -> None:
         """Store the recording locally.
-
-        If the deployment is not provided, the current deployment will be used.
 
         Args:
             recording: The recording to store
         """
-        self._get_or_create_recording(recording)
+        if deployment is not None:
+            recording = recording.model_copy(
+                update=dict(deployment=deployment)
+            )
 
-    @db_session
+        with connect_db(self.db_path) as connection:
+            existing = queries.get_recordings_by_ids(
+                connection, [recording.id]
+            )
+
+            if existing:
+                return
+
+            try:
+                deployment = queries.get_deployment_by_id(
+                    connection,
+                    recording.deployment.id,
+                )
+            except ValueError:
+                deployment = queries.create_deployment(
+                    connection,
+                    recording.deployment,
+                )
+
+            queries.create_recording(connection, recording, deployment)
+
     def store_model_output(self, model_output: data.ModelOutput) -> None:
         """Store the model output locally."""
         self.store_model_outputs([model_output])
@@ -162,83 +172,12 @@ class SqliteStore(types.Store):
 
         self._ensure_recordings_exist(model_outputs)
 
-        model_output_rows = []
-        predicted_tag_rows = []
-        detection_rows = []
+        with connect_db(self.db_path) as connection:
+            queries.insert_model_outputs(connection, model_outputs)
 
-        for model_output in model_outputs:
-            model_output_rows.append(
-                (
-                    model_output.id.bytes,
-                    model_output.name_model,
-                    model_output.recording.id.bytes,
-                    model_output.created_on.isoformat(sep=" "),
-                )
-            )
-
-            for tag in model_output.tags:
-                predicted_tag_rows.append(
-                    (
-                        tag.tag.key,
-                        tag.tag.value,
-                        tag.confidence_score,
-                        None,
-                        model_output.id.bytes,
-                    )
-                )
-
-            for detection in model_output.detections:
-                bbox = detection.location
-                detection_rows.append(
-                    (
-                        detection.id.bytes,
-                        None if bbox is None else bbox.coordinates[0],
-                        None if bbox is None else bbox.coordinates[2],
-                        None if bbox is None else bbox.coordinates[1],
-                        None if bbox is None else bbox.coordinates[3],
-                        detection.detection_score,
-                        model_output.id.bytes,
-                    )
-                )
-
-                for tag in detection.tags:
-                    predicted_tag_rows.append(
-                        (
-                            tag.tag.key,
-                            tag.tag.value,
-                            tag.confidence_score,
-                            detection.id.bytes,
-                            None,
-                        )
-                    )
-
-        with self._connect_sqlite() as connection:
-            connection.execute("PRAGMA foreign_keys = ON")
-            connection.execute("BEGIN")
-            try:
-                connection.executemany(
-                    "INSERT INTO model_output (id, model_name, recording_id, created_on) VALUES (?, ?, ?, ?)",
-                    model_output_rows,
-                )
-                if detection_rows:
-                    connection.executemany(
-                        "INSERT INTO detection (id, start_time_s, end_time_s, low_freq_hz, high_freq_hz, detection_score, model_output_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                        detection_rows,
-                    )
-                if predicted_tag_rows:
-                    connection.executemany(
-                        "INSERT INTO predicted_tag (key, value, confidence_score, detection_id, model_output_id) VALUES (?, ?, ?, ?, ?)",
-                        predicted_tag_rows,
-                    )
-                connection.commit()
-            except Exception:
-                connection.rollback()
-                raise
-
-    @db_session
     def get_recordings_by_path(
         self,
-        paths: List[Path],
+        paths: Sequence[Optional[Path]],
     ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
         """Get a list of recordings from the store by their paths.
 
@@ -249,36 +188,38 @@ class SqliteStore(types.Store):
         -------
             List of tuples of the recording and the corresponding model outputs.
         """
-        paths_str = [str(path) for path in paths]
-        db_recordings = (
-            orm.select(r for r in self.models.Recording if r.path in paths_str)
-            .order_by(orm.desc(self.models.Recording.datetime))
-            .prefetch(
-                self.models.Recording.deployment,
-                self.models.Recording.model_outputs,
-                self.models.ModelOutput.tags,
-                self.models.ModelOutput.detections,
-                self.models.Detection.tags,
-            )
-        )
-        return _to_recordings_and_outputs(db_recordings)
+        paths_str = [str(path) for path in paths if path is not None]
+        if not paths_str:
+            return []
 
-    @db_session
+        with connect_db(self.db_path) as connection:
+            recordings = queries.get_recordings_by_paths(connection, paths_str)
+        outputs_by_recording_id = self.get_recordings_model_outputs(recordings)
+        return [
+            (recording, outputs_by_recording_id.get(recording.id, []))
+            for recording in recordings
+        ]
+
     def get_recordings_info_by_path(
         self,
-        paths: List[Path],
+        paths: Sequence[Optional[Path]],
     ) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
         """Get recordings by path with lightweight model-output metadata."""
-        paths_str = [str(path) for path in paths]
-        db_recordings = orm.select(
-            r for r in self.models.Recording if r.path in paths_str
-        ).prefetch(
-            self.models.Recording.deployment,
-            self.models.Recording.model_outputs,
-        )
-        return _to_recordings_and_output_info(db_recordings)
+        paths_str = [str(path) for path in paths if path is not None]
+        if not paths_str:
+            return []
 
-    @db_session
+        with connect_db(self.db_path) as connection:
+            recordings = queries.get_recordings_by_paths(connection, paths_str)
+            outputs_by_recording_id = queries.get_recordings_model_output_info(
+                connection,
+                [recording.id for recording in recordings],
+            )
+        return [
+            (recording, outputs_by_recording_id.get(recording.id, []))
+            for recording in recordings
+        ]
+
     def get_recording_model_outputs(
         self,
         recording: data.Recording,
@@ -300,47 +241,18 @@ class SqliteStore(types.Store):
             recording.id: recording for recording in recordings
         }
         recording_ids = list(recordings_by_id)
-        with self._connect_sqlite() as connection:
-            model_output_rows = self._get_model_output_rows(
+        with connect_db(self.db_path) as connection:
+            outputs_by_recording_id = queries.get_recordings_model_outputs(
                 connection,
-                recording_ids,
+                recordings_by_id,
             )
-            if not model_output_rows:
+            if not outputs_by_recording_id:
                 return {recording_id: [] for recording_id in recording_ids}
 
-            model_output_ids = [
-                model_output_id
-                for rows in model_output_rows.values()
-                for model_output_id, _, _ in rows
-            ]
-            detection_rows = self._get_detection_rows(
-                connection,
-                model_output_ids,
-            )
-            detection_ids = [UUID(bytes=row[0]) for row in detection_rows]
-            tags_by_model_output_id, tags_by_detection_id = (
-                self._get_predicted_tag_rows(
-                    connection,
-                    model_output_ids,
-                    detection_ids,
-                )
-            )
-
-        detections_by_model_output_id = _assemble_detections(
-            detection_rows,
-            tags_by_detection_id,
-        )
-        outputs_by_recording_id = _assemble_model_outputs(
-            model_output_rows,
-            recordings_by_id,
-            tags_by_model_output_id,
-            detections_by_model_output_id,
-        )
         for recording_id in recording_ids:
             outputs_by_recording_id.setdefault(recording_id, [])
         return outputs_by_recording_id
 
-    @db_session
     def get_recordings(
         self,
         ids: List[UUID],
@@ -357,21 +269,14 @@ class SqliteStore(types.Store):
         -------
             A list of tuples of the recording and the model outputs.
         """
-        db_recordings = (
-            orm.select(r for r in self.models.Recording if r.id in ids)
-            .order_by(orm.desc(self.models.Recording.datetime))
-            .prefetch(
-                self.models.Recording.deployment,
-                self.models.Recording.model_outputs,
-                self.models.ModelOutput.tags,
-                self.models.ModelOutput.detections,
-                self.models.Detection.tags,
-            )
-        )
+        with connect_db(self.db_path) as connection:
+            recordings = queries.get_recordings_by_ids(connection, ids)
+        outputs_by_recording_id = self.get_recordings_model_outputs(recordings)
+        return [
+            (recording, outputs_by_recording_id.get(recording.id, []))
+            for recording in recordings
+        ]
 
-        return _to_recordings_and_outputs(db_recordings)
-
-    @db_session
     def get_model_outputs(
         self,
         after: Optional[datetime.datetime] = None,
@@ -392,44 +297,18 @@ class SqliteStore(types.Store):
         -------
             List of model_outputs matching the created_on datetime.
         """
-        query = orm.select(mo for mo in self.models.ModelOutput)
-
-        if after is not None:
-            query = query.filter(lambda mo: mo.created_on >= after)
-
-        if before is not None:
-            query = query.filter(lambda mo: mo.created_on <= before)
-
-        if ids is not None:
-            query = query.filter(lambda mo: mo.id in ids)
-
-        if recording_ids is not None:
-            query = query.filter(lambda mo: mo.recording.id in recording_ids)
-
-        if model_names is not None:
-            query = query.filter(lambda mo: mo.model_name in model_names)
-
-        if detection_ids is not None:
-            query = query.filter(
-                lambda mo: orm.exists(
-                    d for d in mo.detections if d.id in detection_ids
-                )
+        with connect_db(self.db_path) as connection:
+            return queries.get_model_outputs(
+                connection,
+                after=after,
+                before=before,
+                ids=ids,
+                recording_ids=recording_ids,
+                model_names=model_names,
+                detection_ids=detection_ids,
+                limit=limit,
             )
 
-        query = query.order_by(
-            orm.desc(self.models.ModelOutput.created_on)
-        ).prefetch(
-            self.models.ModelOutput.tags,
-            self.models.ModelOutput.detections,
-            self.models.Detection.tags,
-        )
-
-        if limit is not None:
-            query = query[:limit]
-
-        return [_to_model_output(db_model_output) for db_model_output in query]
-
-    @db_session
     def get_detections(
         self,
         ids: Optional[List[UUID]] = None,
@@ -441,38 +320,18 @@ class SqliteStore(types.Store):
         before: Optional[datetime.datetime] = None,
     ) -> List[data.Detection]:
         """Get a list of detections from the store based on their model_output ids."""
-        query = orm.select(d for d in self.models.Detection)
-
-        if ids:
-            query = query.filter(lambda d: d.id in ids)
-
-        if model_output_ids:
-            query = query.filter(
-                lambda d: d.model_output.id in model_output_ids
+        with connect_db(self.db_path) as connection:
+            return queries.get_detections(
+                connection,
+                ids=ids,
+                model_output_ids=model_output_ids,
+                score_gt=score_gt,
+                score_lt=score_lt,
+                model_names=model_names,
+                after=after,
+                before=before,
             )
 
-        if score_gt is not None:
-            query = query.filter(lambda d: d.detection_score > score_gt)
-
-        if score_lt is not None:
-            query = query.filter(lambda d: d.detection_score < score_lt)
-
-        if after is not None:
-            query = query.filter(lambda d: d.model_output.created_on >= after)
-
-        if before is not None:
-            query = query.filter(lambda d: d.model_output.created_on <= before)
-
-        if model_names:
-            query = query.filter(
-                lambda d: d.model_output.model_name in model_names
-            )
-
-        query = query.prefetch(self.models.Detection.tags)
-
-        return [_to_detection(db_detection) for db_detection in query]
-
-    @db_session
     def get_predicted_tags(
         self,
         detection_ids: Optional[List[UUID]] = None,
@@ -484,46 +343,18 @@ class SqliteStore(types.Store):
         values: Optional[List[str]] = None,
     ) -> List[data.PredictedTag]:
         """Get a list of predicted tags from the store based on their detection ids."""
-        query = orm.select(t for t in self.models.PredictedTag)
-
-        if detection_ids:
-            query = query.filter(
-                lambda t: (
-                    t.detection is not None and t.detection.id in detection_ids
-                )
+        with connect_db(self.db_path) as connection:
+            return queries.get_predicted_tags(
+                connection,
+                detection_ids=detection_ids,
+                after=after,
+                before=before,
+                score_gt=score_gt,
+                score_lt=score_lt,
+                keys=keys,
+                values=values,
             )
 
-        if after is not None:
-            query = query.filter(
-                lambda t: (
-                    t.detection is not None
-                    and t.detection.model_output.created_on >= after
-                )
-            )
-
-        if before is not None:
-            query = query.filter(
-                lambda t: (
-                    t.detection is not None
-                    and t.detection.model_output.created_on <= before
-                )
-            )
-
-        if score_gt is not None:
-            query = query.filter(lambda t: t.confidence_score > score_gt)
-
-        if score_lt is not None:
-            query = query.filter(lambda t: t.confidence_score < score_lt)
-
-        if keys:
-            query = query.filter(lambda t: t.key in keys)
-
-        if values:
-            query = query.filter(lambda t: t.value in values)
-
-        return [_to_predictedtag(db_tag) for db_tag in query]
-
-    @db_session
     def update_recording_path(
         self,
         recording: data.Recording,
@@ -535,59 +366,9 @@ class SqliteStore(types.Store):
             recording: The recording to update.
             path: The new path.
         """
-        db_recording = self._get_or_create_recording(recording)
-        db_recording.path = str(path)
-        recording.path = path
-        return recording
-
-    @db_session
-    def _get_current_deployment(self) -> db_types.Deployment:
-        """Get the current deployment in the database."""
-        db_deployment = (
-            orm.select(d for d in self.models.Deployment)
-            .order_by(orm.desc(self.models.Deployment.started_on))
-            .first()
-        )
-
-        if db_deployment is None:
-            now = datetime.datetime.now()
-            name = f"Deployment {now.strftime('%Y-%m-%d %H:%M:%S')}"
-            db_deployment = self.models.Deployment(
-                started_on=now,
-                name=name,
-                latitude=None,
-                longitude=None,
-            )
-
-        return db_deployment
-
-    @db_session
-    def _create_recording(
-        self,
-        recording: data.Recording,
-    ) -> db_types.Recording:
-        """Create a recording."""
-        deployment_db = self._get_or_create_deployment(recording.deployment)
-        db_recording = self.models.Recording(
-            id=recording.id,
-            path=str(recording.path),
-            duration_s=recording.duration,
-            samplerate_hz=recording.samplerate,
-            audio_channels=recording.audio_channels,
-            datetime=recording.created_on,
-            deployment=deployment_db,
-        )
-        return db_recording
-
-    def _get_or_create_recording(
-        self,
-        recording: data.Recording,
-    ) -> db_types.Recording:
-        """Get or create a recording."""
-        try:
-            return self._get_recording_by_id(recording.id)
-        except ValueError:
-            return self._create_recording(recording)
+        with connect_db(self.db_path) as connection:
+            queries.update_recording_path(connection, recording.id, path)
+        return recording.model_copy(update=dict(path=path))
 
     def _ensure_recordings_exist(
         self,
@@ -601,9 +382,12 @@ class SqliteStore(types.Store):
             recordings_by_id[recording.id] = recording
 
         recording_ids = list(recordings_by_id)
-        existing_recording_ids = self._get_existing_recording_ids(
-            recording_ids
-        )
+        with connect_db(self.db_path) as connection:
+            existing_recording_ids = queries.get_existing_recording_ids(
+                connection,
+                recording_ids,
+            )
+
         missing_recordings = [
             recording
             for recording_id, recording in recordings_by_id.items()
@@ -625,483 +409,3 @@ class SqliteStore(types.Store):
                 + "; ".join(missing_descriptions)
                 + ". Store the recordings first with store_recording()."
             )
-
-    def _get_existing_recording_ids(
-        self,
-        recording_ids: List[UUID],
-    ) -> set[UUID]:
-        """Return the subset of recording ids that already exist."""
-        if not recording_ids:
-            return set()
-
-        rows = []
-        with self._connect_sqlite() as connection:
-            for recording_id_chunk in _chunked_uuids(recording_ids):
-                placeholders = ", ".join("?" for _ in recording_id_chunk)
-                query = (
-                    f"SELECT id FROM recording WHERE id IN ({placeholders})"
-                )
-                rows.extend(
-                    connection.execute(
-                        query,
-                        [
-                            recording_id.bytes
-                            for recording_id in recording_id_chunk
-                        ],
-                    ).fetchall()
-                )
-
-        return {UUID(bytes=row[0]) for row in rows}
-
-    def _get_model_output_rows(
-        self,
-        connection: sqlite3.Connection,
-        recording_ids: List[UUID],
-    ) -> Dict[UUID, List[Tuple[UUID, str, datetime.datetime]]]:
-        """Fetch model outputs grouped by recording id."""
-        grouped: Dict[UUID, List[Tuple[UUID, str, datetime.datetime]]] = (
-            defaultdict(list)
-        )
-        for recording_id_chunk in _chunked_uuids(recording_ids):
-            placeholders = ", ".join("?" for _ in recording_id_chunk)
-            query = (
-                "SELECT id, recording_id, model_name, created_on "
-                f"FROM model_output WHERE recording_id IN ({placeholders})"
-            )
-            rows = connection.execute(
-                query,
-                [recording_id.bytes for recording_id in recording_id_chunk],
-            ).fetchall()
-
-            for (
-                model_output_id_blob,
-                recording_id_blob,
-                model_name,
-                created_on,
-            ) in rows:
-                grouped[UUID(bytes=recording_id_blob)].append(
-                    (
-                        UUID(bytes=model_output_id_blob),
-                        model_name,
-                        datetime.datetime.fromisoformat(created_on),
-                    )
-                )
-
-        return grouped
-
-    def _get_detection_rows(
-        self,
-        connection: sqlite3.Connection,
-        model_output_ids: List[UUID],
-    ) -> List[
-        Tuple[
-            bytes,
-            Optional[float],
-            Optional[float],
-            Optional[float],
-            Optional[float],
-            float,
-            bytes,
-        ]
-    ]:
-        """Fetch detections for the given model outputs."""
-        if not model_output_ids:
-            return []
-
-        rows = []
-        for model_output_id_chunk in _chunked_uuids(model_output_ids):
-            placeholders = ", ".join("?" for _ in model_output_id_chunk)
-            query = (
-                "SELECT id, start_time_s, end_time_s, low_freq_hz, high_freq_hz, detection_score, model_output_id "
-                f"FROM detection WHERE model_output_id IN ({placeholders})"
-            )
-            rows.extend(
-                connection.execute(
-                    query,
-                    [
-                        model_output_id.bytes
-                        for model_output_id in model_output_id_chunk
-                    ],
-                ).fetchall()
-            )
-
-        return rows
-
-    def _get_predicted_tag_rows(
-        self,
-        connection: sqlite3.Connection,
-        model_output_ids: List[UUID],
-        detection_ids: List[UUID],
-    ) -> Tuple[
-        Dict[bytes, List[data.PredictedTag]],
-        Dict[bytes, List[data.PredictedTag]],
-    ]:
-        """Fetch predicted tags for model outputs and detections."""
-        tags_by_model_output_id: Dict[bytes, List[data.PredictedTag]] = (
-            defaultdict(list)
-        )
-        tags_by_detection_id: Dict[bytes, List[data.PredictedTag]] = (
-            defaultdict(list)
-        )
-
-        self._append_predicted_tags_for_ids(
-            connection=connection,
-            ids=model_output_ids,
-            column_name="model_output_id",
-            tags_by_id=tags_by_model_output_id,
-        )
-        self._append_predicted_tags_for_ids(
-            connection=connection,
-            ids=detection_ids,
-            column_name="detection_id",
-            tags_by_id=tags_by_detection_id,
-        )
-
-        return tags_by_model_output_id, tags_by_detection_id
-
-    def _append_predicted_tags_for_ids(
-        self,
-        connection: sqlite3.Connection,
-        ids: List[UUID],
-        column_name: str,
-        tags_by_id: Dict[bytes, List[data.PredictedTag]],
-    ) -> None:
-        """Append predicted tags for one foreign-key column."""
-        for id_chunk in _chunked_uuids(ids):
-            placeholders = ", ".join("?" for _ in id_chunk)
-            query = (
-                "SELECT key, value, confidence_score, "
-                f"{column_name} FROM predicted_tag WHERE "
-                f"{column_name} IN ({placeholders})"
-            )
-            rows = connection.execute(
-                query,
-                [id_value.bytes for id_value in id_chunk],
-            ).fetchall()
-
-            for key, value, confidence_score, id_blob in rows:
-                tags_by_id[id_blob].append(
-                    data.PredictedTag(
-                        tag=data.Tag(key=key, value=value),
-                        confidence_score=confidence_score,
-                    )
-                )
-
-    def _connect_sqlite(self) -> sqlite3.Connection:
-        """Open a sqlite connection to the store database."""
-        if str(self.db_path) == ":memory:":
-            raise MetadataStoreError(
-                "Direct sqlite batch operations are not supported for in-memory "
-                "metadata stores. Use a file-backed sqlite store for batched "
-                "reads and writes."
-            )
-        return sqlite3.connect(str(self.db_path))
-
-    @db_session
-    def _get_deployment_by_started_on(
-        self, started_on: datetime.datetime
-    ) -> db_types.Deployment:
-        """Get the deployment by the started_on datetime."""
-        deployment: Optional[db_types.Deployment] = self.models.Deployment.get(
-            started_on=started_on
-        )
-
-        if deployment is None:
-            raise ValueError("No deployment found")
-
-        return deployment
-
-    @db_session
-    def _create_deployment(
-        self,
-        deployment: data.Deployment,
-    ) -> db_types.Deployment:
-        """Create a deployment."""
-        db_deployment = self.models.Deployment(
-            id=deployment.id,
-            started_on=deployment.started_on,
-            name=deployment.name,
-            latitude=deployment.latitude,
-            longitude=deployment.longitude,
-        )
-        return db_deployment
-
-    def _get_or_create_deployment(
-        self, deployment: data.Deployment
-    ) -> db_types.Deployment:
-        """Get or create a deployment."""
-        try:
-            db_deployment = self._get_deployment_by_id(deployment.id)
-        except ValueError:
-            db_deployment = self._create_deployment(deployment)
-
-        return db_deployment
-
-    @db_session
-    def _get_deployment_by_id(self, id: UUID) -> db_types.Deployment:
-        """Get the deployment by the id."""
-        deployment: Optional[db_types.Deployment] = self.models.Deployment.get(
-            id=id
-        )
-
-        if deployment is None:
-            raise ValueError("No deployment found")
-
-        return deployment
-
-    @db_session
-    def _get_recording_by_id(self, id: UUID) -> db_types.Recording:
-        """Get the recording by the id."""
-        recording: Optional[db_types.Recording] = self.models.Recording.get(
-            id=id
-        )
-
-        if recording is None:
-            raise ValueError("No recording found")
-
-        return recording
-
-
-def _to_deployment(db_deployment: db_types.Deployment) -> data.Deployment:
-    return data.Deployment(
-        id=db_deployment.id,
-        name=db_deployment.name,
-        latitude=db_deployment.latitude,
-        longitude=db_deployment.longitude,
-        started_on=db_deployment.started_on,
-    )
-
-
-def _to_recording(
-    db_recording: db_types.Recording,
-    deployment: Optional[data.Deployment] = None,
-) -> data.Recording:
-    if deployment is None:
-        deployment = _to_deployment(db_recording.deployment)
-    return data.Recording(
-        id=db_recording.id,
-        deployment=deployment,
-        created_on=db_recording.datetime,
-        duration=db_recording.duration_s,
-        samplerate=db_recording.samplerate_hz,
-        audio_channels=db_recording.audio_channels,
-        path=None if db_recording.path is None else Path(db_recording.path),
-    )
-
-
-def _to_predictedtag(db_tag: db_types.PredictedTag) -> data.PredictedTag:
-    return data.PredictedTag(
-        tag=data.Tag(
-            key=db_tag.key,
-            value=db_tag.value,
-        ),
-        confidence_score=db_tag.confidence_score,
-    )
-
-
-def _to_detection(db_detection: db_types.Detection) -> data.Detection:
-    if (
-        db_detection.start_time_s is None
-        or db_detection.end_time_s is None
-        or db_detection.low_freq_hz is None
-        or db_detection.high_freq_hz is None
-    ):
-        location = None
-    else:
-        location = data.BoundingBox(
-            coordinates=(
-                db_detection.start_time_s,
-                db_detection.low_freq_hz,
-                db_detection.end_time_s,
-                db_detection.high_freq_hz,
-            )
-        )
-    return data.Detection(
-        id=db_detection.id,
-        location=location,
-        detection_score=db_detection.detection_score,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(
-                    key=db_tag.key,
-                    value=db_tag.value,
-                ),
-                confidence_score=db_tag.confidence_score,
-            )
-            for db_tag in db_detection.tags
-        ],
-    )
-
-
-def _to_model_output(
-    db_model_output: db_types.ModelOutput,
-    recording: Optional[data.Recording] = None,
-) -> data.ModelOutput:
-    if recording is None:
-        recording = _to_recording(db_model_output.recording)
-    return data.ModelOutput(
-        id=db_model_output.id,
-        name_model=db_model_output.model_name,
-        recording=recording,
-        created_on=db_model_output.created_on,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(
-                    key=db_tag.key,
-                    value=db_tag.value,
-                ),
-                confidence_score=db_tag.confidence_score,
-            )
-            for db_tag in db_model_output.tags
-        ],
-        detections=[
-            _to_detection(db_detection)
-            for db_detection in db_model_output.detections
-        ],
-    )
-
-
-def _to_model_output_info(
-    db_model_output: db_types.ModelOutput,
-) -> data.ModelOutputInfo:
-    return data.ModelOutputInfo(
-        id=db_model_output.id,
-        name_model=db_model_output.model_name,
-        created_on=db_model_output.created_on,
-    )
-
-
-def _chunked_uuids(ids: List[UUID]) -> List[List[UUID]]:
-    """Split UUID lists into sqlite-safe chunks."""
-    return [
-        ids[index : index + SQLITE_MAX_BOUND_VARIABLES]
-        for index in range(0, len(ids), SQLITE_MAX_BOUND_VARIABLES)
-    ]
-
-
-def _assemble_detections(
-    detection_rows: List[
-        Tuple[
-            bytes,
-            Optional[float],
-            Optional[float],
-            Optional[float],
-            Optional[float],
-            float,
-            bytes,
-        ]
-    ],
-    tags_by_detection_id: Dict[bytes, List[data.PredictedTag]],
-) -> Dict[UUID, List[data.Detection]]:
-    """Assemble detections grouped by model output id."""
-    detections_by_model_output_id: Dict[UUID, List[data.Detection]] = (
-        defaultdict(list)
-    )
-    for (
-        detection_id_blob,
-        start_time_s,
-        end_time_s,
-        low_freq_hz,
-        high_freq_hz,
-        detection_score,
-        model_output_id_blob,
-    ) in detection_rows:
-        if (
-            start_time_s is None
-            or end_time_s is None
-            or low_freq_hz is None
-            or high_freq_hz is None
-        ):
-            location_data = None
-        else:
-            location_data = data.BoundingBox(
-                coordinates=(
-                    start_time_s,
-                    low_freq_hz,
-                    end_time_s,
-                    high_freq_hz,
-                )
-            )
-        model_output_id = UUID(bytes=model_output_id_blob)
-        detections_by_model_output_id[model_output_id].append(
-            data.Detection(
-                id=UUID(bytes=detection_id_blob),
-                location=location_data,
-                detection_score=detection_score,
-                tags=tags_by_detection_id.get(detection_id_blob, []),
-            )
-        )
-    return detections_by_model_output_id
-
-
-def _assemble_model_outputs(
-    model_output_rows: Dict[UUID, List[Tuple[UUID, str, datetime.datetime]]],
-    recordings_by_id: Dict[UUID, data.Recording],
-    tags_by_model_output_id: Dict[bytes, List[data.PredictedTag]],
-    detections_by_model_output_id: Dict[UUID, List[data.Detection]],
-) -> Dict[UUID, List[data.ModelOutput]]:
-    """Assemble full model outputs grouped by recording id."""
-    outputs_by_recording_id: Dict[UUID, List[data.ModelOutput]] = {}
-    for recording_id, rows in model_output_rows.items():
-        recording = recordings_by_id[recording_id]
-        outputs_by_recording_id[recording_id] = [
-            data.ModelOutput(
-                id=model_output_id,
-                name_model=model_name,
-                recording=recording,
-                created_on=created_on,
-                tags=tags_by_model_output_id.get(model_output_id.bytes, []),
-                detections=detections_by_model_output_id.get(
-                    model_output_id, []
-                ),
-            )
-            for model_output_id, model_name, created_on in rows
-        ]
-    return outputs_by_recording_id
-
-
-def _to_recordings_and_outputs(
-    db_recordings,
-) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
-    ret = []
-    deployments = {}
-    for db_recording in db_recordings:
-        deployment = deployments.get(db_recording.deployment.id)
-        if deployment is None:
-            deployment = _to_deployment(db_recording.deployment)
-            deployments[db_recording.deployment.id] = deployment
-
-        recording = _to_recording(db_recording, deployment=deployment)
-
-        outputs = []
-        for db_model_output in db_recording.model_outputs:
-            model_output = _to_model_output(
-                db_model_output,
-                recording=recording,
-            )
-            outputs.append(model_output)
-
-        ret.append((recording, outputs))
-
-    return ret
-
-
-def _to_recordings_and_output_info(
-    db_recordings,
-) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
-    ret = []
-    deployments = {}
-    for db_recording in db_recordings:
-        deployment = deployments.get(db_recording.deployment.id)
-        if deployment is None:
-            deployment = _to_deployment(db_recording.deployment)
-            deployments[db_recording.deployment.id] = deployment
-
-        recording = _to_recording(db_recording, deployment=deployment)
-        outputs = [
-            _to_model_output_info(db_model_output)
-            for db_model_output in db_recording.model_outputs
-        ]
-        ret.append((recording, outputs))
-
-    return ret
