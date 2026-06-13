@@ -71,11 +71,21 @@ def test_basic_program_registers_deployment_in_store_on_end(
         name="test",
         latitude=12,
         longitude=32,
-        started_on=datetime.datetime(year=2024, month=7, day=1),
+        started_on=datetime.datetime(
+            year=2024,
+            month=7,
+            day=1,
+            tzinfo=datetime.timezone.utc,
+        ),
     )
     program.on_start(deployment)
 
-    deployment.ended_on = datetime.datetime(year=2024, month=8, day=10)
+    deployment.ended_on = datetime.datetime(
+        year=2024,
+        month=8,
+        day=10,
+        tzinfo=datetime.timezone.utc,
+    )
     program.on_end(deployment)
 
     current = program.store.get_current_deployment()

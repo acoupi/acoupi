@@ -2,6 +2,7 @@
 
 import datetime
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -17,7 +18,7 @@ def test_save_recording_manager_fails_if_recording_has_no_path(
         path=None,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
 
@@ -36,21 +37,27 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
         path=recording_file,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=data.Deployment(name="test"),
     )
     model_output = data.ModelOutput(
         name_model="test_model",
         recording=recording,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value1"),
-                confidence_score=0.6,
-            ),
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value2"),
-                confidence_score=0.3,
-            ),
+        detections=[
+            data.PresenceDetection(
+                location=data.BoundingBox(coordinates=(0, 0, 1, 4000)),
+                detection_score=0.6,
+                tags=[
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value1"),
+                        confidence_score=0.6,
+                    ),
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value2"),
+                        confidence_score=0.3,
+                    ),
+                ],
+            )
         ],
     )
     manager = components.SaveRecordingManager(
@@ -75,21 +82,27 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
         path=recording_file,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=data.Deployment(name="test"),
     )
     model_output = data.ModelOutput(
         name_model="test_model",
         recording=recording,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value1"),
-                confidence_score=0.4,
-            ),
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value2"),
-                confidence_score=0.3,
-            ),
+        detections=[
+            data.PresenceDetection(
+                location=data.BoundingBox(coordinates=(0, 0, 1, 4000)),
+                detection_score=0.4,
+                tags=[
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value1"),
+                        confidence_score=0.4,
+                    ),
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value2"),
+                        confidence_score=0.3,
+                    ),
+                ],
+            )
         ],
     )
     manager = components.SaveRecordingManager(
@@ -125,7 +138,15 @@ def test_date_file_manager_save_recording(
         path=path,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime(year, month, day, hour, minute, second),
+        created_on=datetime.datetime(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+            tzinfo=datetime.timezone.utc,
+        ),
         deployment=deployment,
     )
     # make sure the recording file exists
@@ -140,8 +161,105 @@ def test_date_file_manager_save_recording(
     # Assert
     assert directory.exists()
     assert file_path == (
-        directory / "2023" / "4" / "15" / f"180930_{recording.id}.wav"
+        directory / "2023" / "4" / "15" / f"20230415_180930_{recording.id}.wav"
     )
+
+
+def test_date_file_manager_supports_custom_filename_template(
+    tmp_path: Path,
+    deployment: data.Deployment,
+):
+    path = tmp_path / "test.wav"
+    directory = tmp_path / "recordings"
+    recording = data.Recording(
+        path=path,
+        duration=1.5,
+        samplerate=48000,
+        audio_channels=2,
+        created_on=datetime.datetime(
+            2023, 4, 15, 18, 9, 30, tzinfo=datetime.timezone.utc
+        ),
+        deployment=data.Deployment(
+            name="My Site/1",
+            latitude=51.5,
+            longitude=-0.1,
+            started_on=deployment.started_on,
+        ),
+    )
+    path.touch()
+
+    with patch(
+        "acoupi.components.saving_managers.get_device_info",
+        return_value=data.DeviceInfo(id=""),
+    ):
+        file_manager = components.DateFileManager(
+            directory,
+            filename_template=(
+                "{deployment.name}_{device.id}_{recording.created_on:%H%M}.wav"
+            ),
+        )
+        file_path = file_manager.save_recording(recording)
+
+    assert file_path == (
+        directory / "2023" / "4" / "15" / "My Site_1__1809.wav"
+    )
+
+
+def test_date_file_manager_uses_empty_device_id_when_unavailable(
+    tmp_path: Path,
+):
+    path = tmp_path / "test.wav"
+    directory = tmp_path / "recordings"
+    recording = data.Recording(
+        path=path,
+        duration=1,
+        samplerate=48000,
+        created_on=datetime.datetime(
+            2023, 4, 15, 18, 9, 30, tzinfo=datetime.timezone.utc
+        ),
+        deployment=data.Deployment(name="site-a"),
+    )
+    path.touch()
+
+    with patch(
+        "acoupi.devices.get_device_id",
+        side_effect=RuntimeError("device unavailable"),
+    ):
+        from acoupi.devices import get_device_info
+
+        get_device_info.cache_clear()
+        file_path = components.DateFileManager(
+            directory,
+            filename_template="{device.id}_{recording.created_on:%H%M}.wav",
+        ).save_recording(recording)
+
+    assert file_path == directory / "2023" / "4" / "15" / "_1809.wav"
+
+
+def test_date_file_manager_fails_with_invalid_filename_template(
+    tmp_path: Path,
+    deployment: data.Deployment,
+):
+    path = tmp_path / "test.wav"
+    directory = tmp_path / "recordings"
+    recording = data.Recording(
+        path=path,
+        duration=1,
+        samplerate=8000,
+        created_on=datetime.datetime(
+            2023, 4, 15, 18, 9, 30, tzinfo=datetime.timezone.utc
+        ),
+        deployment=deployment,
+    )
+    path.touch()
+
+    file_manager = components.DateFileManager(
+        directory,
+        filename_template="{recording.hour:02d}.wav",
+    )
+
+    with pytest.raises(ValueError, match="Invalid filename template"):
+        file_manager.save_recording(recording)
 
 
 def test_date_file_manager_fails_if_recording_has_no_path(
@@ -162,7 +280,15 @@ def test_date_file_manager_fails_if_recording_has_no_path(
         path=None,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime(year, month, day, hour, minute, second),
+        created_on=datetime.datetime(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+            tzinfo=datetime.timezone.utc,
+        ),
         deployment=deployment,
     )
 
@@ -177,9 +303,7 @@ def test_date_file_manager_fails_if_recording_has_no_path(
 def test_date_file_manager_fails_if_recording_file_does_not_exist(
     tmp_path: Path, deployment: data.Deployment
 ):
-    """Test DateFileManager.save_recording fails if recording file does not
-    exist.
-    """
+    """Test DateFileManager.save_recording fails if recording file does not exist."""
     # Arrange
     path = tmp_path / "test.wav"
     directory = tmp_path / "recordings"
@@ -195,7 +319,15 @@ def test_date_file_manager_fails_if_recording_file_does_not_exist(
         path=path,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime(year, month, day, hour, minute, second),
+        created_on=datetime.datetime(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+            tzinfo=datetime.timezone.utc,
+        ),
         deployment=deployment,
     )
 
@@ -226,7 +358,7 @@ def test_id_file_manager_save_recording(
         path=path,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
     # make sure the recording file exists
@@ -255,7 +387,7 @@ def test_id_file_manager_fails_if_recording_has_no_path(
         path=None,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
 
@@ -270,9 +402,7 @@ def test_id_file_manager_fails_if_recording_has_no_path(
 def test_id_file_manager_fails_if_recording_file_does_not_exist(
     tmp_path: Path, deployment: data.Deployment
 ):
-    """Test IDFileManager.save_recording fails if recording file does not
-    exist.
-    """
+    """Test IDFileManager.save_recording fails if recording file does not exist."""
     # Arrange
     path = tmp_path / "test.wav"
     directory = tmp_path / "recordings"
@@ -282,7 +412,7 @@ def test_id_file_manager_fails_if_recording_file_does_not_exist(
         path=path,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
 

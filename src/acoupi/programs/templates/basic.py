@@ -287,6 +287,7 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
             device_name=microphone.device_name,
             chunksize=config.recording.chunksize,
             audio_dir=config.paths.tmp_audio,
+            time_expansion=config.microphone.time_expansion,
         )
 
     def configure_store(
@@ -323,8 +324,12 @@ class BasicProgram(AcoupiProgram[ProgramConfig]):
         allowing the next manager in the list to be used.
 
         By default, this method returns a list containing a single
-        `DateFileManager`, which saves recordings in a structured folder
-        hierarchy based on the recording date.
+        `DateFileManager`, which stores recordings under `YYYY/MM/DD/` and
+        uses a filename template that includes the recording date, time, and
+        ID.
+
+        Override this method if you want to provide a different saving manager
+        or a customised `DateFileManager(filename_template=...)`.
 
         Returns
         -------

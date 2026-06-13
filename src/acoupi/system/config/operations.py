@@ -41,7 +41,7 @@ def write_config(
         path.parent.mkdir(parents=True)
 
     with open(path, "w") as file:
-        file.write(config.model_dump_json())
+        file.write(config.model_dump_json(indent=2))
 
 
 def load_config(path: Path, schema: Type[S]) -> S:
@@ -306,7 +306,8 @@ def set_config_field(
     OmegaConf.update(base, field, value)
 
     try:
-        return type(config).model_validate(base, extra="forbid")
+        config_cls = type(config)
+        return config_cls.model_validate(base, extra="forbid")
     except ValidationError as error:
         raise exceptions.ParameterError(
             value=field,

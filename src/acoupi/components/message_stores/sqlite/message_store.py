@@ -1,14 +1,13 @@
 """Message store Sqlite implementation."""
 
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
-from pony import orm
-
-from . import types as db_types
-from .database import create_message_models
+from . import queries
+from .database import create_message_schema
 from acoupi import data
 from acoupi.components import types
+from acoupi.system.database import connect_db
 
 
 class SqliteMessageStore(types.MessageStore):
@@ -25,78 +24,41 @@ class SqliteMessageStore(types.MessageStore):
     db_path: Path
     """Path to the database file."""
 
-    database: orm.Database
-    """The Pony ORM database object."""
-
-    models: db_types.MessageModels
-    """The Pony ORM models."""
-
     def __init__(self, db_path: Path) -> None:
         """Initialise the message store."""
         self.db_path = db_path
-        self.database = orm.Database()
-        self.models = create_message_models(self.database)
-        self.database.bind(
-            provider="sqlite",
-            filename=str(db_path),
-            create_db=True,
-        )
-        self.database.generate_mapping(create_tables=True)
+        with connect_db(self.db_path) as connection:
+            create_message_schema(connection)
 
-    @orm.db_session
     def store_message(
         self,
         message: data.Message,
     ) -> None:
         """Register a recording message with the store."""
-        return self._create_message(message)
+        with connect_db(self.db_path) as connection:
+            queries.store_message(
+                connection,
+                message,
+                self._as_bytes(message.content),
+            )
 
-    @orm.db_session
     def get_unsent_messages(self) -> List[data.Message]:
         """Get the messages that have not been synced to the server."""
-        # Get messages that haven't had an OK response
-        unsent_messages = self.models.Message.select(
-            lambda m: not orm.exists(r for r in m.responses if r.status == 0)
-        )
+        with connect_db(self.db_path) as connection:
+            return queries.get_unsent_messages(connection)
 
-        return [
-            data.Message(
-                id=message.id,
-                content=message.content,
-                created_on=message.created_on,
-            )
-            for message in unsent_messages
-        ]
-
-    @orm.db_session
     def store_response(
         self,
         response: data.Response,
     ) -> None:
         """Store a response to a message."""
-        try:
-            db_message = self.models.Message[response.message.id]
-        except orm.ObjectNotFound:
-            db_message = self._create_message(response.message)
+        with connect_db(self.db_path) as connection:
+            queries.store_response(connection, response)
 
-        self.models.Response(
-            message=db_message,
-            content=response.content or "",
-            status=response.status.value,
-            received_on=response.received_on,
-        )
-        orm.commit()
+    @staticmethod
+    def _as_bytes(content: Union[str, bytes]) -> bytes:
+        """Normalise message content to bytes for storage."""
+        if isinstance(content, bytes):
+            return content
 
-    @orm.db_session
-    def _create_message(
-        self,
-        message: data.Message,
-    ) -> db_types.Message:
-        """Create a Pony ORM message object."""
-        db_message = self.models.Message(
-            id=message.id,
-            content=message.content,
-            created_on=message.created_on,
-        )
-        orm.commit()
-        return db_message
+        return content.encode("utf-8")

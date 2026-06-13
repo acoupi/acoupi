@@ -20,6 +20,7 @@ The SavingManagers are optional and can be ingored if the no recordings are save
 
 import logging
 import os
+import string
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional
@@ -28,6 +29,7 @@ from celery.utils.log import get_task_logger
 
 from acoupi import data
 from acoupi.components import types
+from acoupi.devices import get_device_info
 
 __all__ = [
     "SaveRecordingManager",
@@ -115,24 +117,12 @@ class SaveRecordingManager(types.RecordingSavingManager):
             return self.dirpath
 
         for model_output in model_outputs:
-            # Check if any tags or detectinos are confident
-            if any(
-                tag.confidence_score >= self.detection_threshold
-                for tag in model_output.tags
-            ):
-                return self.dirpath_true
-
+            # Check if any detections are confident
             if any(
                 detection.detection_score >= self.detection_threshold
                 for detection in model_output.detections
             ):
                 return self.dirpath_true
-
-            if any(
-                tag.confidence_score >= self.saving_threshold
-                for tag in model_output.tags
-            ):
-                return self.dirpath_false
 
             if any(
                 detection.detection_score >= self.saving_threshold
@@ -265,21 +255,150 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         return full_path
 
 
-class DateFileManager(BaseFileManager):
-    """FileManager that uses the date to organise the recordings.
+_SANITIZE_TABLE = str.maketrans({ord(char): "_" for char in '<>:"/\\|?*'})
 
-    The recordings are organised in directories of the form
 
-    YYYY/MM/DD/
+def sanitize_filename(filename: str) -> str:
+    """Replace characters that are unsafe in filenames."""
+    return filename.translate(_SANITIZE_TABLE)
 
-    where YYYY is the year, MM is the month and DD is the day. The files
-    are named using the time of the recording and its ID. The format is
 
-    HHMMSS_ID.wav
+class FilenameFormatter(string.Formatter):
+    """Format filename templates while treating ``None`` as an empty string.
 
-    All the files are stored in a single directory that is specified in
-    the constructor.
+    This keeps optional context fields, such as deployment coordinates or the
+    device id, from raising formatting errors when they are missing.
     """
+
+    def get_value(self, key, args, kwargs):
+        value = super().get_value(key, args, kwargs)
+        if value is None:
+            return ""
+        return value
+
+    def format_field(self, value, format_spec):
+        if value is None:
+            value = ""
+        return super().format_field(value, format_spec)
+
+
+class DateFileManager(BaseFileManager):
+    """Save recordings into date-based folders.
+
+    Recordings are stored in a directory structure based on the recording
+    date:
+
+    ``YYYY/MM/DD/``
+
+    By default, each filename includes the recording date, time, and the
+    recording ID:
+
+    ``YYYYMMDD_HHMMSS_<recording-id>.wav``
+
+    Examples
+    --------
+    Use the default filename pattern:
+
+    >>> manager = DateFileManager(Path("recordings"))
+    >>> recording = data.Recording(
+    ...     path=Path("tmp.wav"),
+    ...     duration=1.0,
+    ...     samplerate=48000,
+    ...     deployment=data.Deployment(name="site-a"),
+    ... )
+    >>> relative_path = manager.get_file_path(recording)
+    >>> relative_path.parts[:3] == (
+    ...     str(recording.created_on.year),
+    ...     str(recording.created_on.month),
+    ...     str(recording.created_on.day),
+    ... )
+    True
+
+    Notes
+    -----
+    The filename can be customized by providing a different
+    ``filename_template``. The template uses Python's standard format-string
+    syntax and can reference ``recording``, ``deployment``, and ``device``.
+    Use ``recording.created_on`` with datetime format specifiers when you need
+    year, month, day, or time components in the filename.
+
+    Build a more descriptive filename from deployment and recording fields:
+
+    >>> manager = DateFileManager(
+    ...     Path("recordings"),
+    ...     filename_template=(
+    ...         "{deployment.name}_{recording.created_on:%Y%m%d_%H%M%S}"
+    ...         "_{recording.samplerate}Hz.wav"
+    ...     ),
+    ... )
+
+    Include the runtime device id when available:
+
+    >>> manager = DateFileManager(
+    ...     Path("recordings"),
+    ...     filename_template=(
+    ...         "{deployment.name}_{device.id}_"
+    ...         "{recording.created_on:%H%M%S}.wav"
+    ...     ),
+    ... )
+
+    If you need a different directory layout altogether, use another file
+    manager or subclass ``BaseFileManager``.
+    """
+
+    filename_template: str
+
+    def __init__(
+        self,
+        directory: Path,
+        filename_template: str = (
+            "{recording.created_on:%Y%m%d_%H%M%S}_{recording.id}.wav"
+        ),
+        logger: Optional[logging.Logger] = None,
+    ):
+        """Create a date-based file manager.
+
+        Parameters
+        ----------
+        directory:
+            Root directory where recordings are stored.
+        filename_template:
+            Format string used to build the filename within the date-based
+            directory. The template can reference ``recording``, ``deployment``
+            and ``device`` fields, for example
+            ``"{deployment.name}_{recording.created_on:%Y%m%d_%H%M%S}.wav"``.
+        logger:
+            Optional logger used by the manager.
+        """
+        super().__init__(directory=directory, logger=logger)
+        self.filename_template = filename_template
+
+    def _render_filename(self, recording: data.Recording) -> str:
+        """Render and sanitize the filename for a recording.
+
+        Raises
+        ------
+        ValueError
+            If the template references an unknown field or contains an invalid
+            format specification.
+        """
+        formatter = FilenameFormatter()
+
+        device = get_device_info()
+
+        try:
+            filename = formatter.format(
+                self.filename_template,
+                recording=recording,
+                deployment=recording.deployment,
+                device=device,
+            )
+        except (AttributeError, KeyError, ValueError) as error:
+            raise ValueError(
+                f"Invalid filename template: {self.filename_template}"
+            ) from error
+
+        return sanitize_filename(filename)
 
     def get_file_path(self, recording: data.Recording) -> Path:
         """Get the path where the file of a recording should be stored.
@@ -292,13 +411,17 @@ class DateFileManager(BaseFileManager):
         Returns
         -------
             Path of the file.
+
+        Notes
+        -----
+        The returned path is relative to ``self.directory`` and always follows
+        the ``YYYY/MM/DD/<filename>`` structure.
         """
         date = recording.created_on
         directory = (
             Path(str(date.year)) / Path(str(date.month)) / Path(str(date.day))
         )
-        time = recording.created_on.strftime("%H%M%S")
-        return directory / Path(f"{time}_{recording.id}.wav")
+        return directory / Path(self._render_filename(recording))
 
 
 class IDFileManager(BaseFileManager):

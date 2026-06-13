@@ -33,13 +33,16 @@ coverage:
 	$(ENV_PREFIX)coverage report -m
 	$(ENV_PREFIX)coverage html
 
-lint/pyright:
-	$(ENV_PREFIX)pyright $(SRC_DIR)
+fix:
+	$(ENV_PREFIX)ruff check --fix $(SRC_DIR) $(TEST_DIR)
+
+lint/types:
+	$(ENV_PREFIX)ty check $(SRC_DIR) $(TEST_DIR)
 
 lint/ruff:
-	$(ENV_PREFIX)ruff check $(SRC_DIR)
+	$(ENV_PREFIX)ruff check $(SRC_DIR) $(TEST_DIR)
 
-lint: lint/pyright lint/ruff
+lint: lint/types lint/ruff
 
 test:
 	$(ENV_PREFIX)pytest --verbose --color=yes $(TEST_DIR)
@@ -48,7 +51,7 @@ format:
 	$(ENV_PREFIX)ruff format $(SRC_DIR) $(TEST_DIR)
 
 clean-docs:
-	$(ENV_PREFIX)rm -rf $(DOCS_BUILD_DIR)
+	rm -rf $(DOCS_BUILD_DIR)
 
 docs: clean-docs
 	$(ENV_PREFIX)mkdocs build --clean

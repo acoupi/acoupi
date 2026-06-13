@@ -5,14 +5,54 @@ It contains fixtures that are can be used in multiple test files.
 """
 
 import datetime as dt
+import time
 from pathlib import Path
+from typing import Callable
 
 import pytest
 
 from acoupi import data
 from acoupi.system import Settings
+from acoupi.system.constants import CeleryConfig
 
 pytest_plugins = ("celery.contrib.pytest",)
+
+
+@pytest.fixture(scope="session")
+def celery_config():
+    return CeleryConfig(
+        broker_url="memory://",
+        result_backend="cache+memory://",
+    ).model_dump()
+
+
+@pytest.fixture(scope="session")
+def celery_parameters():
+    return {"broker_url": "memory://", "result_backend": "cache+memory://"}
+
+
+def celery_enable_logging():
+    return True
+
+
+@pytest.fixture
+def wait_for_condition() -> Callable[[Callable[[], bool], float, float], None]:
+    def wait(
+        condition: Callable[[], bool],
+        timeout: float = 3.0,
+        interval: float = 0.05,
+    ) -> None:
+        deadline = time.time() + timeout
+
+        while time.time() < deadline:
+            if condition():
+                return
+
+            time.sleep(interval)
+
+        raise AssertionError("Timed out waiting for condition")
+
+    return wait
 
 
 @pytest.fixture
@@ -51,15 +91,20 @@ def patched_now(monkeypatch):
 
     Example:
         def test_foo(patched_now):
-            now = patched_now(datetime.datetime(2020, 1, 1))
+            now = patched_now(datetime.datetime(2020, 1, 1, tzinfo=datetime.timezone.utc))
             assert datetime.datetime.now() == now
     """
-    _now = dt.datetime.now()
+    _now = data.utc_now()
 
     def set_now(time: dt.datetime = _now):
         class fake_datetime:
             @classmethod
             def now(cls, *args, **kwargs):
+                tz = kwargs.get("tz")
+                if tz is None and args:
+                    tz = args[0]
+                if tz is not None and time.tzinfo is not None:
+                    return time.astimezone(tz)
                 return time
 
         monkeypatch.setattr(
@@ -85,7 +130,7 @@ def recording(deployment: data.Deployment) -> data.Recording:
         path=Path("tests"),
         duration=1,
         samplerate=16000,
-        created_on=dt.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
 
@@ -95,18 +140,8 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
     return data.ModelOutput(
         name_model="test_model",
         recording=recording,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value1"),
-                confidence_score=0.8,
-            ),
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value2"),
-                confidence_score=0.8,
-            ),
-        ],
         detections=[
-            data.Detection(
+            data.PresenceDetection(
                 location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
                 detection_score=0.6,
                 tags=[

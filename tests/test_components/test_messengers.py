@@ -1,16 +1,16 @@
 """Test suite for acoupi messengers."""
 
-import datetime
 from pathlib import Path
 from unittest import mock
 
 import pytest
 import pytest_httpserver
+import requests
 from paho.mqtt.enums import MQTTErrorCode
 
 from acoupi import data
 from acoupi.components import messengers
-from acoupi.system.exceptions import HealthCheckError
+from acoupi.system.exceptions import HealthCheckError, MessageSendError
 
 
 def test_http_messenger():
@@ -74,6 +74,107 @@ def test_http_messenger_with_params():
         )
 
 
+def test_http_messenger_accepts_utf8_json_bytes():
+    """Test the HTTPMessenger accepts JSON payloads encoded as bytes."""
+    with mock.patch("requests.post") as mock_post:
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.text = "OK"
+
+        messenger = messengers.HTTPMessenger(
+            base_url="http://localhost:5000",
+            timeout=5,
+        )
+
+        message = data.Message(content=b'"Hello, world!"')
+
+        response = messenger.send_message(message)
+
+        assert response.status == data.ResponseStatus.SUCCESS
+        assert response.content == "OK"
+
+        mock_post.assert_called_once_with(
+            "http://localhost:5000",
+            json="Hello, world!",
+            params={},
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            timeout=5,
+        )
+
+
+def test_http_messenger_rejects_non_utf8_bytes():
+    """Test the HTTPMessenger rejects bytes that are not UTF-8."""
+    with mock.patch("requests.post") as mock_post:
+        messenger = messengers.HTTPMessenger(
+            base_url="http://localhost:5000",
+            timeout=5,
+        )
+
+        message = data.Message(content=b"\x80\x81\x82")
+
+        with pytest.raises(
+            MessageSendError, match="Invalid HTTP message payload"
+        ):
+            messenger.send_message(message)
+
+        mock_post.assert_not_called()
+
+
+def test_http_messenger_rejects_invalid_json_bytes():
+    """Test the HTTPMessenger rejects UTF-8 bytes that are not JSON."""
+    with mock.patch("requests.post") as mock_post:
+        messenger = messengers.HTTPMessenger(
+            base_url="http://localhost:5000",
+            timeout=5,
+        )
+
+        message = data.Message(content=b"not json")
+
+        with pytest.raises(
+            MessageSendError, match="Invalid HTTP message payload"
+        ):
+            messenger.send_message(message)
+
+        mock_post.assert_not_called()
+
+
+def test_http_messenger_raises_on_request_exception():
+    """Test the HTTPMessenger raises on local request failures."""
+    with mock.patch("requests.post") as mock_post:
+        mock_post.side_effect = requests.exceptions.ConnectionError("boom")
+        messenger = messengers.HTTPMessenger(
+            base_url="http://localhost:5000",
+            timeout=5,
+        )
+
+        message = data.Message(content='"Hello, world!"')
+
+        with pytest.raises(MessageSendError, match="HTTP request failed"):
+            messenger.send_message(message)
+
+
+def test_mqtt_messenger_raises_when_connection_fails():
+    """Test the MQTTMessenger raises on local connection failures."""
+    with mock.patch("paho.mqtt.client.Client") as mock_client:
+        mock_client.return_value.is_connected.return_value = False
+        mock_client.return_value.connect.return_value = (
+            MQTTErrorCode.MQTT_ERR_NO_CONN
+        )
+        messenger = messengers.MQTTMessenger(
+            host="localhost",
+            port=1883,
+            username="test",
+            topic="acoupi",
+        )
+
+        message = data.Message(content='"Hello, world!"')
+
+        with pytest.raises(MessageSendError, match="MQTT connection error"):
+            messenger.send_message(message)
+
+
 def test_http_messeger_with_custom_headers():
     """Test the HTTPMessenger with custom headers."""
     with mock.patch("requests.post") as mock_post:
@@ -123,13 +224,13 @@ def test_http_messenger_with_complex_message():
                 path=Path("test_recording.wav"),
                 duration=1,
                 samplerate=16000,
-                created_on=datetime.datetime.now(),
+                created_on=data.utc_now(),
                 deployment=data.Deployment(
                     name="test_deployment",
                 ),
             ),
             detections=[
-                data.Detection(
+                data.PresenceDetection(
                     location=data.BoundingBox(
                         coordinates=(0, 0, 1, 1),
                     ),
@@ -284,16 +385,13 @@ def test_mqtt_messenger_can_send_simple_message():
     # Arrange
     mock_response = mock.MagicMock()
     mock_response.rc = 0
-    config = {
-        "is_connected.return_value": True,
-        "publish.return_value": mock_response,
-    }
 
     with mock.patch(
         "paho.mqtt.client.Client",
         spec=True,
-        **config,
     ) as mock_client:
+        mock_client.return_value.is_connected.return_value = True
+        mock_client.return_value.publish.return_value = mock_response
         messenger = messengers.MQTTMessenger(
             host="localhost",
             port=1883,
@@ -315,18 +413,72 @@ def test_mqtt_messenger_can_send_simple_message():
         )
 
 
-def test_mqtt_check_is_succesful_when_connected():
-    """Test the MQTTMessenger check connection is successful when connected."""
-    # Arrange
-    config = {
-        "is_connected.return_value": True,
-    }
+def test_mqtt_messenger_can_send_bytes_message():
+    """Test the MQTTMessenger can send a bytes payload."""
+    mock_response = mock.MagicMock()
+    mock_response.rc = 0
 
     with mock.patch(
         "paho.mqtt.client.Client",
         spec=True,
-        **config,
-    ):
+    ) as mock_client:
+        mock_client.return_value.is_connected.return_value = True
+        mock_client.return_value.publish.return_value = mock_response
+        messenger = messengers.MQTTMessenger(
+            host="localhost",
+            port=1883,
+            username="test",
+            topic="acoupi",
+        )
+        message = data.Message(content=b"\x01\x02payload")
+
+        response = messenger.send_message(message)
+
+        assert response.status == data.ResponseStatus.SUCCESS
+        assert response.content == "MQTT_ERR_SUCCESS"
+
+        mock_client.return_value.publish.assert_called_once_with(
+            topic="acoupi",
+            payload=b"\x01\x02payload",
+        )
+
+
+def test_mqtt_messenger_returns_error_response_for_publish_rc_error():
+    """Test the MQTTMessenger returns a response for broker publish errors."""
+    mock_response = mock.MagicMock()
+    mock_response.rc = MQTTErrorCode.MQTT_ERR_QUEUE_SIZE
+
+    with mock.patch(
+        "paho.mqtt.client.Client",
+        spec=True,
+    ) as mock_client:
+        mock_client.return_value.is_connected.return_value = True
+        mock_client.return_value.publish.return_value = mock_response
+
+        messenger = messengers.MQTTMessenger(
+            host="localhost",
+            port=1883,
+            username="test",
+            topic="acoupi",
+        )
+        message = data.Message(content='"Hello, world!"')
+
+        response = messenger.send_message(message)
+
+        assert response.status == data.ResponseStatus.ERROR
+        assert response.content == "MQTT_ERR_QUEUE_SIZE"
+
+        mock_client.return_value.publish.assert_called_once_with(
+            topic="acoupi",
+            payload='"Hello, world!"',
+        )
+
+
+def test_mqtt_check_is_succesful_when_connected():
+    """Test the MQTTMessenger check connection is successful when connected."""
+    # Arrange
+    with mock.patch("paho.mqtt.client.Client") as mock_client:
+        mock_client.return_value.is_connected.return_value = True
         messenger = messengers.MQTTMessenger(
             host="localhost",
             port=1883,
@@ -349,17 +501,14 @@ def test_mqtt_check_is_succesful_when_can_reconnect():
             return False
         return True
 
-    config = {
-        "is_connected": is_conected,
-        "host": "localhost",
-        "reconnect.return_value": 0,
-    }
-
     with mock.patch(
         "paho.mqtt.client.Client",
         spec=True,
-        **config,
-    ):
+    ) as mock_client:
+        mock_client.return_value.is_connected.return_value = True
+        mock_client.return_value.reconnect.return_value = 0
+        mock_client.return_value.host = "localhost"
+
         messenger = messengers.MQTTMessenger(
             host="localhost",
             port=1883,
@@ -382,17 +531,14 @@ def test_mqtt_check_is_successful_when_can_connect():
             return False
         return True
 
-    config = {
-        "is_connected": is_conected,
-        "host": None,
-        "connect.return_value": 0,
-    }
-
     with mock.patch(
         "paho.mqtt.client.Client",
         spec=True,
-        **config,
-    ):
+    ) as mock_client:
+        mock_client.return_value.is_connected.return_value = False
+        mock_client.return_value.connect.return_value = 0
+        mock_client.return_value.host = None
+
         messenger = messengers.MQTTMessenger(
             host="localhost",
             port=1883,
@@ -411,17 +557,14 @@ def test_mqtt_check_is_successful_when_can_connect():
 def test_mqtt_check_fails_with_mqtt_error_on_connection(error_code: int):
     """Test the MQTTMessenger check connection fails with MQTT error."""
     # Arrange
-    config = {
-        "is_connected.return_value": False,
-        "host": None,
-        "connect.return_value": error_code,
-    }
-
     with mock.patch(
         "paho.mqtt.client.Client",
         spec=True,
-        **config,
-    ):
+    ) as mock_client:
+        mock_client.return_value.is_connected.return_value = False
+        mock_client.return_value.connect.return_value = error_code
+        mock_client.return_value.host = None
+
         messenger = messengers.MQTTMessenger(
             host="localhost",
             port=1883,
@@ -444,17 +587,14 @@ def test_mqtt_check_fails_with_mqtt_error_on_connection(error_code: int):
 def test_mqtt_check_fails_with_mqtt_error_on_reconnection(error_code: int):
     """Test the MQTTMessenger check connection fails with MQTT error."""
     # Arrange
-    config = {
-        "is_connected.return_value": False,
-        "host": "localhost",
-        "reconnect.return_value": error_code,
-    }
-
     with mock.patch(
         "paho.mqtt.client.Client",
         spec=True,
-        **config,
-    ):
+    ) as mock_client:
+        mock_client.return_value.is_connected.return_value = False
+        mock_client.return_value.reconnect.return_value = error_code
+        mock_client.return_value.host = "localhost"
+
         messenger = messengers.MQTTMessenger(
             host="localhost",
             port=1883,

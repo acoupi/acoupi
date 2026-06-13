@@ -2,12 +2,18 @@
 
 import datetime
 import sqlite3
+import uuid
+from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import Generator
+from typing import Generator, cast
 
 import pytest
 
 from acoupi import components, data
+from acoupi.components.stores.sqlite import queries as sqlite_queries_module
+from acoupi.components.stores.sqlite import store as sqlite_store_module
+from acoupi.system import database as database_module
+from acoupi.system.exceptions import MetadataStoreError
 
 
 @pytest.fixture(scope="function")
@@ -88,6 +94,29 @@ def test_deployment_table_has_correct_columns(sqlite_store) -> None:
         assert expected_columns == actual_columns
 
 
+def test_detection_table_has_correct_columns(
+    sqlite_store: components.SqliteStore,
+) -> None:
+    """Test that the detection table has the correct columns."""
+    expected_columns = {
+        "id",
+        "prediction_type",
+        "start_time_s",
+        "end_time_s",
+        "low_freq_hz",
+        "high_freq_hz",
+        "detection_score",
+        "model_output_id",
+    }
+    db_path = sqlite_store.db_path
+
+    with sqlite3.connect(str(db_path)) as conn:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(detection);")
+        actual_columns = set(row[1] for row in cursor.fetchall())
+        assert expected_columns == actual_columns
+
+
 def test_can_instantiate_multiple_stores_with_the_same_sqlite_file(
     tmp_path: Path,
 ) -> None:
@@ -107,7 +136,7 @@ def test_can_instantiate_multiple_stores_with_the_same_sqlite_file(
 def test_can_store_a_deployment(sqlite_store: components.SqliteStore) -> None:
     """Test that we can store a deployment."""
     # Arrange
-    now = datetime.datetime.now()
+    now = data.utc_now()
     deployment = data.Deployment(
         started_on=now,
         latitude=1.0,
@@ -124,7 +153,7 @@ def test_can_store_a_deployment(sqlite_store: components.SqliteStore) -> None:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM deployment;")
         row = cursor.fetchone()
-        assert row["started_on"] == now.isoformat(sep=" ")
+        assert row["started_on"] == now.isoformat()
         assert row["latitude"] == 1.0
         assert row["longitude"] == 2.0
 
@@ -158,8 +187,8 @@ def test_get_current_deployment_gets_latest_deployment(
 ) -> None:
     """Test that get_current_deployment gets the latest deployment."""
     # Arrange
-    start_1 = datetime.datetime.now()
-    start_2 = datetime.datetime.now() - datetime.timedelta(days=10)
+    start_1 = data.utc_now()
+    start_2 = data.utc_now() - datetime.timedelta(days=10)
     deployment1 = data.Deployment(
         started_on=start_1,
         latitude=1.0,
@@ -187,7 +216,7 @@ def test_deployment_id_in_db_is_same_as_in_python(
 ) -> None:
     """Test that the deployment_id in the db is the same as in python."""
     # Arrange
-    now = datetime.datetime.now()
+    now = data.utc_now()
     deployment = data.Deployment(
         started_on=now,
         latitude=1.0,
@@ -213,7 +242,7 @@ def test_recordings_can_be_registered(
 ) -> None:
     """Test that recordings can be registered."""
     # Arrange
-    now = datetime.datetime.now()
+    now = data.utc_now()
     recording = data.Recording(
         deployment=deployment,
         path=Path("test/path"),
@@ -236,7 +265,7 @@ def test_recordings_can_be_registered(
         assert row["duration_s"] == 10.0
         assert row["audio_channels"] == 2
         assert row["samplerate_hz"] == 44100
-        assert row["datetime"] == now.isoformat(sep=" ")
+        assert row["datetime"] == now.isoformat()
         assert row["id"] == recording.id.bytes
 
 
@@ -245,7 +274,7 @@ def test_recording_can_be_registered_with_custom_deployment(
 ):
     """Test that recordings can be registered with a custom deployment."""
     # Arrange
-    now = datetime.datetime.now()
+    now = data.utc_now()
     deployment = data.Deployment(
         started_on=now,
         latitude=1.0,
@@ -273,7 +302,7 @@ def test_recording_can_be_registered_with_custom_deployment(
         assert row["path"] == "test/path"
         assert row["duration_s"] == 10.0
         assert row["samplerate_hz"] == 44100
-        assert row["datetime"] == now.isoformat(sep=" ")
+        assert row["datetime"] == now.isoformat()
         assert row["id"] == recording.id.bytes
         assert row["deployment_id"] == deployment.id.bytes
 
@@ -286,7 +315,7 @@ def test_get_all_recordings(
     # Arrange
 
     # Create two recordings
-    now = datetime.datetime.now()
+    now = data.utc_now()
     recording1 = data.Recording(
         deployment=deployment,
         path=Path("test/path1"),
@@ -323,7 +352,7 @@ def test_get_some_recordings(
     # Arrange
 
     # Create two recordings
-    now = datetime.datetime.now()
+    now = data.utc_now()
     recording1 = data.Recording(
         deployment=deployment,
         path=Path("test/path1"),
@@ -355,12 +384,20 @@ def test_can_store_model_outputs(
     sqlite_store: components.SqliteStore,
     model_output: data.ModelOutput,
 ):
+    sqlite_store.store_recording(model_output.recording)
     sqlite_store.store_model_output(model_output)
     db_path = sqlite_store.db_path
 
     retrieved = sqlite_store.get_recordings([model_output.recording.id])
     assert len(retrieved) == 1
-    assert retrieved[0][1][0] == model_output
+
+    _, model_outputs = retrieved[0]
+    assert len(model_outputs) == 1
+
+    retrieved = model_outputs[0]
+
+    assert len(retrieved.detections) == len(model_output.detections)
+    assert retrieved == model_output
 
     # Check that the detections were stored
     with sqlite3.connect(str(db_path)) as conn:
@@ -368,14 +405,296 @@ def test_can_store_model_outputs(
         cursor.execute("SELECT id FROM model_output;")
         assert len(cursor.fetchall()) == 1
 
-        cursor.execute("SELECT id FROM detection;")
-        assert len(cursor.fetchall()) == 1
+        cursor.execute("SELECT * FROM detection;")
+        row = cursor.fetchone()
+        assert row is not None
+        assert row[0] == model_output.detections[0].id.bytes
+        assert row[1] == data.PredictionType.PRESENCE.value
+        assert row[2] == 1
+        assert row[3] == 2
+        assert row[4] == 1000
+        assert row[5] == 2000
+        assert row[6] == model_output.detections[0].detection_score
+
+
+def test_can_store_multiple_model_outputs(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    second_recording = model_output.recording.model_copy(
+        update=dict(
+            id=uuid.uuid4(),
+            path=Path("test/path-second"),
+            created_on=model_output.recording.created_on
+            + datetime.timedelta(seconds=5),
+        )
+    )
+    second_output = model_output.model_copy(
+        update=dict(
+            id=uuid.uuid4(),
+            recording=second_recording,
+            created_on=model_output.created_on + datetime.timedelta(seconds=5),
+            detections=[
+                detection.model_copy(update=dict(id=uuid.uuid4()))
+                for detection in model_output.detections
+            ],
+        )
+    )
+
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_recording(second_recording)
+    sqlite_store.store_model_outputs([model_output, second_output])
+
+    retrieved = sqlite_store.get_recordings(
+        [model_output.recording.id, second_output.recording.id]
+    )
+    assert len(retrieved) == 2
+
+
+def test_get_recordings_by_path_returns_full_model_outputs(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_model_output(model_output)
+
+    retrieved = sqlite_store.get_recordings_by_path(
+        [model_output.recording.path]
+    )
+
+    assert len(retrieved) == 1
+    recording, outputs = retrieved[0]
+    assert recording == model_output.recording
+    assert outputs == [model_output]
+
+
+def test_get_recordings_info_by_path_returns_lightweight_model_output_info(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_model_output(model_output)
+
+    retrieved = sqlite_store.get_recordings_info_by_path(
+        [model_output.recording.path]
+    )
+
+    assert len(retrieved) == 1
+    recording, outputs = retrieved[0]
+    assert recording == model_output.recording
+    assert len(outputs) == 1
+    assert outputs[0].id == model_output.id
+    assert outputs[0].name_model == model_output.name_model
+    assert outputs[0].created_on == model_output.created_on
+
+
+def test_get_recording_model_outputs_returns_full_outputs(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_model_output(model_output)
+
+    retrieved = sqlite_store.get_recording_model_outputs(
+        model_output.recording
+    )
+
+    assert retrieved == [model_output]
+
+
+def test_get_recordings_model_outputs_returns_outputs_grouped_by_recording(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    second_recording = model_output.recording.model_copy(
+        update=dict(
+            id=uuid.uuid4(),
+            path=Path("test/path-second"),
+            created_on=model_output.recording.created_on
+            + datetime.timedelta(seconds=5),
+        )
+    )
+    second_output = model_output.model_copy(
+        update=dict(
+            id=uuid.uuid4(),
+            recording=second_recording,
+            created_on=model_output.created_on + datetime.timedelta(seconds=5),
+            detections=[
+                detection.model_copy(update=dict(id=uuid.uuid4()))
+                for detection in model_output.detections
+            ],
+        )
+    )
+
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_recording(second_recording)
+    sqlite_store.store_model_outputs([model_output, second_output])
+
+    retrieved = sqlite_store.get_recordings_model_outputs(
+        [model_output.recording, second_recording]
+    )
+
+    assert retrieved == {
+        model_output.recording.id: [model_output],
+        second_recording.id: [second_output],
+    }
+
+
+def test_get_recordings_model_outputs_returns_empty_list_for_recording_without_outputs(
+    sqlite_store: components.SqliteStore,
+    recording: data.Recording,
+):
+    sqlite_store.store_recording(recording)
+
+    retrieved = sqlite_store.get_recordings_model_outputs([recording])
+
+    assert retrieved == {recording.id: []}
+
+
+def test_get_recordings_model_outputs_includes_requested_recordings_without_outputs(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    recording_without_outputs = model_output.recording.model_copy(
+        update=dict(
+            id=uuid.uuid4(),
+            path=Path("test/path-without-outputs"),
+            created_on=model_output.recording.created_on
+            + datetime.timedelta(seconds=5),
+        )
+    )
+
+    sqlite_store.store_recording(model_output.recording)
+    sqlite_store.store_recording(recording_without_outputs)
+    sqlite_store.store_model_output(model_output)
+
+    retrieved = sqlite_store.get_recordings_model_outputs(
+        [model_output.recording, recording_without_outputs]
+    )
+
+    assert retrieved == {
+        model_output.recording.id: [model_output],
+        recording_without_outputs.id: [],
+    }
+
+
+def test_get_recordings_model_outputs_chunks_large_batches(
+    sqlite_store: components.SqliteStore,
+    deployment: data.Deployment,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setattr(
+        sqlite_queries_module,
+        "SQLITE_MAX_BOUND_VARIABLES",
+        2,
+    )
+
+    recordings = []
+    model_outputs = []
+    base_time = data.utc_now()
+    for index in range(5):
+        recording = data.Recording(
+            deployment=deployment,
+            path=Path(f"test/chunked-{index}.wav"),
+            duration=10.0,
+            samplerate=44100,
+            created_on=base_time + datetime.timedelta(seconds=index),
+        )
+        model_output = data.ModelOutput(
+            name_model=f"test_model_{index}",
+            recording=recording,
+            detections=[
+                data.PresenceDetection(
+                    id=uuid.uuid4(),
+                    location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
+                    detection_score=0.6,
+                    tags=[
+                        data.PredictedTag(
+                            tag=data.Tag(key="species", value=f"tag-{index}"),
+                            confidence_score=0.3,
+                        )
+                    ],
+                )
+            ],
+            created_on=recording.created_on,
+        )
+        recordings.append(recording)
+        model_outputs.append(model_output)
+
+    for recording in recordings:
+        sqlite_store.store_recording(recording)
+    sqlite_store.store_model_outputs(model_outputs)
+
+    retrieved = sqlite_store.get_recordings_model_outputs(recordings)
+
+    assert retrieved == {
+        recording.id: [model_output]
+        for recording, model_output in zip(
+            recordings,
+            model_outputs,
+            strict=True,
+        )
+    }
+
+
+def test_store_model_outputs_fails_if_recording_is_missing(
+    sqlite_store: components.SqliteStore,
+    model_output: data.ModelOutput,
+):
+    with pytest.raises(MetadataStoreError) as excinfo:
+        sqlite_store.store_model_outputs([model_output])
+
+    message = str(excinfo.value)
+    assert "not present in the metadata store" in message
+    assert str(model_output.recording.id) in message
+    assert str(model_output.recording.path) in message
+    assert "store_recording()" in message
+
+
+def test_in_memory_store_supports_batched_model_output_loads(
+    deployment: data.Deployment,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    with closing(sqlite3.connect(":memory:")) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute("PRAGMA busy_timeout = 5000")
+
+        @contextmanager
+        def connect_memory_db(_path):
+            yield connection
+
+        monkeypatch.setattr(
+            database_module,
+            "connect_db",
+            connect_memory_db,
+        )
+        monkeypatch.setattr(
+            sqlite_store_module,
+            "connect_db",
+            connect_memory_db,
+        )
+
+        sqlite_store = components.SqliteStore(cast(Path, ":memory:"))
+        recording = data.Recording(
+            deployment=deployment,
+            path=Path("test/in-memory.wav"),
+            duration=10.0,
+            samplerate=44100,
+            created_on=data.utc_now(),
+        )
+
+        sqlite_store.store_recording(recording)
+
+        assert sqlite_store.get_recordings_model_outputs([recording]) == {
+            recording.id: []
+        }
 
 
 def test_can_update_deployment_info(
     sqlite_store: components.SqliteStore,
 ):
-    start = datetime.datetime.now()
+    start = data.utc_now()
     deployment = data.Deployment(
         started_on=start,
         latitude=1.0,
@@ -403,7 +722,7 @@ def test_can_update_deployment_info(
 def test_update_deployment_fails_if_corresponding_deployment_does_not_exist(
     sqlite_store: components.SqliteStore,
 ):
-    start = datetime.datetime.now()
+    start = data.utc_now()
     deployment = data.Deployment(
         started_on=start,
         latitude=1.0,

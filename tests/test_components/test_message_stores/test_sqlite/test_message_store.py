@@ -7,6 +7,7 @@ from typing import Generator
 import pytest
 
 from acoupi import components, data
+from acoupi.system.exceptions import MessageStoreError
 
 
 @pytest.fixture(scope="function")
@@ -75,7 +76,24 @@ def test_store_message(
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM message;")
         row = cursor.fetchone()
-        assert row[1] == "test message"
+        assert row[1] == b"test message"
+        assert row[0] == message.id.bytes
+
+
+def test_store_message_bytes(
+    sqlite_message_store: components.SqliteMessageStore,
+):
+    """Test storing a byte message."""
+    message = data.Message(content=b"\x01\x02test")
+
+    sqlite_message_store.store_message(message)
+
+    db_path = sqlite_message_store.db_path
+    with sqlite3.connect(str(db_path)) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM message;")
+        row = cursor.fetchone()
+        assert row[1] == b"\x01\x02test"
         assert row[0] == message.id.bytes
 
 
@@ -92,6 +110,7 @@ def test_store_response(
     )
 
     # Act
+    sqlite_message_store.store_message(message)
     sqlite_message_store.store_response(response)
 
     # Assert
@@ -105,6 +124,21 @@ def test_store_response(
         assert row[2] == message.id.bytes
         assert row[3] == data.ResponseStatus.SUCCESS.value
         assert row[4] is not None
+
+
+def test_store_response_raises_for_missing_message(
+    sqlite_message_store: components.SqliteMessageStore,
+):
+    """Test storing a response fails if the message is not stored."""
+    message = data.Message(content=b"\x01\x02payload")
+    response = data.Response(
+        content="test response",
+        status=data.ResponseStatus.SUCCESS,
+        message=message,
+    )
+
+    with pytest.raises(MessageStoreError, match="unknown message"):
+        sqlite_message_store.store_response(response)
 
 
 def test_get_unsent_messages(
@@ -136,3 +170,7 @@ def test_get_unsent_messages(
 
     # Assert
     assert len(unsent_messages) == 2
+    assert {message.content for message in unsent_messages} == {
+        b"test message 2",
+        b"test message 3",
+    }

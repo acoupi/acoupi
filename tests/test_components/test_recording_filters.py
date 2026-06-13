@@ -26,7 +26,7 @@ def test_focus_species_filter_rejects_if_no_target_species_found(
         name_model="test",
         recording=recording,
         detections=[
-            data.Detection(
+            data.PresenceDetection(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
@@ -51,7 +51,7 @@ def test_focus_species_filter_rejects_low_confidence_detections(
         name_model="test",
         recording=recording,
         detections=[
-            data.Detection(
+            data.PresenceDetection(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),
@@ -76,7 +76,7 @@ def test_focus_species_filter_keeps_high_confidence_detections(
         name_model="test",
         recording=recording,
         detections=[
-            data.Detection(
+            data.PresenceDetection(
                 detection_score=0.6,
                 tags=[
                     data.PredictedTag(
@@ -106,7 +106,7 @@ def test_focus_species_filter_rejects_even_with_confident_non_target(
         name_model="test",
         recording=recording,
         detections=[
-            data.Detection(
+            data.PresenceDetection(
                 detection_score=0.6,
                 tags=[
                     data.PredictedTag(
@@ -143,7 +143,7 @@ def test_focus_species_filter_keeps_with_at_least_one_target_species(
         name_model="test",
         recording=recording,
         detections=[
-            data.Detection(
+            data.PresenceDetection(
                 tags=[
                     data.PredictedTag(
                         tag=data.Tag(key="species", value="test2"),

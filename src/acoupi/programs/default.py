@@ -6,8 +6,8 @@ do any processing and messaging.
 
 import datetime
 from typing import Optional
+from zoneinfo import ZoneInfo
 
-import pytz
 from pydantic import BaseModel
 
 from acoupi import components, data
@@ -48,7 +48,7 @@ class Program(BasicProgram):
             return []
 
         saving_filters = []
-        timezone = pytz.timezone(config.timezone)
+        timezone = ZoneInfo(config.timezone)
         recording_saving = config.recording_saving
 
         # Main filter

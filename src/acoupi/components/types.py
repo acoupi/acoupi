@@ -1,18 +1,21 @@
 """Module containing the types used by the acoupi."""
 
 import datetime
-import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Generic, List, Optional, Protocol, Tuple
+from typing import (
+    Dict,
+    Generic,
+    List,
+    Optional,
+    ParamSpec,
+    Protocol,
+    Sequence,
+    Tuple,
+)
 from uuid import UUID
 
 from acoupi import data
-
-if sys.version_info >= (3, 10):
-    from typing import ParamSpec
-else:
-    from typing_extensions import ParamSpec
 
 
 class RecordingScheduler(ABC):
@@ -34,7 +37,7 @@ class RecordingScheduler(ABC):
     @abstractmethod
     def time_until_next_recording(
         self,
-        time: Optional[datetime.datetime] = None,
+        time: Optional[data.AwareDatetime] = None,
     ) -> float:
         """Provide the number of seconds until the next recording.
 
@@ -314,7 +317,6 @@ class Store(ABC):
     def store_recording(
         self,
         recording: data.Recording,
-        deployment: Optional[data.Deployment] = None,
     ) -> None:
         """Store the recording locally.
 
@@ -322,8 +324,6 @@ class Store(ABC):
         ----------
         recording : data.Recording
             The recording to store.
-        deployment : Optional[data.Deployment], optional
-            The deployment associated with the recording, by default None.
         """
 
     @abstractmethod
@@ -332,6 +332,13 @@ class Store(ABC):
         model_output: data.ModelOutput,
     ) -> None:
         """Store the model output locally."""
+
+    @abstractmethod
+    def store_model_outputs(
+        self,
+        model_outputs: List[data.ModelOutput],
+    ) -> None:
+        """Store multiple model outputs locally."""
 
     @abstractmethod
     def get_recordings(
@@ -356,7 +363,7 @@ class Store(ABC):
     @abstractmethod
     def get_recordings_by_path(
         self,
-        paths: List[Path],
+        paths: Sequence[Optional[Path]],
     ) -> List[Tuple[data.Recording, List[data.ModelOutput]]]:
         """Get a list recordings from the store by their paths.
 
@@ -372,6 +379,27 @@ class Store(ABC):
         -------
             A list of tuples of the recording and the model outputs.
         """
+
+    @abstractmethod
+    def get_recordings_info_by_path(
+        self,
+        paths: Sequence[Optional[Path]],
+    ) -> List[Tuple[data.Recording, List[data.ModelOutputInfo]]]:
+        """Get recordings by path with lightweight model-output metadata."""
+
+    @abstractmethod
+    def get_recording_model_outputs(
+        self,
+        recording: data.Recording,
+    ) -> List[data.ModelOutput]:
+        """Get the full model outputs associated with a single recording."""
+
+    @abstractmethod
+    def get_recordings_model_outputs(
+        self,
+        recordings: Sequence[data.Recording],
+    ) -> Dict[UUID, List[data.ModelOutput]]:
+        """Get the full model outputs associated with multiple recordings."""
 
     @abstractmethod
     def update_recording_path(
@@ -451,7 +479,8 @@ class Summariser(ABC):
         Returns
         -------
         data.Message
-            The summary as a data.Message object. The message should be in JSON format.
+            The summary as a data.Message object. Built-in summarisers emit
+            JSON text, but custom summarisers may emit raw bytes.
         """
 
 
@@ -486,6 +515,12 @@ class Messenger(ABC):
         -------
         data.Response
             A response containing the message, status, content, and received time.
+
+        Raises
+        ------
+        MessageSendError
+            Raised when the message could not be sent locally and no remote
+            response was received.
         """
 
 

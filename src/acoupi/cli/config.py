@@ -2,8 +2,8 @@
 
 import click
 import pygments
-from pygments.formatters import TerminalFormatter
-from pygments.lexers import JsonLexer
+from pygments.formatters import TerminalFormatter  # type: ignore
+from pygments.lexers import JsonLexer  # type: ignore
 
 from acoupi import system
 from acoupi.cli.base import acoupi

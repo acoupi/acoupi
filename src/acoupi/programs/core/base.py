@@ -3,16 +3,9 @@
 import datetime
 import logging
 from abc import ABC
+from collections.abc import Callable
 from functools import wraps
-from typing import (
-    Callable,
-    Generic,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import Generic, List, Optional, Protocol, Type, TypeVar, Union
 
 from celery import Celery, Task, group
 from celery.schedules import crontab
@@ -43,6 +36,12 @@ C = TypeVar("C", bound=BaseModel, covariant=False, contravariant=True)
 B = TypeVar("B")
 
 
+class NamedCallable(Callable, Protocol):
+    """Callable with a name."""
+
+    def __name__(self) -> str: ...
+
+
 class InvalidAcoupiConfiguration(ValueError):
     """Raised when a configuration is invalid."""
 
@@ -52,7 +51,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
     config: ProgramConfig
 
-    config_schema: Type[ProgramConfig]
+    config_schema: Type[BaseModel]
 
     worker_config: Optional[WorkerConfig] = None
 
@@ -115,7 +114,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         self.logger.info("Deployment: %s", deployment)
 
     @classmethod
-    def get_config_schema(cls) -> Type[BaseModel]:
+    def get_config_schema(cls) -> type[BaseModel]:
         """Get the config class."""
         return cls.config_schema
 
@@ -138,13 +137,36 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
     def add_task(
         self,
-        function: Callable[[], Optional[B]],
-        callbacks: Optional[List[Callable[[Optional[B]], None]]] = None,
+        function: NamedCallable[[], Optional[B]],
+        callbacks: Optional[List[NamedCallable[[Optional[B]], None]]] = None,
         schedule: Union[int, datetime.timedelta, crontab, None] = None,
         queue: Optional[str] = None,
+        callback_queue: Optional[str] = None,
         name: Optional[str] = None,
     ):
-        """Add a task to the program."""
+        """Add a task to the program.
+
+        Parameters
+        ----------
+        function :
+            The callable to run as a Celery task.
+        callbacks :
+            Optional list of callables to run after the task completes,
+            receiving the task's return value as their argument.
+        schedule :
+            How often to run the task (timedelta, seconds, or crontab).
+        queue :
+            Name of the queue the task itself should be routed to. Must be
+            declared in the program's ``worker_config``.
+        callback_queue :
+            Name of the queue all callbacks should be routed to. Must be
+            declared in the program's ``worker_config``. When set, every
+            callback is registered in ``app.conf.task_routes`` so that
+            ``apply_async()`` dispatches it to the correct worker without
+            needing an explicit queue argument at call-site.
+        name :
+            Celery task name. Defaults to ``function.__name__``.
+        """
         if not callbacks:
             callbacks = []
 
@@ -159,6 +181,10 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
             # get the task from the list of tasks
             callback_task = self.tasks[callback.__name__]
+
+            if callback_queue:
+                # route the callback task to the callback queue
+                self.add_task_to_queue(callback_task.name, callback_queue)
 
             # add the task to the list of callback tasks
             callback_tasks.append(callback_task)
@@ -190,7 +216,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
     def _add_task(
         self,
-        function: Callable[[], Optional[B]],
+        function: NamedCallable[[], Optional[B]],
         callback_tasks: Optional[List[Task]] = None,
         name: Optional[str] = None,
     ) -> Task:
@@ -232,11 +258,11 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         # add the task to the list of tasks
         self.tasks[name] = task
 
-        return task  # type: ignore
+        return task
 
     def _add_callback(
         self,
-        function: Callable[[Optional[B]], None],
+        function: NamedCallable[[Optional[B]], None],
     ) -> Task:
         # Use the function name as the task name
         name = function.__name__
@@ -250,7 +276,7 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
 
             result = function(result)
 
-            logger.debug("Callback finished")
+            logger.debug("Callback finished with result: %s", result)
 
         # register the task with the app
         task = self.app.task(decorated_function, name=name)
@@ -258,4 +284,4 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         # add the task to the list of tasks
         self.tasks[name] = task
 
-        return task  # type: ignore
+        return task

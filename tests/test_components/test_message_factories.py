@@ -1,6 +1,5 @@
 """Test acoupi components saving filters."""
 
-import datetime
 from pathlib import Path
 from typing import List
 
@@ -24,7 +23,7 @@ def create_test_detection():
         confidence_score: float = 0.6,
     ) -> data.Detection:
         """Return a random detection."""
-        return data.Detection(
+        return data.PresenceDetection(
             location=data.BoundingBox(
                 coordinates=(0.1, 0.2, 0.3, 0.4),
             ),
@@ -56,7 +55,7 @@ def create_test_model_output():
         samplerate=256000,
         audio_channels=1,
         deployment=deployment,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
     )
 
     def factory(

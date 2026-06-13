@@ -1,25 +1,49 @@
 """Data objects for acoupi System."""
 
 import datetime
-from enum import IntEnum
+from dataclasses import dataclass
+from enum import Enum, IntEnum
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import (
+    Any,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import (
+    AwareDatetime,
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+)
 
 __all__ = [
+    "AwareDatetime",
     "TimeInterval",
     "Deployment",
     "Recording",
     "PredictedTag",
+    "PredictionType",
     "Detection",
+    "PresenceDetection",
+    "SequenceDetection",
+    "EventDetection",
     "ModelOutput",
+    "ModelOutputInfo",
     "Message",
     "ResponseStatus",
     "Response",
     "BoundingBox",
 ]
+
+
+def utc_now() -> AwareDatetime:
+    return datetime.datetime.now(datetime.timezone.utc)
 
 
 class TimeInterval(BaseModel):
@@ -30,6 +54,17 @@ class TimeInterval(BaseModel):
 
     end: datetime.time
     """End time of the interval."""
+
+
+class DeviceInfo(BaseModel):
+    """Runtime information about the current device.
+
+    This object is intentionally small and currently only exposes the device
+    identifier used in filename templates and heartbeat-style messages.
+    """
+
+    id: str
+    """Unique identifier for the current device, if available."""
 
 
 class Deployment(BaseModel):
@@ -50,12 +85,10 @@ class Deployment(BaseModel):
     longitude: Optional[float] = None
     """The longitude of the site where the device is deployed."""
 
-    started_on: datetime.datetime = Field(
-        default_factory=datetime.datetime.now
-    )
+    started_on: AwareDatetime = Field(default_factory=utc_now)
     """The datetime when the device was deployed."""
 
-    ended_on: Optional[datetime.datetime] = None
+    ended_on: Optional[AwareDatetime] = None
     """The datetime when the deployment ended."""
 
     @field_validator("latitude")
@@ -76,10 +109,7 @@ class Deployment(BaseModel):
 class Recording(BaseModel):
     """A Recording is a single audio file recorded from the microphone."""
 
-    created_on: datetime.datetime = Field(
-        default_factory=datetime.datetime.now,
-        repr=False,
-    )
+    created_on: AwareDatetime = Field(default_factory=utc_now, repr=False)
     """The datetime when the recording was made"""
 
     duration: float = Field(
@@ -101,6 +131,13 @@ class Recording(BaseModel):
 
     chunksize: Optional[int] = Field(default=4096, repr=False)
     """The chunksize of the audio file in bytes. Defaults to 4096."""
+
+    time_expansion: float = Field(default=1, repr=False, gt=0)
+    """Factor by which the recording's time scale is multiplied.
+
+    Values > 1.0 indicate time expansion (slowing down playback), while values
+    between 0.0 and 1.0 indicate time compression (speeding up playback).
+    """
 
     id: UUID = Field(default_factory=uuid4, repr=True)
     """The unique ID of the recording"""
@@ -127,7 +164,8 @@ class Recording(BaseModel):
         return value
 
 
-class Tag(BaseModel):
+@dataclass(slots=True, frozen=True)
+class Tag:
     """A Tag is a label for a recording."""
 
     key: str
@@ -136,22 +174,9 @@ class Tag(BaseModel):
     value: str
     """The value of the tag."""
 
-    @field_validator("key")
-    def validate_key(cls, value):
-        """Validate that the key is not empty."""
-        if not value:
-            raise ValueError("key cannot be empty")
-        return value
 
-    @field_validator("value")
-    def validate_value(cls, value):
-        """Validate that the value is not empty."""
-        if not value:
-            raise ValueError("value cannot be empty")
-        return value
-
-
-class PredictedTag(BaseModel):
+@dataclass(slots=True, frozen=True)
+class PredictedTag:
     """A PredictedTag is a label predicted by a model.
 
     It consists of a key, a value and a score.
@@ -163,19 +188,14 @@ class PredictedTag(BaseModel):
     confidence_score: float = 1
     """The confidence score of the predicted tag."""
 
-    @field_validator("confidence_score")
-    def validate_score(cls, value):
-        """Validate that the score is between 0 and 1."""
-        if value < 0 or value > 1:
-            raise ValueError("score must be between 0 and 1")
-        return value
-
 
 class BoundingBox(BaseModel):
     """BoundingBox to locate a sound event in time and frequency.
 
     All time values are in seconds and all frequency values are in Hz.
     """
+
+    model_config = ConfigDict(frozen=True)
 
     type: str = "BoundingBox"
 
@@ -210,11 +230,43 @@ class BoundingBox(BaseModel):
         return value
 
 
+class PredictionType(str, Enum):
+    """Describe what kind of sound pattern a detection refers to.
+
+    This helps explain how to interpret the area covered by a detection.
+    A detection may refer to a general presence of sound in a region, one
+    whole sequence of related sounds, or one single sound event.
+    """
+
+    PRESENCE = "presence"
+    """One or more target sounds are present in the detected region."""
+
+    SEQUENCE = "sequence"
+    """Exactly one sequence of related sounds is present in the detected region."""
+
+    EVENT = "event"
+    """Exactly one single target sound event is present in the detected region."""
+
+
 class Detection(BaseModel):
-    """A Detection is a single prediction from a model."""
+    """A Detection is a single prediction from a model.
+
+    The ``prediction_type`` explains what kind of thing the detection refers
+    to. In most cases, it is easier to use one of the convenience classes
+    instead of setting this field manually:
+
+    - ``PresenceDetection`` for one or more target sounds in a region.
+    - ``SequenceDetection`` for exactly one sequence of related sounds.
+    - ``EventDetection`` for exactly one single sound event.
+    """
+
+    model_config = ConfigDict(frozen=True)
 
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the detection"""
+
+    prediction_type: "PredictionType"
+    """The semantic type of prediction represented by this detection."""
 
     location: Optional[BoundingBox] = None
     """The location of the detection in the recording."""
@@ -232,22 +284,80 @@ class Detection(BaseModel):
             raise ValueError("score must be between 0 and 1")
         return value
 
-    @field_validator("tags")
-    def sort_tags(cls, value):
-        """Sort tags."""
-        return sorted(
-            value,
-            key=lambda x: (
-                x.confidence_score,
-                x.tag.key,
-                x.tag.value,
-            ),
-            reverse=True,
+    def __hash__(self) -> int:
+        return hash(
+            (
+                self.id,
+                self.prediction_type,
+                self.location,
+                self.detection_score,
+                tuple(sorted(hash(t) for t in self.tags)),
+            )
         )
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Detection):
+            return NotImplemented
+
+        # Check standard fields first by creating a dict copy without the list fields
+        self_dict = self.model_dump(exclude={"tags"})
+        other_dict = other.model_dump(exclude={"tags"})
+
+        if self_dict != other_dict:
+            return False
+
+        self_tags = set(self.tags)
+        other_tags = set(other.tags)
+        return self_tags == other_tags
+
+
+class PresenceDetection(Detection):
+    """Detection for a region where one or more target sounds are present.
+
+    This is the most general detection type. It is useful for full-recording,
+    clip-level, or bounding-box predictions when the detected region may
+    contain one or more sound events.
+    """
+
+    prediction_type: "PredictionType" = Field(
+        default=PredictionType.PRESENCE,
+        init=False,
+        repr=False,
+    )
+
+
+class SequenceDetection(Detection):
+    """Detection for a region that contains exactly one sequence of sounds.
+
+    Use this when the detected region refers to one meaningful group of
+    related sounds rather than a single event.
+    """
+
+    prediction_type: "PredictionType" = Field(
+        default=PredictionType.SEQUENCE,
+        init=False,
+        repr=False,
+    )
+
+
+class EventDetection(Detection):
+    """Detection for a region that contains exactly one target sound event.
+
+    Use this when the detected region is intended to describe one single
+    sound event.
+    """
+
+    prediction_type: "PredictionType" = Field(
+        default=PredictionType.EVENT,
+        init=False,
+        repr=False,
+    )
 
 
 class ModelOutput(BaseModel):
     """The output of a model."""
+
+    model_config = ConfigDict(frozen=True)
 
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the model output."""
@@ -258,37 +368,39 @@ class ModelOutput(BaseModel):
     recording: Recording
     """The recording that was used as input to the model."""
 
-    tags: List[PredictedTag] = Field(default_factory=list)
-    """The tags predicted by the model at the recording level."""
-
-    detections: List[Detection] = Field(default_factory=list)
+    detections: Sequence[Detection] = Field(default_factory=list)
     """List of predicted sound events in the recording."""
 
-    created_on: datetime.datetime = Field(
-        default_factory=datetime.datetime.now
-    )
+    created_on: AwareDatetime = Field(default_factory=utc_now)
     """The datetime when the model output was created."""
 
-    @field_validator("tags")
-    def sort_tags(cls, value):
-        """Sort tags."""
-        return sorted(
-            value,
-            key=lambda x: (
-                x.confidence_score,
-                x.tag.key,
-                x.tag.value,
-            ),
-            reverse=True,
-        )
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, ModelOutput):
+            return NotImplemented
 
-    @field_validator("detections")
-    def sort_detections(cls, value):
-        """Sort detections by ID."""
-        return sorted(
-            value,
-            key=lambda x: x.id,
-        )
+        # Check standard fields first by creating a dict copy without the list fields
+        self_dict = self.model_dump(exclude={"detections"})
+        other_dict = other.model_dump(exclude={"detections"})
+
+        if self_dict != other_dict:
+            return False
+
+        self_detections = set(d for d in self.detections)
+        other_detections = set(d for d in other.detections)
+        return self_detections == other_detections
+
+
+class ModelOutputInfo(BaseModel):
+    """Lightweight model-output information for management-style queries."""
+
+    id: UUID = Field(default_factory=uuid4)
+    """The unique ID of the model output."""
+
+    name_model: str
+    """The name of the model that produced the output."""
+
+    created_on: AwareDatetime = Field(default_factory=utc_now)
+    """The datetime when the model output was created."""
 
 
 class Message(BaseModel):
@@ -297,12 +409,10 @@ class Message(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the message."""
 
-    content: str
-    """The message to be sent. Usually a JSON string."""
+    content: Union[str, bytes]
+    """The message to be sent. Usually JSON text, but may be raw bytes."""
 
-    created_on: datetime.datetime = Field(
-        default_factory=datetime.datetime.now
-    )
+    created_on: AwareDatetime = Field(default_factory=utc_now)
     """The datetime when the message was created."""
 
 
@@ -334,7 +444,5 @@ class Response(BaseModel):
     content: Optional[str] = None
     """The content of the response."""
 
-    received_on: datetime.datetime = Field(
-        default_factory=datetime.datetime.now
-    )
+    received_on: AwareDatetime = Field(default_factory=utc_now)
     """The datetime the message was received."""

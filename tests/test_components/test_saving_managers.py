@@ -55,7 +55,7 @@ def create_test_detection():
         detection_score: float = 0.8,
     ) -> data.Detection:
         """Return a random detection."""
-        return data.Detection(
+        return data.PresenceDetection(
             detection_score=detection_score,
             tags=[
                 data.PredictedTag(
@@ -84,7 +84,7 @@ def create_test_model_output():
         samplerate=256000,
         audio_channels=1,
         deployment=deployment,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
     )
 
     def factory(
@@ -107,7 +107,9 @@ def test_save_recording_manager_fails_if_recording_has_no_path(
     saving_manager = saving_managers.SaveRecordingManager(tmp_path)
     recording = create_test_recording(
         recording_path=None,
-        recording_time=datetime.datetime(2020, 1, 1, 0, 0, 0),
+        recording_time=datetime.datetime(
+            2020, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+        ),
     )
     with pytest.raises(ValueError):
         saving_manager.save_recording(recording)
@@ -135,7 +137,9 @@ def test_save_recording_with_confident_detections(
     recording_file.write_text("test recording in true_detections folder")
 
     recording = create_test_recording(
-        recording_time=datetime.datetime(2020, 1, 1, 0, 0, 0),
+        recording_time=datetime.datetime(
+            2020, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+        ),
         recording_path=recording_file,
     )
 
@@ -192,7 +196,9 @@ def test_save_recording_with_unconfident_detections(
     )
 
     recording = create_test_recording(
-        recording_time=datetime.datetime(2020, 1, 1, 0, 0, 0),
+        recording_time=datetime.datetime(
+            2020, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+        ),
         recording_path=recording_file,
     )
     model_output = create_test_model_output(
@@ -246,7 +252,9 @@ def test_none_is_returned_if_not_true_or_false_class(
     recording_file.write_text("test recording going to right folder")
 
     recording = create_test_recording(
-        recording_time=datetime.datetime(2020, 1, 1, 0, 0, 0),
+        recording_time=datetime.datetime(
+            2020, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+        ),
         recording_path=recording_file,
     )
 
@@ -291,7 +299,9 @@ def test_date_file_manager_save_recording(
     recording_file.touch()
 
     recording = create_test_recording(
-        recording_time=datetime.datetime(2024, 8, 1, 20, 30, 0),
+        recording_time=datetime.datetime(
+            2024, 8, 1, 20, 30, 0, tzinfo=datetime.timezone.utc
+        ),
         recording_path=recording_file,
     )
 
@@ -305,4 +315,6 @@ def test_date_file_manager_save_recording(
 
     # Assert
     assert tmp_audio_dirpath.exists()
-    assert file_path == Path("2024") / "8" / "1" / f"203000_{recording.id}.wav"
+    assert file_path == (
+        Path("2024") / "8" / "1" / f"20240801_203000_{recording.id}.wav"
+    )

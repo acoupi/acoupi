@@ -16,6 +16,7 @@ import logging
 from typing import Callable, List, Optional
 
 from acoupi.components import types
+from acoupi.system.exceptions import MessageSendError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -72,9 +73,22 @@ def generate_send_messages_task(
                 # break
 
             for messenger in messengers:
-                response = messenger.send_message(message)
+                try:
+                    response = messenger.send_message(message)
+                except MessageSendError as error:
+                    logger.error(
+                        "Message send failed for message %s via %s: %s",
+                        message.id,
+                        messenger.__class__.__name__,
+                        error,
+                    )
+                    continue
+
                 logger.info(
-                    f"Message Sent - Response Status: {response.status}"
+                    "Message sent for message %s via %s - Response Status: %s",
+                    message.id,
+                    messenger.__class__.__name__,
+                    response.status,
                 )
                 message_store.store_response(response)
 

@@ -7,6 +7,9 @@ __all__ = [
     "DeploymentError",
     "HealthCheckError",
     "InvalidProgramError",
+    "MetadataStoreError",
+    "MessageSendError",
+    "MessageStoreError",
     "ParameterError",
     "ProgramNotFoundError",
 ]
@@ -95,6 +98,45 @@ class DeploymentError(Exception):
 
     def __init__(self, message: str):
         """Initialise DeploymentError exception."""
+        self.message = message
+        super().__init__(message)
+
+    def __str__(self):
+        """Return the error message."""
+        return self.message
+
+
+class MessageSendError(Exception):
+    """Exception raised when a message cannot be sent locally."""
+
+    def __init__(self, message: str):
+        """Initialise MessageSendError exception."""
+        self.message = message
+        super().__init__(message)
+
+    def __str__(self):
+        """Return the error message."""
+        return self.message
+
+
+class MessageStoreError(Exception):
+    """Exception raised when the message store state is invalid."""
+
+    def __init__(self, message: str):
+        """Initialise MessageStoreError exception."""
+        self.message = message
+        super().__init__(message)
+
+    def __str__(self):
+        """Return the error message."""
+        return self.message
+
+
+class MetadataStoreError(Exception):
+    """Exception raised when the metadata store state is invalid."""
+
+    def __init__(self, message: str):
+        """Initialise MetadataStoreError exception."""
         self.message = message
         super().__init__(message)
 

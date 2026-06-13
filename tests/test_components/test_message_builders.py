@@ -17,24 +17,12 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
         ),
         duration=1,
         samplerate=192000,
-        created_on=datetime.datetime(2020, 1, 1, 0, 0, 0),
+        created_on=datetime.datetime(
+            2020, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+        ),
     ),
-    tags=[
-        data.PredictedTag(
-            tag=data.Tag(key="species", value="Myotis myotis"),
-            confidence_score=0.9,
-        ),
-        data.PredictedTag(
-            tag=data.Tag(key="species", value="Eptesicus serotinus"),
-            confidence_score=0.7,
-        ),
-        data.PredictedTag(
-            tag=data.Tag(key="antropophony", value="Human voice"),
-            confidence_score=0.4,
-        ),
-    ],
     detections=[
-        data.Detection(
+        data.PresenceDetection(
             location=data.BoundingBox(
                 coordinates=(0.1, 15_000, 0.2, 30_000),
             ),
@@ -50,7 +38,7 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
                 ),
             ],
         ),
-        data.Detection(
+        data.PresenceDetection(
             location=data.BoundingBox(
                 coordinates=(0.5, 19_000, 0.7, 38_000),
             ),
@@ -66,7 +54,7 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
                 ),
             ],
         ),
-        data.Detection(
+        data.PresenceDetection(
             location=data.BoundingBox(
                 coordinates=(0.9, 24_000, 0.95, 41_000),
             ),

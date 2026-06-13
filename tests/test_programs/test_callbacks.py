@@ -1,6 +1,5 @@
-import time
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 import pytest
 from celery import Celery
@@ -10,20 +9,22 @@ from pydantic import BaseModel
 from acoupi.programs.core.base import AcoupiProgram
 from acoupi.programs.core.workers import AcoupiWorker, WorkerConfig
 
+WaitForCondition = Callable[..., None]
+
 
 class Config(BaseModel):
     path: Path
     message: str
 
 
-class TestProgram1(AcoupiProgram):
+class ProgramWithCallbacks(AcoupiProgram):
     config: Config
 
     def setup(self, config: Config):
         def task_1() -> Path:
             return config.path
 
-        def task_2(path: Optional[Path]):
+        def task_2(path: Optional[Path]) -> None:
             if path is None:
                 return
 
@@ -32,12 +33,14 @@ class TestProgram1(AcoupiProgram):
         self.add_task(task_1, callbacks=[task_2])
 
 
+@pytest.mark.timeout(10)
 @pytest.mark.usefixtures("celery_app")
 @pytest.mark.usefixtures("celery_worker")
 def test_does_run_callbacks(
     tmp_path: Path,
     celery_app: Celery,
     celery_worker: TestWorkController,
+    wait_for_condition: WaitForCondition,
 ):
     path = tmp_path / "test.txt"
     message = "Hello, world!"
@@ -45,7 +48,7 @@ def test_does_run_callbacks(
 
     assert not path.exists()
 
-    program = TestProgram1(
+    program = ProgramWithCallbacks(
         program_config=config,
         app=celery_app,
     )
@@ -60,16 +63,16 @@ def test_does_run_callbacks(
     celery_worker.ensure_started()
 
     output = program.tasks["task_1"].delay()
-    output.get()
+    output.get(timeout=3)
 
-    # Need to wait a bit in case task_2 has not run yet
-    time.sleep(0.1)
+    wait_for_condition(path.exists, timeout=3)
+    wait_for_condition(lambda: path.read_text() == message, timeout=3)
 
     assert path.exists()
     assert path.read_text() == message
 
 
-class TestProgram2(AcoupiProgram):
+class ProgramWithQueuedCallbacks(AcoupiProgram):
     config: Config
 
     worker_config = WorkerConfig(
@@ -99,10 +102,12 @@ class TestProgram2(AcoupiProgram):
         self.add_task(task_1, callbacks=[task_2], queue="special")
 
 
+@pytest.mark.timeout(10)
 def test_does_run_callbacks_in_other_queues(
     tmp_path: Path,
     celery_app: Celery,
     celery_worker: TestWorkController,
+    wait_for_condition: WaitForCondition,
 ):
     path = tmp_path / "test.txt"
     message = "Hello, world!"
@@ -110,21 +115,22 @@ def test_does_run_callbacks_in_other_queues(
 
     assert not path.exists()
 
-    program = TestProgram2(
+    program = ProgramWithQueuedCallbacks(
         program_config=config,
         app=celery_app,
     )
 
     celery_worker.reload()
+    celery_worker.ensure_started()
 
     assert "task_1" in program.tasks
     assert "task_2" in program.tasks
 
     output = program.tasks["task_1"].delay()
-    output.get()
+    output.get(timeout=3)
 
-    # Need to wait a bit in case task_2 has not run yet
-    time.sleep(0.1)
+    wait_for_condition(path.exists)
+    wait_for_condition(lambda: path.read_text() == message, timeout=3)
 
     assert path.exists()
     assert path.read_text() == message
