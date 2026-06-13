@@ -53,7 +53,7 @@ def create_test_detection():
         tag_key: str = "species",
     ) -> data.Detection:
         """Return a random detection."""
-        return data.Detection(
+        return data.PresenceDetection(
             detection_score=detection_score,
             tags=[
                 data.PredictedTag(

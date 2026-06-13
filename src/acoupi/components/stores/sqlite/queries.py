@@ -256,12 +256,6 @@ def get_recordings_model_outputs(
         connection,
         model_output_ids,
     )
-    tags_by_model_output_id = get_predicted_tags_by_parent_ids(
-        connection,
-        model_output_ids,
-        column_name="model_output_id",
-    )
-
     outputs_by_recording_id: Dict[UUID, List[data.ModelOutput]] = {}
     for recording_id, rows in model_output_rows.items():
         recording = recordings_by_id[recording_id]
@@ -271,7 +265,6 @@ def get_recordings_model_outputs(
                 name_model=model_name,
                 recording=recording,
                 created_on=created_on,
-                tags=tags_by_model_output_id.get(model_output_id.bytes, []),
                 detections=detections_by_model_output_id.get(
                     model_output_id, []
                 ),
@@ -379,7 +372,8 @@ def get_detections(
     query = [
         """
         SELECT d.id, d.start_time_s, d.end_time_s, d.low_freq_hz,
-               d.high_freq_hz, d.detection_score, d.model_output_id
+               d.high_freq_hz, d.detection_score, d.model_output_id,
+               d.prediction_type
         FROM detection AS d
         JOIN model_output AS mo ON mo.id = d.model_output_id
         """
@@ -434,6 +428,7 @@ def get_detections(
     return [
         data.Detection(
             id=UUID(bytes=row["id"]),
+            prediction_type=data.PredictionType(row["prediction_type"]),
             location=None
             if (
                 row["start_time_s"] is None
@@ -544,22 +539,12 @@ def insert_model_outputs(
             )
         )
 
-        for tag in model_output.tags:
-            predicted_tag_rows.append(
-                (
-                    tag.tag.key,
-                    tag.tag.value,
-                    tag.confidence_score,
-                    None,
-                    model_output.id.bytes,
-                )
-            )
-
         for detection in model_output.detections:
             bbox = detection.location
             detection_rows.append(
                 (
                     detection.id.bytes,
+                    detection.prediction_type.value,
                     None if bbox is None else bbox.coordinates[0],
                     None if bbox is None else bbox.coordinates[2],
                     None if bbox is None else bbox.coordinates[1],
@@ -576,7 +561,6 @@ def insert_model_outputs(
                         tag.tag.value,
                         tag.confidence_score,
                         detection.id.bytes,
-                        None,
                     )
                 )
 
@@ -586,12 +570,12 @@ def insert_model_outputs(
     )
     if detection_rows:
         connection.executemany(
-            "INSERT INTO detection (id, start_time_s, end_time_s, low_freq_hz, high_freq_hz, detection_score, model_output_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO detection (id, prediction_type, start_time_s, end_time_s, low_freq_hz, high_freq_hz, detection_score, model_output_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             detection_rows,
         )
     if predicted_tag_rows:
         connection.executemany(
-            "INSERT INTO predicted_tag (key, value, confidence_score, detection_id, model_output_id) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO predicted_tag (key, value, confidence_score, detection_id) VALUES (?, ?, ?, ?)",
             predicted_tag_rows,
         )
 
@@ -608,7 +592,7 @@ def get_detections_by_model_output_ids(
         placeholders = ", ".join("?" for _ in model_output_id_chunk)
         detection_rows.extend(
             connection.execute(
-                "SELECT id, start_time_s, end_time_s, low_freq_hz, high_freq_hz, detection_score, model_output_id "
+                "SELECT id, prediction_type, start_time_s, end_time_s, low_freq_hz, high_freq_hz, detection_score, model_output_id "
                 f"FROM detection WHERE model_output_id IN ({placeholders})",
                 [
                     model_output_id.bytes
@@ -629,6 +613,7 @@ def get_detections_by_model_output_ids(
     )
     for (
         detection_id_blob,
+        prediction_type,
         start_time_s,
         end_time_s,
         low_freq_hz,
@@ -657,6 +642,7 @@ def get_detections_by_model_output_ids(
         detections_by_model_output_id[model_output_id].append(
             data.Detection(
                 id=UUID(bytes=detection_id_blob),
+                prediction_type=data.PredictionType(prediction_type),
                 location=location,
                 detection_score=detection_score,
                 tags=tags_by_detection_id.get(detection_id_blob, []),

@@ -44,15 +44,21 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
     model_output = data.ModelOutput(
         name_model="test_model",
         recording=recording,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value1"),
-                confidence_score=0.6,
-            ),
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value2"),
-                confidence_score=0.3,
-            ),
+        detections=[
+            data.PresenceDetection(
+                location=data.BoundingBox(coordinates=(0, 0, 1, 4000)),
+                detection_score=0.6,
+                tags=[
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value1"),
+                        confidence_score=0.6,
+                    ),
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value2"),
+                        confidence_score=0.3,
+                    ),
+                ],
+            )
         ],
     )
     manager = components.SaveRecordingManager(
@@ -83,15 +89,21 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
     model_output = data.ModelOutput(
         name_model="test_model",
         recording=recording,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value1"),
-                confidence_score=0.4,
-            ),
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value2"),
-                confidence_score=0.3,
-            ),
+        detections=[
+            data.PresenceDetection(
+                location=data.BoundingBox(coordinates=(0, 0, 1, 4000)),
+                detection_score=0.4,
+                tags=[
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value1"),
+                        confidence_score=0.4,
+                    ),
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value2"),
+                        confidence_score=0.3,
+                    ),
+                ],
+            )
         ],
     )
     manager = components.SaveRecordingManager(

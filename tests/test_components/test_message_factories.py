@@ -24,7 +24,7 @@ def create_test_detection():
         confidence_score: float = 0.6,
     ) -> data.Detection:
         """Return a random detection."""
-        return data.Detection(
+        return data.PresenceDetection(
             location=data.BoundingBox(
                 coordinates=(0.1, 0.2, 0.3, 0.4),
             ),

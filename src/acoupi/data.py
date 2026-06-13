@@ -2,9 +2,9 @@
 
 import datetime
 from dataclasses import dataclass
-from enum import IntEnum
+from enum import Enum, IntEnum
 from pathlib import Path
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Sequence, Tuple, Union
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -14,7 +14,11 @@ __all__ = [
     "Deployment",
     "Recording",
     "PredictedTag",
+    "PredictionType",
     "Detection",
+    "PresenceDetection",
+    "SequenceDetection",
+    "EventDetection",
     "ModelOutput",
     "ModelOutputInfo",
     "Message",
@@ -213,13 +217,43 @@ class BoundingBox(BaseModel):
         return value
 
 
+class PredictionType(str, Enum):
+    """Describe what kind of sound pattern a detection refers to.
+
+    This helps explain how to interpret the area covered by a detection.
+    A detection may refer to a general presence of sound in a region, one
+    whole sequence of related sounds, or one single sound event.
+    """
+
+    PRESENCE = "presence"
+    """One or more target sounds are present in the detected region."""
+
+    SEQUENCE = "sequence"
+    """Exactly one sequence of related sounds is present in the detected region."""
+
+    EVENT = "event"
+    """Exactly one single target sound event is present in the detected region."""
+
+
 class Detection(BaseModel):
-    """A Detection is a single prediction from a model."""
+    """A Detection is a single prediction from a model.
+
+    The ``prediction_type`` explains what kind of thing the detection refers
+    to. In most cases, it is easier to use one of the convenience classes
+    instead of setting this field manually:
+
+    - ``PresenceDetection`` for one or more target sounds in a region.
+    - ``SequenceDetection`` for exactly one sequence of related sounds.
+    - ``EventDetection`` for exactly one single sound event.
+    """
 
     model_config = ConfigDict(frozen=True)
 
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the detection"""
+
+    prediction_type: "PredictionType"
+    """The semantic type of prediction represented by this detection."""
 
     location: Optional[BoundingBox] = None
     """The location of the detection in the recording."""
@@ -241,6 +275,7 @@ class Detection(BaseModel):
         return hash(
             (
                 self.id,
+                self.prediction_type,
                 self.location,
                 self.detection_score,
                 tuple(sorted(hash(t) for t in self.tags)),
@@ -263,6 +298,49 @@ class Detection(BaseModel):
         return self_tags == other_tags
 
 
+class PresenceDetection(Detection):
+    """Detection for a region where one or more target sounds are present.
+
+    This is the most general detection type. It is useful for full-recording,
+    clip-level, or bounding-box predictions when the detected region may
+    contain one or more sound events.
+    """
+
+    prediction_type: "PredictionType" = Field(
+        default=PredictionType.PRESENCE,
+        init=False,
+        repr=False,
+    )
+
+
+class SequenceDetection(Detection):
+    """Detection for a region that contains exactly one sequence of sounds.
+
+    Use this when the detected region refers to one meaningful group of
+    related sounds rather than a single event.
+    """
+
+    prediction_type: "PredictionType" = Field(
+        default=PredictionType.SEQUENCE,
+        init=False,
+        repr=False,
+    )
+
+
+class EventDetection(Detection):
+    """Detection for a region that contains exactly one target sound event.
+
+    Use this when the detected region is intended to describe one single
+    sound event.
+    """
+
+    prediction_type: "PredictionType" = Field(
+        default=PredictionType.EVENT,
+        init=False,
+        repr=False,
+    )
+
+
 class ModelOutput(BaseModel):
     """The output of a model."""
 
@@ -277,14 +355,11 @@ class ModelOutput(BaseModel):
     recording: Recording
     """The recording that was used as input to the model."""
 
-    tags: List[PredictedTag] = Field(default_factory=list)
-    """The tags predicted by the model at the recording level."""
-
-    detections: List[Detection] = Field(default_factory=list)
+    detections: Sequence[Detection] = Field(default_factory=list)
     """List of predicted sound events in the recording."""
 
     created_on: datetime.datetime = Field(
-        default_factory=datetime.datetime.now
+        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
     )
     """The datetime when the model output was created."""
 
@@ -293,16 +368,10 @@ class ModelOutput(BaseModel):
             return NotImplemented
 
         # Check standard fields first by creating a dict copy without the list fields
-        self_dict = self.model_dump(exclude={"tags", "detections"})
-        other_dict = other.model_dump(exclude={"tags", "detections"})
+        self_dict = self.model_dump(exclude={"detections"})
+        other_dict = other.model_dump(exclude={"detections"})
 
         if self_dict != other_dict:
-            return False
-
-        self_tags = set(self.tags)
-        other_tags = set(other.tags)
-
-        if self_tags != other_tags:
             return False
 
         self_detections = set(d for d in self.detections)
@@ -320,7 +389,7 @@ class ModelOutputInfo(BaseModel):
     """The name of the model that produced the output."""
 
     created_on: datetime.datetime = Field(
-        default_factory=datetime.datetime.now
+        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
     )
     """The datetime when the model output was created."""
 
@@ -335,7 +404,7 @@ class Message(BaseModel):
     """The message to be sent. Usually JSON text, but may be raw bytes."""
 
     created_on: datetime.datetime = Field(
-        default_factory=datetime.datetime.now
+        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
     )
     """The datetime when the message was created."""
 
@@ -369,6 +438,6 @@ class Response(BaseModel):
     """The content of the response."""
 
     received_on: datetime.datetime = Field(
-        default_factory=datetime.datetime.now
+        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
     )
     """The datetime the message was received."""

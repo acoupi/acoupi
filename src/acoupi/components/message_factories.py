@@ -14,7 +14,7 @@ implement the build_message method, which takes a model output and returns a mes
 message factories emit JSON text, but custom factories may emit raw bytes for binary transports.
 """
 
-from typing import List, Optional
+from typing import List, Optional, Sequence
 
 from acoupi import data
 from acoupi.components import types
@@ -39,7 +39,7 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         self.detection_threshold = detection_threshold
 
     def filter_detections(
-        self, detections: List[data.Detection]
+        self, detections: Sequence[data.Detection]
     ) -> List[data.Detection]:
         """Remove detections with low score."""
         return [
@@ -70,17 +70,19 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         Examples
         --------
         >>> model_output = data.ModelOutput(
-        ...     data.Detection(
-        ...         detection_score=0.5,
-        ...         tags=[
-        ...             data.PredictedTag(
-        ...                 tag=data.Tag(
-        ...                     key="species", value="species_1"
-        ...                 ),
-        ...                 confidence_score=0.4,
-        ...             )
-        ...         ],
-        ...     )
+        ...     detections=[
+        ...         data.PresenceDetection(
+        ...             detection_score=0.5,
+        ...             tags=[
+        ...                 data.PredictedTag(
+        ...                     tag=data.Tag(
+        ...                         key="species", value="species_1"
+        ...                     ),
+        ...                     confidence_score=0.4,
+        ...                 )
+        ...             ],
+        ...         )
+        ...     ],
         ... )
         >>> message_builder = DetectionThresholdMessageBuilder(
         ...     detection_threshold=0.6
@@ -89,23 +91,25 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         None
 
         >>> model_output = data.ModelOutput(
-        ...     data.Detection(
-        ...         detection_score=0.9,
-        ...         tags=[
-        ...             data.PredictedTag(
-        ...                 tag=data.Tag(
-        ...                     key="species", value="species_1"
-        ...                 ),
-        ...                 confidence_score=0.9,
-        ...             )
-        ...         ],
-        ...     )
+        ...     detections=[
+        ...         data.PresenceDetection(
+        ...             detection_score=0.9,
+        ...             tags=[
+        ...                 data.PredictedTag(
+        ...                     tag=data.Tag(
+        ...                         key="species", value="species_1"
+        ...                     ),
+        ...                     confidence_score=0.9,
+        ...                 )
+        ...             ],
+        ...         )
+        ...     ],
         ... )
         >>> message_builder = DetectionThresholdMessageBuilder(
         ...     detection_threshold=0.6
         ... )
         >>> message_builder.build_message(model_output)
-        Message(content='{"name_model": "TestModel", "recording": {"path": "recording.wav", "deployment": {}, "tags": [], "detections": [{"detection_score": 0.9, "location": {}, "tags": [{"tag": {"key": "species", "value": "species_1"}, "confidence_score": 0.9}]}]}')
+        Message(content='{"name_model": "TestModel", "recording": {"path": "recording.wav", "deployment": {}, "detections": [{"prediction_type": "presence", "detection_score": 0.9, "location": {}, "tags": [{"tag": {"key": "species", "value": "species_1"}, "confidence_score": 0.9}]}]}')
         """
         filtered_detections = self.filter_detections(model_output.detections)
         if not filtered_detections:
@@ -115,7 +119,6 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
         filtered_model_output = data.ModelOutput(
             name_model=model_output.name_model,
             recording=model_output.recording,
-            tags=model_output.tags,
             detections=filtered_detections,
         )
         return data.Message(content=filtered_model_output.model_dump_json())

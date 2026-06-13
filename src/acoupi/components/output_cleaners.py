@@ -17,7 +17,7 @@ the detection task as a list of ModelOutputCleaner objects. This allows to use
 multiple ModelOutputCleaners to clean the model output.
 """
 
-from typing import List
+from typing import List, Sequence
 
 from acoupi import data
 from acoupi.components import types
@@ -55,7 +55,7 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         --------
         >>> model_output = data.ModelOutput(
         ...     detections=[
-        ...         data.Detection(
+        ...         data.PresenceDetection(
         ...             detection_score=0.8,
         ...             tags=[
         ...                 data.PredictedTag(
@@ -64,8 +64,6 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         ...                     ),
         ...                     confidence_score=0.7,
         ...                 )
-        ...             ],
-        ...             tags=[
         ...                 data.PredictedTag(
         ...                     tag=data.Tag(
         ...                         key="species", value="species_2"
@@ -80,7 +78,7 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         >>> model_output = cleaner.clean(model_output)
         >>> assert model_output == data.ModelOutput(
         ...     detections=[
-        ...         data.Detection(
+        ...         data.PresenceDetection(
         ...             detection_score=0.8,
         ...             tags=[
         ...                 data.PredictedTag(
@@ -97,7 +95,6 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         return data.ModelOutput(
             name_model=model_output.name_model,
             recording=model_output.recording,
-            tags=self.get_clean_tags(model_output.tags),
             detections=self.get_clean_detections(model_output.detections),
         )
 
@@ -112,7 +109,7 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         ]
 
     def get_clean_detections(
-        self, detections: List[data.Detection]
+        self, detections: Sequence[data.Detection]
     ) -> List[data.Detection]:
         """Remove detections with low score."""
         return [
@@ -125,6 +122,7 @@ class ThresholdDetectionCleaner(types.ModelOutputCleaner):
         """Remove tags with low score from detection."""
         return data.Detection(
             id=detection.id,
+            prediction_type=detection.prediction_type,
             location=detection.location,
             detection_score=detection.detection_score,
             tags=self.get_clean_tags(detection.tags),

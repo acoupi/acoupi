@@ -269,10 +269,10 @@ class SavingThreshold(types.RecordingSavingFilter):
     def has_confident_model_output(
         self, model_output: data.ModelOutput
     ) -> bool:
-        """Determine if a model output has confident detections or tags.
+        """Determine if a model output has confident detections.
 
-        An output is considered confident if any of its detection score
-        or classification tag score is greater than or equal to the threshold.
+        An output is considered confident if any detection score is greater
+        than or equal to the threshold.
 
         Parameters
         ----------
@@ -282,15 +282,9 @@ class SavingThreshold(types.RecordingSavingFilter):
         Returns
         -------
         bool
-            True if any detection or classification score is above the saving threshold.
-            False if no detection or classification score is above the saving threshold.
+            True if any detection score is above the saving threshold.
+            False if no detection score is above the saving threshold.
         """
-        if any(
-            tag.confidence_score >= self.saving_threshold
-            for tag in model_output.tags
-        ):
-            return True
-
         if any(
             detection.detection_score >= self.saving_threshold
             for detection in model_output.detections
@@ -304,7 +298,7 @@ class SavingThreshold(types.RecordingSavingFilter):
         recording: data.Recording,
         model_outputs: Optional[List[data.ModelOutput]] = None,
     ) -> bool:
-        """Save a recording if it contains any confident detections or tags."""
+        """Save a recording if it contains any confident detections."""
         if model_outputs is None:
             return False
 
@@ -381,8 +375,8 @@ class DetectionTags(types.RecordingSavingFilter):
     def has_confident_tag(self, model_output: data.ModelOutput) -> bool:
         """Determine if a model output has a confident tag.
 
-        An output is considered confident if any of its tags or detections
-        have a score greater than or equal to the threshold.
+        An output is considered confident if any of its detections have a
+        matching tag with score greater than or equal to the threshold.
 
         Parameters
         ----------
@@ -393,13 +387,6 @@ class DetectionTags(types.RecordingSavingFilter):
         -------
             bool
         """
-        if any(
-            tag.tag in self.tags
-            and tag.confidence_score >= self.saving_threshold
-            for tag in model_output.tags
-        ):
-            return True
-
         for detection in model_output.detections:
             if detection.detection_score < self.saving_threshold:
                 continue

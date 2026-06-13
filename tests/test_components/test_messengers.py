@@ -237,7 +237,7 @@ def test_http_messenger_with_complex_message():
                 ),
             ),
             detections=[
-                data.Detection(
+                data.PresenceDetection(
                     location=data.BoundingBox(
                         coordinates=(0, 0, 1, 1),
                     ),

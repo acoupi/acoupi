@@ -135,18 +135,8 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
     return data.ModelOutput(
         name_model="test_model",
         recording=recording,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value1"),
-                confidence_score=0.8,
-            ),
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value2"),
-                confidence_score=0.8,
-            ),
-        ],
         detections=[
-            data.Detection(
+            data.PresenceDetection(
                 location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
                 detection_score=0.6,
                 tags=[

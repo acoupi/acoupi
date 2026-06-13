@@ -117,24 +117,12 @@ class SaveRecordingManager(types.RecordingSavingManager):
             return self.dirpath
 
         for model_output in model_outputs:
-            # Check if any tags or detectinos are confident
-            if any(
-                tag.confidence_score >= self.detection_threshold
-                for tag in model_output.tags
-            ):
-                return self.dirpath_true
-
+            # Check if any detections are confident
             if any(
                 detection.detection_score >= self.detection_threshold
                 for detection in model_output.detections
             ):
                 return self.dirpath_true
-
-            if any(
-                tag.confidence_score >= self.saving_threshold
-                for tag in model_output.tags
-            ):
-                return self.dirpath_false
 
             if any(
                 detection.detection_score >= self.saving_threshold
