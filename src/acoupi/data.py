@@ -4,12 +4,26 @@ import datetime
 from dataclasses import dataclass
 from enum import Enum, IntEnum
 from pathlib import Path
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from typing import (
+    Any,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import (
+    AwareDatetime,
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+)
 
 __all__ = [
+    "AwareDatetime",
     "TimeInterval",
     "Deployment",
     "Recording",
@@ -26,6 +40,10 @@ __all__ = [
     "Response",
     "BoundingBox",
 ]
+
+
+def utc_now() -> AwareDatetime:
+    return datetime.datetime.now(datetime.timezone.utc)
 
 
 class TimeInterval(BaseModel):
@@ -67,12 +85,10 @@ class Deployment(BaseModel):
     longitude: Optional[float] = None
     """The longitude of the site where the device is deployed."""
 
-    started_on: datetime.datetime = Field(
-        default_factory=datetime.datetime.now
-    )
+    started_on: AwareDatetime = Field(default_factory=utc_now)
     """The datetime when the device was deployed."""
 
-    ended_on: Optional[datetime.datetime] = None
+    ended_on: Optional[AwareDatetime] = None
     """The datetime when the deployment ended."""
 
     @field_validator("latitude")
@@ -93,10 +109,7 @@ class Deployment(BaseModel):
 class Recording(BaseModel):
     """A Recording is a single audio file recorded from the microphone."""
 
-    created_on: datetime.datetime = Field(
-        default_factory=datetime.datetime.now,
-        repr=False,
-    )
+    created_on: AwareDatetime = Field(default_factory=utc_now, repr=False)
     """The datetime when the recording was made"""
 
     duration: float = Field(
@@ -358,9 +371,7 @@ class ModelOutput(BaseModel):
     detections: Sequence[Detection] = Field(default_factory=list)
     """List of predicted sound events in the recording."""
 
-    created_on: datetime.datetime = Field(
-        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
-    )
+    created_on: AwareDatetime = Field(default_factory=utc_now)
     """The datetime when the model output was created."""
 
     def __eq__(self, other: Any) -> bool:
@@ -388,9 +399,7 @@ class ModelOutputInfo(BaseModel):
     name_model: str
     """The name of the model that produced the output."""
 
-    created_on: datetime.datetime = Field(
-        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
-    )
+    created_on: AwareDatetime = Field(default_factory=utc_now)
     """The datetime when the model output was created."""
 
 
@@ -403,9 +412,7 @@ class Message(BaseModel):
     content: Union[str, bytes]
     """The message to be sent. Usually JSON text, but may be raw bytes."""
 
-    created_on: datetime.datetime = Field(
-        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
-    )
+    created_on: AwareDatetime = Field(default_factory=utc_now)
     """The datetime when the message was created."""
 
 
@@ -437,7 +444,5 @@ class Response(BaseModel):
     content: Optional[str] = None
     """The content of the response."""
 
-    received_on: datetime.datetime = Field(
-        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
-    )
+    received_on: AwareDatetime = Field(default_factory=utc_now)
     """The datetime the message was received."""

@@ -94,7 +94,7 @@ class SqliteStore(types.Store):
             if deployment is not None:
                 return deployment
 
-            now = datetime.datetime.now()
+            now = data.utc_now()
             deployment = data.Deployment(
                 started_on=now,
                 name=f"Deployment {now.strftime('%Y-%m-%d %H:%M:%S')}",

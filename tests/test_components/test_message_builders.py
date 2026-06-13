@@ -17,7 +17,9 @@ TEST_MODEL_OUTPUT = data.ModelOutput(
         ),
         duration=1,
         samplerate=192000,
-        created_on=datetime.datetime(2020, 1, 1, 0, 0, 0),
+        created_on=datetime.datetime(
+            2020, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+        ),
     ),
     detections=[
         data.PresenceDetection(

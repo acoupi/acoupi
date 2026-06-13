@@ -11,7 +11,7 @@ from acoupi.components.summariser import ThresholdsDetectionsSummariser
 
 def test_build_summary(tmp_path: Path) -> None:
     """Build a threshold-based summary message."""
-    now = datetime.datetime(2024, 1, 1, 12, 0, 0)
+    now = datetime.datetime(2024, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc)
     deployment = data.Deployment(name="test_deployment")
     recording = data.Recording(
         path=tmp_path / "test.wav",

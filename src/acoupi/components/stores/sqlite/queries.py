@@ -219,7 +219,7 @@ def get_recordings_model_outputs(
 ) -> Dict[UUID, List[data.ModelOutput]]:
     recording_ids = list(recordings_by_id)
     model_output_rows: Dict[
-        UUID, List[Tuple[UUID, str, datetime.datetime]]
+        UUID, List[Tuple[UUID, str, data.AwareDatetime]]
     ] = defaultdict(list)
 
     for recording_id_chunk in chunked_uuids(recording_ids):
@@ -277,8 +277,8 @@ def get_recordings_model_outputs(
 
 def get_model_outputs(
     connection: sqlite3.Connection,
-    after: Optional[datetime.datetime] = None,
-    before: Optional[datetime.datetime] = None,
+    after: Optional[data.AwareDatetime] = None,
+    before: Optional[data.AwareDatetime] = None,
     ids: Optional[List[UUID]] = None,
     recording_ids: Optional[List[UUID]] = None,
     model_names: Optional[List[str]] = None,
@@ -366,8 +366,8 @@ def get_detections(
     score_gt: Optional[float] = None,
     score_lt: Optional[float] = None,
     model_names: Optional[List[str]] = None,
-    after: Optional[datetime.datetime] = None,
-    before: Optional[datetime.datetime] = None,
+    after: Optional[data.AwareDatetime] = None,
+    before: Optional[data.AwareDatetime] = None,
 ) -> List[data.Detection]:
     query = [
         """
@@ -454,8 +454,8 @@ def get_detections(
 def get_predicted_tags(
     connection: sqlite3.Connection,
     detection_ids: Optional[List[UUID]] = None,
-    after: Optional[datetime.datetime] = None,
-    before: Optional[datetime.datetime] = None,
+    after: Optional[data.AwareDatetime] = None,
+    before: Optional[data.AwareDatetime] = None,
     score_gt: Optional[float] = None,
     score_lt: Optional[float] = None,
     keys: Optional[List[str]] = None,
@@ -662,7 +662,7 @@ def get_predicted_tags_by_parent_ids(
         placeholders = ", ".join("?" for _ in id_chunk)
         rows = connection.execute(
             "SELECT key, value, confidence_score, "
-            f"{column_name} FROM predicted_tag WHERE {column_name} IN ({placeholders})",
+            f"{column_name} FROM predicted_tag WHERE {column_name} IN ({placeholders}) ORDER BY rowid",
             [id_value.bytes for id_value in id_chunk],
         ).fetchall()
 
@@ -725,9 +725,12 @@ def chunked_uuids(ids: List[UUID]) -> List[List[UUID]]:
     ]
 
 
-def serialise_datetime(value: datetime.datetime) -> str:
-    return value.isoformat(sep=" ")
+def serialise_datetime(value: data.AwareDatetime) -> str:
+    return value.isoformat()
 
 
-def parse_datetime(value: str) -> datetime.datetime:
-    return datetime.datetime.fromisoformat(value)
+def parse_datetime(value: str) -> data.AwareDatetime:
+    parsed = datetime.datetime.fromisoformat(value)
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=datetime.timezone.utc)
+    return parsed

@@ -14,7 +14,6 @@ audio recorder return a temporary .wav file.
 """
 
 import argparse
-import datetime
 import math
 import wave
 from pathlib import Path
@@ -102,7 +101,7 @@ class PyAudioRecorder(AudioRecorder):
         -------
         data.Recording: A Recording object containing the temporary path of the file.
         """
-        now = datetime.datetime.now()
+        now = data.utc_now()
         temp_path = self.audio_dir / f"{now.strftime('%Y%m%d_%H%M%S')}.wav"
         frames = self.get_recording_data(duration=self.duration)
         self.save_recording(frames, temp_path)

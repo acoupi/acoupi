@@ -4,7 +4,6 @@ This module contains utility functions for acoupi programs
 such as loading programs and getting celery apps from programs.
 """
 
-import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -57,7 +56,7 @@ def start_deployment(
 
     deployment = data.Deployment(
         name=name,
-        started_on=datetime.datetime.now(),
+        started_on=data.utc_now(),
         latitude=latitude,
         longitude=longitude,
     )
@@ -115,7 +114,7 @@ def end_deployment(settings: Settings) -> data.Deployment:
         If the deployment has already ended or has not been started yet.
     """
     deployment = get_current_deployment(settings)
-    deployment.ended_on = datetime.datetime.now()
+    deployment.ended_on = data.utc_now()
     write_deployment_to_file(deployment, settings.deployment_file)
     return deployment
 

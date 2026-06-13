@@ -23,7 +23,7 @@ class DummyRecorder(AudioRecorder):
     def __init__(
         self,
         path: Path,
-        created_on: datetime.datetime,
+        created_on: data.AwareDatetime,
         samplerate: int = 16000,
         duration: float = 1.0,
     ):
@@ -58,9 +58,13 @@ def test_recording_task_writes_guano_metadata_with_location(
         name="field-site-a",
         latitude=51.5072,
         longitude=-0.1276,
-        started_on=datetime.datetime(2024, 1, 1, 0, 0, 0),
+        started_on=datetime.datetime(
+            2024, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+        ),
     )
-    created_on = datetime.datetime(2024, 8, 4, 5, 6, 7)
+    created_on = datetime.datetime(
+        2024, 8, 4, 5, 6, 7, tzinfo=datetime.timezone.utc
+    )
 
     store = SqliteStore(tmp_path / "metadata.db")
     store.store_deployment(deployment)
@@ -99,9 +103,13 @@ def test_recording_task_writes_guano_metadata_without_location(
 
     deployment = data.Deployment(
         name="field-site-b",
-        started_on=datetime.datetime(2024, 1, 1, 0, 0, 0),
+        started_on=datetime.datetime(
+            2024, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+        ),
     )
-    created_on = datetime.datetime(2024, 8, 4, 5, 6, 7)
+    created_on = datetime.datetime(
+        2024, 8, 4, 5, 6, 7, tzinfo=datetime.timezone.utc
+    )
 
     store = SqliteStore(tmp_path / "metadata.db")
     store.store_deployment(deployment)

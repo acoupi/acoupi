@@ -227,7 +227,7 @@ class MQTTMessenger(types.Messenger):
         if response.rc != MQTTErrorCode.MQTT_ERR_SUCCESS:
             status = data.ResponseStatus.ERROR
 
-        received_on = datetime.datetime.now()
+        received_on = data.utc_now()
         logging.debug(f"Message sent: {message.content}")
 
         return data.Response(
@@ -416,7 +416,7 @@ class HTTPMessenger(types.Messenger):
                 f"HTTP send failed for message {message.id}: {error}"
             ) from error
 
-        received_on = datetime.datetime.now()
+        received_on = data.utc_now()
 
         return data.Response(
             content=response_content,

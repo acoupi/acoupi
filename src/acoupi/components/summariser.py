@@ -50,7 +50,7 @@ class StatisticsDetectionsSummariser(types.Summariser):
         self.store = store
         self.interval = interval
 
-    def build_summary(self, now: datetime.datetime) -> data.Message:
+    def build_summary(self, now: data.AwareDatetime) -> data.Message:
         """Build a message from a summary.
 
         Parameters
@@ -161,7 +161,7 @@ class ThresholdsDetectionsSummariser(types.Summariser):
         self.mid_band_threshold = mid_band_threshold
         self.high_band_threshold = high_band_threshold
 
-    def build_summary(self, now: datetime.datetime) -> data.Message:
+    def build_summary(self, now: data.AwareDatetime) -> data.Message:
         """Build a message from a summary.
 
         Parameters

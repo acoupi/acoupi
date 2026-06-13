@@ -136,7 +136,7 @@ def test_can_instantiate_multiple_stores_with_the_same_sqlite_file(
 def test_can_store_a_deployment(sqlite_store: components.SqliteStore) -> None:
     """Test that we can store a deployment."""
     # Arrange
-    now = datetime.datetime.now()
+    now = data.utc_now()
     deployment = data.Deployment(
         started_on=now,
         latitude=1.0,
@@ -153,7 +153,7 @@ def test_can_store_a_deployment(sqlite_store: components.SqliteStore) -> None:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM deployment;")
         row = cursor.fetchone()
-        assert row["started_on"] == now.isoformat(sep=" ")
+        assert row["started_on"] == now.isoformat()
         assert row["latitude"] == 1.0
         assert row["longitude"] == 2.0
 
@@ -187,8 +187,8 @@ def test_get_current_deployment_gets_latest_deployment(
 ) -> None:
     """Test that get_current_deployment gets the latest deployment."""
     # Arrange
-    start_1 = datetime.datetime.now()
-    start_2 = datetime.datetime.now() - datetime.timedelta(days=10)
+    start_1 = data.utc_now()
+    start_2 = data.utc_now() - datetime.timedelta(days=10)
     deployment1 = data.Deployment(
         started_on=start_1,
         latitude=1.0,
@@ -216,7 +216,7 @@ def test_deployment_id_in_db_is_same_as_in_python(
 ) -> None:
     """Test that the deployment_id in the db is the same as in python."""
     # Arrange
-    now = datetime.datetime.now()
+    now = data.utc_now()
     deployment = data.Deployment(
         started_on=now,
         latitude=1.0,
@@ -242,7 +242,7 @@ def test_recordings_can_be_registered(
 ) -> None:
     """Test that recordings can be registered."""
     # Arrange
-    now = datetime.datetime.now()
+    now = data.utc_now()
     recording = data.Recording(
         deployment=deployment,
         path=Path("test/path"),
@@ -265,7 +265,7 @@ def test_recordings_can_be_registered(
         assert row["duration_s"] == 10.0
         assert row["audio_channels"] == 2
         assert row["samplerate_hz"] == 44100
-        assert row["datetime"] == now.isoformat(sep=" ")
+        assert row["datetime"] == now.isoformat()
         assert row["id"] == recording.id.bytes
 
 
@@ -274,7 +274,7 @@ def test_recording_can_be_registered_with_custom_deployment(
 ):
     """Test that recordings can be registered with a custom deployment."""
     # Arrange
-    now = datetime.datetime.now()
+    now = data.utc_now()
     deployment = data.Deployment(
         started_on=now,
         latitude=1.0,
@@ -302,7 +302,7 @@ def test_recording_can_be_registered_with_custom_deployment(
         assert row["path"] == "test/path"
         assert row["duration_s"] == 10.0
         assert row["samplerate_hz"] == 44100
-        assert row["datetime"] == now.isoformat(sep=" ")
+        assert row["datetime"] == now.isoformat()
         assert row["id"] == recording.id.bytes
         assert row["deployment_id"] == deployment.id.bytes
 
@@ -315,7 +315,7 @@ def test_get_all_recordings(
     # Arrange
 
     # Create two recordings
-    now = datetime.datetime.now()
+    now = data.utc_now()
     recording1 = data.Recording(
         deployment=deployment,
         path=Path("test/path1"),
@@ -352,7 +352,7 @@ def test_get_some_recordings(
     # Arrange
 
     # Create two recordings
-    now = datetime.datetime.now()
+    now = data.utc_now()
     recording1 = data.Recording(
         deployment=deployment,
         path=Path("test/path1"),
@@ -591,7 +591,7 @@ def test_get_recordings_model_outputs_chunks_large_batches(
 
     recordings = []
     model_outputs = []
-    base_time = datetime.datetime.now()
+    base_time = data.utc_now()
     for index in range(5):
         recording = data.Recording(
             deployment=deployment,
@@ -681,7 +681,7 @@ def test_in_memory_store_supports_batched_model_output_loads(
             path=Path("test/in-memory.wav"),
             duration=10.0,
             samplerate=44100,
-            created_on=datetime.datetime.now(),
+            created_on=data.utc_now(),
         )
 
         sqlite_store.store_recording(recording)
@@ -694,7 +694,7 @@ def test_in_memory_store_supports_batched_model_output_loads(
 def test_can_update_deployment_info(
     sqlite_store: components.SqliteStore,
 ):
-    start = datetime.datetime.now()
+    start = data.utc_now()
     deployment = data.Deployment(
         started_on=start,
         latitude=1.0,
@@ -722,7 +722,7 @@ def test_can_update_deployment_info(
 def test_update_deployment_fails_if_corresponding_deployment_does_not_exist(
     sqlite_store: components.SqliteStore,
 ):
-    start = datetime.datetime.now()
+    start = data.utc_now()
     deployment = data.Deployment(
         started_on=start,
         latitude=1.0,

@@ -31,7 +31,7 @@ def build_recording(
     deployment: data.Deployment,
     *,
     path: str,
-    created_on: datetime.datetime,
+    created_on: data.AwareDatetime,
 ) -> data.Recording:
     return data.Recording(
         deployment=deployment,
@@ -46,7 +46,7 @@ def build_model_output(
     recording: data.Recording,
     *,
     name_model: str,
-    created_on: datetime.datetime,
+    created_on: data.AwareDatetime,
     detection_score: float,
     detection_tag: tuple[str, str, float],
 ) -> data.ModelOutput:
@@ -114,7 +114,7 @@ class TestGetRecordingsByIds:
             path=Path("first.wav"),
             duration=1.0,
             samplerate=16000,
-            created_on=datetime.datetime.now(),
+            created_on=data.utc_now(),
         )
         second = first.model_copy(
             update=dict(

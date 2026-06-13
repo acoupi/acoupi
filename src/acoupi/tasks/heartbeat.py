@@ -5,7 +5,7 @@ from typing import Callable, List
 from pydantic import BaseModel, Field
 
 from acoupi.components import types
-from acoupi.data import Message
+from acoupi.data import Message, utc_now
 from acoupi.devices import get_device_id
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ logger.setLevel(logging.INFO)
 
 
 class Heartbeat(BaseModel):
-    sent_on: datetime.datetime = Field(default_factory=datetime.datetime.now)
+    sent_on: datetime.datetime = Field(default_factory=utc_now)
     device_id: str
     status: str = "OK"
 
@@ -47,7 +47,7 @@ def generate_heartbeat_task(
     def heartbeat_task() -> None:
         device_id = get_device_id()
 
-        now = datetime.datetime.now()
+        now = utc_now()
 
         heartbeat = Heartbeat(device_id=device_id, sent_on=now)
         message = Message(

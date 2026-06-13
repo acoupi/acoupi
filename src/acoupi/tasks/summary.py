@@ -14,6 +14,7 @@ import logging
 from typing import Callable, List
 
 from acoupi.components import types
+from acoupi.data import utc_now
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -53,7 +54,7 @@ def generate_summariser_task(
 
     def summary_task() -> None:
         """Create a summary message."""
-        now = datetime.datetime.now()
+        now = utc_now()
 
         for summariser in summarisers:
             logger.info(f"SUMMARISER: {summariser}")

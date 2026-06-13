@@ -37,7 +37,7 @@ class RecordingScheduler(ABC):
     @abstractmethod
     def time_until_next_recording(
         self,
-        time: Optional[datetime.datetime] = None,
+        time: Optional[data.AwareDatetime] = None,
     ) -> float:
         """Provide the number of seconds until the next recording.
 
