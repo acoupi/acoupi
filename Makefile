@@ -33,6 +33,9 @@ coverage:
 	$(ENV_PREFIX)coverage report -m
 	$(ENV_PREFIX)coverage html
 
+fix:
+	$(ENV_PREFIX)ruff check --fix $(SRC_DIR) $(TEST_DIR)
+
 lint/types:
 	$(ENV_PREFIX)ty check $(SRC_DIR) $(TEST_DIR)
 

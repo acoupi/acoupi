@@ -9,7 +9,6 @@ following steps:
 2. Store the summary message in the message store.
 """
 
-import datetime
 import logging
 from typing import Callable, List
 

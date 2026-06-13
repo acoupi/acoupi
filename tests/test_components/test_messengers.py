@@ -1,6 +1,5 @@
 """Test suite for acoupi messengers."""
 
-import datetime
 from pathlib import Path
 from unittest import mock
 

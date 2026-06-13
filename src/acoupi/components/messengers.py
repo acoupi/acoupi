@@ -13,7 +13,6 @@ The MQTTMessenger sends messages using the MQTT protocol. The HTTPMessenger
 sends messages using HTTP POST requests.
 """
 
-import datetime
 import json
 import logging
 import socket

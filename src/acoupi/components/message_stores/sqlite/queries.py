@@ -1,7 +1,7 @@
 """SQLite message-store query helpers."""
 
-import sqlite3
 import datetime
+import sqlite3
 from typing import List
 from uuid import UUID
 

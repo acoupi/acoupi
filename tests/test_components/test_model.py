@@ -1,6 +1,5 @@
 """Test running the model of a recorded audio file."""
 
-import datetime
 from pathlib import Path
 
 from acoupi import data

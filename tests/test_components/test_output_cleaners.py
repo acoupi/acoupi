@@ -1,6 +1,5 @@
 """Test output cleaners."""
 
-import datetime
 from pathlib import Path
 from typing import List
 

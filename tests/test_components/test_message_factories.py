@@ -1,6 +1,5 @@
 """Test acoupi components saving filters."""
 
-import datetime
 from pathlib import Path
 from typing import List
 
