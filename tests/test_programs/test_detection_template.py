@@ -138,7 +138,9 @@ class MockModel(Model):
 
 
 def test_worker_config_has_dedicated_detection_worker():
-    workers = {w.name: w for w in DetectionProgram.worker_config.workers}
+    worker_config = DetectionProgram.worker_config
+    assert worker_config is not None
+    workers = {w.name: w for w in worker_config.workers}
     assert "detection" in workers, (
         "DetectionProgram must declare a 'detection' worker"
     )

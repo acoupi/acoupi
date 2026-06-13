@@ -4,7 +4,7 @@ import datetime
 from typing import List, Optional, Tuple
 
 import pytest
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from acoupi.system.config import get_config_field, set_config_field
 from acoupi.system.exceptions import ParameterError
@@ -348,4 +348,5 @@ def test_set_field_in_nested_optional_config():
 
     new_config = set_config_field(config, "c.a", 3)
 
+    assert new_config.c is not None
     assert new_config.c.a == 3

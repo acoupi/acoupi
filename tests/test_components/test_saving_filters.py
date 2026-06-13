@@ -1,14 +1,14 @@
 """Test acoupi components saving filters."""
 
 import datetime
+import tempfile
 from pathlib import Path
 from typing import List
-import tempfile
+
+import pytest
 import pytz
 from astral import LocationInfo
 from astral.sun import sun
-
-import pytest
 
 from acoupi import data
 from acoupi.components import saving_filters

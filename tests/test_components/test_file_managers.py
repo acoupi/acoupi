@@ -7,7 +7,6 @@ from unittest.mock import patch
 import pytest
 
 from acoupi import components, data
-from acoupi.components import saving_managers
 
 
 def test_save_recording_manager_fails_if_recording_has_no_path(
@@ -282,9 +281,7 @@ def test_date_file_manager_fails_if_recording_has_no_path(
 def test_date_file_manager_fails_if_recording_file_does_not_exist(
     tmp_path: Path, deployment: data.Deployment
 ):
-    """Test DateFileManager.save_recording fails if recording file does not
-    exist.
-    """
+    """Test DateFileManager.save_recording fails if recording file does not exist."""
     # Arrange
     path = tmp_path / "test.wav"
     directory = tmp_path / "recordings"
@@ -375,9 +372,7 @@ def test_id_file_manager_fails_if_recording_has_no_path(
 def test_id_file_manager_fails_if_recording_file_does_not_exist(
     tmp_path: Path, deployment: data.Deployment
 ):
-    """Test IDFileManager.save_recording fails if recording file does not
-    exist.
-    """
+    """Test IDFileManager.save_recording fails if recording file does not exist."""
     # Arrange
     path = tmp_path / "test.wav"
     directory = tmp_path / "recordings"

@@ -9,7 +9,6 @@ from acoupi.programs.templates import (
     MessagingConfig,
     PathsConfiguration,
 )
-from acoupi.system.constants import CeleryConfig
 
 
 @pytest.fixture(scope="session")

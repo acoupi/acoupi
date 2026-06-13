@@ -158,17 +158,11 @@ def test_http_messenger_raises_on_request_exception():
 
 def test_mqtt_messenger_raises_when_connection_fails():
     """Test the MQTTMessenger raises on local connection failures."""
-    config = {
-        "is_connected.return_value": False,
-        "host": None,
-        "connect.return_value": MQTTErrorCode.MQTT_ERR_NO_CONN,
-    }
-
-    with mock.patch(
-        "paho.mqtt.client.Client",
-        spec=True,
-        **config,
-    ):
+    with mock.patch("paho.mqtt.client.Client") as mock_client:
+        mock_client.return_value.is_connected.return_value = False
+        mock_client.return_value.connect.return_value = (
+            MQTTErrorCode.MQTT_ERR_NO_CONN
+        )
         messenger = messengers.MQTTMessenger(
             host="localhost",
             port=1883,
@@ -492,15 +486,8 @@ def test_mqtt_messenger_returns_error_response_for_publish_rc_error():
 def test_mqtt_check_is_succesful_when_connected():
     """Test the MQTTMessenger check connection is successful when connected."""
     # Arrange
-    config = {
-        "is_connected.return_value": True,
-    }
-
-    with mock.patch(
-        "paho.mqtt.client.Client",
-        spec=True,
-        **config,
-    ):
+    with mock.patch("paho.mqtt.client.Client") as mock_client:
+        mock_client.return_value.is_connected.return_value = True
         messenger = messengers.MQTTMessenger(
             host="localhost",
             port=1883,

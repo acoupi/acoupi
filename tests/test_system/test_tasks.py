@@ -3,11 +3,9 @@
 from pstats import Stats
 
 import pytest
-from celery import Celery
 from pydantic import BaseModel
 
 from acoupi import system
-from acoupi.programs import AcoupiProgram
 
 
 class Config(BaseModel):

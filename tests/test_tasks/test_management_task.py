@@ -18,21 +18,21 @@ from acoupi.tasks import generate_file_management_task
 
 def always_manage(
     recording: data.Recording,
-    model_outputs: Sequence[data.ModelOutput],
+    model_outputs: Sequence[data.ModelOutputInfo],
 ) -> bool:
     return True
 
 
 def never_manage(
     recording: data.Recording,
-    model_outputs: Sequence[data.ModelOutput],
+    model_outputs: Sequence[data.ModelOutputInfo],
 ) -> bool:
     return False
 
 
 def manage_if_any_model_output(
     recording: data.Recording,
-    model_outputs: Sequence[data.ModelOutput],
+    model_outputs: Sequence[data.ModelOutputInfo],
 ) -> bool:
     return bool(model_outputs)
 
