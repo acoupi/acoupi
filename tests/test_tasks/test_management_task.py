@@ -18,21 +18,21 @@ from acoupi.tasks import generate_file_management_task
 
 def always_manage(
     recording: data.Recording,
-    model_outputs: Sequence[data.ModelOutput],
+    model_outputs: Sequence[data.ModelOutputInfo],
 ) -> bool:
     return True
 
 
 def never_manage(
     recording: data.Recording,
-    model_outputs: Sequence[data.ModelOutput],
+    model_outputs: Sequence[data.ModelOutputInfo],
 ) -> bool:
     return False
 
 
 def manage_if_any_model_output(
     recording: data.Recording,
-    model_outputs: Sequence[data.ModelOutput],
+    model_outputs: Sequence[data.ModelOutputInfo],
 ) -> bool:
     return bool(model_outputs)
 
@@ -92,18 +92,8 @@ def model_output(recording: data.Recording) -> data.ModelOutput:
     return data.ModelOutput(
         name_model="test_model",
         recording=recording,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value1"),
-                confidence_score=0.8,
-            ),
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value2"),
-                confidence_score=0.8,
-            ),
-        ],
         detections=[
-            data.Detection(
+            data.PresenceDetection(
                 location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
                 detection_score=0.6,
                 tags=[

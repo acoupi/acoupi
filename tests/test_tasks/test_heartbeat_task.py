@@ -25,6 +25,7 @@ def test_heartbeat_task_sends_message(patched_now):
     call = calls[0]
     message = call[1][0]
     assert isinstance(message, data.Message)
+    assert isinstance(message.content, str)
     assert device_id in message.content
     assert now.isoformat() in message.content
 

@@ -57,8 +57,14 @@ A **bounding box** object represents the location of a sound event in time and f
 It contains information about the start time and end time in seconds and the low frequency and high frequency in Hz of a sound event.
 
 A **detection** object represents a single detection made by a model.
-It contains information about the specific recording the detection was made, the species that were detected using the [**`data.PredictedTag`**][acoupi.data.PredictedTag] class, and the score of the detection.
-A detection can be created by instantiating a [**`data.Detection`**][acoupi.data.Detection] class.
+It contains the prediction type, an optional bounding box in time and frequency, the species that were detected using the [**`data.PredictedTag`**][acoupi.data.PredictedTag] class, and the score of the detection.
+A detection can be created by instantiating a [**`data.Detection`**][acoupi.data.Detection] class, or one of the convenience classes [**`data.PresenceDetection`**][acoupi.data.PresenceDetection], [**`data.SequenceDetection`**][acoupi.data.SequenceDetection], and [**`data.EventDetection`**][acoupi.data.EventDetection].
+
+The prediction type explains what kind of sound pattern the detection refers to:
+
+- **Presence** means one or more target sounds are present in the detected region.
+- **Sequence** means the detected region contains exactly one sequence of related sounds.
+- **Event** means the detected region contains exactly one single target sound event.
 
 A **predicted tag** object represents the label predicted by a model.
 It consists of a [**`data.Tag`**][acoupi.data.Tag] object made of a key and a value, and a confidence score.

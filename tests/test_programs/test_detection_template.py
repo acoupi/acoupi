@@ -119,15 +119,8 @@ class MockModel(Model):
         return data.ModelOutput(
             name_model="test",
             recording=recording,
-            tags=[
-                data.PredictedTag(
-                    tag=data.Tag(key="species", value="Myotis daubentonii"),
-                    confidence_score=score / 10,
-                )
-                for score in range(11)
-            ],
             detections=[
-                data.Detection(
+                data.PresenceDetection(
                     detection_score=score / 10,
                     tags=[
                         data.PredictedTag(
@@ -145,8 +138,12 @@ class MockModel(Model):
 
 
 def test_worker_config_has_dedicated_detection_worker():
-    workers = {w.name: w for w in DetectionProgram.worker_config.workers}
-    assert "detection" in workers, "DetectionProgram must declare a 'detection' worker"
+    worker_config = DetectionProgram.worker_config
+    assert worker_config is not None
+    workers = {w.name: w for w in worker_config.workers}
+    assert "detection" in workers, (
+        "DetectionProgram must declare a 'detection' worker"
+    )
     assert workers["detection"].concurrency == 1, (
         "detection worker must have concurrency=1 to prevent OOM from parallel model loads"
     )
@@ -238,7 +235,6 @@ def test_program_only_stores_detections_with_high_threshold(
         detection.detection_score >= threshold
         for detection in output.detections
     )
-    assert all(tag.confidence_score >= threshold for tag in output.tags)
     assert all(
         tag.confidence_score >= threshold
         for detection in output.detections
@@ -250,7 +246,6 @@ def test_program_only_stores_detections_with_high_threshold(
         min(detection.detection_score for detection in output.detections)
         == threshold
     )
-    assert min(tag.confidence_score for tag in output.tags) == threshold
     assert (
         min(
             tag.confidence_score

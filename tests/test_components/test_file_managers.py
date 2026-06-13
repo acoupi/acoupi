@@ -7,7 +7,6 @@ from unittest.mock import patch
 import pytest
 
 from acoupi import components, data
-from acoupi.components import saving_managers
 
 
 def test_save_recording_manager_fails_if_recording_has_no_path(
@@ -44,15 +43,21 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
     model_output = data.ModelOutput(
         name_model="test_model",
         recording=recording,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value1"),
-                confidence_score=0.6,
-            ),
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value2"),
-                confidence_score=0.3,
-            ),
+        detections=[
+            data.PresenceDetection(
+                location=data.BoundingBox(coordinates=(0, 0, 1, 4000)),
+                detection_score=0.6,
+                tags=[
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value1"),
+                        confidence_score=0.6,
+                    ),
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value2"),
+                        confidence_score=0.3,
+                    ),
+                ],
+            )
         ],
     )
     manager = components.SaveRecordingManager(
@@ -83,15 +88,21 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
     model_output = data.ModelOutput(
         name_model="test_model",
         recording=recording,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value1"),
-                confidence_score=0.4,
-            ),
-            data.PredictedTag(
-                tag=data.Tag(key="test", value="value2"),
-                confidence_score=0.3,
-            ),
+        detections=[
+            data.PresenceDetection(
+                location=data.BoundingBox(coordinates=(0, 0, 1, 4000)),
+                detection_score=0.4,
+                tags=[
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value1"),
+                        confidence_score=0.4,
+                    ),
+                    data.PredictedTag(
+                        tag=data.Tag(key="test", value="value2"),
+                        confidence_score=0.3,
+                    ),
+                ],
+            )
         ],
     )
     manager = components.SaveRecordingManager(
@@ -270,9 +281,7 @@ def test_date_file_manager_fails_if_recording_has_no_path(
 def test_date_file_manager_fails_if_recording_file_does_not_exist(
     tmp_path: Path, deployment: data.Deployment
 ):
-    """Test DateFileManager.save_recording fails if recording file does not
-    exist.
-    """
+    """Test DateFileManager.save_recording fails if recording file does not exist."""
     # Arrange
     path = tmp_path / "test.wav"
     directory = tmp_path / "recordings"
@@ -363,9 +372,7 @@ def test_id_file_manager_fails_if_recording_has_no_path(
 def test_id_file_manager_fails_if_recording_file_does_not_exist(
     tmp_path: Path, deployment: data.Deployment
 ):
-    """Test IDFileManager.save_recording fails if recording file does not
-    exist.
-    """
+    """Test IDFileManager.save_recording fails if recording file does not exist."""
     # Arrange
     path = tmp_path / "test.wav"
     directory = tmp_path / "recordings"

@@ -19,7 +19,6 @@ class SqliteStore(types.Store):
     The store is used to store the recordings, detections and deployments
     locally. The data is stored in a sqlite database file in the given path.
 
-    Under the hood, the store uses the Pony ORM to interact with the database.
     The database schema is defined in the database module and contains the
     following tables:
 
@@ -35,11 +34,10 @@ class SqliteStore(types.Store):
       has a key, value and score.
 
     - Detection: Contains the detection information. Each detection consists
-      of a location, score and a list of predicted tags.
+      of a prediction type, location, score and a list of predicted tags.
 
     - ModelOutput: Contains the model output information. Each model output
-      has the model name, the list of predicted tags at the recording level,
-      and a list of detections.
+      has the model name and a list of detections.
 
     The store is thread-safe, and can be used from multiple threads
     simultaneously.

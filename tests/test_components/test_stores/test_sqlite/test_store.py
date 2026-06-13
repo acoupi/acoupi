@@ -100,6 +100,7 @@ def test_detection_table_has_correct_columns(
     """Test that the detection table has the correct columns."""
     expected_columns = {
         "id",
+        "prediction_type",
         "start_time_s",
         "end_time_s",
         "low_freq_hz",
@@ -408,11 +409,12 @@ def test_can_store_model_outputs(
         row = cursor.fetchone()
         assert row is not None
         assert row[0] == model_output.detections[0].id.bytes
-        assert row[1] == 1
-        assert row[2] == 2
-        assert row[3] == 1000
-        assert row[4] == 2000
-        assert row[5] == model_output.detections[0].detection_score
+        assert row[1] == data.PredictionType.PRESENCE.value
+        assert row[2] == 1
+        assert row[3] == 2
+        assert row[4] == 1000
+        assert row[5] == 2000
+        assert row[6] == model_output.detections[0].detection_score
 
 
 def test_can_store_multiple_model_outputs(
@@ -601,14 +603,8 @@ def test_get_recordings_model_outputs_chunks_large_batches(
         model_output = data.ModelOutput(
             name_model=f"test_model_{index}",
             recording=recording,
-            tags=[
-                data.PredictedTag(
-                    tag=data.Tag(key="test", value=f"value-{index}"),
-                    confidence_score=0.8,
-                )
-            ],
             detections=[
-                data.Detection(
+                data.PresenceDetection(
                     id=uuid.uuid4(),
                     location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
                     detection_score=0.6,

@@ -47,11 +47,9 @@ def build_model_output(
     *,
     name_model: str,
     created_on: datetime.datetime,
-    file_tag: tuple[str, str, float],
     detection_score: float,
     detection_tag: tuple[str, str, float],
 ) -> data.ModelOutput:
-    file_key, file_value, file_score = file_tag
     detection_key, detection_value, detection_tag_score = detection_tag
 
     return data.ModelOutput(
@@ -59,14 +57,8 @@ def build_model_output(
         name_model=name_model,
         recording=recording,
         created_on=created_on,
-        tags=[
-            data.PredictedTag(
-                tag=data.Tag(key=file_key, value=file_value),
-                confidence_score=file_score,
-            )
-        ],
         detections=[
-            data.Detection(
+            data.PresenceDetection(
                 id=uuid.uuid4(),
                 location=data.BoundingBox(coordinates=(1, 1000, 2, 2000)),
                 detection_score=detection_score,
@@ -212,7 +204,6 @@ class TestGetModelOutputs:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -220,7 +211,6 @@ class TestGetModelOutputs:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -259,7 +249,6 @@ class TestGetModelOutputs:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -267,7 +256,6 @@ class TestGetModelOutputs:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -307,7 +295,6 @@ class TestGetModelOutputs:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -315,7 +302,6 @@ class TestGetModelOutputs:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -357,7 +343,6 @@ class TestGetModelOutputs:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -365,7 +350,6 @@ class TestGetModelOutputs:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -405,7 +389,6 @@ class TestGetModelOutputs:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -413,7 +396,6 @@ class TestGetModelOutputs:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -453,7 +435,6 @@ class TestGetModelOutputs:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -461,7 +442,6 @@ class TestGetModelOutputs:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -521,7 +501,6 @@ class TestGetDetections:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -529,7 +508,6 @@ class TestGetDetections:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -568,7 +546,6 @@ class TestGetDetections:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -576,7 +553,6 @@ class TestGetDetections:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -616,7 +592,6 @@ class TestGetDetections:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -624,7 +599,6 @@ class TestGetDetections:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -661,7 +635,6 @@ class TestGetDetections:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -669,7 +642,6 @@ class TestGetDetections:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -709,7 +681,6 @@ class TestGetDetections:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -717,7 +688,6 @@ class TestGetDetections:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -757,7 +727,6 @@ class TestGetDetections:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -765,7 +734,6 @@ class TestGetDetections:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -830,7 +798,6 @@ class TestGetPredictedTags:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -838,7 +805,6 @@ class TestGetPredictedTags:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -878,7 +844,6 @@ class TestGetPredictedTags:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -886,7 +851,6 @@ class TestGetPredictedTags:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -926,7 +890,6 @@ class TestGetPredictedTags:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -934,7 +897,6 @@ class TestGetPredictedTags:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -950,9 +912,7 @@ class TestGetPredictedTags:
 
         # Then only tags above the threshold are returned
         assert retrieved == [
-            first_output.tags[0],
             first_output.detections[0].tags[0],
-            second_output.tags[0],
         ]
 
     def test_filters_by_score_lt(
@@ -975,7 +935,6 @@ class TestGetPredictedTags:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -983,7 +942,6 @@ class TestGetPredictedTags:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -1020,7 +978,6 @@ class TestGetPredictedTags:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -1028,7 +985,6 @@ class TestGetPredictedTags:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )
@@ -1065,7 +1021,6 @@ class TestGetPredictedTags:
             first_recording,
             name_model="test_model",
             created_on=base_time,
-            file_tag=("test", "value1", 0.8),
             detection_score=0.6,
             detection_tag=("test2", "value3", 0.3),
         )
@@ -1073,7 +1028,6 @@ class TestGetPredictedTags:
             second_recording,
             name_model="other_model",
             created_on=base_time + datetime.timedelta(seconds=10),
-            file_tag=("site", "second", 0.5),
             detection_score=0.2,
             detection_tag=("species", "other", 0.1),
         )

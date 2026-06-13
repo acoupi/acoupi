@@ -2,11 +2,16 @@
 
 import sqlite3
 
+SCHEMA_VERSION = 1
 
-def create_base_schema(connection: sqlite3.Connection) -> None:
+
+def create_base_schema(
+    connection: sqlite3.Connection,
+    version: int = SCHEMA_VERSION,
+) -> None:
     """Create the metadata-store schema if it does not exist."""
     connection.executescript(
-        """
+        f"""
         CREATE TABLE IF NOT EXISTS deployment (
             id BLOB PRIMARY KEY,
             name TEXT NOT NULL,
@@ -37,6 +42,9 @@ def create_base_schema(connection: sqlite3.Connection) -> None:
 
         CREATE TABLE IF NOT EXISTS detection (
             id BLOB PRIMARY KEY,
+            prediction_type TEXT NOT NULL CHECK (
+                prediction_type IN ('presence', 'sequence', 'event')
+            ),
             start_time_s REAL,
             end_time_s REAL,
             low_freq_hz REAL,
@@ -51,10 +59,8 @@ def create_base_schema(connection: sqlite3.Connection) -> None:
             key TEXT NOT NULL,
             value TEXT NOT NULL,
             confidence_score REAL NOT NULL,
-            detection_id BLOB,
-            model_output_id BLOB,
-            FOREIGN KEY (detection_id) REFERENCES detection(id),
-            FOREIGN KEY (model_output_id) REFERENCES model_output(id)
+            detection_id BLOB NOT NULL,
+            FOREIGN KEY (detection_id) REFERENCES detection(id)
         );
 
         CREATE INDEX IF NOT EXISTS idx_recording_deployment_id
@@ -72,10 +78,9 @@ def create_base_schema(connection: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_predicted_tag_detection_id
         ON predicted_tag(detection_id);
 
-        CREATE INDEX IF NOT EXISTS idx_predicted_tag_model_output_id
-        ON predicted_tag(model_output_id);
-
         CREATE INDEX IF NOT EXISTS idx_predicted_tag_key_value
         ON predicted_tag(key, value);
+
+        PRAGMA user_version = {version};
         """
     )

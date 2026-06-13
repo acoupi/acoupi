@@ -1,14 +1,14 @@
 """Test acoupi components saving filters."""
 
 import datetime
+import tempfile
 from pathlib import Path
 from typing import List
-import tempfile
+
+import pytest
 import pytz
 from astral import LocationInfo
 from astral.sun import sun
-
-import pytest
 
 from acoupi import data
 from acoupi.components import saving_filters
@@ -58,7 +58,7 @@ def create_test_detection():
         detection_score: float = 0.8,
     ) -> data.Detection:
         """Return a random detection."""
-        return data.Detection(
+        return data.PresenceDetection(
             detection_score=detection_score,
             tags=[
                 data.PredictedTag(

@@ -80,8 +80,8 @@ def test_loads_correct_program_when_multiple_programs_exist(tmp_path: Path):
     sys.path.append(str(tmp_path))
     program_class = programs.load_program_class("test_program")
     assert program_class.__name__ == "Program"
-    assert hasattr(program_class, "name")
-    assert getattr(program_class, "name") == "test_program"
+    name = program_class.__dict__.get("name")
+    assert name == "test_program"
 
 
 def test_load_program_fails_if_module_does_not_exist():

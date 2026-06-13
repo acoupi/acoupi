@@ -27,13 +27,13 @@ def create_test_model_output():
     )
 
     def factory(
-        tags: List[data.PredictedTag],
+        detections: List[data.Detection],
     ) -> data.ModelOutput:
         """Return a model output."""
         return data.ModelOutput(
             recording=recording,
             name_model="test_model",
-            tags=tags,
+            detections=detections,
         )
 
     return factory
@@ -46,31 +46,41 @@ def create_test_predictedtags():
     Will create multiple random tags.
     """
 
-    def factory(
-        tag_key: str = "species",
-    ) -> List[data.PredictedTag]:
-        """Return a random detection."""
+    def factory(tag_key: str = "species") -> List[data.Detection]:
+        """Return random detections."""
         return [
-            data.PredictedTag(
-                tag=data.Tag(
-                    key=tag_key,
-                    value="specie_a",
-                ),
-                confidence_score=0.45,
+            data.PresenceDetection(
+                tags=[
+                    data.PredictedTag(
+                        tag=data.Tag(
+                            key=tag_key,
+                            value="specie_a",
+                        ),
+                        confidence_score=0.45,
+                    )
+                ]
             ),
-            data.PredictedTag(
-                tag=data.Tag(
-                    key=tag_key,
-                    value="specie_b",
-                ),
-                confidence_score=0.65,
+            data.PresenceDetection(
+                tags=[
+                    data.PredictedTag(
+                        tag=data.Tag(
+                            key=tag_key,
+                            value="specie_b",
+                        ),
+                        confidence_score=0.65,
+                    )
+                ]
             ),
-            data.PredictedTag(
-                tag=data.Tag(
-                    key=tag_key,
-                    value="specie_c",
-                ),
-                confidence_score=0.85,
+            data.PresenceDetection(
+                tags=[
+                    data.PredictedTag(
+                        tag=data.Tag(
+                            key=tag_key,
+                            value="specie_c",
+                        ),
+                        confidence_score=0.85,
+                    )
+                ]
             ),
         ]
 
@@ -82,7 +92,7 @@ def create_test_predictedtags():
     ):
         """Test get species name."""
         model_output = create_test_model_output(
-            tags=create_test_predictedtags(),
+            detections=create_test_predictedtags(),
         )
         summariser_tester = summariser.Summariser(
             threshold_lowband=0.5,
@@ -100,7 +110,7 @@ def create_test_predictedtags():
     ):
         """Test get species count in bands."""
         model_output = create_test_model_output(
-            tags=create_test_predictedtags(),
+            detections=create_test_predictedtags(),
         )
         summariser_tester = summariser.Summariser(
             threshold_lowband=0.5,
