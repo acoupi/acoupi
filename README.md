@@ -175,9 +175,10 @@ An _acoupi_ application consists of the full set of code that runs at the deploy
 
 ## Features and development
 **acoupi** builds on other Python packages. The list of the most important packages and their functions is summarised below. For more information about each of them, make sure to check their respective documentation. 
-- [PDM](https://pdm-project.org/2.10/) to manage package dependencies. 
+- [uv](https://docs.astral.sh/uv/) to manage project dependencies and developer workflows. 
 - [Pydantic](https://docs.pydantic.dev/dev/) for data validation. 
 - [Pytest](https://docs.pytest.org/en/7.4.x/) as a testing framework.
-- [Pony-ORM](https://ponyorm.org/) for databse queries. 
+- [Ruff](https://docs.astral.sh/ruff/) for linting and import formatting checks.
+- [ty](https://docs.astral.sh/ty/) for static type checking.
 - [Celery](https://docs.celeryq.dev/en/stable/getting-started/introduction.html) to manage the processing of tasks. 
-- [Jinja](#jinja) for text templating. 
+- [Jinja](https://jinja.palletsprojects.com/) for text templating. 
