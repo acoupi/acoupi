@@ -6,7 +6,12 @@ from typing import List, Optional, Sequence
 
 import pytest
 
-from .conftest import create_wav_file, read_guano_chunk, write_guano_chunk
+from tests.test_tasks.conftest import (
+    create_wav_file,
+    read_guano_chunk,
+    write_guano_chunk,
+)
+
 from acoupi import data
 from acoupi.components import SqliteStore
 from acoupi.components.types import (

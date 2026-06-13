@@ -255,7 +255,7 @@ class BaseFileManager(types.RecordingSavingManager, ABC):
         return full_path
 
 
-_SANITIZE_TABLE = str.maketrans({char: "_" for char in '<>:"/\\|?*'})
+_SANITIZE_TABLE = str.maketrans({ord(char): "_" for char in '<>:"/\\|?*'})
 
 
 def sanitize_filename(filename: str) -> str:

@@ -1,61 +1,42 @@
-"""Test Summariser."""
+"""Tests for detection summarisers."""
 
 import datetime
+import json
 from pathlib import Path
-from typing import List
-
-import pytest
 
 from acoupi import data
-from acoupi.components import summariser
+from acoupi.components.stores import SqliteStore
+from acoupi.components.summariser import ThresholdsDetectionsSummariser
 
 
-@pytest.fixture
-def create_test_model_output():
-    """Return a model output."""
-    deployment = data.Deployment(
-        name="test_deployment",
-    )
-
+def test_build_summary(tmp_path: Path) -> None:
+    """Build a threshold-based summary message."""
+    now = datetime.datetime(2024, 1, 1, 12, 0, 0)
+    deployment = data.Deployment(name="test_deployment")
     recording = data.Recording(
-        path=Path("test.wav"),
+        path=tmp_path / "test.wav",
         duration=1,
         samplerate=256000,
         audio_channels=1,
         deployment=deployment,
-        created_on=datetime.datetime.now(),
+        created_on=now,
     )
-
-    def factory(
-        detections: List[data.Detection],
-    ) -> data.ModelOutput:
-        """Return a model output."""
-        return data.ModelOutput(
-            recording=recording,
-            name_model="test_model",
-            detections=detections,
-        )
-
-    return factory
-
-
-@pytest.fixture
-def create_test_predictedtags():
-    """Fixture for creating random predicted tags.
-
-    Will create multiple random tags.
-    """
-
-    def factory(tag_key: str = "species") -> List[data.Detection]:
-        """Return random detections."""
-        return [
+    model_output = data.ModelOutput(
+        recording=recording,
+        name_model="test_model",
+        detections=[
             data.PresenceDetection(
                 tags=[
                     data.PredictedTag(
-                        tag=data.Tag(
-                            key=tag_key,
-                            value="specie_a",
-                        ),
+                        tag=data.Tag(key="species", value="specie_a"),
+                        confidence_score=0.05,
+                    )
+                ]
+            ),
+            data.PresenceDetection(
+                tags=[
+                    data.PredictedTag(
+                        tag=data.Tag(key="species", value="specie_b"),
                         confidence_score=0.45,
                     )
                 ]
@@ -63,102 +44,54 @@ def create_test_predictedtags():
             data.PresenceDetection(
                 tags=[
                     data.PredictedTag(
-                        tag=data.Tag(
-                            key=tag_key,
-                            value="specie_b",
-                        ),
-                        confidence_score=0.65,
-                    )
-                ]
-            ),
-            data.PresenceDetection(
-                tags=[
-                    data.PredictedTag(
-                        tag=data.Tag(
-                            key=tag_key,
-                            value="specie_c",
-                        ),
+                        tag=data.Tag(key="species", value="specie_c"),
                         confidence_score=0.85,
                     )
                 ]
             ),
-        ]
+        ],
+        created_on=now,
+    )
+    store = SqliteStore(tmp_path / "test.db")
+    store.store_recording(recording)
+    store.store_model_output(model_output)
+    summariser = ThresholdsDetectionsSummariser(
+        store=store,
+        interval=60,
+        low_band_threshold=0.1,
+        mid_band_threshold=0.5,
+        high_band_threshold=0.9,
+    )
 
-    return factory
+    summary = summariser.build_summary(now)
 
-    def test_get_species_name(
-        create_test_model_output,
-        create_test_predictedtags,
-    ):
-        """Test get species name."""
-        model_output = create_test_model_output(
-            detections=create_test_predictedtags(),
-        )
-        summariser_tester = summariser.Summariser(
-            threshold_lowband=0.5,
-            threshold_midband=0.7,
-            threshold_highband=0.9,
-        )
-        species_name = summariser_tester.get_species_name(
-            model_outputs=[model_output],
-        )
-        assert species_name == ["specie_a", "specie_b", "specie_c"]
-
-    def test_get_species_count_in_bands(
-        create_test_model_output,
-        create_test_predictedtags,
-    ):
-        """Test get species count in bands."""
-        model_output = create_test_model_output(
-            detections=create_test_predictedtags(),
-        )
-        summariser_tester = summariser.Summariser(
-            threshold_lowband=0.5,
-            threshold_midband=0.7,
-            threshold_highband=0.9,
-        )
-        species_count = summariser_tester.get_species_count_in_bands(
-            species_name="specie_c",
-            model_outputs=[model_output],
-        )
-        assert species_count == {
-            "low_band": 0,
-            "mid_band": 0,
-            "high_band": 1,
-        }
-
-        def test_build_summary(
-            create_test_model_output,
-            create_test_predictedtags,
-        ):
-            """Test build summary."""
-            model_output = create_test_model_output(
-                tags=create_test_predictedtags(),
-            )
-            summariser_tester = summariser.Summariser(
-                threshold_lowband=0.5,
-                threshold_midband=0.7,
-                threshold_highband=0.9,
-            )
-            summary = summariser_tester.build_summary(
-                model_outputs=[model_output],
-            )
-            assert summary == data.Message(
-                species_count={
-                    "specie_a": {
-                        "low_band": 0,
-                        "mid_band": 0,
-                        "high_band": 0,
-                    },
-                    "specie_b": {
-                        "low_band": 1,
-                        "mid_band": 0,
-                        "high_band": 0,
-                    },
-                    "specie_c": {
-                        "low_band": 0,
-                        "mid_band": 0,
-                        "high_band": 1,
-                    },
-                },
-            )
+    assert isinstance(summary, data.Message)
+    payload = json.loads(summary.content)
+    assert payload["specie_a"] == {
+        "count_low_threshold": 1,
+        "count_mid_threshold": 0,
+        "count_high_threshold": 0,
+        "mean_low_threshold": 0.05,
+        "mean_mid_threshold": 0,
+        "mean_high_threshold": 0,
+    }
+    assert payload["specie_b"] == {
+        "count_low_threshold": 0,
+        "count_mid_threshold": 1,
+        "count_high_threshold": 0,
+        "mean_low_threshold": 0,
+        "mean_mid_threshold": 0.45,
+        "mean_high_threshold": 0,
+    }
+    assert payload["specie_c"] == {
+        "count_low_threshold": 0,
+        "count_mid_threshold": 0,
+        "count_high_threshold": 1,
+        "mean_low_threshold": 0,
+        "mean_mid_threshold": 0,
+        "mean_high_threshold": 0.85,
+    }
+    assert payload["timeinterval"] == {
+        "starttime": (now - datetime.timedelta(seconds=60)).isoformat(),
+        "endtime": now.isoformat(),
+    }

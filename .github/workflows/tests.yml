@@ -37,6 +37,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      rabbitmq:
+        image: rabbitmq:latest
+        ports:
+          - 5672:5672
+
     strategy:
       fail-fast: false
       matrix:
@@ -45,8 +51,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup Libraries
-        run: bash scripts/setup.sh
+      - name: Cache and Install APT Libraries
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: |
+            libsndfile1
+            libasound2-dev
+            libffi-dev
+            portaudio19-dev
+          version: 1.0
 
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b

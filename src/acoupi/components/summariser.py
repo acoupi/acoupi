@@ -213,63 +213,35 @@ class ThresholdsDetectionsSummariser(types.Summariser):
                 for t in predicted_tags
                 if t.tag.value == species_name
             ]
+            low_band = [
+                score
+                for score in species_probabilities
+                if score <= self.low_band_threshold
+            ]
+            mid_band = [
+                score
+                for score in species_probabilities
+                if self.low_band_threshold < score <= self.mid_band_threshold
+            ]
+            high_band = [
+                score
+                for score in species_probabilities
+                if self.mid_band_threshold < score
+            ]
 
             stats = {
-                "count_low_threshold": len(
-                    [
-                        d
-                        for d in species_probabilities
-                        if d <= self.low_band_threshold
-                    ]
-                ),
-                "count_mid_threshold": len(
-                    [
-                        d
-                        for d in species_probabilities
-                        if self.low_band_threshold
-                        < d
-                        <= self.mid_band_threshold
-                    ]
-                ),
-                "count_high_threshold": len(
-                    [
-                        d
-                        for d in species_probabilities
-                        if self.mid_band_threshold < d
-                    ]
-                ),
-                "mean_low_threshold": round(
-                    mean(
-                        [
-                            d
-                            for d in species_probabilities
-                            if d <= self.low_band_threshold
-                        ]
-                    ),
-                    3,
-                ),
-                "mean_mid_threshold": round(
-                    mean(
-                        [
-                            d
-                            for d in species_probabilities
-                            if self.low_band_threshold
-                            < d
-                            <= self.mid_band_threshold
-                        ]
-                    ),
-                    3,
-                ),
-                "mean_high_threshold": round(
-                    mean(
-                        [
-                            d
-                            for d in species_probabilities
-                            if self.mid_band_threshold < d
-                        ]
-                    ),
-                    3,
-                ),
+                "count_low_threshold": len(low_band),
+                "count_mid_threshold": len(mid_band),
+                "count_high_threshold": len(high_band),
+                "mean_low_threshold": round(mean(low_band), 3)
+                if low_band
+                else 0,
+                "mean_mid_threshold": round(mean(mid_band), 3)
+                if mid_band
+                else 0,
+                "mean_high_threshold": round(mean(high_band), 3)
+                if high_band
+                else 0,
             }
 
             db_species_stats[species_name] = {

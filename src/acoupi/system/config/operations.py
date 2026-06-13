@@ -306,7 +306,8 @@ def set_config_field(
     OmegaConf.update(base, field, value)
 
     try:
-        return type(config).model_validate(base, extra="forbid")
+        config_cls = type(config)
+        return config_cls.model_validate(base, extra="forbid")
     except ValidationError as error:
         raise exceptions.ParameterError(
             value=field,
