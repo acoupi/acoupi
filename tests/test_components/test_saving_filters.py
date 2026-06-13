@@ -4,9 +4,9 @@ import datetime
 import tempfile
 from pathlib import Path
 from typing import List
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 from astral import LocationInfo
 from astral.sun import sun
 
@@ -87,7 +87,7 @@ def create_test_model_output():
         samplerate=256000,
         audio_channels=1,
         deployment=deployment,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
     )
 
     def factory(
@@ -116,7 +116,9 @@ def test_save_recording_ifin_interval(
         end=datetime.time(4, 0, 0),
     )
     recording = create_test_recording(
-        recording_time=datetime.datetime(2024, 8, 1, 23, 0, 0),
+        recording_time=datetime.datetime(
+            2024, 8, 1, 23, 0, 0, tzinfo=datetime.timezone.utc
+        ),
     )
 
     saving_filter = saving_filters.SaveIfInInterval(
@@ -139,7 +141,9 @@ def test_delete_recording_ifnotin_interval(
         end=datetime.time(4, 0, 0),
     )
     recording = create_test_recording(
-        recording_time=datetime.datetime(2024, 8, 1, 12, 0, 0),
+        recording_time=datetime.datetime(
+            2024, 8, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+        ),
     )
 
     saving_filter = saving_filters.SaveIfInInterval(
@@ -161,7 +165,7 @@ def test_before_dawndusk_time_interval(
     """Test if a recording is saved if it is in the interval."""
     # Setup
     interval_duration: float = 20  # in minutes
-    timezone = pytz.timezone("Europe/London")
+    timezone = ZoneInfo("Europe/London")
 
     saving_filter = saving_filters.Before_DawnDuskTimeInterval(
         duration=interval_duration, timezone=timezone
@@ -218,7 +222,7 @@ def test_after_dawndusk_time_interval(
     """Test if a recording is saved if it is in the interval."""
     # Setup
     interval_duration: float = 20  # in minutes
-    timezone = pytz.timezone("Europe/London")
+    timezone = ZoneInfo("Europe/London")
 
     saving_filter = saving_filters.After_DawnDuskTimeInterval(
         duration=interval_duration, timezone=timezone
@@ -284,7 +288,9 @@ def test_delete_recording_without_detections(
         temp_path = tmpfile.name
 
     recording = create_test_recording(
-        recording_time=datetime.datetime(2024, 8, 1, 20, 0, 0),
+        recording_time=datetime.datetime(
+            2024, 8, 1, 20, 0, 0, tzinfo=datetime.timezone.utc
+        ),
         recording_path=Path(temp_path),
     )
 
@@ -312,7 +318,9 @@ def test_save_recording_ifboth_detclassprob_above_savingthreshold(
     # Setup
     saving_threshold = 0.6
     recording = create_test_recording(
-        recording_time=datetime.datetime(2024, 8, 1, 20, 0, 0),
+        recording_time=datetime.datetime(
+            2024, 8, 1, 20, 0, 0, tzinfo=datetime.timezone.utc
+        ),
     )
     model_output = create_test_model_output(
         detections=[
@@ -350,7 +358,9 @@ def test_save_recording_if_onlydetprob_above_savingthreshold(
     # Setup
     saving_threshold = 0.6
     recording = create_test_recording(
-        recording_time=datetime.datetime(2024, 8, 1, 20, 0, 0),
+        recording_time=datetime.datetime(
+            2024, 8, 1, 20, 0, 0, tzinfo=datetime.timezone.utc
+        ),
     )
     model_output = create_test_model_output(
         detections=[
@@ -392,7 +402,9 @@ def test_delete_recording_if_detclassprob_below_savingthreshold(
         temp_path = tmpfile.name
 
     recording = create_test_recording(
-        recording_time=datetime.datetime(2024, 8, 1, 20, 0, 0),
+        recording_time=datetime.datetime(
+            2024, 8, 1, 20, 0, 0, tzinfo=datetime.timezone.utc
+        ),
         recording_path=Path(temp_path),
     )
     model_output = create_test_model_output(
@@ -434,7 +446,9 @@ def test_save_recording_with_focus_tagvalues(
     """Test if the recording is saved if it contains a focus tag value (e.g., name of a species)."""
     # Setup
     recording = create_test_recording(
-        recording_time=datetime.datetime(2024, 8, 1, 20, 0, 0),
+        recording_time=datetime.datetime(
+            2024, 8, 1, 20, 0, 0, tzinfo=datetime.timezone.utc
+        ),
     )
     focus_species = ["species_1", "species_2"]
     model_output = create_test_model_output(
@@ -470,7 +484,9 @@ def test_delete_recording_ifnot_focus_tagvalues(
     """Test if the recording is saved if it contains the focus species."""
     # Setup
     recording = create_test_recording(
-        recording_time=datetime.datetime(2024, 8, 1, 20, 0, 0),
+        recording_time=datetime.datetime(
+            2024, 8, 1, 20, 0, 0, tzinfo=datetime.timezone.utc
+        ),
     )
     focus_species = ["species_1", "species_2"]
     model_output = create_test_model_output(

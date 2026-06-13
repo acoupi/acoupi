@@ -1,6 +1,5 @@
 """Test suite for the file management task generator."""
 
-import datetime
 from pathlib import Path
 from typing import List, Optional, Sequence
 
@@ -87,7 +86,7 @@ def recording(
         duration=1,
         samplerate=256000,
         audio_channels=1,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
 
@@ -187,7 +186,7 @@ def test_file_management_ignores_files_without_path(
         path=None,
         duration=1,
         samplerate=256000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
     store.store_recording(recording)
@@ -241,7 +240,7 @@ def test_file_management_preserves_existing_guano_metadata(
         duration=1,
         samplerate=16000,
         audio_channels=1,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
     store.store_recording(recording)

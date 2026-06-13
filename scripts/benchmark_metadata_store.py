@@ -94,12 +94,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Number of predicted tags on each detection.",
     )
     parser.add_argument(
-        "--recording-tags",
-        type=int,
-        default=0,
-        help="Number of recording-level tags on each model output.",
-    )
-    parser.add_argument(
         "--keep-dbs",
         action="store_true",
         help="Keep generated sqlite databases after benchmarking.",
@@ -186,7 +180,7 @@ def make_detection(index: int, tags_per_detection: int) -> data.Detection:
         make_tag(index + tag_index, max(0.0, 0.99 - 0.01 * tag_index))
         for tag_index in range(tags_per_detection)
     ]
-    return data.Detection(
+    return data.PresenceDetection(
         location=data.BoundingBox.from_coordinates(
             start_time=float(index % 30) * 0.1,
             low_freq=1000.0 + float(index % 20) * 50.0,
@@ -220,7 +214,6 @@ def make_model_output(
     recording_index: int,
     detections_per_output: int,
     tags_per_detection: int,
-    recording_tags: int,
 ) -> data.ModelOutput:
     """Create one synthetic model output for a recording."""
     detections = [
@@ -230,14 +223,9 @@ def make_model_output(
         )
         for detection_index in range(detections_per_output)
     ]
-    tags = [
-        make_tag(recording_index + tag_index, 0.95)
-        for tag_index in range(recording_tags)
-    ]
     return data.ModelOutput(
         name_model="benchmark-model",
         recording=recording,
-        tags=tags,
         detections=detections,
         created_on=recording.created_on,
     )
@@ -339,17 +327,6 @@ def bulk_seed_stage_data(
             )
         )
 
-        for tag in model_output.tags:
-            predicted_tag_rows.append(
-                (
-                    tag.tag.key,
-                    tag.tag.value,
-                    tag.confidence_score,
-                    None,
-                    model_output.id.bytes,
-                )
-            )
-
         for detection in model_output.detections:
             location = detection.location
 
@@ -367,6 +344,7 @@ def bulk_seed_stage_data(
             detection_rows.append(
                 (
                     detection.id.bytes,
+                    "presence",
                     start_time_s,
                     low_freq_hz,
                     end_time_s,
@@ -383,7 +361,6 @@ def bulk_seed_stage_data(
                         tag.tag.value,
                         tag.confidence_score,
                         detection.id.bytes,
-                        None,
                     )
                 )
 
@@ -403,12 +380,12 @@ def bulk_seed_stage_data(
                 )
             if detection_rows:
                 connection.executemany(
-                    "INSERT INTO detection (id, start_time_s, low_freq_hz, end_time_s, high_freq_hz, detection_score, model_output_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO detection (id, prediction_type, start_time_s, low_freq_hz, end_time_s, high_freq_hz, detection_score, model_output_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     detection_rows,
                 )
             if predicted_tag_rows:
                 connection.executemany(
-                    "INSERT INTO predicted_tag (key, value, confidence_score, detection_id, model_output_id) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO predicted_tag (key, value, confidence_score, detection_id) VALUES (?, ?, ?, ?)",
                     predicted_tag_rows,
                 )
             connection.commit()
@@ -422,10 +399,9 @@ def populate_stage_database(
     deployment: data.Deployment,
     stage: StageDefinition,
     tags_per_detection: int,
-    recording_tags: int,
 ) -> List[data.ModelOutput]:
     """Populate one stage database with existing recordings and detections."""
-    base_time = dt.datetime(2024, 1, 1, 12, 0, 0)
+    base_time = dt.datetime(2024, 1, 1, 12, 0, 0, tzinfo=dt.timezone.utc)
     recordings = [
         make_recording(deployment, recording_index, base_time)
         for recording_index in range(stage.existing_recordings)
@@ -437,7 +413,6 @@ def populate_stage_database(
             recording_index=index,
             detections_per_output=stage.detections_per_output,
             tags_per_detection=tags_per_detection,
-            recording_tags=recording_tags,
         )
         for index, recording in enumerate(recordings)
     ]
@@ -466,8 +441,6 @@ def main() -> None:
         raise SystemExit("--query-repetitions must be greater than 0")
     if args.tags_per_detection <= 0:
         raise SystemExit("--tags-per-detection must be greater than 0")
-    if args.recording_tags < 0:
-        raise SystemExit("--recording-tags must be 0 or greater")
 
     args.db_dir.mkdir(parents=True, exist_ok=True)
     results: List[BenchmarkResult] = []
@@ -479,9 +452,14 @@ def main() -> None:
     print(f"management_sample_size={args.management_sample_size}")
     print(f"query_repetitions={args.query_repetitions}")
     print(f"tags_per_detection={args.tags_per_detection}")
-    print(f"recording_tags={args.recording_tags}")
     print(f"stages={args.stages or 'all'}")
     print()
+
+    def load_recordings_for_management(paths: List[Path]) -> None:
+        recordings_and_info = store.get_recordings_info_by_path(paths=paths)
+        store.get_recordings_model_outputs(
+            [recording for recording, _ in recordings_and_info]
+        )
 
     for stage in select_stages(args.stages):
         print(f"Starting stage {stage}")
@@ -494,7 +472,7 @@ def main() -> None:
         store = SqliteStore(db_path)
         deployment = data.Deployment(
             name=f"benchmark-{stage.name}",
-            started_on=dt.datetime(2024, 1, 1, 0, 0, 0)
+            started_on=dt.datetime(2024, 1, 1, 0, 0, 0, tzinfo=dt.timezone.utc)
             + dt.timedelta(days=len(results)),
         )
         store.store_deployment(deployment)
@@ -503,7 +481,6 @@ def main() -> None:
             deployment=deployment,
             stage=stage,
             tags_per_detection=args.tags_per_detection,
-            recording_tags=args.recording_tags,
         )
         print(" done")
 
@@ -512,7 +489,9 @@ def main() -> None:
             make_recording(
                 deployment=deployment,
                 recording_index=base_index + index,
-                base_time=dt.datetime(2024, 1, 1, 12, 0, 0),
+                base_time=dt.datetime(
+                    2024, 1, 1, 12, 0, 0, tzinfo=dt.timezone.utc
+                ),
             )
             for index in range(args.recording_batch_size)
         ]
@@ -522,7 +501,6 @@ def main() -> None:
                 recording_index=base_index + index,
                 detections_per_output=stage.detections_per_output,
                 tags_per_detection=args.tags_per_detection,
-                recording_tags=args.recording_tags,
             )
             for index, recording in enumerate(new_recordings)
         ]
@@ -564,14 +542,6 @@ def main() -> None:
             for model_output in all_outputs[:sample_size]
             if model_output.recording.path is not None
         ]
-
-        def load_recordings_for_management(paths: List[Path]) -> None:
-            recordings_and_info = store.get_recordings_info_by_path(
-                paths=paths
-            )
-            store.get_recordings_model_outputs(
-                [recording for recording, _ in recordings_and_info]
-            )
 
         print(f"Testing get {len(sample_paths)} recordings by path")
         results.append(

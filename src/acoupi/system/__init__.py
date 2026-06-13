@@ -22,6 +22,7 @@ from acoupi.system.config import (
     write_config,
 )
 from acoupi.system.constants import Settings
+from acoupi.system.datetime import get_system_timezone, set_system_timezone
 from acoupi.system.deployments import (
     end_deployment,
     get_current_deployment,
@@ -64,6 +65,7 @@ __all__ = [
     "get_config_field",
     "get_current_deployment",
     "get_status",
+    "get_system_timezone",
     "get_task_list",
     "get_temp_file_id",
     "get_temp_files",
@@ -81,6 +83,7 @@ __all__ = [
     "run_task",
     "services_are_installed",
     "set_config_field",
+    "set_system_timezone",
     "setup_program",
     "start_deployment",
     "start_program",

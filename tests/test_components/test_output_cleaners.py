@@ -1,6 +1,5 @@
 """Test output cleaners."""
 
-import datetime
 from pathlib import Path
 from typing import List
 
@@ -23,7 +22,7 @@ def create_test_model_output():
         samplerate=256000,
         audio_channels=1,
         deployment=deployment,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
     )
 
     def factory(

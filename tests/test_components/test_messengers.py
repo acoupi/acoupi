@@ -1,6 +1,5 @@
 """Test suite for acoupi messengers."""
 
-import datetime
 from pathlib import Path
 from unittest import mock
 
@@ -225,7 +224,7 @@ def test_http_messenger_with_complex_message():
                 path=Path("test_recording.wav"),
                 duration=1,
                 samplerate=16000,
-                created_on=datetime.datetime.now(),
+                created_on=data.utc_now(),
                 deployment=data.Deployment(
                     name="test_deployment",
                 ),

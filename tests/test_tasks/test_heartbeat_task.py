@@ -1,4 +1,5 @@
 import datetime
+import json
 from unittest.mock import Mock
 
 import pytest
@@ -11,7 +12,7 @@ from acoupi.tasks import generate_heartbeat_task
 def test_heartbeat_task_sends_message(patched_now):
     messenger = Mock()
 
-    now = datetime.datetime(2024, 1, 1)
+    now = datetime.datetime(2024, 1, 1, tzinfo=datetime.timezone.utc)
     patched_now(now)
     device_id = get_device_id()
 
@@ -27,7 +28,8 @@ def test_heartbeat_task_sends_message(patched_now):
     assert isinstance(message, data.Message)
     assert isinstance(message.content, str)
     assert device_id in message.content
-    assert now.isoformat() in message.content
+    payload = json.loads(message.content)
+    assert payload["sent_on"] == "2024-01-01T00:00:00Z"
 
 
 def test_heartbeat_task_send_message_with_all_messengers():

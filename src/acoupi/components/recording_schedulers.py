@@ -14,6 +14,7 @@ made.
 import datetime
 from typing import Optional
 
+from acoupi import data
 from acoupi.components.types import RecordingScheduler
 
 __all__ = [
@@ -38,7 +39,7 @@ class IntervalScheduler(RecordingScheduler):
         self.timeinterval = timeinterval
 
     def time_until_next_recording(
-        self, time: Optional[datetime.datetime] = None
+        self, time: Optional[data.AwareDatetime] = None
     ) -> float:
         """Provide the number of seconds until the next recording.
 
@@ -54,7 +55,7 @@ class IntervalScheduler(RecordingScheduler):
             Will return 0 if a recording should be made immediately.
         """
         if not time:
-            time = datetime.datetime.now()
+            time = data.utc_now()
         next_recording_time = (
             time + datetime.timedelta(seconds=self.timeinterval)
         ).replace(microsecond=0)

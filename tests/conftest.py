@@ -91,15 +91,20 @@ def patched_now(monkeypatch):
 
     Example:
         def test_foo(patched_now):
-            now = patched_now(datetime.datetime(2020, 1, 1))
+            now = patched_now(datetime.datetime(2020, 1, 1, tzinfo=datetime.timezone.utc))
             assert datetime.datetime.now() == now
     """
-    _now = dt.datetime.now()
+    _now = data.utc_now()
 
     def set_now(time: dt.datetime = _now):
         class fake_datetime:
             @classmethod
             def now(cls, *args, **kwargs):
+                tz = kwargs.get("tz")
+                if tz is None and args:
+                    tz = args[0]
+                if tz is not None and time.tzinfo is not None:
+                    return time.astimezone(tz)
                 return time
 
         monkeypatch.setattr(
@@ -125,7 +130,7 @@ def recording(deployment: data.Deployment) -> data.Recording:
         path=Path("tests"),
         duration=1,
         samplerate=16000,
-        created_on=dt.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
 

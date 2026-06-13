@@ -1,7 +1,7 @@
 """SQLite message-store query helpers."""
 
+import datetime
 import sqlite3
-from datetime import datetime
 from typing import List
 from uuid import UUID
 
@@ -75,9 +75,12 @@ def store_response(
     )
 
 
-def serialise_datetime(value: datetime) -> str:
+def serialise_datetime(value: data.AwareDatetime) -> str:
     return value.isoformat(sep=" ")
 
 
-def parse_datetime(value: str) -> datetime:
-    return datetime.fromisoformat(value)
+def parse_datetime(value: str) -> data.AwareDatetime:
+    parsed = datetime.datetime.fromisoformat(value)
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=datetime.timezone.utc)
+    return parsed

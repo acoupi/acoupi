@@ -1,6 +1,5 @@
 """Test running the model of a recorded audio file."""
 
-import datetime
 from pathlib import Path
 
 from acoupi import data
@@ -52,7 +51,7 @@ def test_model(deployment: data.Deployment):
         path=Path("tests/data/test_ultrasonic.wav"),
         duration=1,
         samplerate=16000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
     model = MockModel()

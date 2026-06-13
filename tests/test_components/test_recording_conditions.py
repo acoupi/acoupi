@@ -14,7 +14,7 @@ def test_single_interval_recording_manager(patched_now):
         end=datetime.time(11, 0),
     )
 
-    now = datetime.datetime.now().replace(
+    now = data.utc_now().replace(
         hour=0,
         minute=0,
         second=0,
@@ -55,7 +55,7 @@ def test_multiple_interval_recording_manager(patched_now):
         ),
     ]
 
-    now = datetime.datetime.now().replace(
+    now = data.utc_now().replace(
         hour=0,
         minute=0,
         second=0,

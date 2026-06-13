@@ -18,7 +18,7 @@ def test_save_recording_manager_fails_if_recording_has_no_path(
         path=None,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
 
@@ -37,7 +37,7 @@ def test_save_recording_with_confident_tags(tmp_path: Path):
         path=recording_file,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=data.Deployment(name="test"),
     )
     model_output = data.ModelOutput(
@@ -82,7 +82,7 @@ def test_save_recording_with_unconfident_tags(tmp_path: Path):
         path=recording_file,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=data.Deployment(name="test"),
     )
     model_output = data.ModelOutput(
@@ -138,7 +138,15 @@ def test_date_file_manager_save_recording(
         path=path,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime(year, month, day, hour, minute, second),
+        created_on=datetime.datetime(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+            tzinfo=datetime.timezone.utc,
+        ),
         deployment=deployment,
     )
     # make sure the recording file exists
@@ -168,7 +176,9 @@ def test_date_file_manager_supports_custom_filename_template(
         duration=1.5,
         samplerate=48000,
         audio_channels=2,
-        created_on=datetime.datetime(2023, 4, 15, 18, 9, 30),
+        created_on=datetime.datetime(
+            2023, 4, 15, 18, 9, 30, tzinfo=datetime.timezone.utc
+        ),
         deployment=data.Deployment(
             name="My Site/1",
             latitude=51.5,
@@ -204,7 +214,9 @@ def test_date_file_manager_uses_empty_device_id_when_unavailable(
         path=path,
         duration=1,
         samplerate=48000,
-        created_on=datetime.datetime(2023, 4, 15, 18, 9, 30),
+        created_on=datetime.datetime(
+            2023, 4, 15, 18, 9, 30, tzinfo=datetime.timezone.utc
+        ),
         deployment=data.Deployment(name="site-a"),
     )
     path.touch()
@@ -234,7 +246,9 @@ def test_date_file_manager_fails_with_invalid_filename_template(
         path=path,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime(2023, 4, 15, 18, 9, 30),
+        created_on=datetime.datetime(
+            2023, 4, 15, 18, 9, 30, tzinfo=datetime.timezone.utc
+        ),
         deployment=deployment,
     )
     path.touch()
@@ -266,7 +280,15 @@ def test_date_file_manager_fails_if_recording_has_no_path(
         path=None,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime(year, month, day, hour, minute, second),
+        created_on=datetime.datetime(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+            tzinfo=datetime.timezone.utc,
+        ),
         deployment=deployment,
     )
 
@@ -297,7 +319,15 @@ def test_date_file_manager_fails_if_recording_file_does_not_exist(
         path=path,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime(year, month, day, hour, minute, second),
+        created_on=datetime.datetime(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+            tzinfo=datetime.timezone.utc,
+        ),
         deployment=deployment,
     )
 
@@ -328,7 +358,7 @@ def test_id_file_manager_save_recording(
         path=path,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
     # make sure the recording file exists
@@ -357,7 +387,7 @@ def test_id_file_manager_fails_if_recording_has_no_path(
         path=None,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
 
@@ -382,7 +412,7 @@ def test_id_file_manager_fails_if_recording_file_does_not_exist(
         path=path,
         duration=1,
         samplerate=8000,
-        created_on=datetime.datetime.now(),
+        created_on=data.utc_now(),
         deployment=deployment,
     )
 
