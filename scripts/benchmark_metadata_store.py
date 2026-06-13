@@ -401,7 +401,7 @@ def populate_stage_database(
     tags_per_detection: int,
 ) -> List[data.ModelOutput]:
     """Populate one stage database with existing recordings and detections."""
-    base_time = dt.datetime(2024, 1, 1, 12, 0, 0)
+    base_time = dt.datetime(2024, 1, 1, 12, 0, 0, tzinfo=dt.timezone.utc)
     recordings = [
         make_recording(deployment, recording_index, base_time)
         for recording_index in range(stage.existing_recordings)
@@ -455,11 +455,8 @@ def main() -> None:
     print(f"stages={args.stages or 'all'}")
     print()
 
-
     def load_recordings_for_management(paths: List[Path]) -> None:
-        recordings_and_info = store.get_recordings_info_by_path(
-            paths=paths
-        )
+        recordings_and_info = store.get_recordings_info_by_path(paths=paths)
         store.get_recordings_model_outputs(
             [recording for recording, _ in recordings_and_info]
         )
@@ -475,7 +472,7 @@ def main() -> None:
         store = SqliteStore(db_path)
         deployment = data.Deployment(
             name=f"benchmark-{stage.name}",
-            started_on=dt.datetime(2024, 1, 1, 0, 0, 0)
+            started_on=dt.datetime(2024, 1, 1, 0, 0, 0, tzinfo=dt.timezone.utc)
             + dt.timedelta(days=len(results)),
         )
         store.store_deployment(deployment)
@@ -492,7 +489,9 @@ def main() -> None:
             make_recording(
                 deployment=deployment,
                 recording_index=base_index + index,
-                base_time=dt.datetime(2024, 1, 1, 12, 0, 0),
+                base_time=dt.datetime(
+                    2024, 1, 1, 12, 0, 0, tzinfo=dt.timezone.utc
+                ),
             )
             for index in range(args.recording_batch_size)
         ]
