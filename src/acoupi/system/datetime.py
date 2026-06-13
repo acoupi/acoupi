@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 __all__ = ["get_system_timezone", "set_system_timezone"]
 
 
-def get_system_timezone() -> Optional[str]:
+def get_system_timezone() -> Optional[ZoneInfo]:
     """Get the current system timezone.
 
     Returns
@@ -17,7 +17,6 @@ def get_system_timezone() -> Optional[str]:
         determined.
     """
     try:
-        # Run timedatectl to get the current timezone
         result = subprocess.run(
             ["timedatectl", "show", "--property=Timezone", "--value"],
             capture_output=True,
@@ -26,13 +25,17 @@ def get_system_timezone() -> Optional[str]:
         )
         tz_string = result.stdout.strip()
 
-        if tz_string:
-            return tz_string
-
     except subprocess.CalledProcessError:
-        pass
+        return None
 
-    return None
+    if not tz_string:
+        return None
+
+    try:
+        return ZoneInfo(tz_string)
+
+    except ZoneInfoNotFoundError:
+        return None
 
 
 def set_system_timezone(timezone_str: str) -> bool:
@@ -48,13 +51,11 @@ def set_system_timezone(timezone_str: str) -> bool:
     bool
         True if successful, False otherwise.
     """
-    # 1. Validate that the requested timezone actually exists
     try:
         ZoneInfo(timezone_str)
     except ZoneInfoNotFoundError:
         return False
 
-    # 2. Attempt to set it using timedatectl
     try:
         subprocess.run(
             ["sudo", "timedatectl", "set-timezone", timezone_str],
