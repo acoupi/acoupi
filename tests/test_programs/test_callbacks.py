@@ -30,7 +30,7 @@ class ProgramWithCallbacks(AcoupiProgram):
 
             path.write_text(config.message)
 
-        self.add_task(task_1, callbacks=[task_2])  # ty: ignore
+        self.add_task(task_1, callbacks=[task_2])
 
 
 @pytest.mark.timeout(10)
@@ -99,7 +99,7 @@ class ProgramWithQueuedCallbacks(AcoupiProgram):
 
             path.write_text(config.message)
 
-        self.add_task(task_1, callbacks=[task_2], queue="special")  # ty: ignore
+        self.add_task(task_1, callbacks=[task_2], queue="special")
 
 
 @pytest.mark.timeout(10)

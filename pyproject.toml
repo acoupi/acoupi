@@ -56,7 +56,7 @@ dev = [
   "mkdocs-video>=1.5.0",
   "pytest-mock>=3.14.0",
   "pytest-timeout>=2.4.0",
-  "pyrefly>=1.0.0",
+  "ty>=0.0.49",
 ]
 
 [tool.ruff]

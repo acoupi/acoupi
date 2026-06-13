@@ -34,7 +34,7 @@ coverage:
 	$(ENV_PREFIX)coverage html
 
 lint/types:
-	$(ENV_PREFIX)pyrefly check $(SRC_DIR) $(TEST_DIR)
+	$(ENV_PREFIX)ty check $(SRC_DIR) $(TEST_DIR)
 
 lint/ruff:
 	$(ENV_PREFIX)ruff check $(SRC_DIR) $(TEST_DIR)

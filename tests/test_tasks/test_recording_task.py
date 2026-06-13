@@ -6,7 +6,8 @@ from pathlib import Path
 
 from guano import GuanoFile
 
-from .conftest import create_wav_file
+from tests.test_tasks.conftest import create_wav_file
+
 from acoupi import data
 from acoupi.components import SqliteStore
 from acoupi.components.types import AudioRecorder
