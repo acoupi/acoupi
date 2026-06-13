@@ -33,13 +33,13 @@ coverage:
 	$(ENV_PREFIX)coverage report -m
 	$(ENV_PREFIX)coverage html
 
-lint/pyright:
-	$(ENV_PREFIX)pyright $(SRC_DIR) $(TEST_DIR)
+lint/types:
+	$(ENV_PREFIX)pyrefly check $(SRC_DIR) $(TEST_DIR)
 
 lint/ruff:
 	$(ENV_PREFIX)ruff check $(SRC_DIR) $(TEST_DIR)
 
-lint: lint/pyright lint/ruff
+lint: lint/types lint/ruff
 
 test:
 	$(ENV_PREFIX)pytest --verbose --color=yes $(TEST_DIR)

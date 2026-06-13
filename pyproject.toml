@@ -44,8 +44,6 @@ dev = [
   "sphinx-copybutton>=0.5.1",
   "sphinx-autobuild>=2021.3.14",
   "pytest-httpserver>=1.0.6",
-  "black>=23.3.0",
-  "pyright>=1.1.375",
   "ruff>=0.1.6",
   "isort>=5.11.5",
   "mkdocs>=1.5.3,<2.0",
@@ -58,14 +56,8 @@ dev = [
   "mkdocs-video>=1.5.0",
   "pytest-mock>=3.14.0",
   "pytest-timeout>=2.4.0",
+  "pyrefly>=1.0.0",
 ]
-
-[tool.pyright]
-venvPath = "."
-venv = ".venv"
-exclude = ["src/acoupi/templates/"]
-include = ["src/acoupi/**/*.py", "tests/**/*.py"]
-pythonVersion = "3.10"
 
 [tool.ruff]
 line-length = 79
@@ -87,3 +79,10 @@ known-local-folder = ["src", "acoupi"]
 
 [tool.coverage.run]
 source = ["src/acoupi"]
+
+[tool.pyrefly]
+project-includes = ["src/acoupi/**/*.py", "tests/**/*.py"]
+project-excludes = ["src/acoupi/templates/"]
+python-version = "3.10.0"
+infer-with-first-use = false
+search-path = ["src", "."]
