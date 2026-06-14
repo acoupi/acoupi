@@ -19,7 +19,6 @@ from pathlib import Path
 from typing import Optional
 
 import pyaudio
-from celery.utils.log import get_task_logger
 
 from acoupi import data
 from acoupi.components.types import AudioRecorder
@@ -64,7 +63,6 @@ class PyAudioRecorder(AudioRecorder):
         device_name: str,
         chunksize: int = 2048,
         audio_dir: Path = TMP_PATH,
-        logger=None,
         time_expansion: float = 1,
     ) -> None:
         """Initialise the AudioRecorder with the audio parameters."""
@@ -85,10 +83,6 @@ class PyAudioRecorder(AudioRecorder):
         if self.time_expansion <= 0:
             raise ValueError("time_expansion must be greater than 0")
 
-        if logger is None:
-            logger = get_task_logger(__name__)
-        self.logger = logger
-
     def record(self, deployment: data.Deployment) -> data.Recording:
         """Record an audio file.
 
@@ -108,7 +102,6 @@ class PyAudioRecorder(AudioRecorder):
             samplerate=self.samplerate,
             audio_channels=self.audio_channels,
             time_expansion=self.time_expansion,
-            chunksize=self.chunksize,
             deployment=deployment,
         )
 
