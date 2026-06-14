@@ -4,8 +4,8 @@ from argparse import ArgumentParser
 from pathlib import Path
 from subprocess import run
 
-import questionary
-from pydantic import BaseModel
+import click
+from pydantic import BaseModel, Field
 
 from acoupi import data
 from acoupi.components.types import AudioRecorder
@@ -32,20 +32,17 @@ class PWRecorder(AudioRecorder):
         device_name: str,
         audio_dir: Path = TMP_PATH,
     ):
-        # Audio Duration
         self.duration = duration
 
-        # Audio Microphone Parameters
         self.samplerate = samplerate
         self.audio_channels = audio_channels
         self.device_name = device_name
 
-        # Audio Files Parameters
         self.audio_dir = audio_dir
 
     def record(self, deployment: data.Deployment) -> data.Recording:
         """Record an audio file."""
-        now = datetime.datetime.now()
+        now = data.utc_now()
         temp_path = self.audio_dir / f"{now.strftime('%Y%m%d_%H%M%S')}.wav"
 
         pw_record_audio(
@@ -90,6 +87,7 @@ class PWMicrophoneConfig(BaseModel):
     device_name: str
     samplerate: int = 48_000
     audio_channels: int = 1
+    time_expansion: float = Field(default=1, gt=0)
 
     @classmethod
     def setup(
@@ -111,18 +109,21 @@ def _parse_pw_microphone_config(
     parser = ArgumentParser(description="Microphone configuration")
     parser.add_argument(
         f"--{prefix}device-name",
+        dest="device_name",
         type=str,
         help="The name of the microphone device",
         default=None,
     )
     parser.add_argument(
         f"--{prefix}samplerate",
+        dest="samplerate",
         type=int,
         help="The samplerate of the microphone",
         default=None,
     )
     parser.add_argument(
         f"--{prefix}audio-channels",
+        dest="audio_channels",
         type=int,
         help="The number of audio channels",
         default=None,
@@ -136,11 +137,7 @@ def _parse_pw_microphone_config(
         if not prompt:
             raise ValueError("No microphone device name provided")
 
-        choice = questionary.select(
-            "What microphone do you want to use?",
-            choices=[_get_device_choice(info) for info in device_info],
-        ).ask()
-        parsed.device_name = choice
+        parsed.device_name = _prompt_device_choice(device_info)
 
     selected_device = next(
         (
@@ -167,23 +164,26 @@ def _parse_pw_microphone_config(
         if not rates:
             raise ValueError("No samplerates available")
 
-        choice = questionary.select(
+        default = None
+        if len(rates) == 1:
+            default = rates[0]
+
+        choice = click.prompt(
             "What samplerate do you want to use?",
-            choices=rates,
-        ).ask()
+            type=click.Choice(rates),
+            default=default,
+        )
         parsed.samplerate = choice
 
     if parsed.audio_channels is None:
         if not prompt:
             raise ValueError("No audio channels provided")
 
-        choice = questionary.select(
+        choice = click.prompt(
             "How many audio channels do you want to use?",
-            choices=[
-                questionary.Choice(title="1", value=1),
-                questionary.Choice(title="2", value=2),
-            ],
-        ).ask()
+            type=click.Choice([1, 2]),
+            default=1,
+        )
         parsed.audio_channels = choice
 
     return PWMicrophoneConfig(
@@ -206,10 +206,34 @@ def _get_pw_device_info():
     ]
 
 
-def _get_device_choice(pw_info) -> questionary.Choice:
-    rates = [fmt.get("rate") for fmt in pw_info["params"]["EnumFormat"]]
+def _prompt_device_choice(device_info) -> str:
+    info = [_get_device_choice(info) for info in device_info]
 
-    return questionary.Choice(
+    click.secho(
+        "Available microphones:\n",
+        fg="green",
+        bold=True,
+    )
+    for i, device in enumerate(info):
+        click.secho(f"[{i:>2}]   ", fg="green", bold=True, nl=False)
+        click.echo(device["title"])
+
+    default = None
+    if len(info) == 1:
+        default = info[0]["value"]
+
+    choice = click.prompt(
+        "Which microphone do you want to use?",
+        type=click.Choice(range(len(info))),
+        default=default,
+    )
+
+    return info[choice]["value"]
+
+
+def _get_device_choice(pw_info) -> dict:
+    rates = [fmt.get("rate") for fmt in pw_info["params"]["EnumFormat"]]
+    return dict(
         title=f"{pw_info['props']['node.description']} {rates}",
         value=pw_info["props"]["node.name"],
     )
