@@ -77,13 +77,12 @@ def test_check_fails_if_recording_duration_is_zero(
         audio_dir=tmp_path,
     )
 
-    def mock_get_recording_data(*args, **kwargs) -> bytes:
+    def mock_record_audio(*args, **kwargs) -> bytes:
         return b""
 
     monkeypatch.setattr(
-        recorder,
-        "get_recording_data",
-        mock_get_recording_data,
+        "acoupi.components.audio_recorder.pyaudio_recorder.record_audio",
+        mock_record_audio,
     )
 
     # If the duration is zero, the check should fail
@@ -107,7 +106,7 @@ def test_check_fails_if_invalid_samplerate(tmp_path: Path):
     )
 
     # If the samplerate is invalid, the check should fail
-    with pytest.raises(HealthCheckError, match="samplerate"):
+    with pytest.raises(HealthCheckError, match="sample rate"):
         recorder.check()
 
 
