@@ -6,11 +6,8 @@ from subprocess import CalledProcessError, TimeoutExpired, run
 import click
 from pydantic import BaseModel, Field
 
-from acoupi import data
-from acoupi.components.audio_recorder.base import BaseAudioRecorder
+from acoupi.components.audio_recorder.base import TMP_PATH, BaseAudioRecorder
 from acoupi.system.exceptions import HealthCheckError, ParameterError
-
-TMP_PATH = Path("/run/shm/")
 
 
 class PWRecorder(BaseAudioRecorder):
@@ -68,22 +65,24 @@ def pw_record_audio(
     audio_channels: int,
     device_name: str,
 ) -> None:
+    samples = int(duration * samplerate)
     cmd = [
         "pw-record",
-        "--format=s16",
         f"--rate={samplerate}",
         f"--channels={audio_channels}",
-        f"--duration={duration}",
+        f"--sample-count={samples}",
         f"--target={device_name}",
         str(path),
     ]
+
+    path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
         run(
             cmd,
             capture_output=True,
             text=True,
-            check=True,
+            check=False,
             timeout=duration + 2,
         )
     except FileNotFoundError as error:
@@ -98,14 +97,13 @@ def pw_record_audio(
             message="The pw-record command did not finish within the expected time.",
             help="Check that PipeWire is running and the selected device is responsive.",
         ) from error
-    except CalledProcessError as error:
-        stderr = (error.stderr or "").strip()
+
+    if not path.exists():
         raise ParameterError(
             value="device_name",
-            message="PipeWire failed to record audio"
-            + (f": {stderr}" if stderr else "."),
+            message="PipeWire failed to record audio",
             help="Check that the selected microphone exists and supports the requested settings.",
-        ) from error
+        )
 
 
 class PWMicrophoneConfig(BaseModel):

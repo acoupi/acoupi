@@ -5,7 +5,7 @@ import click
 import pyaudio
 from pydantic import BaseModel, Field
 
-from acoupi.devices.audio import get_input_devices
+from acoupi.devices.audio.pyaudio import get_input_devices
 from acoupi.system.config.parsers import parse_field_from_args
 from acoupi.system.exceptions import ParameterError
 

@@ -20,13 +20,14 @@ from pathlib import Path
 import pyaudio
 
 from acoupi.components.audio_recorder.base import BaseAudioRecorder
-from acoupi.devices.audio import DeviceInfo, get_input_device_by_name
+from acoupi.devices.audio.pyaudio import get_input_device_by_name
 from acoupi.system.exceptions import HealthCheckError, ParameterError
 
 TMP_PATH = Path("/run/shm/")
 
 __all__ = [
     "PyAudioRecorder",
+    "record_audio",
 ]
 
 
@@ -146,23 +147,6 @@ class PyAudioRecorder(BaseAudioRecorder):
                     "Check the configurations."
                 )
             )
-
-
-def get_device_by_name(p: pyaudio.PyAudio, device_name: str) -> DeviceInfo:
-    """Get the input device by name."""
-    try:
-        device = get_input_device_by_name(p, device_name)
-    except IOError as error:
-        raise ParameterError(
-            value="device_name",
-            message=(
-                "The selected input device was not found. "
-                f"Device name: {device_name}"
-            ),
-            help="Check if the microphone is connected.",
-        ) from error
-
-    return device
 
 
 def record_audio(

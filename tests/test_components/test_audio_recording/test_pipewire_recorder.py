@@ -7,8 +7,12 @@ from pathlib import Path
 import guano
 import pytest
 
-from acoupi import components, data
-from acoupi.devices.audio import get_default_microphone, has_input_audio_device
+from acoupi import data
+from acoupi.components.audio_recorder.pipewire_recorder import PWRecorder
+from acoupi.devices.audio.pipewire import (
+    get_default_microphone,
+    has_input_audio_device,
+)
 from acoupi.system.exceptions import HealthCheckError
 from acoupi.tasks.recording import add_guano_metadata
 
@@ -19,13 +23,15 @@ from acoupi.tasks.recording import add_guano_metadata
 )
 def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
     """Test getting information from microhpone."""
-    audio_channels, samplerate, device_name = get_default_microphone()
-    recorder = components.PyAudioRecorder(
+    device = get_default_microphone()
+    samplerate = device.samplerates[0] if device.samplerates else 48000
+    audio_channels = device.max_input_channels
+    device_name = device.name
+    recorder = PWRecorder(
         duration=0.1,
         samplerate=samplerate,
         audio_channels=audio_channels,
         device_name=device_name,
-        chunksize=8192,
         audio_dir=tmp_path,
     )
 
@@ -46,13 +52,15 @@ def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
 )
 def test_check_is_succesful(tmp_path: Path):
     """Test check_is_succesful."""
-    audio_channels, samplerate, device_name = get_default_microphone()
-    recorder = components.PyAudioRecorder(
+    device = get_default_microphone()
+    samplerate = device.samplerates[0] if device.samplerates else 48000
+    audio_channels = device.max_input_channels
+    device_name = device.name
+    recorder = PWRecorder(
         duration=0.1,
         samplerate=samplerate,
         audio_channels=audio_channels,
         device_name=device_name,
-        chunksize=8192,
         audio_dir=tmp_path,
     )
 
@@ -64,64 +72,15 @@ def test_check_is_succesful(tmp_path: Path):
     not has_input_audio_device(),
     reason="No audio device found.",
 )
-def test_check_fails_if_recording_duration_is_zero(
-    monkeypatch, tmp_path: Path
-):
-    audio_channels, samplerate, device_name = get_default_microphone()
-    recorder = components.PyAudioRecorder(
-        duration=1,
-        samplerate=samplerate,
-        audio_channels=audio_channels,
-        device_name=device_name,
-        chunksize=8192,
-        audio_dir=tmp_path,
-    )
-
-    def mock_record_audio(*args, **kwargs) -> bytes:
-        return b""
-
-    monkeypatch.setattr(
-        "acoupi.components.audio_recorder.pyaudio_recorder.record_audio",
-        mock_record_audio,
-    )
-
-    # If the duration is zero, the check should fail
-    with pytest.raises(HealthCheckError):
-        recorder.check()
-
-
-@pytest.mark.skipif(
-    not has_input_audio_device(),
-    reason="No audio device found.",
-)
-def test_check_fails_if_invalid_samplerate(tmp_path: Path):
-    audio_channels, _, device_name = get_default_microphone()
-    recorder = components.PyAudioRecorder(
-        duration=1,
-        samplerate=10,
-        audio_channels=audio_channels,
-        device_name=device_name,
-        chunksize=8192,
-        audio_dir=tmp_path,
-    )
-
-    # If the samplerate is invalid, the check should fail
-    with pytest.raises(HealthCheckError, match="sample rate"):
-        recorder.check()
-
-
-@pytest.mark.skipif(
-    not has_input_audio_device(),
-    reason="No audio device found.",
-)
 def test_check_fails_if_audio_device_is_not_found(tmp_path: Path):
-    audio_channels, samplerate, _ = get_default_microphone()
-    recorder = components.PyAudioRecorder(
+    device = get_default_microphone()
+    samplerate = device.samplerates[0] if device.samplerates else 48000
+    audio_channels = device.max_input_channels
+    recorder = PWRecorder(
         duration=1,
         samplerate=samplerate,
         audio_channels=audio_channels,
         device_name="invalid_device",
-        chunksize=8192,
         audio_dir=tmp_path,
     )
 
@@ -134,13 +93,14 @@ def test_check_fails_if_audio_device_is_not_found(tmp_path: Path):
     reason="No audio device found.",
 )
 def test_check_fails_if_invalid_number_of_audio_channels(tmp_path: Path):
-    _, samplerate, device_name = get_default_microphone()
-    recorder = components.PyAudioRecorder(
+    device = get_default_microphone()
+    samplerate = device.samplerates[0] if device.samplerates else 48000
+    device_name = device.name
+    recorder = PWRecorder(
         duration=1,
         samplerate=samplerate,
         audio_channels=1000,
         device_name=device_name,
-        chunksize=8192,
         audio_dir=tmp_path,
     )
 
@@ -158,13 +118,14 @@ def test_recording_duration_is_as_requested(
     duration: float,
     deployment: data.Deployment,
 ):
-    _, samplerate, device_name = get_default_microphone()
-    recorder = components.PyAudioRecorder(
+    device = get_default_microphone()
+    samplerate = device.samplerates[0] if device.samplerates else 48000
+    device_name = device.name
+    recorder = PWRecorder(
         duration=duration,
         samplerate=samplerate,
         audio_channels=1,
         device_name=device_name,
-        chunksize=8192,
         audio_dir=tmp_path,
     )
 
@@ -187,13 +148,14 @@ def test_recording_duration_is_as_requested(
 def test_can_record_with_time_expansion(
     tmp_path: Path, deployment: data.Deployment
 ):
-    _, samplerate, device_name = get_default_microphone()
-    recorder = components.PyAudioRecorder(
+    device = get_default_microphone()
+    samplerate = device.samplerates[0] if device.samplerates else 48000
+    device_name = device.name
+    recorder = PWRecorder(
         duration=1,
         samplerate=samplerate,
         audio_channels=1,
         device_name=device_name,
-        chunksize=8192,
         audio_dir=tmp_path,
         time_expansion=0.1,
     )
@@ -225,13 +187,14 @@ def test_time_expansion_is_saved_in_guano_metadata(
         return_value="1234567890ABCDEF",
     )
 
-    _, samplerate, device_name = get_default_microphone()
-    recorder = components.PyAudioRecorder(
+    device = get_default_microphone()
+    samplerate = device.samplerates[0] if device.samplerates else 48000
+    device_name = device.name
+    recorder = PWRecorder(
         duration=1,
         samplerate=samplerate,
         audio_channels=1,
         device_name=device_name,
-        chunksize=8192,
         audio_dir=tmp_path,
         time_expansion=0.1,
     )

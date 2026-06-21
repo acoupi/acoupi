@@ -4,7 +4,6 @@ import pyaudio
 from pydantic import BaseModel
 
 __all__ = [
-    "DeviceInfo",
     "get_input_devices",
     "get_input_device_by_name",
     "has_input_audio_device",
@@ -90,15 +89,15 @@ def get_input_device_by_name(p: pyaudio.PyAudio, name: str) -> DeviceInfo:
     added by PyAudio has been removed. This should coincide with the name
     provided by `arecord -l` or `lsusb`.
     """
-    avaliable_devices = get_input_devices(p)
+    available_devices = get_input_devices(p)
 
-    for device in avaliable_devices:
+    for device in available_devices:
         if name == device.name:
             return device
 
     raise IOError(
         f"Audio device with name '{name}' not found."
-        f" Available devices: {', '.join([device.name for device in avaliable_devices])}"
+        f" Available devices: {', '.join([device.name for device in available_devices])}"
     )
 
 
