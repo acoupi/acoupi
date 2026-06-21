@@ -76,7 +76,10 @@ def get_input_device_by_name(name: str) -> DeviceInfo:
 
 
 def has_input_audio_device() -> bool:
-    return bool(get_input_devices())
+    try:
+        return bool(get_input_devices())
+    except RuntimeError:
+        return False
 
 
 def get_default_microphone() -> DeviceInfo:

@@ -1,0 +1,23 @@
+[
+  {
+    "id": 42,
+    "type": "PipeWire:Interface:Node",
+    "info": {
+      "props": {
+        "media.class": "Audio/Sink",
+        "node.name": "alsa_output.platform-bcm2835_audio.stereo-fallback",
+        "node.description": "Built-in Audio Analog Stereo"
+      },
+      "params": {
+        "EnumFormat": [
+          {
+            "mediaType": "audio",
+            "mediaSubtype": "raw",
+            "rate": 48000,
+            "channels": 2
+          }
+        ]
+      }
+    }
+  }
+]

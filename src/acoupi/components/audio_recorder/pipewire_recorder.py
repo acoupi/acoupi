@@ -31,24 +31,50 @@ class PWRecorder(BaseAudioRecorder):
 
     def generate_recording(self, path: Path) -> None:
         """Generate an audio recording."""
-        pw_record_audio(
-            path=path,
-            duration=self.duration,
-            samplerate=self.samplerate,
-            audio_channels=self.audio_channels,
-            device_name=self.device_name,
-        )
+        samples = int(self.duration * self.samplerate)
+        cmd = [
+            "pw-record",
+            f"--rate={self.samplerate}",
+            f"--channels={self.audio_channels}",
+            f"--sample-count={samples}",
+            f"--target={self.device_name}",
+            str(path),
+        ]
+
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=self.duration + 2,
+            )
+        except FileNotFoundError as error:
+            raise ParameterError(
+                value="pw-record",
+                message="The pw-record command was not found.",
+                help="Install PipeWire tools and check that pw-record is on PATH.",
+            ) from error
+        except TimeoutExpired as error:
+            raise ParameterError(
+                value="pw-record",
+                message="The pw-record command did not finish within the expected time.",
+                help="Check that PipeWire is running and the selected device is responsive.",
+            ) from error
+
+        if not path.exists():
+            raise ParameterError(
+                value="device_name",
+                message="PipeWire failed to record audio",
+                help="Check that the selected microphone exists and supports the requested settings.",
+            )
 
     def check(self):
         """Check if the audio recorder is compatible with the config."""
         try:
-            pw_record_audio(
-                path=Path("/dev/null"),
-                duration=0.1,
-                samplerate=self.samplerate,
-                audio_channels=self.audio_channels,
-                device_name=self.device_name,
-            )
+            self.generate_recording(Path("/dev/null"))
         except ParameterError as error:
             raise HealthCheckError(
                 message=(
@@ -56,54 +82,6 @@ class PWRecorder(BaseAudioRecorder):
                     f"microphone. Check the configurations. Error: {error}"
                 )
             ) from error
-
-
-def pw_record_audio(
-    path: Path,
-    duration: float,
-    samplerate: int,
-    audio_channels: int,
-    device_name: str,
-) -> None:
-    samples = int(duration * samplerate)
-    cmd = [
-        "pw-record",
-        f"--rate={samplerate}",
-        f"--channels={audio_channels}",
-        f"--sample-count={samples}",
-        f"--target={device_name}",
-        str(path),
-    ]
-
-    path.parent.mkdir(parents=True, exist_ok=True)
-
-    try:
-        run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=duration + 2,
-        )
-    except FileNotFoundError as error:
-        raise ParameterError(
-            value="pw-record",
-            message="The pw-record command was not found.",
-            help="Install PipeWire tools and check that pw-record is on PATH.",
-        ) from error
-    except TimeoutExpired as error:
-        raise ParameterError(
-            value="pw-record",
-            message="The pw-record command did not finish within the expected time.",
-            help="Check that PipeWire is running and the selected device is responsive.",
-        ) from error
-
-    if not path.exists():
-        raise ParameterError(
-            value="device_name",
-            message="PipeWire failed to record audio",
-            help="Check that the selected microphone exists and supports the requested settings.",
-        )
 
 
 class PWMicrophoneConfig(BaseModel):

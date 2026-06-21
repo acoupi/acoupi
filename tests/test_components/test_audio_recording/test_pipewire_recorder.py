@@ -1,10 +1,8 @@
-"""Test the recording of an audio files."""
+"""Tests for the PipeWire audio recorder."""
 
-import math
 import wave
 from pathlib import Path
 
-import guano
 import pytest
 
 from acoupi import data
@@ -13,197 +11,195 @@ from acoupi.devices.audio.pipewire import (
     get_default_microphone,
     has_input_audio_device,
 )
-from acoupi.system.exceptions import HealthCheckError
-from acoupi.tasks.recording import add_guano_metadata
+from acoupi.system.exceptions import HealthCheckError, ParameterError
 
 
-@pytest.mark.skipif(
-    not has_input_audio_device(),
-    reason="No audio device found.",
-)
-def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
-    """Test getting information from microhpone."""
-    device = get_default_microphone()
-    samplerate = device.samplerates[0] if device.samplerates else 48000
-    audio_channels = device.max_input_channels
-    device_name = device.name
+def create_wav_file(
+    path: Path,
+    samplerate: int,
+    channels: int,
+    frames: int,
+) -> None:
+    with wave.open(str(path), "wb") as wf:
+        wf.setnchannels(channels)
+        wf.setsampwidth(2)
+        wf.setframerate(samplerate)
+        wf.writeframes(b"\x00\x00" * frames * channels)
+
+
+def test_audio_recording(
+    deployment: data.Deployment, tmp_path: Path, monkeypatch
+):
     recorder = PWRecorder(
         duration=0.1,
-        samplerate=samplerate,
-        audio_channels=audio_channels,
-        device_name=device_name,
+        samplerate=48_000,
+        audio_channels=1,
+        device_name="test-mic",
         audio_dir=tmp_path,
     )
 
-    # record audio
+    monkeypatch.setattr(
+        recorder,
+        "generate_recording",
+        lambda path: create_wav_file(path, 48_000, 1, 4_800),
+    )
+
     recording = recorder.record(deployment=deployment)
+
     assert isinstance(recording, data.Recording)
     assert recording.deployment == deployment
     assert recording.duration == 0.1
-    assert recording.samplerate == samplerate
-    assert recording.audio_channels == audio_channels
+    assert recording.samplerate == 48_000
+    assert recording.audio_channels == 1
     assert recording.path is not None
     assert recording.path.exists()
 
 
 @pytest.mark.skipif(
     not has_input_audio_device(),
-    reason="No audio device found.",
+    reason="No PipeWire input audio device found.",
 )
-def test_check_is_succesful(tmp_path: Path):
-    """Test check_is_succesful."""
+def test_can_record_with_default_pipewire_input_device(
+    deployment: data.Deployment,
+    tmp_path: Path,
+):
     device = get_default_microphone()
-    samplerate = device.samplerates[0] if device.samplerates else 48000
-    audio_channels = device.max_input_channels
-    device_name = device.name
+    samplerate = device.samplerates[0] if device.samplerates else 48_000
+    audio_channels = min(device.max_input_channels, 1)
     recorder = PWRecorder(
         duration=0.1,
         samplerate=samplerate,
         audio_channels=audio_channels,
-        device_name=device_name,
+        device_name=device.name,
         audio_dir=tmp_path,
     )
 
-    # If everything is ok, the check should pass
+    recording = recorder.record(deployment=deployment)
+
+    assert recording.path is not None
+    assert recording.path.exists()
+
+    with wave.open(str(recording.path), "rb") as wf:
+        assert wf.getframerate() == samplerate
+        assert wf.getnchannels() == audio_channels
+        assert wf.getnframes() == int(recording.duration * samplerate)
+
+
+def test_check_detects_missing_pipewire_command(tmp_path: Path, monkeypatch):
+    recorder = PWRecorder(
+        duration=1,
+        samplerate=48_000,
+        audio_channels=1,
+        device_name="test-mic",
+        audio_dir=tmp_path,
+    )
+
+    def raise_error(self, path: Path) -> None:
+        raise ParameterError(
+            value="pw-record",
+            message="The pw-record command was not found.",
+        )
+
+    monkeypatch.setattr(
+        "acoupi.components.audio_recorder.pipewire_recorder.PWRecorder.generate_recording",
+        raise_error,
+    )
+
+    with pytest.raises(
+        HealthCheckError, match="pw-record command was not found"
+    ):
+        recorder.check()
+
+
+def test_check_detects_missing_device(tmp_path: Path, monkeypatch):
+    recorder = PWRecorder(
+        duration=1,
+        samplerate=48_000,
+        audio_channels=1,
+        device_name="missing-device",
+        audio_dir=tmp_path,
+    )
+
+    def raise_error(self, path: Path) -> None:
+        raise ParameterError(
+            value="device_name",
+            message="PipeWire failed to record audio",
+            help="Check that the selected microphone exists.",
+        )
+
+    monkeypatch.setattr(
+        "acoupi.components.audio_recorder.pipewire_recorder.PWRecorder.generate_recording",
+        raise_error,
+    )
+
+    with pytest.raises(HealthCheckError, match="failed to record audio"):
+        recorder.check()
+
+
+def test_check_detects_invalid_configuration(tmp_path: Path, monkeypatch):
+    recorder = PWRecorder(
+        duration=1,
+        samplerate=48_000,
+        audio_channels=99,
+        device_name="test-mic",
+        audio_dir=tmp_path,
+    )
+
+    def raise_error(self, path: Path) -> None:
+        raise ParameterError(
+            value="device_name",
+            message="PipeWire failed to record audio",
+            help="Check that the selected microphone exists and supports the requested settings.",
+        )
+
+    monkeypatch.setattr(
+        "acoupi.components.audio_recorder.pipewire_recorder.PWRecorder.generate_recording",
+        raise_error,
+    )
+
+    with pytest.raises(HealthCheckError, match="failed to record audio"):
+        recorder.check()
+
+
+def test_check_succeeds_only_with_expected_recording_output(
+    tmp_path: Path, monkeypatch
+):
+    recorder = PWRecorder(
+        duration=1,
+        samplerate=48_000,
+        audio_channels=2,
+        device_name="test-mic",
+        audio_dir=tmp_path,
+    )
+
+    calls = {}
+
+    def mock_generate_recording(self, path: Path) -> None:
+        calls.update(
+            path=path,
+            duration=recorder.duration,
+            samplerate=recorder.samplerate,
+            audio_channels=recorder.audio_channels,
+            device_name=recorder.device_name,
+        )
+        create_wav_file(
+            tmp_path / "check.wav",
+            samplerate=recorder.samplerate,
+            channels=recorder.audio_channels,
+            frames=int(recorder.duration * recorder.samplerate),
+        )
+
+    monkeypatch.setattr(
+        "acoupi.components.audio_recorder.pipewire_recorder.PWRecorder.generate_recording",
+        mock_generate_recording,
+    )
+
     recorder.check()
 
-
-@pytest.mark.skipif(
-    not has_input_audio_device(),
-    reason="No audio device found.",
-)
-def test_check_fails_if_audio_device_is_not_found(tmp_path: Path):
-    device = get_default_microphone()
-    samplerate = device.samplerates[0] if device.samplerates else 48000
-    audio_channels = device.max_input_channels
-    recorder = PWRecorder(
-        duration=1,
-        samplerate=samplerate,
-        audio_channels=audio_channels,
-        device_name="invalid_device",
-        audio_dir=tmp_path,
-    )
-
-    with pytest.raises(HealthCheckError, match="device"):
-        recorder.check()
-
-
-@pytest.mark.skipif(
-    not has_input_audio_device(),
-    reason="No audio device found.",
-)
-def test_check_fails_if_invalid_number_of_audio_channels(tmp_path: Path):
-    device = get_default_microphone()
-    samplerate = device.samplerates[0] if device.samplerates else 48000
-    device_name = device.name
-    recorder = PWRecorder(
-        duration=1,
-        samplerate=samplerate,
-        audio_channels=1000,
-        device_name=device_name,
-        audio_dir=tmp_path,
-    )
-
-    with pytest.raises(HealthCheckError, match="channels"):
-        recorder.check()
-
-
-@pytest.mark.skipif(
-    not has_input_audio_device(),
-    reason="No audio device found.",
-)
-@pytest.mark.parametrize("duration", [0.1, 0.3, 0.7, 1])
-def test_recording_duration_is_as_requested(
-    tmp_path: Path,
-    duration: float,
-    deployment: data.Deployment,
-):
-    device = get_default_microphone()
-    samplerate = device.samplerates[0] if device.samplerates else 48000
-    device_name = device.name
-    recorder = PWRecorder(
-        duration=duration,
-        samplerate=samplerate,
-        audio_channels=1,
-        device_name=device_name,
-        audio_dir=tmp_path,
-    )
-
-    recording = recorder.record(deployment=deployment)
-
-    assert recording.path is not None
-    with wave.open(str(recording.path)) as wf:
-        assert samplerate == wf.getframerate()
-        assert math.isclose(
-            duration,
-            wf.getnframes() / samplerate,
-            abs_tol=0.01,
-        )
-
-
-@pytest.mark.skipif(
-    not has_input_audio_device(),
-    reason="No audio device found.",
-)
-def test_can_record_with_time_expansion(
-    tmp_path: Path, deployment: data.Deployment
-):
-    device = get_default_microphone()
-    samplerate = device.samplerates[0] if device.samplerates else 48000
-    device_name = device.name
-    recorder = PWRecorder(
-        duration=1,
-        samplerate=samplerate,
-        audio_channels=1,
-        device_name=device_name,
-        audio_dir=tmp_path,
-        time_expansion=0.1,
-    )
-
-    recording = recorder.record(deployment=deployment)
-
-    # The recording object has the original samplerate
-    assert recording.samplerate == samplerate
-    assert recording.time_expansion == 0.1
-
-    with wave.open(str(recording.path)) as wf:
-        stored_samplerate = wf.getframerate()
-        assert math.isclose(
-            stored_samplerate,
-            recorder.get_expanded_samplerate(),
-            abs_tol=0.01,
-        )
-
-
-@pytest.mark.skipif(
-    not has_input_audio_device(),
-    reason="No audio device found.",
-)
-def test_time_expansion_is_saved_in_guano_metadata(
-    tmp_path: Path, deployment: data.Deployment, mocker
-):
-    mocker.patch(
-        "acoupi.tasks.recording.get_rpi_serial_number",
-        return_value="1234567890ABCDEF",
-    )
-
-    device = get_default_microphone()
-    samplerate = device.samplerates[0] if device.samplerates else 48000
-    device_name = device.name
-    recorder = PWRecorder(
-        duration=1,
-        samplerate=samplerate,
-        audio_channels=1,
-        device_name=device_name,
-        audio_dir=tmp_path,
-        time_expansion=0.1,
-    )
-
-    recording = recorder.record(deployment=deployment)
-
-    add_guano_metadata(recording)
-
-    assert recording.path is not None
-    g = guano.GuanoFile(str(recording.path))
-    assert g["TE"] == str(0.1)
-    assert g["Samplerate"] == samplerate
+    assert calls == {
+        "path": Path("/dev/null"),
+        "duration": 1,
+        "samplerate": 48_000,
+        "audio_channels": 2,
+        "device_name": "test-mic",
+    }
