@@ -102,6 +102,31 @@ class TestGetInputDeviceByName:
         assert device.description == "Scarlett 2i2 USB"
         assert device.max_input_channels == 2
 
+    def test_raises_if_device_is_missing(
+        self, monkeypatch, load_audio_test_fixture, make_completed_process
+    ):
+        payload = load_audio_test_fixture("pipewire/dumps/mixed_sources.json")
+        monkeypatch.setattr(
+            "acoupi.devices.audio.pipewire.run",
+            lambda *args, **kwargs: make_completed_process(
+                json.dumps(payload)
+            ),
+        )
+
+        with pytest.raises(DeviceUnavailableError, match="not found"):
+            get_input_device_by_name("missing-device")
+
+    def test_raises_if_pw_dump_fails(self, monkeypatch):
+        def raise_error(*args, **kwargs):
+            raise FileNotFoundError()
+
+        monkeypatch.setattr("acoupi.devices.audio.pipewire.run", raise_error)
+
+        with pytest.raises(
+            DeviceUnavailableError, match="pw-dump command was not found"
+        ):
+            get_input_device_by_name("missing-device")
+
 
 class TestHasInputAudioDevice:
     def test_returns_true_when_source_device_exists(
@@ -116,6 +141,29 @@ class TestHasInputAudioDevice:
         )
 
         assert has_input_audio_device() is True
+
+    def test_returns_false_when_no_source_device_exists(
+        self, monkeypatch, load_audio_test_fixture, make_completed_process
+    ):
+        payload = load_audio_test_fixture(
+            "pipewire/dumps/no_audio_sources.json"
+        )
+        monkeypatch.setattr(
+            "acoupi.devices.audio.pipewire.run",
+            lambda *args, **kwargs: make_completed_process(
+                json.dumps(payload)
+            ),
+        )
+
+        assert has_input_audio_device() is False
+
+    def test_returns_false_when_pw_dump_fails(self, monkeypatch):
+        def raise_error(*args, **kwargs):
+            raise FileNotFoundError()
+
+        monkeypatch.setattr("acoupi.devices.audio.pipewire.run", raise_error)
+
+        assert has_input_audio_device() is False
 
 
 class TestGetDefaultMicrophone:
