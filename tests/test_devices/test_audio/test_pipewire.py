@@ -257,11 +257,20 @@ class TestGenerateRecording:
 
 
 class TestParsePWMicrophoneConfig:
+    @staticmethod
+    def build_ultramic_device() -> DeviceInfo:
+        return DeviceInfo(
+            name="alsa_input.usb-UltraMic_250K_16_bit_r4-00.mono-fallback",
+            description="UltraMic 250K 16 bit r4 Mono",
+            max_input_channels=1,
+            samplerates=[192000, 250000],
+        )
+
     def test_raises_parameter_error_if_device_name_missing_without_prompt(
         self, monkeypatch
     ):
         monkeypatch.setattr(
-            "acoupi.components.audio_recorder.pipewire_recorder._get_pw_device_info",
+            "acoupi.components.audio_recorder.pipewire_recorder.get_input_devices",
             lambda: [],
         )
 
@@ -271,19 +280,24 @@ class TestParsePWMicrophoneConfig:
             _parse_pw_microphone_config([], prompt=False)
 
     def test_raises_parameter_error_if_device_name_is_unknown(
-        self, monkeypatch, load_audio_test_fixture
+        self, monkeypatch
     ):
-        payload = load_audio_test_fixture("pipewire/dumps/mixed_sources.json")
-        device_info = [
-            device["info"]
-            for device in payload
-            if device.get("type") == "PipeWire:Interface:Node"
-            and device.get("info", {}).get("props", {}).get("media.class")
-            == "Audio/Source"
-        ]
+        ultramic = self.build_ultramic_device()
+        scarlett = DeviceInfo(
+            name="alsa_input.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo",
+            description="Scarlett 2i2 USB",
+            max_input_channels=2,
+            samplerates=[48000, 96000],
+        )
         monkeypatch.setattr(
-            "acoupi.components.audio_recorder.pipewire_recorder._get_pw_device_info",
-            lambda: device_info,
+            "acoupi.components.audio_recorder.pipewire_recorder.get_input_devices",
+            lambda: [ultramic, scarlett],
+        )
+        monkeypatch.setattr(
+            "acoupi.components.audio_recorder.pipewire_recorder.get_input_device_by_name",
+            lambda name: (_ for _ in ()).throw(
+                DeviceUnavailableError(message="missing device")
+            ),
         )
 
         with pytest.raises(ParameterError, match="No device found with name"):
@@ -293,12 +307,16 @@ class TestParsePWMicrophoneConfig:
             )
 
     def test_raises_parameter_error_if_samplerate_missing_without_prompt(
-        self, monkeypatch, load_audio_test_fixture
+        self, monkeypatch
     ):
-        device = load_audio_test_fixture("pipewire/devices/ultramic_250k.json")
+        device = self.build_ultramic_device()
         monkeypatch.setattr(
-            "acoupi.components.audio_recorder.pipewire_recorder._get_pw_device_info",
-            lambda: [device["info"]],
+            "acoupi.components.audio_recorder.pipewire_recorder.get_input_devices",
+            lambda: [device],
+        )
+        monkeypatch.setattr(
+            "acoupi.components.audio_recorder.pipewire_recorder.get_input_device_by_name",
+            lambda name: device,
         )
 
         with pytest.raises(ParameterError, match="No samplerate provided"):
@@ -310,12 +328,16 @@ class TestParsePWMicrophoneConfig:
             )
 
     def test_raises_parameter_error_if_channels_missing_without_prompt(
-        self, monkeypatch, load_audio_test_fixture
+        self, monkeypatch
     ):
-        device = load_audio_test_fixture("pipewire/devices/ultramic_250k.json")
+        device = self.build_ultramic_device()
         monkeypatch.setattr(
-            "acoupi.components.audio_recorder.pipewire_recorder._get_pw_device_info",
-            lambda: [device["info"]],
+            "acoupi.components.audio_recorder.pipewire_recorder.get_input_devices",
+            lambda: [device],
+        )
+        monkeypatch.setattr(
+            "acoupi.components.audio_recorder.pipewire_recorder.get_input_device_by_name",
+            lambda name: device,
         )
 
         with pytest.raises(ParameterError, match="No audio channels provided"):
