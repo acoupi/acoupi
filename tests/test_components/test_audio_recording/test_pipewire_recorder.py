@@ -11,8 +11,8 @@ from acoupi.components.audio_recorder.pipewire_recorder import (
     PWRecorder,
     _parse_pw_microphone_config,
 )
-from acoupi.devices.audio.pipewire import DeviceInfo
 from acoupi.devices.audio.pipewire import (
+    DeviceInfo,
     get_default_microphone,
     has_input_audio_device,
 )

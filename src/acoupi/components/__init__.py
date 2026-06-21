@@ -2,10 +2,10 @@
 
 from acoupi.components.audio_recorder import (
     MicrophoneConfig,
-    PARecorderConfig,
     PARecorder,
-    PWRecorderConfig,
+    PARecorderConfig,
     PWRecorder,
+    PWRecorderConfig,
     PyAudioRecorder,
 )
 from acoupi.components.message_factories import (

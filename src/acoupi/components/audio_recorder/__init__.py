@@ -1,12 +1,12 @@
 from acoupi.components.audio_recorder.base import TMP_PATH
 from acoupi.components.audio_recorder.pipewire_recorder import (
-    PWRecorderConfig,
     PWRecorder,
+    PWRecorderConfig,
 )
 from acoupi.components.audio_recorder.pyaudio_recorder import (
-    PARecorderConfig,
-    PARecorder,
     MicrophoneConfig,
+    PARecorder,
+    PARecorderConfig,
     PyAudioRecorder,
 )
 
