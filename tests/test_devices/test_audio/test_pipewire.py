@@ -4,7 +4,10 @@ from subprocess import CalledProcessError, CompletedProcess, TimeoutExpired
 
 import pytest
 
-from acoupi.components.audio_recorder.pipewire_recorder import PWRecorder
+from acoupi.components.audio_recorder.pipewire_recorder import (
+    PWRecorder,
+    _parse_pw_microphone_config,
+)
 from acoupi.devices.audio.pipewire import (
     DeviceInfo,
     get_default_microphone,
@@ -12,7 +15,11 @@ from acoupi.devices.audio.pipewire import (
     get_input_devices,
     has_input_audio_device,
 )
-from acoupi.system.exceptions import ParameterError
+from acoupi.system.exceptions import (
+    DeviceUnavailableError,
+    ParameterError,
+    RecordingError,
+)
 
 
 class TestGetInputDevices:
@@ -60,18 +67,18 @@ class TestGetInputDevices:
 
         assert get_input_devices() == []
 
-    def test_raises_runtime_error_if_pw_dump_is_missing(self, monkeypatch):
+    def test_raises_error_if_pw_dump_is_missing(self, monkeypatch):
         def raise_error(*args, **kwargs):
             raise FileNotFoundError()
 
         monkeypatch.setattr("acoupi.devices.audio.pipewire.run", raise_error)
 
         with pytest.raises(
-            RuntimeError, match="pw-dump command was not found"
+            DeviceUnavailableError, match="pw-dump command was not found"
         ):
             get_input_devices()
 
-    def test_raises_runtime_error_if_pw_dump_fails(self, monkeypatch):
+    def test_raise_error_if_pw_dump_fails(self, monkeypatch):
         def raise_error(*args, **kwargs):
             raise CalledProcessError(
                 1, ["pw-dump"], stderr="service unavailable"
@@ -79,7 +86,9 @@ class TestGetInputDevices:
 
         monkeypatch.setattr("acoupi.devices.audio.pipewire.run", raise_error)
 
-        with pytest.raises(RuntimeError, match="service unavailable"):
+        with pytest.raises(
+            DeviceUnavailableError, match="service unavailable"
+        ):
             get_input_devices()
 
 
@@ -198,7 +207,7 @@ class TestGenerateRecording:
         )
 
         with pytest.raises(
-            ParameterError, match="pw-record command was not found"
+            DeviceUnavailableError, match="pw-record command was not found"
         ):
             recorder.generate_recording(tmp_path / "recording.wav")
 
@@ -220,7 +229,7 @@ class TestGenerateRecording:
         )
 
         with pytest.raises(
-            ParameterError, match="did not finish within the expected time"
+            RecordingError, match="did not finish within the expected time"
         ):
             recorder.generate_recording(tmp_path / "recording.wav")
 
@@ -243,5 +252,77 @@ class TestGenerateRecording:
             ),
         )
 
-        with pytest.raises(ParameterError, match="failed to record audio"):
+        with pytest.raises(RecordingError, match="failed to record audio"):
             recorder.generate_recording(tmp_path / "recording.wav")
+
+
+class TestParsePWMicrophoneConfig:
+    def test_raises_parameter_error_if_device_name_missing_without_prompt(
+        self, monkeypatch
+    ):
+        monkeypatch.setattr(
+            "acoupi.components.audio_recorder.pipewire_recorder._get_pw_device_info",
+            lambda: [],
+        )
+
+        with pytest.raises(
+            ParameterError, match="No microphone device name provided"
+        ):
+            _parse_pw_microphone_config([], prompt=False)
+
+    def test_raises_parameter_error_if_device_name_is_unknown(
+        self, monkeypatch, load_audio_test_fixture
+    ):
+        payload = load_audio_test_fixture("pipewire/dumps/mixed_sources.json")
+        device_info = [
+            device["info"]
+            for device in payload
+            if device.get("type") == "PipeWire:Interface:Node"
+            and device.get("info", {}).get("props", {}).get("media.class")
+            == "Audio/Source"
+        ]
+        monkeypatch.setattr(
+            "acoupi.components.audio_recorder.pipewire_recorder._get_pw_device_info",
+            lambda: device_info,
+        )
+
+        with pytest.raises(ParameterError, match="No device found with name"):
+            _parse_pw_microphone_config(
+                ["--device-name=missing-device"],
+                prompt=False,
+            )
+
+    def test_raises_parameter_error_if_samplerate_missing_without_prompt(
+        self, monkeypatch, load_audio_test_fixture
+    ):
+        device = load_audio_test_fixture("pipewire/devices/ultramic_250k.json")
+        monkeypatch.setattr(
+            "acoupi.components.audio_recorder.pipewire_recorder._get_pw_device_info",
+            lambda: [device["info"]],
+        )
+
+        with pytest.raises(ParameterError, match="No samplerate provided"):
+            _parse_pw_microphone_config(
+                [
+                    "--device-name=alsa_input.usb-UltraMic_250K_16_bit_r4-00.mono-fallback"
+                ],
+                prompt=False,
+            )
+
+    def test_raises_parameter_error_if_channels_missing_without_prompt(
+        self, monkeypatch, load_audio_test_fixture
+    ):
+        device = load_audio_test_fixture("pipewire/devices/ultramic_250k.json")
+        monkeypatch.setattr(
+            "acoupi.components.audio_recorder.pipewire_recorder._get_pw_device_info",
+            lambda: [device["info"]],
+        )
+
+        with pytest.raises(ParameterError, match="No audio channels provided"):
+            _parse_pw_microphone_config(
+                [
+                    "--device-name=alsa_input.usb-UltraMic_250K_16_bit_r4-00.mono-fallback",
+                    "--samplerate=250000",
+                ],
+                prompt=False,
+            )

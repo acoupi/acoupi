@@ -1,12 +1,39 @@
 import struct
+import tempfile
+import wave
 from abc import abstractmethod
+from dataclasses import dataclass
+from math import isclose
 from pathlib import Path
 from typing import BinaryIO
 
 from acoupi import data
 from acoupi.components.types import AudioRecorder
+from acoupi.system.exceptions import (
+    DeviceConfigurationError,
+    DeviceUnavailableError,
+    HealthCheckError,
+    RecordingError,
+)
 
 TMP_PATH = Path("/run/shm/")
+
+
+@dataclass
+class MediaInfo:
+    """Information about the media."""
+
+    duration: float
+    """Duration of the media in seconds."""
+
+    samplerate: int
+    """Samplerate of the media."""
+
+    audio_channels: int
+    """Number of audio channels in the media."""
+
+    frames: int
+    """Number of frames in the media."""
 
 
 class BaseAudioRecorder(AudioRecorder):
@@ -99,7 +126,7 @@ class BaseAudioRecorder(AudioRecorder):
         if expanded_samplerate == self.samplerate:
             return
 
-        patch_wav_sample_rate(path, expanded_samplerate)
+        patch_samplerate(path, expanded_samplerate)
 
     def get_expanded_samplerate(self):
         """Get the expanded samplerate of the recording.
@@ -116,7 +143,11 @@ class BaseAudioRecorder(AudioRecorder):
         return int(self.samplerate / self.time_expansion)
 
     @abstractmethod  # pragma: no cover
-    def generate_recording(self, path: Path) -> None:
+    def generate_recording(
+        self,
+        path: Path,
+        duration: float | None = None,
+    ) -> None:
         """Generate an audio recording.
 
         This method is called by the `record` method to generate the actual
@@ -129,10 +160,57 @@ class BaseAudioRecorder(AudioRecorder):
         """
         ...
 
-    @abstractmethod  # pragma: no cover
     def check(self):
         """Check if the audio recorder is compatible with the config."""
-        ...
+        check_duration = 0.1
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "recording.wav"
+
+            try:
+                self.generate_recording(path=path, duration=check_duration)
+            except (
+                DeviceConfigurationError,
+                DeviceUnavailableError,
+                RecordingError,
+            ) as error:
+                help_text = f" Help: {error.help}" if error.help else ""
+                raise HealthCheckError(
+                    message=f"{error}{help_text}"
+                ) from error
+
+            if not path.exists():
+                raise HealthCheckError(
+                    message="No audio file was recorded during the health check."
+                )
+
+            media_info = get_media_info(path)
+            if media_info.samplerate != self.samplerate:
+                raise HealthCheckError(
+                    message=(
+                        "Recorded audio samplerate does not match the configured "
+                        f"samplerate. Expected {self.samplerate} Hz, got "
+                        f"{media_info.samplerate} Hz."
+                    )
+                )
+
+            if media_info.audio_channels != self.audio_channels:
+                raise HealthCheckError(
+                    message=(
+                        "Recorded audio channel count does not match the configured "
+                        f"number of channels. Expected {self.audio_channels}, got "
+                        f"{media_info.audio_channels}."
+                    )
+                )
+
+            if not isclose(media_info.duration, check_duration, abs_tol=0.01):
+                raise HealthCheckError(
+                    message=(
+                        "Recorded audio duration does not match the health check "
+                        f"duration. Expected about {check_duration:.2f}s, got "
+                        f"{media_info.duration:.2f}s."
+                    )
+                )
 
 
 def iter_riff_chunks(fp: BinaryIO):
@@ -150,7 +228,21 @@ def iter_riff_chunks(fp: BinaryIO):
         fp.seek(chunk_size, 1)
 
 
-def patch_wav_sample_rate(filepath: Path, new_sample_rate: int) -> None:
+def get_media_info(path: Path) -> MediaInfo:
+    """Get information about the media."""
+    with wave.open(str(path), "rb") as wf:
+        frames = wf.getnframes()
+        rate = wf.getframerate()
+        channels = wf.getnchannels()
+        return MediaInfo(
+            duration=frames / rate,
+            samplerate=rate,
+            audio_channels=channels,
+            frames=frames,
+        )
+
+
+def patch_samplerate(filepath: Path, new_sample_rate: int) -> None:
     with open(filepath, "r+b") as f:
         riff_header = f.read(12)
 

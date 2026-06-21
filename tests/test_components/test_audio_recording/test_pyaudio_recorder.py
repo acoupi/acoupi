@@ -109,7 +109,7 @@ def test_check_fails_if_invalid_samplerate(tmp_path: Path):
     )
 
     # If the samplerate is invalid, the check should fail
-    with pytest.raises(HealthCheckError, match="sample rate"):
+    with pytest.raises(HealthCheckError, match="selected samplerate"):
         recorder.check()
 
 

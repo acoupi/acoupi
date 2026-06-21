@@ -3,6 +3,8 @@ from typing import List, Tuple
 import pyaudio
 from pydantic import BaseModel
 
+from acoupi.system.exceptions import DeviceUnavailableError
+
 __all__ = [
     "get_input_devices",
     "get_input_device_by_name",
@@ -77,11 +79,6 @@ def get_input_device_by_name(p: pyaudio.PyAudio, name: str) -> DeviceInfo:
     DeviceInfo
         The information of the audio device.
 
-    Raises
-    ------
-    IOError
-        If the audio device with the given name is not found.
-
     Notes
     -----
     It is assumed that the name of the audio device has been cleaned
@@ -95,9 +92,11 @@ def get_input_device_by_name(p: pyaudio.PyAudio, name: str) -> DeviceInfo:
         if name == device.name:
             return device
 
-    raise IOError(
-        f"Audio device with name '{name}' not found."
-        f" Available devices: {', '.join([device.name for device in available_devices])}"
+    raise DeviceUnavailableError(
+        message=(
+            f"Audio device with name '{name}' not found."
+            f" Available devices: {', '.join([device.name for device in available_devices])}"
+        )
     )
 
 
@@ -108,7 +107,7 @@ def has_input_audio_device() -> bool:
     try:
         p.get_default_input_device_info()
         return True
-    except IOError:
+    except OSError:
         return False
 
 
@@ -126,10 +125,6 @@ def get_default_microphone() -> Tuple[int, int, str]:
     device_name: str
         The name of the audio device.
 
-    Raises
-    ------
-    IOError
-        If no compatible audio device is found.
     """
     # Create an instance of PyAudio
     p = pyaudio.PyAudio()
@@ -151,5 +146,7 @@ def get_default_microphone() -> Tuple[int, int, str]:
         p.terminate()
         return channels, sample_rate, name
 
-    except IOError as e:
-        raise IOError("No compatible audio device found.") from e
+    except OSError as error:
+        raise DeviceUnavailableError(
+            "No compatible audio device found."
+        ) from error

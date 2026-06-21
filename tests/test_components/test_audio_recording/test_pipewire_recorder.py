@@ -11,7 +11,11 @@ from acoupi.devices.audio.pipewire import (
     get_default_microphone,
     has_input_audio_device,
 )
-from acoupi.system.exceptions import HealthCheckError, ParameterError
+from acoupi.system.exceptions import (
+    DeviceUnavailableError,
+    HealthCheckError,
+    RecordingError,
+)
 
 
 def create_wav_file(
@@ -94,9 +98,8 @@ def test_check_detects_missing_pipewire_command(tmp_path: Path, monkeypatch):
         audio_dir=tmp_path,
     )
 
-    def raise_error(self, path: Path) -> None:
-        raise ParameterError(
-            value="pw-record",
+    def raise_error(self, path: Path, duration: float | None = None) -> None:
+        raise DeviceUnavailableError(
             message="The pw-record command was not found.",
         )
 
@@ -120,9 +123,8 @@ def test_check_detects_missing_device(tmp_path: Path, monkeypatch):
         audio_dir=tmp_path,
     )
 
-    def raise_error(self, path: Path) -> None:
-        raise ParameterError(
-            value="device_name",
+    def raise_error(self, path: Path, duration: float | None = None) -> None:
+        raise RecordingError(
             message="PipeWire failed to record audio",
             help="Check that the selected microphone exists.",
         )
@@ -145,9 +147,8 @@ def test_check_detects_invalid_configuration(tmp_path: Path, monkeypatch):
         audio_dir=tmp_path,
     )
 
-    def raise_error(self, path: Path) -> None:
-        raise ParameterError(
-            value="device_name",
+    def raise_error(self, path: Path, duration: float | None = None) -> None:
+        raise RecordingError(
             message="PipeWire failed to record audio",
             help="Check that the selected microphone exists and supports the requested settings.",
         )
@@ -174,19 +175,21 @@ def test_check_succeeds_only_with_expected_recording_output(
 
     calls = {}
 
-    def mock_generate_recording(self, path: Path) -> None:
+    def mock_generate_recording(
+        self, path: Path, duration: float | None = None
+    ) -> None:
         calls.update(
             path=path,
-            duration=recorder.duration,
+            duration=duration,
             samplerate=recorder.samplerate,
             audio_channels=recorder.audio_channels,
             device_name=recorder.device_name,
         )
         create_wav_file(
-            tmp_path / "check.wav",
+            path,
             samplerate=recorder.samplerate,
             channels=recorder.audio_channels,
-            frames=int(recorder.duration * recorder.samplerate),
+            frames=int((duration or recorder.duration) * recorder.samplerate),
         )
 
     monkeypatch.setattr(
@@ -196,10 +199,8 @@ def test_check_succeeds_only_with_expected_recording_output(
 
     recorder.check()
 
-    assert calls == {
-        "path": Path("/dev/null"),
-        "duration": 1,
-        "samplerate": 48_000,
-        "audio_channels": 2,
-        "device_name": "test-mic",
-    }
+    assert calls["path"].name == "recording.wav"
+    assert calls["duration"] == 0.1
+    assert calls["samplerate"] == 48_000
+    assert calls["audio_channels"] == 2
+    assert calls["device_name"] == "test-mic"

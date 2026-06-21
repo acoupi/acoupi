@@ -3,6 +3,8 @@ from subprocess import CalledProcessError, run
 
 from pydantic import BaseModel
 
+from acoupi.system.exceptions import DeviceUnavailableError
+
 __all__ = [
     "get_input_devices",
 ]
@@ -28,16 +30,16 @@ def get_input_devices() -> list[DeviceInfo]:
     try:
         result = run(["pw-dump"], capture_output=True, text=True, check=True)
     except FileNotFoundError as error:
-        raise RuntimeError(
-            "The pw-dump command was not found. ",
-            "Install PipeWire tools and check that pw-dump is on PATH.",
+        raise DeviceUnavailableError(
+            message="The pw-dump command was not found.",
+            help="Install PipeWire tools and check that pw-dump is on PATH.",
         ) from error
     except CalledProcessError as error:
         stderr = (error.stderr or "").strip()
-        raise RuntimeError(
-            "Failed to query PipeWire devices"
+        raise DeviceUnavailableError(
+            message="Failed to query PipeWire devices"
             + (f": {stderr}" if stderr else "."),
-            "Check that PipeWire is running and accessible.",
+            help="Check that PipeWire is running and accessible.",
         ) from error
 
     devices = json.loads(result.stdout)
@@ -69,16 +71,18 @@ def get_input_device_by_name(name: str) -> DeviceInfo:
         if device.name == name:
             return device
 
-    raise IOError(
-        f"Audio device with name '{name}' not found."
-        f" Available devices: {', '.join([device.name for device in available_devices])}"
+    raise DeviceUnavailableError(
+        message=(
+            f"Audio device with name '{name}' not found."
+            f" Available devices: {', '.join([device.name for device in available_devices])}"
+        )
     )
 
 
 def has_input_audio_device() -> bool:
     try:
         return bool(get_input_devices())
-    except RuntimeError:
+    except DeviceUnavailableError:
         return False
 
 
@@ -86,6 +90,6 @@ def get_default_microphone() -> DeviceInfo:
     available_devices = get_input_devices()
 
     if not available_devices:
-        raise IOError("No compatible audio devices found.")
+        raise DeviceUnavailableError("No compatible audio devices found.")
 
     return available_devices[0]

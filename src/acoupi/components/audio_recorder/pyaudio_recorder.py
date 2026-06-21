@@ -21,7 +21,12 @@ import pyaudio
 
 from acoupi.components.audio_recorder.base import BaseAudioRecorder
 from acoupi.devices.audio.pyaudio import get_input_device_by_name
-from acoupi.system.exceptions import HealthCheckError, ParameterError
+from acoupi.system.exceptions import (
+    DeviceConfigurationError,
+    DeviceUnavailableError,
+    HealthCheckError,
+    RecordingError,
+)
 
 TMP_PATH = Path("/run/shm/")
 
@@ -77,13 +82,17 @@ class PyAudioRecorder(BaseAudioRecorder):
         self.sample_width = pyaudio.get_sample_size(pyaudio.paInt16)
         self.chunksize = chunksize
 
-    def generate_recording(self, path: Path) -> None:
+    def generate_recording(
+        self,
+        path: Path,
+        duration: float | None = None,
+    ) -> None:
         """Generate an audio recording."""
         frames = record_audio(
             samplerate=self.samplerate,
             audio_channels=self.audio_channels,
             device_name=self.device_name,
-            duration=self.duration,
+            duration=duration or self.duration,
             chunksize=self.chunksize,
         )
         save_wav_to_file(
@@ -93,60 +102,6 @@ class PyAudioRecorder(BaseAudioRecorder):
             sample_width=self.sample_width,
             samplerate=self.samplerate,
         )
-
-    def check(self):
-        """Check if the audio recorder is compatible with the config."""
-        num_chunks = 20
-        try:
-            data = record_audio(
-                samplerate=self.samplerate,
-                audio_channels=self.audio_channels,
-                device_name=self.device_name,
-                num_chunks=num_chunks,
-                chunksize=self.chunksize,
-            )
-        except IOError as error:
-            raise HealthCheckError(
-                message=(
-                    f"The microphone {self.device_name} was not found."
-                    "Check the configurations."
-                    f"Error: {error}"
-                )
-            ) from error
-        except ParameterError as error:
-            raise HealthCheckError(
-                message=(
-                    "The audio recorder is not compatible with the "
-                    "selected microphone. Check the configurations."
-                    f"Error: {error}"
-                )
-            ) from error
-        except OSError as error:
-            if "Invalid sample rate" in str(error):
-                raise HealthCheckError(
-                    message=(
-                        "The audio recorder is not compatible with the "
-                        "selected samplerate. Check the configurations."
-                    )
-                ) from error
-
-            if "Invalid number of channels" in str(error):
-                raise HealthCheckError(
-                    message=(
-                        "The audio recorder is not compatible with the "
-                        "selected number of channels. Check the configurations."
-                    )
-                ) from error
-
-            raise error
-
-        if len(data) != self.chunksize * self.audio_channels * 2 * num_chunks:
-            raise HealthCheckError(
-                message=(
-                    "The audio recorder is not working properly. "
-                    "Check the configurations."
-                )
-            )
 
 
 def record_audio(
@@ -173,14 +128,34 @@ def record_audio(
 
     device = get_input_device_by_name(p, device_name)
 
-    stream = p.open(
-        format=pyaudio.paInt16,
-        channels=audio_channels,
-        rate=samplerate,
-        input=True,
-        frames_per_buffer=2048,
-        input_device_index=device.index,
-    )
+    try:
+        stream = p.open(
+            format=pyaudio.paInt16,
+            channels=audio_channels,
+            rate=samplerate,
+            input=True,
+            frames_per_buffer=2048,
+            input_device_index=device.index,
+        )
+    except OSError as error:
+        message = str(error)
+        if "Invalid sample rate" in message:
+            raise DeviceConfigurationError(
+                message=(
+                    "The audio recorder is not compatible with the selected "
+                    "samplerate. Check the configurations."
+                )
+            ) from error
+
+        if "Invalid number of channels" in message:
+            raise DeviceConfigurationError(
+                message=(
+                    "The audio recorder is not compatible with the selected "
+                    "number of channels. Check the configurations."
+                )
+            ) from error
+
+        raise RecordingError(message=message) from error
 
     frames = []
     for _ in range(0, num_chunks if num_chunks > 0 else 1):
