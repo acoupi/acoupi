@@ -1,45 +1,48 @@
-"""Implementation of AudioRecorder for acoupi.
-
-An AudioRecorder is used to record audio files.
-The PyAudioRecorder is implemented as class that inherit from
-`AudioRecorder`. The class should implement the record() method which
-return a temporary audio file based on the dataclass Recording.
-
-The audio recorder takes argument related to the audio device. It
-specifies the acoutics parameters of recording an audio file. These are
-the samplerate, the duration, the number of audio_channels, the chunk
-size, and the index of the audio device. The index of the audio device
-corresponds to the index of the USB port the device is connected to. The
-audio recorder return a temporary .wav file.
-"""
+"""PyAudio-backed audio recorder and recorder configuration."""
 
 import argparse
 import math
 import wave
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import click
 import pyaudio
-from celery.utils.log import get_task_logger
 from pydantic import BaseModel, Field
 
-from acoupi import data
-from acoupi.components.types import AudioRecorder
-from acoupi.devices.audio import get_input_device_by_name, get_input_devices
+from acoupi.components.audio_recorder.base import BaseAudioRecorder
+from acoupi.devices.audio.pyaudio import (
+    get_input_device_by_name,
+    get_input_devices,
+)
 from acoupi.system.config.parsers import parse_field_from_args
-from acoupi.system.exceptions import HealthCheckError, ParameterError
+from acoupi.system.exceptions import (
+    DeviceConfigurationError,
+    ParameterError,
+    RecordingError,
+)
 
 TMP_PATH = Path("/run/shm/")
 
 __all__ = [
-    "PyAudioRecorder",
+    "PARecorder",
+    "PARecorderConfig",
     "MicrophoneConfig",
+    "PyAudioRecorder",
+    "record_audio",
 ]
 
 
-class PyAudioRecorder(AudioRecorder):
-    """Component that records fixed duration audio to a file."""
+class PARecorder(BaseAudioRecorder):
+    """Audio recorder implementation backed by PyAudio.
+
+    This recorder captures PCM audio from a named PyAudio input device and
+    stores the result as a WAV file.
+
+    Use [`check`][.check] before deployment to verify that the selected device,
+    samplerate, number of channels, and chunk size work reliably on the target
+    machine.
+    """
 
     duration: float
     """The duration of the audio file in seconds."""
@@ -54,12 +57,29 @@ class PyAudioRecorder(AudioRecorder):
     """The name of the input audio device."""
 
     chunksize: int
+    """Number of audio frames read from the device per stream read.
+
+    This value controls how much audio is pulled from the device each time the
+    recorder reads from the PyAudio stream. Lower values reduce buffering but
+    increase the number of read calls. Higher values reduce Python overhead but
+    can increase latency and may interact differently with device drivers.
+
+    Some devices are sensitive to this setting. If recording fails, drops
+    samples, or behaves unreliably despite a valid device and samplerate, try
+    adjusting ``chunksize``. In practice, trying a different power-of-two value
+    is often the most effective fix.
+    """
 
     audio_dir: Path
     """The directory where to store the created recordings."""
 
     time_expansion: float
-    """The time expansion factor for the recording."""
+    """Factor used to reinterpret the recording timescale downstream.
+
+    This does not change the way audio is captured from the device. Instead, it
+    adjusts the stored samplerate metadata after recording so downstream tools
+    analyse the file at a slower or faster effective timescale.
+    """
 
     def __init__(
         self,
@@ -69,177 +89,179 @@ class PyAudioRecorder(AudioRecorder):
         device_name: str,
         chunksize: int = 2048,
         audio_dir: Path = TMP_PATH,
-        logger=None,
         time_expansion: float = 1,
     ) -> None:
-        """Initialise the AudioRecorder with the audio parameters."""
-        # Audio Duration
-        self.duration = duration
+        """Initialise a PyAudio recorder.
 
-        # Audio Microphone Parameters
-        self.samplerate = samplerate
-        self.audio_channels = audio_channels
-        self.device_name = device_name
+        Parameters
+        ----------
+        duration:
+            Default recording duration in seconds.
+        samplerate:
+            Recording samplerate in Hz.
+        audio_channels:
+            Number of input channels to capture.
+        device_name:
+            Name of the PyAudio input device.
+        chunksize:
+            Number of audio frames read from the device per stream read.
+            If recording fails unexpectedly on a working device, this is one of
+            the first values worth adjusting.
+        audio_dir:
+            Directory where recorded WAV files will be written.
+        time_expansion:
+            Metadata factor used to reinterpret the recording timescale
+            downstream.
 
-        # Audio Files Parameters
-        self.chunksize = chunksize
-        self.audio_dir = audio_dir
-        self.sample_width = pyaudio.get_sample_size(pyaudio.paInt16)
-        self.time_expansion = time_expansion
-
-        if self.time_expansion <= 0:
-            raise ValueError("time_expansion must be greater than 0")
-
-        if logger is None:
-            logger = get_task_logger(__name__)
-        self.logger = logger
-
-    def record(self, deployment: data.Deployment) -> data.Recording:
-        """Record an audio file.
-
-        Returns
-        -------
-        data.Recording: A Recording object containing the temporary path of the file.
+        Raises
+        ------
+        ValueError
+            If ``time_expansion`` is not greater than zero.
         """
-        now = data.utc_now()
-        temp_path = self.audio_dir / f"{now.strftime('%Y%m%d_%H%M%S')}.wav"
-        frames = self.get_recording_data(duration=self.duration)
-        self.save_recording(frames, temp_path)
+        super().__init__(
+            duration=duration,
+            samplerate=samplerate,
+            audio_channels=audio_channels,
+            device_name=device_name,
+            audio_dir=audio_dir,
+            time_expansion=time_expansion,
+        )
 
-        return data.Recording(
-            path=temp_path,
-            created_on=now,
-            duration=self.duration,
+        self.sample_width = pyaudio.get_sample_size(pyaudio.paInt16)
+        self.chunksize = chunksize
+
+    def generate_recording(
+        self,
+        path: Path,
+        duration: float | None = None,
+    ) -> None:
+        """Record audio to ``path`` using PyAudio.
+
+        Raises
+        ------
+        DeviceConfigurationError
+            If the requested samplerate or channel count is unsupported.
+        RecordingError
+            If recording starts but fails unexpectedly.
+        """
+        frames = record_audio(
             samplerate=self.samplerate,
             audio_channels=self.audio_channels,
-            time_expansion=self.time_expansion,
+            device_name=self.device_name,
+            duration=duration or self.duration,
             chunksize=self.chunksize,
-            deployment=deployment,
+        )
+        save_wav_to_file(
+            frames,
+            path,
+            audio_channels=self.audio_channels,
+            sample_width=self.sample_width,
+            samplerate=self.samplerate,
         )
 
-    def get_recording_data(
-        self,
-        duration: Optional[float] = None,
-        num_chunks: Optional[int] = None,
-    ) -> bytes:
-        if num_chunks is None:
-            if duration is None:
-                raise ValueError("duration or num_chunks must be provided")
 
-            # NOTE: Round up to the nearest chunk otherwise the recording will
-            # be shorter than the requested duration
-            num_chunks = math.ceil(duration * self.samplerate / self.chunksize)
+def record_audio(
+    samplerate: int,
+    audio_channels: int,
+    device_name: str,
+    duration: float | None = None,
+    num_chunks: int | None = None,
+    chunksize: int = 2048,
+) -> bytes:
+    """Record audio samples from a PyAudio input device.
 
+    Raises
+    ------
+    ValueError
+        If neither ``duration`` nor ``num_chunks`` is provided.
+    DeviceConfigurationError
+        If the requested samplerate or channel count is unsupported.
+    RecordingError
+        If PyAudio fails while opening or reading from the stream.
+    """
+    if num_chunks is None:
         if duration is None:
-            duration = num_chunks * self.chunksize / self.samplerate
+            raise ValueError("duration or num_chunks must be provided")
 
-        p = pyaudio.PyAudio()
+        # NOTE: Round up to the nearest chunk otherwise the recording will
+        # be shorter than the requested duration
+        num_chunks = math.ceil(duration * samplerate / chunksize)
 
-        device = self.get_input_device(p)
+    if duration is None:
+        duration = num_chunks * chunksize / samplerate
 
+    p = pyaudio.PyAudio()
+
+    device = get_input_device_by_name(p, device_name)
+
+    try:
         stream = p.open(
             format=pyaudio.paInt16,
-            channels=self.audio_channels,
-            rate=self.samplerate,
+            channels=audio_channels,
+            rate=samplerate,
             input=True,
-            frames_per_buffer=self.chunksize,
+            frames_per_buffer=2048,
             input_device_index=device.index,
         )
-
-        frames = []
-        for _ in range(0, num_chunks if num_chunks > 0 else 1):
-            audio_data = stream.read(
-                self.chunksize,
-                exception_on_overflow=True,
-            )
-            frames.append(audio_data)
-
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
-
-        data = b"".join(frames)
-
-        # NOTE: Due to the rounding up of the number of chunks, the recording
-        # might be longer than the requested duration. We need to truncate the
-        # data to the expected length.
-        expected_length = int(
-            2 * self.samplerate * duration * self.audio_channels
-        )
-        if len(data) > expected_length:
-            data = data[:expected_length]
-
-        return data
-
-    def get_expanded_samplerate(self):
-        return int(self.samplerate / self.time_expansion)
-
-    def save_recording(self, data: bytes, path: Path) -> None:
-        """Save the recording to a file."""
-        with wave.open(str(path), "wb") as temp_audio_file:
-            temp_audio_file.setnchannels(self.audio_channels)
-            temp_audio_file.setsampwidth(self.sample_width)
-            temp_audio_file.setframerate(self.get_expanded_samplerate())
-            temp_audio_file.writeframes(data)
-
-    def get_input_device(self, p: pyaudio.PyAudio):
-        """Get the input device."""
-        try:
-            device = get_input_device_by_name(p, self.device_name)
-        except IOError as error:
-            raise ParameterError(
-                value="device_name",
+    except OSError as error:
+        message = str(error)
+        if "Invalid sample rate" in message:
+            raise DeviceConfigurationError(
                 message=(
-                    "The selected input device was not found. "
-                    f"Device name: {self.device_name}"
-                ),
-                help="Check if the microphone is connected.",
-            ) from error
-
-        return device
-
-    def check(self):
-        """Check if the audio recorder is compatible with the config."""
-        num_chunks = 20
-        try:
-            data = self.get_recording_data(num_chunks=num_chunks)
-        except ParameterError as error:
-            raise HealthCheckError(
-                message=(
-                    "The audio recorder is not compatible with the "
-                    "selected microphone. Check the configurations."
-                    f"Error: {error}"
+                    "The audio recorder is not compatible with the selected "
+                    "samplerate. Check the configurations."
                 )
             ) from error
-        except OSError as error:
-            if "Invalid sample rate" in str(error):
-                raise HealthCheckError(
-                    message=(
-                        "The audio recorder is not compatible with the "
-                        "selected samplerate. Check the configurations."
-                    )
-                ) from error
 
-            if "Invalid number of channels" in str(error):
-                raise HealthCheckError(
-                    message=(
-                        "The audio recorder is not compatible with the "
-                        "selected number of channels. Check the configurations."
-                    )
-                ) from error
-
-            raise error
-
-        if len(data) != self.chunksize * self.audio_channels * 2 * num_chunks:
-            raise HealthCheckError(
+        if "Invalid number of channels" in message:
+            raise DeviceConfigurationError(
                 message=(
-                    "The audio recorder is not working properly. "
-                    "Check the configurations."
+                    "The audio recorder is not compatible with the selected "
+                    "number of channels. Check the configurations."
                 )
-            )
+            ) from error
+
+        raise RecordingError(message=message) from error
+
+    frames = []
+    for _ in range(0, num_chunks if num_chunks > 0 else 1):
+        audio_data = stream.read(chunksize, exception_on_overflow=True)
+        frames.append(audio_data)
+
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+    wavdata = b"".join(frames)
+
+    # NOTE: Due to the rounding up of the number of chunks, the recording
+    # might be longer than the requested duration. We need to truncate the
+    # data to the expected length.
+    expected_length = int(2 * samplerate * duration * audio_channels)
+    if len(wavdata) > expected_length:
+        wavdata = wavdata[:expected_length]
+
+    return wavdata
 
 
-class MicrophoneConfig(BaseModel):
+def save_wav_to_file(
+    wavdata: bytes,
+    path: Path,
+    audio_channels: int = 1,
+    sample_width: int = 2,
+    samplerate: int = 48000,
+) -> None:
+    """Write raw PCM frame bytes to a WAV file."""
+    with wave.open(str(path), "wb") as temp_audio_file:
+        temp_audio_file.setnchannels(audio_channels)
+        temp_audio_file.setsampwidth(sample_width)
+        temp_audio_file.setframerate(samplerate)
+        temp_audio_file.writeframes(wavdata)
+
+
+class PARecorderConfig(BaseModel):
+    """Configuration values required to build a ``PARecorder``."""
+
     device_name: str
     samplerate: int = 48_000
     audio_channels: int = 1
@@ -251,8 +273,8 @@ class MicrophoneConfig(BaseModel):
         args: List[str],
         prompt: bool = True,
         prefix: str = "",
-    ) -> "MicrophoneConfig":
-        """Set up the microphone configuration."""
+    ) -> "PARecorderConfig":
+        """Create recorder configuration from CLI-style arguments."""
         return parse_microphone_config(args, prompt, prefix)
 
 
@@ -260,8 +282,8 @@ def parse_microphone_config(
     args: List[str],
     prompt: bool = True,
     prefix: str = "",
-) -> MicrophoneConfig:
-    # TODO: Adapt to use args, prompt and prefix
+) -> PARecorderConfig:
+    """Parse PyAudio recorder configuration from command-line arguments."""
     click.secho("\n* Setting up microphone configuration.\n", fg="green")
 
     p = pyaudio.PyAudio()
@@ -282,7 +304,7 @@ def parse_microphone_config(
         try:
             device_name = parse_field_from_args(
                 "device_name",
-                MicrophoneConfig.model_fields["device_name"],
+                PARecorderConfig.model_fields["device_name"],
                 args,
                 prompt=False,
                 prefix=prefix,
@@ -305,7 +327,7 @@ def parse_microphone_config(
 
         samplerate = parse_field_from_args(
             "samplerate",
-            MicrophoneConfig.model_fields["samplerate"],
+            PARecorderConfig.model_fields["samplerate"],
             args,
             prompt=False,
             prefix=prefix,
@@ -316,7 +338,7 @@ def parse_microphone_config(
 
         channels = parse_field_from_args(
             "audio_channels",
-            MicrophoneConfig.model_fields["audio_channels"],
+            PARecorderConfig.model_fields["audio_channels"],
             args,
             prompt=False,
             prefix=prefix,
@@ -324,13 +346,13 @@ def parse_microphone_config(
 
         time_expansion = parse_field_from_args(
             "time_expansion",
-            MicrophoneConfig.model_fields["time_expansion"],
+            PARecorderConfig.model_fields["time_expansion"],
             args,
             prompt=False,
             prefix=prefix,
         )
 
-        return MicrophoneConfig(
+        return PARecorderConfig(
             device_name=device.name,
             samplerate=int(samplerate),  # type: ignore
             audio_channels=channels or 1,  # type: ignore
@@ -443,9 +465,14 @@ def parse_microphone_config(
         default=1.0,
     )
 
-    return MicrophoneConfig(
+    return PARecorderConfig(
         device_name=selected_device.name,
         samplerate=samplerate,
         audio_channels=channels,
         time_expansion=time_expansion,
     )
+
+
+# Backwards-compatible aliases for the public component API.
+PyAudioRecorder = PARecorder
+MicrophoneConfig = PARecorderConfig

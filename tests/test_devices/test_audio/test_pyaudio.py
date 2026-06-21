@@ -1,4 +1,10 @@
-from acoupi.devices import audio
+import pytest
+
+from acoupi.devices.audio.pyaudio import (
+    get_input_device_by_name,
+    get_input_devices,
+)
+from acoupi.system.exceptions import DeviceUnavailableError
 
 TEST_DEVICE_INFO = [
     {
@@ -94,7 +100,7 @@ def test_can_get_all_input_devices():
     p = MockPyAudio()
 
     # Act
-    available_devices = audio.get_input_devices(p)  # type: ignore
+    available_devices = get_input_devices(p)  # type: ignore
 
     # Assert
     assert len(available_devices) == 1
@@ -109,8 +115,15 @@ def test_can_get_device_by_name():
     p = MockPyAudio()
 
     # Act
-    device = audio.get_input_device_by_name(p, "UltraMic 250K 16 bit r4")  # type: ignore
+    device = get_input_device_by_name(p, "UltraMic 250K 16 bit r4")  # type: ignore
 
     # Assert
     assert device.index == 2
     assert device.name == "UltraMic 250K 16 bit r4"
+
+
+def test_get_device_by_name_raises_if_missing():
+    p = MockPyAudio()
+
+    with pytest.raises(DeviceUnavailableError, match="not found"):
+        get_input_device_by_name(p, "missing-device")  # type: ignore

@@ -4,6 +4,9 @@ from typing import Optional
 
 __all__ = [
     "ConfigurationError",
+    "DeviceConfigurationError",
+    "DeviceError",
+    "DeviceUnavailableError",
     "DeploymentError",
     "HealthCheckError",
     "InvalidProgramError",
@@ -12,6 +15,7 @@ __all__ = [
     "MessageStoreError",
     "ParameterError",
     "ProgramNotFoundError",
+    "RecordingError",
 ]
 
 
@@ -78,6 +82,30 @@ class ParameterError(Exception):
     def __str__(self):
         """Return the error message."""
         return self.message
+
+
+class DeviceError(Exception):
+    """Exception raised when a device operation fails."""
+
+    def __init__(self, message: str, help: Optional[str] = None):
+        self.message = message
+        self.help = help
+        super().__init__(message, help)
+
+    def __str__(self):
+        return self.message
+
+
+class DeviceUnavailableError(DeviceError):
+    """Exception raised when a device or backend is unavailable."""
+
+
+class DeviceConfigurationError(DeviceError):
+    """Exception raised when device settings are unsupported."""
+
+
+class RecordingError(DeviceError):
+    """Exception raised when a recording operation fails."""
 
 
 class HealthCheckError(Exception):

@@ -8,7 +8,10 @@ import guano
 import pytest
 
 from acoupi import components, data
-from acoupi.devices.audio import get_default_microphone, has_input_audio_device
+from acoupi.devices.audio.pyaudio import (
+    get_default_microphone,
+    has_input_audio_device,
+)
 from acoupi.system.exceptions import HealthCheckError
 from acoupi.tasks.recording import add_guano_metadata
 
@@ -36,7 +39,6 @@ def test_audio_recording(deployment: data.Deployment, tmp_path: Path):
     assert recording.duration == 0.1
     assert recording.samplerate == samplerate
     assert recording.audio_channels == audio_channels
-    assert recording.chunksize == 8192
     assert recording.path is not None
     assert recording.path.exists()
 
@@ -78,13 +80,12 @@ def test_check_fails_if_recording_duration_is_zero(
         audio_dir=tmp_path,
     )
 
-    def mock_get_recording_data(*args, **kwargs) -> bytes:
+    def mock_record_audio(*args, **kwargs) -> bytes:
         return b""
 
     monkeypatch.setattr(
-        recorder,
-        "get_recording_data",
-        mock_get_recording_data,
+        "acoupi.components.audio_recorder.pyaudio_recorder.record_audio",
+        mock_record_audio,
     )
 
     # If the duration is zero, the check should fail
@@ -108,7 +109,7 @@ def test_check_fails_if_invalid_samplerate(tmp_path: Path):
     )
 
     # If the samplerate is invalid, the check should fail
-    with pytest.raises(HealthCheckError, match="samplerate"):
+    with pytest.raises(HealthCheckError, match="selected samplerate"):
         recorder.check()
 
 

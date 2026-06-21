@@ -1,10 +1,13 @@
+"""PyAudio device discovery helpers for audio input devices."""
+
 from typing import List, Tuple
 
 import pyaudio
 from pydantic import BaseModel
 
+from acoupi.system.exceptions import DeviceUnavailableError
+
 __all__ = [
-    "DeviceInfo",
     "get_input_devices",
     "get_input_device_by_name",
     "has_input_audio_device",
@@ -13,7 +16,7 @@ __all__ = [
 
 
 class DeviceInfo(BaseModel):
-    """A dataclass to store the information of an audio device."""
+    """Normalized description of a PyAudio input device."""
 
     index: int
     """The input index of the audio device."""
@@ -29,7 +32,7 @@ class DeviceInfo(BaseModel):
 
 
 def get_input_devices(p: pyaudio.PyAudio) -> List[DeviceInfo]:
-    """Get all input devices available."""
+    """Return all PyAudio devices that support audio input."""
     count = p.get_device_count()
 
     devices = []
@@ -80,8 +83,8 @@ def get_input_device_by_name(p: pyaudio.PyAudio, name: str) -> DeviceInfo:
 
     Raises
     ------
-    IOError
-        If the audio device with the given name is not found.
+    DeviceUnavailableError
+        If the named input device cannot be found.
 
     Notes
     -----
@@ -90,33 +93,33 @@ def get_input_device_by_name(p: pyaudio.PyAudio, name: str) -> DeviceInfo:
     added by PyAudio has been removed. This should coincide with the name
     provided by `arecord -l` or `lsusb`.
     """
-    avaliable_devices = get_input_devices(p)
+    available_devices = get_input_devices(p)
 
-    for device in avaliable_devices:
+    for device in available_devices:
         if name == device.name:
             return device
 
-    raise IOError(
-        f"Audio device with name '{name}' not found."
-        f" Available devices: {', '.join([device.name for device in avaliable_devices])}"
+    raise DeviceUnavailableError(
+        message=(
+            f"Audio device with name '{name}' not found."
+            f" Available devices: {', '.join([device.name for device in available_devices])}"
+        )
     )
 
 
 def has_input_audio_device() -> bool:
-    """Check if there are any input audio devices available."""
+    """Return ``True`` when a default PyAudio input device is available."""
     p = pyaudio.PyAudio()
 
     try:
         p.get_default_input_device_info()
         return True
-    except IOError:
+    except OSError:
         return False
 
 
 def get_default_microphone() -> Tuple[int, int, str]:
-    """Check if there are any input audio devices available.
-
-    And get the information of a compatible audio device.
+    """Return the default PyAudio input device parameters.
 
     Returns
     -------
@@ -129,8 +132,8 @@ def get_default_microphone() -> Tuple[int, int, str]:
 
     Raises
     ------
-    IOError
-        If no compatible audio device is found.
+    DeviceUnavailableError
+        If no compatible default input device is available.
     """
     # Create an instance of PyAudio
     p = pyaudio.PyAudio()
@@ -152,5 +155,7 @@ def get_default_microphone() -> Tuple[int, int, str]:
         p.terminate()
         return channels, sample_rate, name
 
-    except IOError as e:
-        raise IOError("No compatible audio device found.") from e
+    except OSError as error:
+        raise DeviceUnavailableError(
+            "No compatible audio device found."
+        ) from error

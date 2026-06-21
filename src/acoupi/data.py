@@ -129,9 +129,6 @@ class Recording(BaseModel):
     audio_channels: Optional[int] = Field(default=1, repr=False)
     """The number of audio_channels in the recording."""
 
-    chunksize: Optional[int] = Field(default=4096, repr=False)
-    """The chunksize of the audio file in bytes. Defaults to 4096."""
-
     time_expansion: float = Field(default=1, repr=False, gt=0)
     """Factor by which the recording's time scale is multiplied.
 
