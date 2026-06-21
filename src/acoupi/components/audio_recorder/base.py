@@ -1,3 +1,5 @@
+"""Shared base implementation for audio recorder components."""
+
 import struct
 import tempfile
 import wave
@@ -21,7 +23,7 @@ TMP_PATH = Path("/run/shm/")
 
 @dataclass
 class MediaInfo:
-    """Information about the media."""
+    """Basic metadata extracted from a recorded WAV file."""
 
     duration: float
     """Duration of the media in seconds."""
@@ -37,7 +39,12 @@ class MediaInfo:
 
 
 class BaseAudioRecorder(AudioRecorder):
-    """Base class for audio recorders."""
+    """Base class shared by concrete audio recorder implementations.
+
+    Subclasses are responsible for implementing :meth:`generate_recording` for
+    their backend, while this base class provides common recording, health
+    check, and metadata-adjustment behaviour.
+    """
 
     duration: float
     """Duration of each audio recording in seconds."""
@@ -55,10 +62,12 @@ class BaseAudioRecorder(AudioRecorder):
     """Directory where to store the recordings."""
 
     time_expansion: float = 1
-    """Factor by which the recording's time scale is multiplied.
+    """Factor used to reinterpret the recording timescale downstream.
 
-    Values > 1.0 indicate time expansion (slowing down playback), while values
-    between 0.0 and 1.0 indicate time compression (speeding up playback).
+    Values greater than ``1.0`` slow the effective playback rate, while values
+    between ``0.0`` and ``1.0`` speed it up. The captured audio samples are not
+    changed during recording; instead, the stored samplerate metadata is
+    adjusted after capture.
     """
 
     def __init__(
@@ -71,6 +80,29 @@ class BaseAudioRecorder(AudioRecorder):
         time_expansion: float = 1,
         **kwargs,
     ):
+        """Initialise a recorder with common audio capture settings.
+
+        Parameters
+        ----------
+        duration:
+            Default recording duration in seconds.
+        samplerate:
+            Recording samplerate in Hz.
+        audio_channels:
+            Number of input channels to capture.
+        device_name:
+            Backend-specific name of the input device.
+        audio_dir:
+            Directory where recordings will be written.
+        time_expansion:
+            Metadata factor used to reinterpret the recording timescale
+            downstream.
+
+        Raises
+        ------
+        ValueError
+            If ``time_expansion`` is not greater than zero.
+        """
         self.duration = duration
 
         self.samplerate = samplerate
@@ -87,11 +119,12 @@ class BaseAudioRecorder(AudioRecorder):
             self.audio_dir.mkdir(parents=True)
 
     def record(self, deployment: data.Deployment) -> data.Recording:
-        """Record an audio file.
+        """Record an audio file and return the corresponding ``Recording``.
 
         Returns
         -------
-        data.Recording: A Recording object containing the temporary path of the file.
+        data.Recording
+            Recording metadata for the captured WAV file.
         """
         now = data.utc_now()
         temp_path = self.audio_dir / f"{now.strftime('%Y%m%d_%H%M%S')}.wav"
@@ -111,15 +144,12 @@ class BaseAudioRecorder(AudioRecorder):
         )
 
     def adjust_time_expansion(self, path: Path) -> None:
-        """Adjust the time expansion of the recording.
-
-        This method is called by the `record` method to adjust the time
-        expansion of the recording. It should be implemented by subclasses.
+        """Adjust the stored samplerate metadata for time expansion.
 
         Parameters
         ----------
-        path : Path
-            The path of the recording.
+        path:
+            Path to the recorded WAV file.
         """
         expanded_samplerate = self.get_expanded_samplerate()
 
@@ -129,16 +159,12 @@ class BaseAudioRecorder(AudioRecorder):
         patch_samplerate(path, expanded_samplerate)
 
     def get_expanded_samplerate(self):
-        """Get the expanded samplerate of the recording.
-
-        This method is called by the `adjust_time_expansion` method to get the
-        expanded samplerate of the recording. It should be implemented by
-        subclasses.
+        """Return the samplerate that should be stored after time expansion.
 
         Returns
         -------
         int
-            The expanded samplerate of the recording.
+            Adjusted samplerate metadata for the recorded file.
         """
         return int(self.samplerate / self.time_expansion)
 
@@ -148,20 +174,30 @@ class BaseAudioRecorder(AudioRecorder):
         path: Path,
         duration: float | None = None,
     ) -> None:
-        """Generate an audio recording.
-
-        This method is called by the `record` method to generate the actual
-        audio recording. It should be implemented by subclasses.
+        """Generate an audio recording with the backend-specific mechanism.
 
         Parameters
         ----------
-        path : Path
-            The path where to store the recording.
+        path:
+            Output path for the recorded WAV file.
+        duration:
+            Optional override for the recording duration in seconds.
         """
         ...
 
     def check(self):
-        """Check if the audio recorder is compatible with the config."""
+        """Run a backend-agnostic health check for recorder compatibility.
+
+        The check records a short WAV file and verifies that the resulting file
+        exists and matches the configured samplerate, channel count, and
+        expected duration.
+
+        Raises
+        ------
+        HealthCheckError
+            If the device is unavailable, recording fails, or the produced WAV
+            file does not match the configured recording parameters.
+        """
         check_duration = 0.1
 
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -214,6 +250,7 @@ class BaseAudioRecorder(AudioRecorder):
 
 
 def iter_riff_chunks(fp: BinaryIO):
+    """Iterate over RIFF chunk identifiers in an open WAV file."""
     fp.seek(12)
 
     while True:
@@ -229,7 +266,7 @@ def iter_riff_chunks(fp: BinaryIO):
 
 
 def get_media_info(path: Path) -> MediaInfo:
-    """Get information about the media."""
+    """Read basic WAV metadata from ``path``."""
     with wave.open(str(path), "rb") as wf:
         frames = wf.getnframes()
         rate = wf.getframerate()
@@ -243,6 +280,17 @@ def get_media_info(path: Path) -> MediaInfo:
 
 
 def patch_samplerate(filepath: Path, new_sample_rate: int) -> None:
+    """Patch the stored WAV samplerate metadata in-place.
+
+    This updates both the ``SampleRate`` and ``ByteRate`` fields in the ``fmt``
+    chunk of a RIFF/WAVE file.
+
+    Raises
+    ------
+    ValueError
+        If the file is not a valid RIFF/WAVE file or does not contain a ``fmt``
+        chunk.
+    """
     with open(filepath, "r+b") as f:
         riff_header = f.read(12)
 

@@ -1,3 +1,5 @@
+"""PipeWire-backed audio recorder and recorder configuration."""
+
 from argparse import ArgumentParser
 from pathlib import Path
 from subprocess import TimeoutExpired, run
@@ -6,11 +8,7 @@ import click
 from pydantic import BaseModel, Field
 
 from acoupi.components.audio_recorder.base import TMP_PATH, BaseAudioRecorder
-from acoupi.devices.audio.pipewire import (
-    DeviceInfo,
-    get_input_device_by_name,
-    get_input_devices,
-)
+from acoupi.devices.audio.pipewire import DeviceInfo, get_input_devices
 from acoupi.system.exceptions import (
     DeviceUnavailableError,
     ParameterError,
@@ -19,6 +17,15 @@ from acoupi.system.exceptions import (
 
 
 class PWRecorder(BaseAudioRecorder):
+    """Audio recorder implementation that shells out to ``pw-record``.
+
+    This recorder delegates capture to PipeWire command-line tools instead of
+    reading audio frames directly through Python.
+
+    Use [`check`][.check] before deployment to verify that the selected device and
+    recording parameters work on the target machine.
+    """
+
     def __init__(
         self,
         duration: float,
@@ -28,6 +35,29 @@ class PWRecorder(BaseAudioRecorder):
         audio_dir: Path = TMP_PATH,
         time_expansion: float = 1,
     ):
+        """Initialise a PipeWire recorder.
+
+        Parameters
+        ----------
+        duration:
+            Default recording duration in seconds.
+        samplerate:
+            Recording samplerate in Hz.
+        audio_channels:
+            Number of input channels to capture.
+        device_name:
+            PipeWire target device name.
+        audio_dir:
+            Directory where recorded WAV files will be written.
+        time_expansion:
+            Metadata factor used to reinterpret the recording timescale
+            downstream.
+
+        Raises
+        ------
+        ValueError
+            If ``time_expansion`` is not greater than zero.
+        """
         super().__init__(
             duration=duration,
             samplerate=samplerate,
@@ -42,7 +72,15 @@ class PWRecorder(BaseAudioRecorder):
         path: Path,
         duration: float | None = None,
     ) -> None:
-        """Generate an audio recording."""
+        """Record audio to ``path`` using PipeWire tools.
+
+        Raises
+        ------
+        DeviceUnavailableError
+            If the PipeWire recording command is unavailable.
+        RecordingError
+            If recording fails or no output file is produced.
+        """
         return record_audio(
             path=path,
             samplerate=self.samplerate,
@@ -59,6 +97,28 @@ def record_audio(
     device_name: str,
     duration: float,
 ) -> None:
+    """Record audio with ``pw-record``.
+
+    Parameters
+    ----------
+    path:
+        Destination path for the recorded WAV file.
+    samplerate:
+        Requested recording samplerate in Hz.
+    audio_channels:
+        Requested number of input channels.
+    device_name:
+        PipeWire target device name.
+    duration:
+        Recording duration in seconds.
+
+    Raises
+    ------
+    DeviceUnavailableError
+        If ``pw-record`` is not available on the system.
+    RecordingError
+        If the command times out or does not produce an output file.
+    """
     samples = int(duration * samplerate)
     cmd = [
         "pw-record",
@@ -97,7 +157,9 @@ def record_audio(
         )
 
 
-class PWMicrophoneConfig(BaseModel):
+class PWRecorderConfig(BaseModel):
+    """Configuration values required to build a ``PWRecorder``."""
+
     device_name: str
     samplerate: int = 48_000
     audio_channels: int = 1
@@ -109,8 +171,8 @@ class PWMicrophoneConfig(BaseModel):
         args: list[str],
         prompt: bool = True,
         prefix: str = "",
-    ) -> "PWMicrophoneConfig":
-        """Set up the microphone configuration."""
+    ) -> "PWRecorderConfig":
+        """Create recorder configuration from CLI-style arguments."""
         return _parse_pw_microphone_config(args, prompt, prefix)
 
 
@@ -118,8 +180,8 @@ def _parse_pw_microphone_config(
     args: list[str],
     prompt: bool = True,
     prefix: str = "",
-) -> PWMicrophoneConfig:
-    """Parse the microphone configuration."""
+) -> PWRecorderConfig:
+    """Parse PipeWire recorder configuration from command-line arguments."""
     parser = ArgumentParser(description="Microphone configuration")
     parser.add_argument(
         f"--{prefix}device-name",
@@ -158,8 +220,14 @@ def _parse_pw_microphone_config(
         parsed.device_name = _prompt_device_choice(available_devices)
 
     try:
-        selected_device = get_input_device_by_name(parsed.device_name)
-    except DeviceUnavailableError as error:
+        selected_device = next(
+            (
+                device
+                for device in available_devices
+                if device.name == parsed.device_name
+            )
+        )
+    except StopIteration as error:
         raise ParameterError(
             value="device_name",
             message=f"No device found with name {parsed.device_name}.",
@@ -209,7 +277,7 @@ def _parse_pw_microphone_config(
         )
         parsed.audio_channels = choice
 
-    return PWMicrophoneConfig(
+    return PWRecorderConfig(
         device_name=parsed.device_name,
         samplerate=int(parsed.samplerate),
         audio_channels=int(parsed.audio_channels),
@@ -217,6 +285,7 @@ def _parse_pw_microphone_config(
 
 
 def _prompt_device_choice(devices: list[DeviceInfo]) -> str:
+    """Prompt the user to choose a PipeWire input device."""
     if not devices:
         raise ParameterError(
             value="device_name",
@@ -247,6 +316,7 @@ def _prompt_device_choice(devices: list[DeviceInfo]) -> str:
 
 
 def _format_device_choice(device: DeviceInfo) -> str:
+    """Format a concise device label for interactive prompts."""
     return (
         f"{device.description} "
         f"[{device.max_input_channels} ch, rates={sorted(device.samplerates)}]"

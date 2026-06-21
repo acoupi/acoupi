@@ -1,3 +1,5 @@
+"""PipeWire device discovery helpers for audio input devices."""
+
 import json
 from subprocess import CalledProcessError, run
 
@@ -11,7 +13,7 @@ __all__ = [
 
 
 class DeviceInfo(BaseModel):
-    """A dataclass to store the information of an audio device."""
+    """Normalized description of a PipeWire audio input device."""
 
     description: str
     """The input index of the audio device."""
@@ -27,6 +29,13 @@ class DeviceInfo(BaseModel):
 
 
 def get_input_devices() -> list[DeviceInfo]:
+    """Return all PipeWire audio input devices visible to the current session.
+
+    Raises
+    ------
+    DeviceUnavailableError
+        If PipeWire device information cannot be queried.
+    """
     try:
         result = run(["pw-dump"], capture_output=True, text=True, check=True)
     except FileNotFoundError as error:
@@ -53,6 +62,7 @@ def get_input_devices() -> list[DeviceInfo]:
 
 
 def _parse_pw_info(pw_info: dict) -> DeviceInfo:
+    """Convert raw ``pw-dump`` node information into ``DeviceInfo``."""
     props = pw_info["props"]
     formats = pw_info["params"]["EnumFormat"]
     default_format = formats[0]
@@ -65,6 +75,13 @@ def _parse_pw_info(pw_info: dict) -> DeviceInfo:
 
 
 def get_input_device_by_name(name: str) -> DeviceInfo:
+    """Return a PipeWire input device by its normalized name.
+
+    Raises
+    ------
+    DeviceUnavailableError
+        If the named device cannot be found or devices cannot be queried.
+    """
     available_devices = get_input_devices()
 
     for device in available_devices:
@@ -80,6 +97,7 @@ def get_input_device_by_name(name: str) -> DeviceInfo:
 
 
 def has_input_audio_device() -> bool:
+    """Return ``True`` when at least one PipeWire input device is available."""
     try:
         return bool(get_input_devices())
     except DeviceUnavailableError:
@@ -87,6 +105,13 @@ def has_input_audio_device() -> bool:
 
 
 def get_default_microphone() -> DeviceInfo:
+    """Return the first available PipeWire input device.
+
+    Raises
+    ------
+    DeviceUnavailableError
+        If no compatible PipeWire input device is available.
+    """
     available_devices = get_input_devices()
 
     if not available_devices:

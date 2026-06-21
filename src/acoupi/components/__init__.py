@@ -1,6 +1,13 @@
 """Acoupi components."""
 
-from acoupi.components.audio_recorder import MicrophoneConfig, PyAudioRecorder
+from acoupi.components.audio_recorder import (
+    MicrophoneConfig,
+    PARecorderConfig,
+    PARecorder,
+    PWRecorderConfig,
+    PWRecorder,
+    PyAudioRecorder,
+)
 from acoupi.components.message_factories import (
     DetectionThresholdMessageBuilder,
     FullModelOutputMessageBuilder,
@@ -53,6 +60,10 @@ __all__ = [
     "MQTTConfig",
     "MQTTMessenger",
     "MicrophoneConfig",
+    "PARecorderConfig",
+    "PARecorder",
+    "PWRecorderConfig",
+    "PWRecorder",
     "PyAudioRecorder",
     "SaveIfInInterval",
     "SaveRecordingManager",

@@ -321,7 +321,7 @@ class TestGenerateRecording:
             recorder.generate_recording(tmp_path / "recording.wav")
 
 
-class TestParsePWMicrophoneConfig:
+class TestParsePWRecorderConfig:
     @staticmethod
     def build_ultramic_device() -> DeviceInfo:
         return DeviceInfo(

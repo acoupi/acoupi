@@ -1,3 +1,5 @@
+"""PyAudio device discovery helpers for audio input devices."""
+
 from typing import List, Tuple
 
 import pyaudio
@@ -14,7 +16,7 @@ __all__ = [
 
 
 class DeviceInfo(BaseModel):
-    """A dataclass to store the information of an audio device."""
+    """Normalized description of a PyAudio input device."""
 
     index: int
     """The input index of the audio device."""
@@ -30,7 +32,7 @@ class DeviceInfo(BaseModel):
 
 
 def get_input_devices(p: pyaudio.PyAudio) -> List[DeviceInfo]:
-    """Get all input devices available."""
+    """Return all PyAudio devices that support audio input."""
     count = p.get_device_count()
 
     devices = []
@@ -79,6 +81,11 @@ def get_input_device_by_name(p: pyaudio.PyAudio, name: str) -> DeviceInfo:
     DeviceInfo
         The information of the audio device.
 
+    Raises
+    ------
+    DeviceUnavailableError
+        If the named input device cannot be found.
+
     Notes
     -----
     It is assumed that the name of the audio device has been cleaned
@@ -101,7 +108,7 @@ def get_input_device_by_name(p: pyaudio.PyAudio, name: str) -> DeviceInfo:
 
 
 def has_input_audio_device() -> bool:
-    """Check if there are any input audio devices available."""
+    """Return ``True`` when a default PyAudio input device is available."""
     p = pyaudio.PyAudio()
 
     try:
@@ -112,9 +119,7 @@ def has_input_audio_device() -> bool:
 
 
 def get_default_microphone() -> Tuple[int, int, str]:
-    """Check if there are any input audio devices available.
-
-    And get the information of a compatible audio device.
+    """Return the default PyAudio input device parameters.
 
     Returns
     -------
@@ -125,6 +130,10 @@ def get_default_microphone() -> Tuple[int, int, str]:
     device_name: str
         The name of the audio device.
 
+    Raises
+    ------
+    DeviceUnavailableError
+        If no compatible default input device is available.
     """
     # Create an instance of PyAudio
     p = pyaudio.PyAudio()
