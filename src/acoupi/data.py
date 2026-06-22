@@ -99,10 +99,7 @@ class Deployment(BaseModel):
         if isinstance(v, str):
             v = datetime.datetime.fromisoformat(v)
 
-        if not isinstance(v, datetime.datetime):
-            raise ValueError("Should be datetime")
-
-        if v.tzinfo is None:
+        if isinstance(v, datetime.datetime) and v.tzinfo is None:
             v = v.replace(tzinfo=datetime.timezone.utc)
 
         return v
