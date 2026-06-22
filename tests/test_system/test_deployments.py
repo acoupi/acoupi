@@ -121,3 +121,13 @@ def test_loads_legacy_deployment_timestamps_as_utc():
     assert deployment.ended_on == datetime.datetime(
         2024, 1, 1, 13, 0, 0, tzinfo=datetime.timezone.utc
     )
+
+
+def test_loads_z_suffixed_deployment_timestamps_as_utc():
+    deployment = data.Deployment.model_validate_json(
+        '{"name":"current","started_on":"2024-01-01T12:00:00Z"}'
+    )
+
+    assert deployment.started_on == datetime.datetime(
+        2024, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+    )

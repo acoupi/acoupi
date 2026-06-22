@@ -93,10 +93,12 @@ class Deployment(BaseModel):
 
     @field_validator("started_on", "ended_on", mode="before")
     def add_missing_timezone(cls, v):
-        if v is None:
-            return v
-
         if isinstance(v, str):
+            # Leave timezone-aware strings to Pydantic so parsing remains
+            # consistent across Python versions, especially for trailing ``Z``.
+            if v.endswith("Z") or "+" in v[10:] or "-" in v[10:]:
+                return v
+
             v = datetime.datetime.fromisoformat(v)
 
         if isinstance(v, datetime.datetime) and v.tzinfo is None:
