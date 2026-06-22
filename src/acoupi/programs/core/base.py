@@ -8,7 +8,7 @@ from functools import wraps
 from typing import Generic, List, Optional, Protocol, Type, TypeVar, Union
 
 from celery import Celery, Task, group
-from celery.schedules import crontab
+from celery.schedules import BaseSchedule, crontab
 from celery.utils.log import get_task_logger
 from pydantic import BaseModel
 
@@ -139,7 +139,13 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
         self,
         function: NamedCallable[[], Optional[B]],
         callbacks: Optional[List[NamedCallable[[Optional[B]], None]]] = None,
-        schedule: Union[int, datetime.timedelta, crontab, None] = None,
+        schedule: Union[
+            int,
+            datetime.timedelta,
+            crontab,
+            BaseSchedule,
+            None,
+        ] = None,
         queue: Optional[str] = None,
         callback_queue: Optional[str] = None,
         name: Optional[str] = None,
@@ -154,7 +160,8 @@ class AcoupiProgram(ABC, Generic[ProgramConfig]):
             Optional list of callables to run after the task completes,
             receiving the task's return value as their argument.
         schedule :
-            How often to run the task (timedelta, seconds, or crontab).
+            How often to run the task (timedelta, seconds, crontab, or a
+            custom Celery schedule).
         queue :
             Name of the queue the task itself should be routed to. Must be
             declared in the program's ``worker_config``.

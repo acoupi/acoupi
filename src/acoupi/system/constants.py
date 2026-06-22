@@ -93,7 +93,7 @@ class CeleryConfig(BaseModel):
 
     task_acks_late: bool = True
     """Whether to acknowledge tasks after they have been executed. 
-    
+
     True means that tasks are acknowledged after they have been executed, 
     not right before.
     """
@@ -122,4 +122,11 @@ class CeleryConfig(BaseModel):
 
     If you have tasks that are expected to run longer than this limit,
     you should increase this value or specify the time limit directly.
+    """
+
+    beat_max_loop_interval: int = 1
+    """Maximum number of seconds Celery beat sleeps between checks.
+
+    Keeping this low allows beat to dispatch second-aligned periodic tasks with
+    predictable timing.
     """

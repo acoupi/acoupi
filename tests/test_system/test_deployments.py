@@ -1,5 +1,7 @@
 """Test suite for system deployment functions."""
 
+import datetime
+
 import pytest
 
 from acoupi import data
@@ -102,3 +104,30 @@ def test_get_current_deployment_fails_if_ended(settings: Settings):
     deployments.end_deployment(settings)
     with pytest.raises(exceptions.DeploymentError):
         deployments.get_current_deployment(settings)
+
+
+def test_loads_legacy_deployment_timestamps_as_utc():
+    deployment = data.Deployment.model_validate(
+        {
+            "name": "legacy",
+            "started_on": "2024-01-01T12:00:00",
+            "ended_on": "2024-01-01T13:00:00",
+        }
+    )
+
+    assert deployment.started_on == datetime.datetime(
+        2024, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+    )
+    assert deployment.ended_on == datetime.datetime(
+        2024, 1, 1, 13, 0, 0, tzinfo=datetime.timezone.utc
+    )
+
+
+def test_loads_z_suffixed_deployment_timestamps_as_utc():
+    deployment = data.Deployment.model_validate_json(
+        '{"name":"current","started_on":"2024-01-01T12:00:00Z"}'
+    )
+
+    assert deployment.started_on == datetime.datetime(
+        2024, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+    )
