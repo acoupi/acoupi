@@ -91,6 +91,22 @@ class Deployment(BaseModel):
     ended_on: Optional[AwareDatetime] = None
     """The datetime when the deployment ended."""
 
+    @field_validator("started_on", "ended_on", mode="before")
+    def add_missing_timezone(cls, v):
+        if v is None:
+            return v
+
+        if isinstance(v, str):
+            v = datetime.datetime.fromisoformat(v)
+
+        if not isinstance(v, datetime.datetime):
+            raise ValueError("Should be datetime")
+
+        if v.tzinfo is None:
+            v = v.replace(tzinfo=datetime.timezone.utc)
+
+        return v
+
     @field_validator("latitude")
     def validate_latitude(cls, value):
         """Validate that the latitude are within range."""
