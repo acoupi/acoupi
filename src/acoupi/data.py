@@ -443,3 +443,22 @@ class Response(BaseModel):
 
     received_on: AwareDatetime = Field(default_factory=utc_now)
     """The datetime the message was received."""
+
+
+class Metric(BaseModel):
+    """A metric is a single value with a name and unit.
+
+    Used to report the status of a system or model.
+    """
+
+    name: str
+    """The name of the metric."""
+
+    value: float
+    """The value of the metric."""
+
+    captured_on: datetime.datetime = Field(default_factory=utc_now)
+    """The date and time the metric was captured."""
+
+    unit: str
+    """The unit of the metric."""

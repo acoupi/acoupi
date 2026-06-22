@@ -10,6 +10,9 @@ In the following section, you will find more about the available _acoupi_ functi
     They are individual elements (i.e., Python classes) designed to perform specific actions based on the configurations of a user.
     Their inputs and outputs follow the structure of the data.
 
+- [Devices](devices.md): Device-specific helpers and runtime measurements.
+    This includes utilities for working with device/sensors and collecting diagnostic metrics from them.
+
 - [Task](tasks.md): Integrate a sequence of one or more components executed in a specific flow.
 
 - [Programs](programs.md): Illustrate the complete set of tasks, components, and data schema.
@@ -31,6 +34,14 @@ In the following section, you will find more about the available _acoupi_ functi
     </td>
     <td>
       <p>Building blocks of acoupi.</p>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="devices">Devices</a>
+    </td>
+    <td>
+      <p>Device helpers and diagnostic metrics.</p>
     </td>
   </tr>
   <tr>
