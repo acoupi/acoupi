@@ -174,6 +174,35 @@ from celery.schedules import crontab
         )
 ```
 
+- **Aligned intervals**
+
+If you need second-level intervals that line up with the wall clock, use
+[`aligned_schedule`][acoupi.tasks.aligned_schedule]. This is useful when you
+want a task to run at exact second boundaries, such as ``:00, :10, :20`` of
+every minute.
+
+```python
+import datetime
+
+from acoupi.tasks import aligned_schedule
+
+...
+
+    def setup(self, config):
+        ...
+
+        self.add_task(
+            my_custom_task,
+            schedule=aligned_schedule(
+                run_every=datetime.timedelta(seconds=10),
+                offset_seconds=0,
+            ),
+        )
+```
+
+Set ``offset_seconds=5`` if you want the task to run at ``:05, :15, :25`` and
+so on.
+
 #### Task dependencies
 
 Often, tasks within a program need to execute in a specific order or depend on the output of other tasks.

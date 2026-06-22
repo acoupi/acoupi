@@ -25,6 +25,22 @@ class aligned_schedule(BaseSchedule):
         nowfun=None,
         app=None,
     ):
+        """Initialise a wall-clock-aligned interval schedule.
+
+        Parameters
+        ----------
+        run_every : datetime.timedelta
+            Interval between valid schedule slots.
+        offset_seconds : int, optional
+            Offset applied within each interval. With ``run_every=10`` seconds
+            and ``offset_seconds=5``, the schedule runs at ``:05, :15, :25``
+            and so on. Must be non-negative and smaller than ``run_every``.
+        nowfun : callable, optional
+            Override used by Celery to obtain the current time. Primarily
+            useful for testing.
+        app : celery.Celery, optional
+            Celery application instance passed through to ``BaseSchedule``.
+        """
         self.run_every = run_every
         self.offset_seconds = offset_seconds
         super().__init__(nowfun=nowfun, app=app)
