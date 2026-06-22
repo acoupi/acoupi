@@ -22,6 +22,7 @@ from acoupi.tasks.heartbeat import generate_heartbeat_task
 from acoupi.tasks.management import generate_file_management_task
 from acoupi.tasks.messaging import generate_send_messages_task
 from acoupi.tasks.recording import generate_recording_task
+from acoupi.tasks.schedules import aligned_schedule
 from acoupi.tasks.summary import generate_summariser_task
 
 __all__ = [
@@ -31,4 +32,5 @@ __all__ = [
     "generate_send_messages_task",
     "generate_summariser_task",
     "generate_heartbeat_task",
+    "aligned_schedule",
 ]
