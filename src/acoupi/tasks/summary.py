@@ -49,17 +49,27 @@ def generate_summariser_task(
         - Store the summary message in the message store.
         - See [components.stores][acoupi.components.stores] for implementation
         of [types.Store][acoupi.components.types.Store].
+
+    If a summariser returns ``None`` from ``build_summary``, the task treats
+    that as "no summary available" and skips storing any message for that
+    summariser.
     """
 
     def summary_task() -> None:
         """Create a summary message."""
         now = utc_now()
+        logger.info(
+            "Starting summary generation for %d summariser(s).",
+            len(summarisers),
+        )
 
         for summariser in summarisers:
-            logger.info(f"SUMMARISER: {summariser}")
             try:
+                logger.debug(
+                    "Building summary message with summariser %s.",
+                    summariser,
+                )
                 summary_message = summariser.build_summary(now)
-                logger.info(f"SUMMARY MESSAGE: {summary_message}")
             except Exception as e:
                 logger.error(
                     "Error building summary message for summariser %s: %s",
@@ -68,9 +78,22 @@ def generate_summariser_task(
                 )
                 continue
 
+            if summary_message is None:
+                logger.debug(
+                    "Summariser %s returned no summary message. Skipping.",
+                    summariser,
+                )
+                continue
+
             # Store Message
+            logger.info(
+                "Storing summary message from summariser %s.",
+                summariser,
+            )
             message_store.store_message(summary_message)
-            logger.debug(f"Summary Message Stored: {summary_message}")
-            logger.debug("Message stored %s", summary_message)
+            logger.debug(
+                "Stored summary message from summariser %s.",
+                summariser,
+            )
 
     return summary_task
