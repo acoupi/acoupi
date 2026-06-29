@@ -11,19 +11,14 @@ The recording process contains the following steps:
 """
 
 import logging
-import sys
+from importlib.metadata import version
 from typing import Callable, List, Optional, TypeVar
 
 from guano import GuanoFile
 
 from acoupi import data
 from acoupi.components import types
-from acoupi.devices import get_rpi_serial_number
-
-if sys.version_info < (3, 10):
-    from importlib_metadata import version
-else:
-    from importlib.metadata import version
+from acoupi.devices import get_device_id
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -122,7 +117,7 @@ def add_guano_metadata(recording: data.Recording) -> None:
     g["Acoupi|Deployment Name"] = recording.deployment.name
     g["Firmware Version"] = version("acoupi")
     g["Make"] = "acoupi"
-    g["Serial"] = get_rpi_serial_number()
+    g["Serial"] = get_device_id()
     g["Samplerate"] = recording.samplerate
 
     if recording.time_expansion != 1:
