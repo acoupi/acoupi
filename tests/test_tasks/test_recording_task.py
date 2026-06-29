@@ -44,7 +44,7 @@ def test_recording_task_writes_guano_metadata_with_location(
     mocker,
 ):
     mocker.patch(
-        "acoupi.tasks.recording.get_rpi_serial_number",
+        "acoupi.tasks.recording.get_device_id",
         return_value="1234567890ABCDEF",
     )
 
@@ -91,7 +91,7 @@ def test_recording_task_writes_guano_metadata_without_location(
     mocker,
 ):
     mocker.patch(
-        "acoupi.tasks.recording.get_rpi_serial_number",
+        "acoupi.tasks.recording.get_device_id",
         return_value="1234567890ABCDEF",
     )
 

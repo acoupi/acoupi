@@ -224,7 +224,7 @@ def test_time_expansion_is_saved_in_guano_metadata(
     tmp_path: Path, deployment: data.Deployment, mocker
 ):
     mocker.patch(
-        "acoupi.tasks.recording.get_rpi_serial_number",
+        "acoupi.tasks.recording.get_device_id",
         return_value="1234567890ABCDEF",
     )
 
