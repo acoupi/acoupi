@@ -18,6 +18,12 @@ from .utils import (
 )
 
 
+def _call_app_method(app: Any, name: str) -> None:
+    handler = getattr(app, name, None)
+    if callable(handler):
+        handler()
+
+
 class BaseEditor(Container):
     """Base class for field editor widgets."""
 
@@ -39,22 +45,13 @@ class BaseEditor(Container):
         self.focus()
 
     def action_cancel_edit(self) -> None:
-        app = self.app
-        handler = getattr(app, "cancel_current_edit", None)
-        if callable(handler):
-            handler()
+        _call_app_method(self.app, "cancel_current_edit")
 
     def action_apply_edit(self) -> None:
-        app = self.app
-        handler = getattr(app, "apply_current_edit", None)
-        if callable(handler):
-            handler()
+        _call_app_method(self.app, "apply_current_edit")
 
     def action_reset_edit(self) -> None:
-        app = self.app
-        handler = getattr(app, "action_reset_field", None)
-        if callable(handler):
-            handler()
+        _call_app_method(self.app, "action_reset_field")
 
 
 class InputEditor(BaseEditor):

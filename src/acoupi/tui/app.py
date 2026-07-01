@@ -36,6 +36,7 @@ from .utils import (
     set_value,
     summarize_value,
     to_display_value,
+    validation_errors_by_path,
 )
 
 
@@ -219,7 +220,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         return data
 
     def compose(self) -> ComposeResult:
-        yield Header(show_clock=False)
+        yield Header(show_clock=True)
         with Horizontal(id="body"):
             with Vertical(id="tree-pane"):
                 yield Static("Configuration", classes="section-title")
@@ -248,14 +249,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
             self.schema.model_validate(self.data)
             return {}
         except ValidationError as error:
-            errors: dict[str, str] = {}
-            for item in error.errors():
-                location = item.get("loc", ())
-                if not location:
-                    continue
-                path = ".".join(str(part) for part in location)
-                errors[path] = item.get("msg", "Invalid value")
-            return errors
+            return validation_errors_by_path(error)
 
     def _branch_has_error(self, path: tuple[str, ...]) -> bool:
         prefix = ".".join(path)
@@ -398,6 +392,9 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         ):
             return factory(node, value)
 
+        return self._make_default_editor(node, value)
+
+    def _make_default_editor(self, node: FieldNode, value: Any) -> BaseEditor:
         annotation = node.effective_annotation
         origin = get_origin(annotation)
         if node.is_section:
@@ -456,14 +453,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         try:
             self.schema.model_validate(candidate)
         except ValidationError as error:
-            errors: dict[str, str] = {}
-            for item in error.errors():
-                location = item.get("loc", ())
-                if not location:
-                    continue
-                dotted = ".".join(str(part) for part in location)
-                errors[dotted] = item.get("msg", "Invalid value")
-            return errors
+            return validation_errors_by_path(error)
         return {}
 
     def _persist_validated_data(self, validated: BaseModel) -> None:

@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Union
 
 from pydantic import BaseModel
+from pydantic import ValidationError
 from typing_extensions import Annotated, get_args, get_origin
 
 
@@ -177,3 +178,14 @@ def summarize_value(value: Any) -> str:
         return f"{len(value)} items"
     text = to_display_value(value).replace("\n", " ")
     return text[:28] + ("..." if len(text) > 28 else "")
+
+
+def validation_errors_by_path(error: ValidationError) -> dict[str, str]:
+    errors: dict[str, str] = {}
+    for item in error.errors():
+        location = item.get("loc", ())
+        if not location:
+            continue
+        path = ".".join(str(part) for part in location)
+        errors[path] = item.get("msg", "Invalid value")
+    return errors

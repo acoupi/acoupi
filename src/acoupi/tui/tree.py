@@ -6,6 +6,12 @@ from textual.binding import Binding
 from textual.widgets import Tree
 
 
+def _call_app_method(app: object, name: str) -> None:
+    handler = getattr(app, name, None)
+    if callable(handler):
+        handler()
+
+
 class ConfigTree(Tree[str]):
     """Tree widget that can hand focus to a selected leaf editor."""
 
@@ -20,10 +26,7 @@ class ConfigTree(Tree[str]):
     ]
 
     def action_activate_current(self) -> None:
-        app = self.app
-        handler = getattr(app, "activate_tree_node", None)
-        if callable(handler):
-            handler()
+        _call_app_method(self.app, "activate_tree_node")
 
     def action_collapse_current(self) -> None:
         node = self.cursor_node
