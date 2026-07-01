@@ -148,6 +148,10 @@ class InputEditor(BaseEditor):
     def get_raw_value(self) -> Any:
         return self.query_one("#editor-input", Input).value
 
+    @on(Input.Submitted, "#editor-input")
+    def submit_input(self) -> None:
+        self.action_apply_edit()
+
     def focus_input(self) -> None:
         self.query_one("#editor-input", Input).focus()
 
@@ -567,6 +571,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
     #editor-error {
         color: $error;
         margin-bottom: 1;
+        min-height: 3;
     }
 
     #message-modal {
@@ -612,6 +617,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
             else self._build_initial_data(schema)
         )
         self.validation_errors: dict[str, str] = {}
+        self.editor_errors: dict[str, str] = {}
         self.current_path = self.nodes[0].dotted_path if self.nodes else ""
         self._tree_paths: dict[str, Any] = {}
 
@@ -685,7 +691,9 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
             return f"{marker} {node.title}"
 
         value = _get_value(self.data, node.path)
-        if self._branch_has_error(node.path):
+        if node.dotted_path in self.editor_errors or self._branch_has_error(
+            node.path
+        ):
             indicator = "[red]![/red]"
         elif value is None and node.required:
             indicator = "[yellow]?[/yellow]"
@@ -763,11 +771,12 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
             return
         node = self.node_lookup[self.current_path]
         self.query_one("#editor-error", Static).update("")
+        self.editor_errors.pop(node.dotted_path, None)
         self._load_node(node)
         self._focus_tree_at_current_path()
 
     def apply_current_edit(self) -> None:
-        self._apply_current_field()
+        self._apply_current_field(refocus_on_error=True)
 
     @on(Tree.NodeSelected, "#config-tree")
     def handle_tree_selection(self, event: Tree.NodeSelected[Any]) -> None:
@@ -825,7 +834,10 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
             f"{required} | {_friendly_type_name(node.effective_annotation)} | {node.dotted_path}",
         )
         self.query_one("#editor-error", Static).update(
-            self.validation_errors.get(node.dotted_path, ""),
+            self.editor_errors.get(
+                node.dotted_path,
+                self.validation_errors.get(node.dotted_path, ""),
+            ),
         )
 
         host = self.query_one("#editor-widget-host", Container)
@@ -855,6 +867,26 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
     def _validate_data(self) -> BaseModel:
         return self.schema.model_validate(self.data)
 
+    def _candidate_validation_errors(
+        self,
+        path: tuple[str, ...],
+        value: Any,
+    ) -> dict[str, str]:
+        candidate = dict(self.data)
+        _set_value(candidate, path, value)
+        try:
+            self.schema.model_validate(candidate)
+        except ValidationError as error:
+            errors: dict[str, str] = {}
+            for item in error.errors():
+                location = item.get("loc", ())
+                if not location:
+                    continue
+                dotted = ".".join(str(part) for part in location)
+                errors[dotted] = item.get("msg", "Invalid value")
+            return errors
+        return {}
+
     def _persist_validated_data(self, validated: BaseModel) -> None:
         if self.output_path is None:
             return
@@ -862,31 +894,56 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
             self.output_path.parent.mkdir(parents=True, exist_ok=True)
         self.output_path.write_text(validated.model_dump_json(indent=2))
 
-    def _apply_current_field(self) -> None:
+    def _apply_current_field(self, refocus_on_error: bool = False) -> None:
         if not self.current_path:
             return
         node = self.node_lookup[self.current_path]
         raw = self._current_editor().get_raw_value()
         try:
             value = _coerce_value(node, raw)
-            _set_value(self.data, node.path, value)
-            validated = self._validate_data()
-        except (ValueError, ValidationError, json.JSONDecodeError) as error:
+        except (ValueError, json.JSONDecodeError) as error:
+            self.editor_errors[node.dotted_path] = str(error)
             self.query_one("#editor-error", Static).update(str(error))
-            self.validation_errors = self._collect_validation_errors()
-            self._rebuild_tree()
+            self.validation_errors = {}
+            tree_node = self._tree_paths.get(node.dotted_path)
+            if tree_node is not None:
+                tree_node.set_label(self._format_tree_label(node))
+            if refocus_on_error:
+                self._focus_current_editor_input()
             return
+
+        candidate_errors = self._candidate_validation_errors(node.path, value)
+        if candidate_errors:
+            self.editor_errors[node.dotted_path] = candidate_errors.get(
+                node.dotted_path,
+                "This value is not valid.",
+            )
+            self.query_one("#editor-error", Static).update(
+                self.editor_errors[node.dotted_path],
+            )
+            self.validation_errors = candidate_errors
+            tree_node = self._tree_paths.get(node.dotted_path)
+            if tree_node is not None:
+                tree_node.set_label(self._format_tree_label(node))
+            if refocus_on_error:
+                self._focus_current_editor_input()
+            return
+
+        self.editor_errors.pop(node.dotted_path, None)
+        _set_value(self.data, node.path, value)
+        validated = self._validate_data()
 
         self.data = validated.model_dump(mode="json")
         self._persist_validated_data(validated)
         self.query_one("#editor-error", Static).update("")
+        self.validation_errors = {}
         self._rebuild_tree()
         self._load_node(node)
         self._focus_tree_at_current_path()
 
     @on(Button.Pressed, "#apply-value")
     def apply_value(self) -> None:
-        self._apply_current_field()
+        self._apply_current_field(refocus_on_error=True)
 
     @on(Button.Pressed, "#reset-value")
     def reset_value(self) -> None:
@@ -901,6 +958,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
             default = default.model_dump(mode="json")
         elif default is not None:
             default = _json_safe(default)
+        self.editor_errors.pop(node.dotted_path, None)
         _set_value(self.data, node.path, default)
         try:
             validated = self._validate_data()
