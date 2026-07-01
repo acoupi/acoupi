@@ -1,408 +1,45 @@
-"""Textual TUI for editing Pydantic configuration models.
-
-This module is intentionally standalone so it can be explored without wiring it
-into the rest of the Acoupi CLI yet.
-"""
+"""Main Textual config TUI application."""
 
 from __future__ import annotations
 
 import datetime as dt
 import json
-import types
-from dataclasses import dataclass
-from enum import Enum
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field, ValidationError
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import (
-    Container,
-    Horizontal,
-    Vertical,
-)
+from textual.containers import Container, Horizontal, Vertical
 from textual.screen import ModalScreen
-from textual.widgets import (
-    Button,
-    Checkbox,
-    Footer,
-    Header,
-    Input,
-    Select,
-    Static,
-    TextArea,
-    Tree,
+from textual.widgets import Button, Footer, Header, Input, Static, Tree
+from typing_extensions import Annotated, get_origin
+
+from .editors import (
+    BaseEditor,
+    CheckboxEditor,
+    InputEditor,
+    JsonEditor,
+    SectionEditor,
+    SelectEditor,
 )
-from typing_extensions import Annotated, get_args, get_origin
-
-
-def _titleize(name: str) -> str:
-    return name.replace("_", " ").strip().capitalize()
-
-
-def _json_safe(value: Any) -> Any:
-    return json.loads(json.dumps(value, default=str))
-
-
-def _split_annotated(annotation: Any) -> tuple[Any, tuple[Any, ...]]:
-    if get_origin(annotation) == Annotated:
-        args = get_args(annotation)
-        return args[0], tuple(args[1:])
-    return annotation, ()
-
-
-def _is_optional(annotation: Any) -> bool:
-    origin = get_origin(annotation)
-    return origin in (Union, types.UnionType) and type(None) in get_args(
-        annotation
-    )
-
-
-def _strip_optional(annotation: Any) -> Any:
-    if not _is_optional(annotation):
-        return annotation
-    args = tuple(arg for arg in get_args(annotation) if arg is not type(None))
-    if len(args) == 1:
-        return args[0]
-    return Union[args]
-
-
-def _unwrap_annotation(annotation: Any) -> tuple[Any, tuple[Any, ...]]:
-    base, metadata = _split_annotated(annotation)
-    base = _strip_optional(base)
-    nested_base, nested_metadata = _split_annotated(base)
-    return nested_base, metadata + nested_metadata
-
-
-def _is_basemodel_type(annotation: Any) -> bool:
-    try:
-        return isinstance(annotation, type) and issubclass(
-            annotation, BaseModel
-        )
-    except TypeError:
-        return False
-
-
-def _default_value(field: Any) -> Any:
-    if field.default_factory is not None:
-        return field.get_default(call_default_factory=True)
-    if getattr(field, "default", None) is not None:
-        return field.default
-    return None
-
-
-class BaseEditor(Container):
-    """Base class for field editor widgets."""
-
-    BINDINGS = [
-        Binding("escape", "cancel_edit", "Cancel", show=False),
-        Binding("ctrl+s", "apply_edit", "Apply", show=False),
-        Binding("ctrl+r", "reset_edit", "Reset", show=False),
-    ]
-
-    def __init__(self, node: "FieldNode", value: Any, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-        self.node = node
-        self.value = value
-
-    def get_raw_value(self) -> Any:
-        """Return the raw widget value."""
-        raise NotImplementedError
-
-    def focus_input(self) -> None:
-        """Move keyboard focus to the main interactive control."""
-        self.focus()
-
-    def action_cancel_edit(self) -> None:
-        app = self.app
-        if not isinstance(app, ConfigEditorApp):
-            return
-        app.cancel_current_edit()
-
-    def action_apply_edit(self) -> None:
-        app = self.app
-        if not isinstance(app, ConfigEditorApp):
-            return
-        app.apply_current_edit()
-
-    def action_reset_edit(self) -> None:
-        app = self.app
-        if not isinstance(app, ConfigEditorApp):
-            return
-        app.action_reset_field()
-
-
-FieldEditorType = type[BaseEditor]
-
-
-class InputEditor(BaseEditor):
-    """Single line text editor."""
-
-    BINDINGS = [Binding("ctrl+s", "apply_edit", "Apply", show=False)]
-
-    def compose(self) -> ComposeResult:
-        yield Input(value=_to_display_value(self.value), id="editor-input")
-
-    def get_raw_value(self) -> Any:
-        return self.query_one("#editor-input", Input).value
-
-    @on(Input.Submitted, "#editor-input")
-    def submit_input(self) -> None:
-        self.action_apply_edit()
-
-    def focus_input(self) -> None:
-        self.query_one("#editor-input", Input).focus()
-
-
-class CheckboxEditor(BaseEditor):
-    """Boolean editor."""
-
-    BINDINGS = [Binding("ctrl+s", "apply_edit", "Apply", show=False)]
-
-    def compose(self) -> ComposeResult:
-        yield Checkbox("Enabled", value=bool(self.value), id="editor-checkbox")
-
-    def get_raw_value(self) -> Any:
-        return self.query_one("#editor-checkbox", Checkbox).value
-
-    def focus_input(self) -> None:
-        self.query_one("#editor-checkbox", Checkbox).focus()
-
-
-class SelectEditor(BaseEditor):
-    """Enum editor."""
-
-    BINDINGS = [Binding("ctrl+s", "apply_edit", "Apply", show=False)]
-
-    def compose(self) -> ComposeResult:
-        options = [
-            (str(member.value), str(member.value))
-            for member in self.node.enum_type or []
-        ]
-        current = "" if self.value is None else str(self.value)
-        yield Select(options=options, value=current, id="editor-select")
-
-    def get_raw_value(self) -> Any:
-        return self.query_one("#editor-select", Select).value
-
-    def focus_input(self) -> None:
-        self.query_one("#editor-select", Select).focus()
-
-
-class JsonEditor(BaseEditor):
-    """JSON editor for structured values."""
-
-    BINDINGS = [Binding("ctrl+s", "apply_edit", "Apply", show=False)]
-
-    def compose(self) -> ComposeResult:
-        yield TextArea(_to_display_value(self.value), id="editor-json")
-        yield Static(
-            "Use JSON for lists or structured values.",
-            classes="hint",
-        )
-
-    def get_raw_value(self) -> Any:
-        return self.query_one("#editor-json", TextArea).text
-
-    def focus_input(self) -> None:
-        self.query_one("#editor-json", TextArea).focus()
-
-
-class SectionEditor(BaseEditor):
-    """Read-only editor for nested sections."""
-
-    def compose(self) -> ComposeResult:
-        app = self.app
-        children: list[FieldNode] = []
-        if isinstance(app, ConfigEditorApp):
-            children = app.get_child_nodes(self.node)
-
-        yield Static(
-            "This section contains the following settings.",
-            classes="hint",
-        )
-        if not children:
-            yield Static("No fields in this section.", classes="hint")
-            return
-
-        for child in children:
-            value = None
-            if isinstance(app, ConfigEditorApp):
-                value = _get_value(app.data, child.path)
-            yield Static(
-                f"{child.title} ({_friendly_type_name(child.effective_annotation)}): {_summarize_value(value)}",
-            )
-
-    def get_raw_value(self) -> Any:
-        return self.value
-
-
-class ConfigTree(Tree[str]):
-    """Tree widget that can hand focus to a selected leaf editor."""
-
-    BINDINGS = [
-        Binding("enter", "activate_current", "Activate", show=False),
-        Binding("right", "activate_current", "Activate", show=False),
-        Binding("left", "collapse_current", "Collapse", show=False),
-        Binding("l", "activate_current", "Activate", show=False),
-        Binding("h", "collapse_current", "Collapse", show=False),
-        Binding("j", "cursor_down", "Down", show=False),
-        Binding("k", "cursor_up", "Up", show=False),
-    ]
-
-    def action_activate_current(self) -> None:
-        app = self.app
-        if not isinstance(app, ConfigEditorApp):
-            return
-        app.activate_tree_node()
-
-    def action_collapse_current(self) -> None:
-        node = self.cursor_node
-        if node is None or not node.allow_expand:
-            return
-        if node.is_expanded:
-            node.collapse()
-
-
-@dataclass(frozen=True)
-class FieldNode:
-    """Description of a field in the configuration tree."""
-
-    path: tuple[str, ...]
-    field_name: str
-    title: str
-    annotation: Any
-    field_info: Any
-    parent_model: type[BaseModel]
-    metadata: tuple[Any, ...]
-    editor_factory: FieldEditorType | None
-
-    @property
-    def dotted_path(self) -> str:
-        return ".".join(self.path)
-
-    @property
-    def description(self) -> str:
-        return self.field_info.description or ""
-
-    @property
-    def required(self) -> bool:
-        return self.field_info.is_required()
-
-    @property
-    def effective_annotation(self) -> Any:
-        annotation, _ = _unwrap_annotation(self.annotation)
-        return annotation
-
-    @property
-    def is_section(self) -> bool:
-        return _is_basemodel_type(self.effective_annotation)
-
-    @property
-    def enum_type(self) -> type[Enum] | None:
-        annotation = self.effective_annotation
-        if isinstance(annotation, type) and issubclass(annotation, Enum):
-            return annotation
-        return None
-
-
-def _extract_editor_factory(
-    metadata: tuple[Any, ...],
-) -> FieldEditorType | None:
-    for item in metadata:
-        if isinstance(item, type) and issubclass(item, BaseEditor):
-            return item
-    return None
-
-
-def _walk_schema(
-    schema: type[BaseModel],
-    prefix: tuple[str, ...] = (),
-) -> list[FieldNode]:
-    nodes: list[FieldNode] = []
-    for field_name, field in schema.model_fields.items():
-        annotation = field.annotation
-        if annotation is None:
-            continue
-
-        _, metadata = _unwrap_annotation(annotation)
-        node = FieldNode(
-            path=prefix + (field_name,),
-            field_name=field_name,
-            title=field.title or _titleize(field_name),
-            annotation=annotation,
-            field_info=field,
-            parent_model=schema,
-            metadata=metadata,
-            editor_factory=_extract_editor_factory(metadata),
-        )
-        nodes.append(node)
-
-        if node.is_section:
-            nodes.extend(
-                _walk_schema(node.effective_annotation, prefix=node.path)
-            )
-    return nodes
-
-
-def _get_value(data: dict[str, Any], path: tuple[str, ...]) -> Any:
-    current: Any = data
-    for part in path:
-        if not isinstance(current, dict):
-            return None
-        current = current.get(part)
-    return current
-
-
-def _set_value(
-    data: dict[str, Any], path: tuple[str, ...], value: Any
-) -> None:
-    current = data
-    for part in path[:-1]:
-        next_value = current.get(part)
-        if not isinstance(next_value, dict):
-            next_value = {}
-            current[part] = next_value
-        current = next_value
-    if value is None:
-        current.pop(path[-1], None)
-    else:
-        current[path[-1]] = value
-
-
-def _coerce_scalar(annotation: Any, raw: str) -> Any:
-    if annotation is str:
-        return raw
-    if annotation is int:
-        return int(raw)
-    if annotation is float:
-        return float(raw)
-    if annotation is bool:
-        lower = raw.strip().lower()
-        if lower in {"true", "t", "yes", "y", "1", "on"}:
-            return True
-        if lower in {"false", "f", "no", "n", "0", "off"}:
-            return False
-        raise ValueError("Enter yes/no or true/false.")
-    if annotation is Path:
-        return Path(raw).expanduser()
-    if annotation is dt.time:
-        return dt.time.fromisoformat(raw)
-    if annotation is dt.date:
-        return dt.date.fromisoformat(raw)
-    if annotation is dt.datetime:
-        return dt.datetime.fromisoformat(raw)
-    if isinstance(annotation, type) and issubclass(annotation, Enum):
-        for option in annotation:
-            if raw == option.name or raw == str(option.value):
-                return option
-        raise ValueError("Choose one of the listed options.")
-    return raw
-
-
-def _coerce_value(node: FieldNode, raw: Any) -> Any:
+from .models import FieldNode, walk_schema
+from .tree import ConfigTree
+from .utils import (
+    coerce_scalar,
+    default_value,
+    friendly_type_name,
+    get_value,
+    is_basemodel_type,
+    json_safe,
+    set_value,
+    summarize_value,
+    to_display_value,
+)
+
+
+def coerce_value(node: FieldNode, raw: Any) -> Any:
     annotation = node.effective_annotation
     origin = get_origin(annotation)
 
@@ -426,67 +63,9 @@ def _coerce_value(node: FieldNode, raw: Any) -> Any:
         return raw
 
     if isinstance(raw, str):
-        return _coerce_scalar(annotation, raw.strip())
+        return coerce_scalar(annotation, raw.strip())
 
     return raw
-
-
-def _to_display_value(value: Any) -> str:
-    if value is None:
-        return ""
-    if isinstance(value, BaseModel):
-        return json.dumps(value.model_dump(mode="json"), indent=2)
-    if isinstance(value, (dict, list, tuple)):
-        return json.dumps(value, indent=2, default=str)
-    if isinstance(value, Path):
-        return str(value)
-    if isinstance(value, Enum):
-        return str(value.value)
-    if isinstance(value, (dt.date, dt.time, dt.datetime)):
-        return value.isoformat()
-    return str(value)
-
-
-def _friendly_type_name(annotation: Any) -> str:
-    origin = get_origin(annotation)
-    if origin is list:
-        return "List"
-    if origin is dict:
-        return "Object"
-    if origin is tuple:
-        return "List"
-    if isinstance(annotation, type) and issubclass(annotation, Enum):
-        return "Choice"
-    if annotation is Path:
-        return "Path"
-    if annotation is dt.time:
-        return "Time"
-    if annotation is dt.date:
-        return "Date"
-    if annotation is dt.datetime:
-        return "Date and time"
-    if annotation is bool:
-        return "On or off"
-    if annotation is int:
-        return "Whole number"
-    if annotation is float:
-        return "Number"
-    if annotation is str:
-        return "Text"
-    if _is_basemodel_type(annotation):
-        return "Section"
-    return getattr(annotation, "__name__", "Value")
-
-
-def _summarize_value(value: Any) -> str:
-    if value is None:
-        return "missing"
-    if isinstance(value, dict):
-        return f"{len(value)} items"
-    if isinstance(value, list):
-        return f"{len(value)} items"
-    text = _to_display_value(value).replace("\n", " ")
-    return text[:28] + ("..." if len(text) > 28 else "")
 
 
 class MessageScreen(ModalScreen[None]):
@@ -613,7 +192,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         super().__init__()
         self.schema = schema
         self.output_path = output_path
-        self.nodes = _walk_schema(schema)
+        self.nodes = walk_schema(schema)
         self.node_lookup = {node.dotted_path: node for node in self.nodes}
         self.data = (
             value.model_dump(mode="json")
@@ -628,14 +207,14 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
     def _build_initial_data(self, schema: type[BaseModel]) -> dict[str, Any]:
         data: dict[str, Any] = {}
         for field_name, field in schema.model_fields.items():
-            annotation, _ = _unwrap_annotation(field.annotation)
-            default = _default_value(field)
+            annotation = field.annotation
+            default = default_value(field)
             if default is not None:
                 if isinstance(default, BaseModel):
                     data[field_name] = default.model_dump(mode="json")
                 else:
-                    data[field_name] = _json_safe(default)
-            elif _is_basemodel_type(annotation):
+                    data[field_name] = json_safe(default)
+            elif annotation is not None and is_basemodel_type(annotation):
                 data[field_name] = self._build_initial_data(annotation)
         return data
 
@@ -694,7 +273,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
             )
             return f"{marker} {node.title}"
 
-        value = _get_value(self.data, node.path)
+        value = get_value(self.data, node.path)
         if node.dotted_path in self.editor_errors or self._branch_has_error(
             node.path
         ):
@@ -703,7 +282,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
             indicator = "[yellow]?[/yellow]"
         else:
             indicator = "[green]•[/green]"
-        return f"{indicator} {node.title}: {_summarize_value(value)}"
+        return f"{indicator} {node.title}: {summarize_value(value)}"
 
     def _rebuild_tree(self) -> None:
         self.validation_errors = self._collect_validation_errors()
@@ -812,7 +391,11 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
 
     def _make_editor(self, node: FieldNode, value: Any) -> BaseEditor:
         factory = node.editor_factory
-        if factory is not None:
+        if (
+            factory is not None
+            and isinstance(factory, type)
+            and issubclass(factory, BaseEditor)
+        ):
             return factory(node, value)
 
         annotation = node.effective_annotation
@@ -835,7 +418,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         )
         required = "Required" if node.required else "Optional"
         self.query_one("#editor-meta", Static).update(
-            f"{required} | {_friendly_type_name(node.effective_annotation)} | {node.dotted_path}",
+            f"{required} | {friendly_type_name(node.effective_annotation)} | {node.dotted_path}",
         )
         self.query_one("#editor-error", Static).update(
             self.editor_errors.get(
@@ -846,7 +429,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
 
         host = self.query_one("#editor-widget-host", Container)
         host.remove_children()
-        editor = self._make_editor(node, _get_value(self.data, node.path))
+        editor = self._make_editor(node, get_value(self.data, node.path))
         host.mount(editor)
 
     def _current_editor(self) -> BaseEditor:
@@ -860,14 +443,6 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
     def _focus_current_editor_input(self) -> None:
         self._current_editor().focus_input()
 
-    def _is_editor_control_focused(self) -> bool:
-        focused = self.focused
-        if focused is None:
-            return False
-        if isinstance(focused, (Input, Checkbox, Select, TextArea)):
-            return True
-        return False
-
     def _validate_data(self) -> BaseModel:
         return self.schema.model_validate(self.data)
 
@@ -877,7 +452,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         value: Any,
     ) -> dict[str, str]:
         candidate = dict(self.data)
-        _set_value(candidate, path, value)
+        set_value(candidate, path, value)
         try:
             self.schema.model_validate(candidate)
         except ValidationError as error:
@@ -904,7 +479,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         node = self.node_lookup[self.current_path]
         raw = self._current_editor().get_raw_value()
         try:
-            value = _coerce_value(node, raw)
+            value = coerce_value(node, raw)
         except (ValueError, json.JSONDecodeError) as error:
             self.editor_errors[node.dotted_path] = str(error)
             self.query_one("#editor-error", Static).update(str(error))
@@ -934,7 +509,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
             return
 
         self.editor_errors.pop(node.dotted_path, None)
-        _set_value(self.data, node.path, value)
+        set_value(self.data, node.path, value)
         validated = self._validate_data()
 
         self.data = validated.model_dump(mode="json")
@@ -957,13 +532,13 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         if not self.current_path:
             return
         node = self.node_lookup[self.current_path]
-        default = _default_value(node.field_info)
+        default = default_value(node.field_info)
         if isinstance(default, BaseModel):
             default = default.model_dump(mode="json")
         elif default is not None:
-            default = _json_safe(default)
+            default = json_safe(default)
         self.editor_errors.pop(node.dotted_path, None)
-        _set_value(self.data, node.path, default)
+        set_value(self.data, node.path, default)
         try:
             validated = self._validate_data()
         except ValidationError:
@@ -1004,7 +579,7 @@ class TimeInputEditor(InputEditor):
         yield Static(
             "Use 24-hour format, for example 06:30:00.", classes="hint"
         )
-        yield Input(value=_to_display_value(self.value), id="editor-input")
+        yield Input(value=to_display_value(self.value), id="editor-input")
 
 
 class ExampleAudioSettings(BaseModel):
@@ -1086,7 +661,3 @@ def main() -> None:
     result = run_editor(ExampleProgramSettings)
     if result is not None:
         print(result.model_dump_json(indent=2))
-
-
-if __name__ == "__main__":
-    main()
