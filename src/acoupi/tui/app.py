@@ -26,6 +26,7 @@ from .editors import (
 )
 from .models import FieldNode, walk_schema
 from .tree import ConfigTree
+from .tree_presenter import TreePresenter
 from .utils import (
     coerce_scalar,
     default_value,
@@ -204,6 +205,7 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         self.editor_errors: dict[str, str] = {}
         self.current_path = self.nodes[0].dotted_path if self.nodes else ""
         self._tree_paths: dict[str, Any] = {}
+        self.tree_presenter = TreePresenter(self)
 
     def _build_initial_data(self, schema: type[BaseModel]) -> dict[str, Any]:
         data: dict[str, Any] = {}
@@ -251,74 +253,43 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         except ValidationError as error:
             return validation_errors_by_path(error)
 
-    def _branch_has_error(self, path: tuple[str, ...]) -> bool:
-        prefix = ".".join(path)
-        return any(
-            error == prefix or error.startswith(f"{prefix}.")
-            for error in self.validation_errors
-        )
-
-    def _format_tree_label(self, node: FieldNode) -> str:
-        if node.is_section:
-            marker = (
-                "[red]![/red]"
-                if self._branch_has_error(node.path)
-                else "[cyan]+[/cyan]"
-            )
-            return f"{marker} {node.title}"
-
-        value = get_value(self.data, node.path)
-        if node.dotted_path in self.editor_errors or self._branch_has_error(
-            node.path
-        ):
-            indicator = "[red]![/red]"
-        elif value is None and node.required:
-            indicator = "[yellow]?[/yellow]"
-        else:
-            indicator = "[green]•[/green]"
-        return f"{indicator} {node.title}: {summarize_value(value)}"
-
     def _rebuild_tree(self) -> None:
         self.validation_errors = self._collect_validation_errors()
-        tree = self.query_one("#config-tree", Tree)
-        tree.clear()
-        tree.root.label = "Configuration"
-        tree.root.expand()
-        self._tree_paths = {}
-
-        branch_index: dict[tuple[str, ...], Any] = {(): tree.root}
-        for node in self.nodes:
-            parent = branch_index[node.path[:-1]]
-            branch = parent.add(
-                self._format_tree_label(node),
-                data=node.dotted_path,
-            )
-            self._tree_paths[node.dotted_path] = branch
-            if node.is_section:
-                branch.allow_expand = True
-                branch.collapse()
-                branch_index[node.path] = branch
-            else:
-                branch.allow_expand = False
-
-        if self.current_path and self.current_path in self._tree_paths:
-            self._expand_to_path(self.current_path)
-            tree.select_node(self._tree_paths[self.current_path])
-
-    def _expand_to_path(self, dotted_path: str) -> None:
-        parts = dotted_path.split(".")
-        for size in range(1, len(parts)):
-            prefix = ".".join(parts[:size])
-            branch = self._tree_paths.get(prefix)
-            if branch is not None:
-                branch.expand()
+        self.tree_presenter.rebuild()
 
     def _focus_tree_at_current_path(self) -> None:
         tree = self.query_one("#config-tree", ConfigTree)
         if self.current_path and self.current_path in self._tree_paths:
-            self._expand_to_path(self.current_path)
+            self.tree_presenter.expand_to_path(self.current_path)
             tree.select_node(self._tree_paths[self.current_path])
         tree.focus()
+
+    def _get_current_node(self) -> FieldNode | None:
+        if not self.current_path:
+            return None
+        return self.node_lookup[self.current_path]
+
+    def _set_editor_error(self, path: str, message: str) -> None:
+        self.editor_errors[path] = message
+        self.query_one("#editor-error", Static).update(message)
+
+    def _clear_editor_error(self, path: str) -> None:
+        self.editor_errors.pop(path, None)
+        self.query_one("#editor-error", Static).update("")
+
+    def _refresh_tree_node_label(self, node: FieldNode) -> None:
+        self.tree_presenter.refresh_node_label(node)
+
+    def _finish_successful_change(
+        self, node: FieldNode, validated: BaseModel
+    ) -> None:
+        self.data = validated.model_dump(mode="json")
+        self._persist_validated_data(validated)
+        self._clear_editor_error(node.dotted_path)
+        self.validation_errors = {}
+        self._rebuild_tree()
+        self._load_node(node)
+        self._focus_tree_at_current_path()
 
     def activate_tree_node(self) -> None:
         tree = self.query_one("#config-tree", ConfigTree)
@@ -344,11 +315,10 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         self.call_after_refresh(self._focus_current_editor_input)
 
     def cancel_current_edit(self) -> None:
-        if not self.current_path:
+        node = self._get_current_node()
+        if node is None:
             return
-        node = self.node_lookup[self.current_path]
-        self.query_one("#editor-error", Static).update("")
-        self.editor_errors.pop(node.dotted_path, None)
+        self._clear_editor_error(node.dotted_path)
         self._load_node(node)
         self._focus_tree_at_current_path()
 
@@ -464,51 +434,38 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         self.output_path.write_text(validated.model_dump_json(indent=2))
 
     def _apply_current_field(self, refocus_on_error: bool = False) -> None:
-        if not self.current_path:
+        node = self._get_current_node()
+        if node is None:
             return
-        node = self.node_lookup[self.current_path]
         raw = self._current_editor().get_raw_value()
         try:
             value = coerce_value(node, raw)
         except (ValueError, json.JSONDecodeError) as error:
-            self.editor_errors[node.dotted_path] = str(error)
-            self.query_one("#editor-error", Static).update(str(error))
+            self._set_editor_error(node.dotted_path, str(error))
             self.validation_errors = {}
-            tree_node = self._tree_paths.get(node.dotted_path)
-            if tree_node is not None:
-                tree_node.set_label(self._format_tree_label(node))
+            self._refresh_tree_node_label(node)
             if refocus_on_error:
                 self._focus_current_editor_input()
             return
 
         candidate_errors = self._candidate_validation_errors(node.path, value)
         if candidate_errors:
-            self.editor_errors[node.dotted_path] = candidate_errors.get(
+            self._set_editor_error(
                 node.dotted_path,
-                "This value is not valid.",
-            )
-            self.query_one("#editor-error", Static).update(
-                self.editor_errors[node.dotted_path],
+                candidate_errors.get(
+                    node.dotted_path,
+                    "This value is not valid.",
+                ),
             )
             self.validation_errors = candidate_errors
-            tree_node = self._tree_paths.get(node.dotted_path)
-            if tree_node is not None:
-                tree_node.set_label(self._format_tree_label(node))
+            self._refresh_tree_node_label(node)
             if refocus_on_error:
                 self._focus_current_editor_input()
             return
 
-        self.editor_errors.pop(node.dotted_path, None)
         set_value(self.data, node.path, value)
         validated = self._validate_data()
-
-        self.data = validated.model_dump(mode="json")
-        self._persist_validated_data(validated)
-        self.query_one("#editor-error", Static).update("")
-        self.validation_errors = {}
-        self._rebuild_tree()
-        self._load_node(node)
-        self._focus_tree_at_current_path()
+        self._finish_successful_change(node, validated)
 
     @on(Button.Pressed, "#apply-value")
     def apply_value(self) -> None:
@@ -519,24 +476,23 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         self.action_reset_field()
 
     def action_reset_field(self) -> None:
-        if not self.current_path:
+        node = self._get_current_node()
+        if node is None:
             return
-        node = self.node_lookup[self.current_path]
         default = default_value(node.field_info)
         if isinstance(default, BaseModel):
             default = default.model_dump(mode="json")
         elif default is not None:
             default = json_safe(default)
-        self.editor_errors.pop(node.dotted_path, None)
+        self._clear_editor_error(node.dotted_path)
         set_value(self.data, node.path, default)
         try:
             validated = self._validate_data()
         except ValidationError:
             self.validation_errors = self._collect_validation_errors()
         else:
-            self.data = validated.model_dump(mode="json")
-            self._persist_validated_data(validated)
-            self.validation_errors = {}
+            self._finish_successful_change(node, validated)
+            return
         self._rebuild_tree()
         self._load_node(node)
         self._focus_tree_at_current_path()
