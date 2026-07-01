@@ -30,7 +30,6 @@ from textual.widgets import (
     Footer,
     Header,
     Input,
-    Pretty,
     Select,
     Static,
     TextArea,
@@ -99,7 +98,7 @@ class BaseEditor(Container):
 
     BINDINGS = [
         Binding("escape", "cancel_edit", "Cancel", show=False),
-        Binding("ctrl+enter", "apply_edit", "Apply", show=False),
+        Binding("ctrl+s", "apply_edit", "Apply", show=False),
         Binding("ctrl+r", "reset_edit", "Reset", show=False),
     ]
 
@@ -141,6 +140,8 @@ FieldEditorType = type[BaseEditor]
 class InputEditor(BaseEditor):
     """Single line text editor."""
 
+    BINDINGS = [Binding("ctrl+s", "apply_edit", "Apply", show=False)]
+
     def compose(self) -> ComposeResult:
         yield Input(value=_to_display_value(self.value), id="editor-input")
 
@@ -154,6 +155,8 @@ class InputEditor(BaseEditor):
 class CheckboxEditor(BaseEditor):
     """Boolean editor."""
 
+    BINDINGS = [Binding("ctrl+s", "apply_edit", "Apply", show=False)]
+
     def compose(self) -> ComposeResult:
         yield Checkbox("Enabled", value=bool(self.value), id="editor-checkbox")
 
@@ -166,6 +169,8 @@ class CheckboxEditor(BaseEditor):
 
 class SelectEditor(BaseEditor):
     """Enum editor."""
+
+    BINDINGS = [Binding("ctrl+s", "apply_edit", "Apply", show=False)]
 
     def compose(self) -> ComposeResult:
         options = [
@@ -184,6 +189,8 @@ class SelectEditor(BaseEditor):
 
 class JsonEditor(BaseEditor):
     """JSON editor for structured values."""
+
+    BINDINGS = [Binding("ctrl+s", "apply_edit", "Apply", show=False)]
 
     def compose(self) -> ComposeResult:
         yield TextArea(_to_display_value(self.value), id="editor-json")
@@ -477,6 +484,12 @@ def _summarize_value(value: Any) -> str:
 class MessageScreen(ModalScreen[None]):
     """Simple modal for messages."""
 
+    CSS = """
+    MessageScreen {
+        align: center middle;
+    }
+    """
+
     BINDINGS = [Binding("escape", "dismiss", "Close")]
 
     def __init__(self, title: str, message: str) -> None:
@@ -508,27 +521,22 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
     }
 
     #tree-pane {
-        width: 42;
+        width: 54;
         border: round $surface;
         padding: 1;
     }
 
-    #editor-pane, #preview-pane {
+    #editor-pane {
         border: round $surface;
         padding: 1;
     }
 
-    #tree-pane:focus-within,
-    #preview-pane:focus-within {
+    #tree-pane:focus-within {
         border: round $primary;
     }
 
     #editor-pane {
         width: 1fr;
-    }
-
-    #preview-pane {
-        width: 48;
     }
 
     #config-tree {
@@ -580,9 +588,10 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
     """
 
     BINDINGS = [
-        Binding("ctrl+s", "save", "Save"),
+        Binding("ctrl+s", "apply_current_edit", "Apply", priority=True),
         Binding("ctrl+e", "export_json", "Export"),
         Binding("ctrl+r", "reset_field", "Reset field"),
+        Binding("ctrl+x", "save", "Finish", priority=True),
         Binding("q", "quit", "Quit"),
     ]
 
@@ -590,9 +599,11 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         self,
         schema: type[BaseModel],
         value: Optional[BaseModel] = None,
+        output_path: Optional[Path] = None,
     ) -> None:
         super().__init__()
         self.schema = schema
+        self.output_path = output_path
         self.nodes = _walk_schema(schema)
         self.node_lookup = {node.dotted_path: node for node in self.nodes}
         self.data = (
@@ -635,15 +646,11 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
                 with Horizontal():
                     yield Button("Apply", id="apply-value", variant="primary")
                     yield Button("Reset to default", id="reset-value")
-            with Vertical(id="preview-pane"):
-                yield Static("Preview", classes="section-title")
-                yield Pretty({}, id="preview")
         yield Footer()
 
     def on_mount(self) -> None:
         self.query_one("#editor-widget-host", Container).can_focus = False
         self._rebuild_tree()
-        self._refresh_preview()
         if self.current_path:
             self._load_node(self.node_lookup[self.current_path])
 
@@ -837,8 +844,23 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
     def _focus_current_editor_input(self) -> None:
         self._current_editor().focus_input()
 
+    def _is_editor_control_focused(self) -> bool:
+        focused = self.focused
+        if focused is None:
+            return False
+        if isinstance(focused, (Input, Checkbox, Select, TextArea)):
+            return True
+        return False
+
     def _validate_data(self) -> BaseModel:
         return self.schema.model_validate(self.data)
+
+    def _persist_validated_data(self, validated: BaseModel) -> None:
+        if self.output_path is None:
+            return
+        if not self.output_path.parent.exists():
+            self.output_path.parent.mkdir(parents=True, exist_ok=True)
+        self.output_path.write_text(validated.model_dump_json(indent=2))
 
     def _apply_current_field(self) -> None:
         if not self.current_path:
@@ -856,14 +878,11 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
             return
 
         self.data = validated.model_dump(mode="json")
+        self._persist_validated_data(validated)
         self.query_one("#editor-error", Static).update("")
         self._rebuild_tree()
-        self._refresh_preview()
         self._load_node(node)
         self._focus_tree_at_current_path()
-
-    def _refresh_preview(self) -> None:
-        self.query_one("#preview", Pretty).update(self.data)
 
     @on(Button.Pressed, "#apply-value")
     def apply_value(self) -> None:
@@ -883,9 +902,15 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         elif default is not None:
             default = _json_safe(default)
         _set_value(self.data, node.path, default)
-        self.validation_errors = self._collect_validation_errors()
+        try:
+            validated = self._validate_data()
+        except ValidationError:
+            self.validation_errors = self._collect_validation_errors()
+        else:
+            self.data = validated.model_dump(mode="json")
+            self._persist_validated_data(validated)
+            self.validation_errors = {}
         self._rebuild_tree()
-        self._refresh_preview()
         self._load_node(node)
         self._focus_tree_at_current_path()
 
@@ -984,9 +1009,14 @@ class ExampleProgramSettings(BaseModel):
 def run_editor(
     schema: type[BaseModel],
     value: Optional[BaseModel] = None,
+    output_path: Optional[Path] = None,
 ) -> Optional[BaseModel]:
     """Run the configuration editor for a schema."""
-    return ConfigEditorApp(schema=schema, value=value).run()
+    return ConfigEditorApp(
+        schema=schema,
+        value=value,
+        output_path=output_path,
+    ).run()
 
 
 def main() -> None:
