@@ -246,6 +246,10 @@ class ConfigTree(Tree[str]):
         Binding("enter", "activate_current", "Activate", show=False),
         Binding("right", "activate_current", "Activate", show=False),
         Binding("left", "collapse_current", "Collapse", show=False),
+        Binding("l", "activate_current", "Activate", show=False),
+        Binding("h", "collapse_current", "Collapse", show=False),
+        Binding("j", "cursor_down", "Down", show=False),
+        Binding("k", "cursor_up", "Up", show=False),
     ]
 
     def action_activate_current(self) -> None:
