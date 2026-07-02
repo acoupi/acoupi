@@ -20,7 +20,7 @@ class TreePresenter:
         prefix = ".".join(path)
         return any(
             error == prefix or error.startswith(f"{prefix}.")
-            for error in self.app.validation_errors
+            for error in self.app.state.validation_errors
         )
 
     def format_label(self, node: FieldNode) -> str:
@@ -32,9 +32,10 @@ class TreePresenter:
             )
             return f"{marker} {node.title}"
 
-        value = get_value(self.app.data, node.path)
-        if node.dotted_path in self.app.editor_errors or self.branch_has_error(
-            node.path
+        value = get_value(self.app.state.data, node.path)
+        if (
+            node.dotted_path in self.app.state.editor_errors
+            or self.branch_has_error(node.path)
         ):
             indicator = "[red]![/red]"
         elif value is None and node.required:
@@ -74,11 +75,11 @@ class TreePresenter:
                 branch.allow_expand = False
 
         if (
-            self.app.current_path
-            and self.app.current_path in self.app._tree_paths
+            self.app.state.current_path
+            and self.app.state.current_path in self.app._tree_paths
         ):
-            self.expand_to_path(self.app.current_path)
-            tree.select_node(self.app._tree_paths[self.app.current_path])
+            self.expand_to_path(self.app.state.current_path)
+            tree.select_node(self.app._tree_paths[self.app.state.current_path])
 
     def refresh_node_label(self, node: FieldNode) -> None:
         tree_node = self.app._tree_paths.get(node.dotted_path)
