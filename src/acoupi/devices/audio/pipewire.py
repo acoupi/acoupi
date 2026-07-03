@@ -61,16 +61,44 @@ def get_input_devices() -> list[DeviceInfo]:
     ]
 
 
+def _extract_rate(rate_field) -> list[int]:
+    if isinstance(rate_field, int):
+        return [rate_field]
+    if isinstance(rate_field, list):
+        return [r for r in rate_field if isinstance(r, int)]
+    if isinstance(rate_field, dict):
+        default = rate_field.get("default")
+        min_rate = rate_field.get("min")
+        max_rate = rate_field.get("max")
+        rates = []
+        if isinstance(default, int):
+            rates.append(default)
+        if isinstance(min_rate, int) and isinstance(max_rate, int):
+            for r in [16000, 32000, 44100, 48000, 96000, 192000]:
+                if min_rate <= r <= max_rate:
+                    rates.append(r)
+        if not rates:
+            if isinstance(min_rate, int):
+                rates.append(min_rate)
+            if isinstance(max_rate, int):
+                rates.append(max_rate)
+        return rates
+    return [48000]
+
+
 def _parse_pw_info(pw_info: dict) -> DeviceInfo:
     """Convert raw ``pw-dump`` node information into ``DeviceInfo``."""
     props = pw_info["props"]
     formats = pw_info["params"]["EnumFormat"]
     default_format = formats[0]
+    samplerates = set()
+    for f in formats:
+        samplerates.update(_extract_rate(f.get("rate", 48_000)))
     return DeviceInfo(
         name=props["node.name"],
         description=props["node.description"],
         max_input_channels=default_format["channels"],
-        samplerates=list({format.get("rate", 48_000) for format in formats}),
+        samplerates=list(samplerates),
     )
 
 
