@@ -459,7 +459,8 @@ def get_field_dtype(field: FieldInfo) -> type:
 
     # Check for optional fields and remove the
     # typing.Optional if present
-    if origin == Union:
+    import types
+    if origin in (Union, getattr(types, "UnionType", None)):
         nested = get_args(annotation)[0]
         return nested
 
