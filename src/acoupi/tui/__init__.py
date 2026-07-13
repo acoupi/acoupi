@@ -8,6 +8,7 @@ from .app import (
 from .controller import ConfigEditorController
 from .demo import (
     ExampleAudioSettings,
+    ExamplePipeWireProgramSettings,
     ExampleProgramSettings,
     ExampleStorageSettings,
     TimeInputEditor,
@@ -32,6 +33,7 @@ __all__ = [
     "ConfigEditorController",
     "ConfigTree",
     "ExampleAudioSettings",
+    "ExamplePipeWireProgramSettings",
     "ExampleProgramSettings",
     "ExampleStorageSettings",
     "FieldNode",

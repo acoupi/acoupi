@@ -14,8 +14,7 @@ from textual.widgets import Button, Footer, Header, Static, Tree
 from typing_extensions import get_origin
 
 from .controller import ConfigEditorController
-from .demo import ExampleProgramSettings
-from .dialogs import MessageScreen
+from .demo import ExamplePipeWireProgramSettings
 from .editors import (
     BaseEditor,
     CheckboxEditor,
@@ -215,6 +214,9 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
     def _refresh_tree_node_label(self, node: FieldNode) -> None:
         self.tree_presenter.refresh_node_label(node)
 
+    def refresh_tree_node_label(self, node: FieldNode) -> None:
+        self._refresh_tree_node_label(node)
+
     def _finish_successful_change(
         self, node: FieldNode, validated: BaseModel
     ) -> None:
@@ -275,6 +277,11 @@ class ConfigEditorApp(App[Optional[BaseModel]]):
         return self._make_default_editor(node, value)
 
     def _make_default_editor(self, node: FieldNode, value: Any) -> BaseEditor:
+        # Dynamic field behaviors can turn a scalar field into a choice field
+        # when valid values depend on current config state or live resources.
+        if self.controller.runtime_options(node):
+            return SelectEditor(node, value)
+
         annotation = node.effective_annotation
         origin = get_origin(annotation)
         if node.is_section:
@@ -356,6 +363,6 @@ def run_editor(
 
 def main() -> None:
     """Launch a demo editor when run as a module."""
-    result = run_editor(ExampleProgramSettings)
+    result = run_editor(ExamplePipeWireProgramSettings)
     if result is not None:
         print(result.model_dump_json(indent=2))

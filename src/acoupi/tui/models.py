@@ -8,6 +8,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from .behaviors import FieldBehavior, extract_field_behavior
 from .utils import is_basemodel_type, titleize, unwrap_annotation
 
 
@@ -23,6 +24,7 @@ class FieldNode:
     parent_model: type[BaseModel]
     metadata: tuple[Any, ...]
     editor_factory: Any = None
+    behavior: FieldBehavior | None = None
 
     @property
     def dotted_path(self) -> str:
@@ -71,6 +73,8 @@ def walk_schema(
             continue
 
         _, metadata = unwrap_annotation(annotation)
+        field_metadata = tuple(getattr(field, "metadata", ()))
+        combined_metadata = metadata + field_metadata
         node = FieldNode(
             path=prefix + (field_name,),
             field_name=field_name,
@@ -78,8 +82,9 @@ def walk_schema(
             annotation=annotation,
             field_info=field,
             parent_model=schema,
-            metadata=metadata,
-            editor_factory=extract_editor_factory(metadata),
+            metadata=combined_metadata,
+            editor_factory=extract_editor_factory(combined_metadata),
+            behavior=extract_field_behavior(combined_metadata),
         )
         nodes.append(node)
 
