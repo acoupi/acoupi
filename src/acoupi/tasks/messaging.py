@@ -30,22 +30,33 @@ def generate_send_messages_task(
     order: Literal["oldest_first", "newest_first"] = "oldest_first",
     logger: logging.Logger = logger,
 ) -> Callable[[], None]:
-    """Generate a send data task.
+    """Generate a task that sends queued messages.
+
+    The returned task retrieves unsent messages from ``message_store``,
+    applies the requested selection order and optional limit, sends the
+    selected messages with each messenger, and stores successful
+    responses.
 
     Parameters
     ----------
     message_store : types.MessageStore
-        The message store to get and store messages.
+        Message store used to retrieve unsent messages and persist
+        responses.
     messengers : list[types.Messenger] | None, optional
-        The messengers to send messages, by default None.
+        Messenger instances used to send the selected messages. Must
+        contain at least one messenger.
     max_messages : int | None, optional
         Maximum number of messages to send per task run. If `None`, all
         unsent messages are sent.
     order : Literal["oldest_first", "newest_first"], optional
-        Order in which unsent messages are selected, by default
-        "oldest_first".
+        Order used to prioritise which unsent messages are selected first.
     logger : logging.Logger, optional
-        The logger to log messages, by default logger.
+        Logger instance used to report task progress and send outcomes.
+
+    Returns
+    -------
+    Callable[[], None]
+        A task that sends the selected messages when called.
 
     Raises
     ------
@@ -55,17 +66,9 @@ def generate_send_messages_task(
 
     Notes
     -----
-    The send data task calls the following methods:
-
-    1. **message_store.get_unsent_messages()** -> List[data.Message]
-        - Get the unsent messages from the message store.
-        - See [components.message_stores][acoupi.components.message_stores] for implementation of [types.MessageStore][acoupi.components.types.MessageStore].
-    2. **messenger.send_message(message)** -> data.Response
-        - Send the messages to a remote server.
-        - See [acoupi.components.messengers][acoupi.components.messengers] for implementation of [types.Messenger][acoupi.components.types.Messenger].
-    3. **message_store.store_response(response)** -> None
-        - Store the response from the remote server in the message store.
-        - See [components.message_stores][acoupi.components.message_stores] for implementation of [types.MessageStore][acoupi.components.types.MessageStore].
+    When ``max_messages`` is ``None``, the task selects all unsent
+    messages. Otherwise, it selects at most ``max_messages`` messages
+    using ``order`` to determine which messages are considered first.
     """
     if not messengers:
         raise ValueError("At least one messenger must be provided.")
@@ -76,7 +79,10 @@ def generate_send_messages_task(
     def send_messages_task() -> None:
         """Send Messages."""
         logger.info(
-            "Starting message send task with %d messenger(s), limit=%s, order=%s.",
+            (
+                "Starting message send task with %d messenger(s), "
+                "limit=%s, order=%s."
+            ),
             len(messengers),
             max_messages,
             order,
@@ -114,7 +120,10 @@ def generate_send_messages_task(
 
                 successful_sends += 1
                 logger.debug(
-                    "Response received for message %s via %s with status %s.",
+                    (
+                        "Response received for message %s via %s "
+                        "with status %s."
+                    ),
                     message.id,
                     messenger.__class__.__name__,
                     response.status,
@@ -122,7 +131,11 @@ def generate_send_messages_task(
                 message_store.store_response(response)
 
         logger.info(
-            "Finished message send task: %d message(s) selected, %d send attempt(s), %d successful response(s), %d failed send(s).",
+            (
+                "Finished message send task: %d message(s) selected, "
+                "%d send attempt(s), %d successful response(s), "
+                "%d failed send(s)."
+            ),
             len(messages),
             attempted_sends,
             successful_sends,

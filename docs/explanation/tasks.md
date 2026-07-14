@@ -94,6 +94,10 @@ The task builds upon the acoupi components: `ProcessingFilter` to determine if a
 The [Messaging](../reference/tasks.md) task is responsible responsible for communication with a remote server.
 It uses the `Messenger` component to define the communication protocol for sending messages, and the `MessageStore` component to check if there are any pending messages to need to be sent.
 
+When needed, the messaging task can send queued messages in smaller
+batches instead of sending the full backlog in one run. It can also
+choose whether older or newer queued messages are selected first.
+
 #### Management
 
 The [Management](../reference/tasks.md) task is responsible for managing recording files.
