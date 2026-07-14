@@ -2,7 +2,7 @@
 
 import datetime
 import sqlite3
-from typing import List
+from typing import Literal
 from uuid import UUID
 
 from acoupi import data
@@ -24,9 +24,13 @@ def store_message(
     )
 
 
-def get_unsent_messages(connection: sqlite3.Connection) -> List[data.Message]:
-    rows = connection.execute(
-        """
+def get_unsent_messages(
+    connection: sqlite3.Connection,
+    limit: int | None = None,
+    order: Literal["oldest_first", "newest_first"] = "oldest_first",
+) -> list[data.Message]:
+    order_by = "DESC" if order == "newest_first" else "ASC"
+    query = f"""
         SELECT m.id, m.content, m.created_on
         FROM message AS m
         WHERE NOT EXISTS (
@@ -34,9 +38,15 @@ def get_unsent_messages(connection: sqlite3.Connection) -> List[data.Message]:
             FROM response AS r
             WHERE r.message_id = m.id AND r.status = ?
         )
-        """,
-        (data.ResponseStatus.SUCCESS.value,),
-    ).fetchall()
+        ORDER BY m.created_on {order_by}, m.id ASC
+    """
+    parameters = [data.ResponseStatus.SUCCESS.value]
+
+    if limit is not None:
+        query += " LIMIT ?"
+        parameters.append(limit)
+
+    rows = connection.execute(query, tuple(parameters)).fetchall()
 
     return [
         data.Message(

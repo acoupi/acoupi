@@ -13,7 +13,7 @@ synced. The send data process contains the following steps:
 """
 
 import logging
-from typing import Callable, List, Optional
+from typing import Callable, Literal
 
 from acoupi.components import types
 from acoupi.system.exceptions import MessageSendError
@@ -24,7 +24,9 @@ logger.setLevel(logging.INFO)
 
 def generate_send_messages_task(
     message_store: types.MessageStore,
-    messengers: Optional[List[types.Messenger]] = None,
+    messengers: list[types.Messenger] | None = None,
+    max_messages: int | None = None,
+    order: Literal["oldest_first", "newest_first"] = "oldest_first",
     logger: logging.Logger = logger,
 ) -> Callable[[], None]:
     """Generate a send data task.
@@ -33,8 +35,14 @@ def generate_send_messages_task(
     ----------
     message_store : types.MessageStore
         The message store to get and store messages.
-    messengers : Optional[List[types.Messenger]], optional
+    messengers : list[types.Messenger] | None, optional
         The messengers to send messages, by default None.
+    max_messages : int | None, optional
+        Maximum number of messages to send per task run. If `None`, all
+        unsent messages are sent.
+    order : Literal["oldest_first", "newest_first"], optional
+        Order in which unsent messages are selected, by default
+        "oldest_first".
     logger : logging.Logger, optional
         The logger to log messages, by default logger.
 
@@ -55,9 +63,15 @@ def generate_send_messages_task(
     if messengers is None:
         messengers = []
 
+    if max_messages is not None and max_messages <= 0:
+        raise ValueError("max_messages must be a positive integer or None.")
+
     def send_messages_task() -> None:
         """Send Messages."""
-        messages = message_store.get_unsent_messages()
+        messages = message_store.get_unsent_messages(
+            limit=max_messages,
+            order=order,
+        )
 
         for message in messages:
             logger.info("MESSAGE TASK")

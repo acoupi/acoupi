@@ -33,7 +33,7 @@ that inherits from `MessagingProgram` and configure it using the
 """
 
 from pathlib import Path
-from typing import Callable, Optional, TypeVar
+from typing import Callable, Literal, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -61,13 +61,19 @@ class MessagingConfig(BaseModel):
     message_send_interval: int = 120
     """Interval between sending messages in seconds."""
 
+    max_messages: int | None = Field(default=None, gt=0)
+    """Maximum number of messages to send per messaging task run."""
+
+    message_order: Literal["oldest_first", "newest_first"] = "oldest_first"
+    """Order in which unsent messages are prioritised for sending."""
+
     heartbeat_interval: int = 60 * 60
     """Interval between sending heartbeats in seconds."""
 
-    http: Optional[messengers.HTTPConfig] = None
+    http: messengers.HTTPConfig | None = None
     """HTTP messenger configuration."""
 
-    mqtt: Optional[messengers.MQTTConfig] = None
+    mqtt: messengers.MQTTConfig | None = None
     """MQTT messenger configuration."""
 
 
@@ -112,7 +118,7 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
     management.
     """
 
-    messenger: Optional[types.Messenger]
+    messenger: types.Messenger | None
     """The configured messenger instance."""
 
     message_store: types.MessageStore
@@ -218,12 +224,12 @@ class MessagingProgram(BasicProgram[ProgramConfig]):
         return tasks.generate_send_messages_task(
             message_store=self.message_store,
             messengers=[self.messenger],
+            max_messages=config.messaging.max_messages,
+            order=config.messaging.message_order,
             logger=self.logger.getChild("messaging"),
         )
 
-    def create_heartbeat_task(
-        self, config: ProgramConfig
-    ) -> Optional[Callable]:
+    def create_heartbeat_task(self, config: ProgramConfig) -> Callable | None:
         """Create the heartbeat task.
 
         This method creates the task responsible for sending heartbeats.
