@@ -11,20 +11,44 @@ from acoupi import components, data, tasks
 
 def test_generate_send_messages_task_rejects_non_positive_max_messages():
     message_store = Mock()
+    messenger = Mock()
 
     with pytest.raises(ValueError, match="positive integer or None"):
         tasks.generate_send_messages_task(
             message_store=message_store,
+            messengers=[messenger],
             max_messages=0,
+        )
+
+
+def test_generate_send_messages_task_rejects_missing_messengers():
+    message_store = Mock()
+
+    with pytest.raises(ValueError, match="At least one messenger"):
+        tasks.generate_send_messages_task(
+            message_store=message_store,
+            messengers=None,
+        )
+
+
+def test_generate_send_messages_task_rejects_empty_messengers():
+    message_store = Mock()
+
+    with pytest.raises(ValueError, match="At least one messenger"):
+        tasks.generate_send_messages_task(
+            message_store=message_store,
+            messengers=[],
         )
 
 
 def test_generate_send_messages_task_passes_limit_and_order_to_store():
     message_store = Mock()
     message_store.get_unsent_messages.return_value = []
+    messenger = Mock()
 
     task = tasks.generate_send_messages_task(
         message_store=message_store,
+        messengers=[messenger],
         max_messages=3,
         order="newest_first",
     )

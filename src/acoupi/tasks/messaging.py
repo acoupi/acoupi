@@ -20,6 +20,7 @@ from acoupi.system.exceptions import MessageSendError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+MAX_DEBUG_CONTENT_LENGTH = 200
 
 
 def generate_send_messages_task(
@@ -46,6 +47,12 @@ def generate_send_messages_task(
     logger : logging.Logger, optional
         The logger to log messages, by default logger.
 
+    Raises
+    ------
+    ValueError
+        Raised if `messengers` is empty or not provided, or if
+        `max_messages` is not a positive integer.
+
     Notes
     -----
     The send data task calls the following methods:
@@ -60,36 +67,43 @@ def generate_send_messages_task(
         - Store the response from the remote server in the message store.
         - See [components.message_stores][acoupi.components.message_stores] for implementation of [types.MessageStore][acoupi.components.types.MessageStore].
     """
-    if messengers is None:
-        messengers = []
+    if not messengers:
+        raise ValueError("At least one messenger must be provided.")
 
     if max_messages is not None and max_messages <= 0:
         raise ValueError("max_messages must be a positive integer or None.")
 
     def send_messages_task() -> None:
         """Send Messages."""
+        logger.info(
+            "Starting message send task with %d messenger(s), limit=%s, order=%s.",
+            len(messengers),
+            max_messages,
+            order,
+        )
         messages = message_store.get_unsent_messages(
             limit=max_messages,
             order=order,
         )
+        logger.info("Selected %d message(s) to be sent.", len(messages))
 
-        for message in messages:
-            logger.info("MESSAGE TASK")
-            logger.info(f"MESSAGE CONTENT: {message.content}")
+        attempted_sends = 0
+        successful_sends = 0
+        failed_sends = 0
 
-            if message.content is None:
-                logger.debug("MESSAGE IS EMPTY")
-                continue
-
-            if len(messengers) == 0:
-                logger.info("NO MESSENGER DEFINED")
-                continue
-                # break
-
-            for messenger in messengers:
+        for messenger in messengers:
+            for message in messages:
+                attempted_sends += 1
+                logger.debug(
+                    "Sending message %s via %s with content %r.",
+                    message.id,
+                    messenger.__class__.__name__,
+                    _format_message_content_for_debug(message.content),
+                )
                 try:
                     response = messenger.send_message(message)
                 except MessageSendError as error:
+                    failed_sends += 1
                     logger.error(
                         "Message send failed for message %s via %s: %s",
                         message.id,
@@ -98,12 +112,28 @@ def generate_send_messages_task(
                     )
                     continue
 
-                logger.info(
-                    "Message sent for message %s via %s - Response Status: %s",
+                successful_sends += 1
+                logger.debug(
+                    "Response received for message %s via %s with status %s.",
                     message.id,
                     messenger.__class__.__name__,
                     response.status,
                 )
                 message_store.store_response(response)
 
+        logger.info(
+            "Finished message send task: %d message(s) selected, %d send attempt(s), %d successful response(s), %d failed send(s).",
+            len(messages),
+            attempted_sends,
+            successful_sends,
+            failed_sends,
+        )
+
     return send_messages_task
+
+
+def _format_message_content_for_debug(content: str | bytes) -> str | bytes:
+    if isinstance(content, bytes):
+        return content[:MAX_DEBUG_CONTENT_LENGTH]
+
+    return content[:MAX_DEBUG_CONTENT_LENGTH]
