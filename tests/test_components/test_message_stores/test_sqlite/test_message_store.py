@@ -1,5 +1,6 @@
 """Test the SQLite Message store."""
 
+import datetime
 import sqlite3
 from pathlib import Path
 from typing import Generator
@@ -174,3 +175,54 @@ def test_get_unsent_messages(
         b"test message 2",
         b"test message 3",
     }
+
+
+def test_get_unsent_messages_applies_limit_and_oldest_first_order(
+    sqlite_message_store: components.SqliteMessageStore,
+):
+    messages = [
+        data.Message(
+            content=f"test message {index}",
+            created_on=datetime.datetime(
+                2024, 1, index, tzinfo=datetime.timezone.utc
+            ),
+        )
+        for index in range(1, 4)
+    ]
+
+    for message in messages:
+        sqlite_message_store.store_message(message)
+
+    unsent_messages = sqlite_message_store.get_unsent_messages(limit=2)
+
+    assert [message.content for message in unsent_messages] == [
+        b"test message 1",
+        b"test message 2",
+    ]
+
+
+def test_get_unsent_messages_applies_newest_first_order(
+    sqlite_message_store: components.SqliteMessageStore,
+):
+    messages = [
+        data.Message(
+            content=f"test message {index}",
+            created_on=datetime.datetime(
+                2024, 1, index, tzinfo=datetime.timezone.utc
+            ),
+        )
+        for index in range(1, 4)
+    ]
+
+    for message in messages:
+        sqlite_message_store.store_message(message)
+
+    unsent_messages = sqlite_message_store.get_unsent_messages(
+        limit=2,
+        order="newest_first",
+    )
+
+    assert [message.content for message in unsent_messages] == [
+        b"test message 3",
+        b"test message 2",
+    ]

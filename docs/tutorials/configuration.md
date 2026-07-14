@@ -141,7 +141,16 @@ Messages can be sent using either the HTTP or MQTT protocol. At least one of the
 
 The messages and their statuses, indicating if they have been sent, and whether this was a success or a failure, are stored in a database called `messages.db`. By default, this file is located in the `storages/` folder in the home directory.
 
-The `message_send_interval` parameter controls how frequently the _acoupi_ program checks for new messages to send (i.e., 120 seconds by default). Similarly, the `heartbeat_interval` determines how often a `heartbeat_message`is sent (i.e., 10 minutes by default).
+The `message_send_interval` parameter controls how frequently the
+_acoupi_ program checks for new messages to send (i.e., 120 seconds
+by default). Similarly, the `heartbeat_interval` determines how often
+a `heartbeat_message` is sent (i.e., 1 hour by default).
+
+For deployments with limited bandwidth or strict communication
+budgets, you can also restrict how many queued messages are sent in a
+single run. This makes it possible to spread message delivery across
+multiple runs instead of attempting to send the entire backlog at
+once.
 
 
 !!! Example "CLI Output: _acoupi config get_"
@@ -153,7 +162,9 @@ The `message_send_interval` parameter controls how frequently the _acoupi_ progr
       "messaging": {
         "messages_db": "/home/pi/storages/messages.db",
         "message_send_interval": 120,
-        "heartbeat_interval": 600,
+        "max_messages": null,
+        "message_order": "oldest_first",
+        "heartbeat_interval": 3600,
         "http": {
           "base_url": "https://test_acoupi.org/",
           "content_type": "application/json",
@@ -180,7 +191,9 @@ The table below provides detailed information about the supplementary parameters
 | `messaging.messages_db`| str | "/home/pi/storages/messages.db" | Path to the database file storing messages. | This .db keeps track of the messages to be sent to a remote server and their sending/receiving status. |
 | __Messaging__| | | Configuration for sending messages to remote server.| Will require access to network connectivity at the location of your device deployment. |
 | `messaging.message_send_interval`| int (sec.) | 120 | Interval in seconds for sending messages to the remote server. | Adjust for network performance and data bandwidth. |
-| `messaging.heartbeat_interval` | int (sec.) | 600 | Interval in seconds for sending heartbeat messages to the server. | Heartbeat message provides information about the device status (i.e., the correct functioning of the device). |
+| `messaging.max_messages` | int or null | null | Maximum number of queued messages sent during one messaging run. | Use this when messages should be spread across multiple runs instead of sending the full backlog at once. |
+| `messaging.message_order` | str | "oldest_first" | Controls whether the oldest or newest queued messages are selected first when applying `max_messages`. | Supported values are `oldest_first` and `newest_first`. |
+| `messaging.heartbeat_interval` | int (sec.) | 3600 | Interval in seconds for sending heartbeat messages to the server. | Heartbeat message provides information about the device status (i.e., the correct functioning of the device). |
 | __Messaging HTTP__| | | Configuration for sending messages via HTTP.| |
 | `messaging.http.base_url` | str | - | URL of the HTTP server to which messages are sent. | Configure according to your server setup. |
 | `messaging.http.content_type` | str | application/json | Content type of the HTTP messages. | Messages to be sent are formated into a `json` object. |

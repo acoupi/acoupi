@@ -13,69 +13,103 @@ synced. The send data process contains the following steps:
 """
 
 import logging
-from typing import Callable, List, Optional
+from typing import Callable, Literal
 
 from acoupi.components import types
 from acoupi.system.exceptions import MessageSendError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+MAX_DEBUG_CONTENT_LENGTH = 200
 
 
 def generate_send_messages_task(
     message_store: types.MessageStore,
-    messengers: Optional[List[types.Messenger]] = None,
+    messengers: list[types.Messenger] | None = None,
+    max_messages: int | None = None,
+    order: Literal["oldest_first", "newest_first"] = "oldest_first",
     logger: logging.Logger = logger,
 ) -> Callable[[], None]:
-    """Generate a send data task.
+    """Generate a task that sends queued messages.
+
+    The returned task retrieves unsent messages from ``message_store``,
+    applies the requested selection order and optional limit, sends the
+    selected messages with each messenger, and stores successful
+    responses.
 
     Parameters
     ----------
     message_store : types.MessageStore
-        The message store to get and store messages.
-    messengers : Optional[List[types.Messenger]], optional
-        The messengers to send messages, by default None.
+        Message store used to retrieve unsent messages and persist
+        responses.
+    messengers : list[types.Messenger] | None, optional
+        Messenger instances used to send the selected messages. Must
+        contain at least one messenger.
+    max_messages : int | None, optional
+        Maximum number of messages to send per task run. If `None`, all
+        unsent messages are sent.
+    order : Literal["oldest_first", "newest_first"], optional
+        Order used to prioritise which unsent messages are selected first.
     logger : logging.Logger, optional
-        The logger to log messages, by default logger.
+        Logger instance used to report task progress and send outcomes.
+
+    Returns
+    -------
+    Callable[[], None]
+        A task that sends the selected messages when called.
+
+    Raises
+    ------
+    ValueError
+        Raised if `messengers` is empty or not provided, or if
+        `max_messages` is not a positive integer.
 
     Notes
     -----
-    The send data task calls the following methods:
-
-    1. **message_store.get_unsent_messages()** -> List[data.Message]
-        - Get the unsent messages from the message store.
-        - See [components.message_stores][acoupi.components.message_stores] for implementation of [types.MessageStore][acoupi.components.types.MessageStore].
-    2. **messenger.send_message(message)** -> data.Response
-        - Send the messages to a remote server.
-        - See [acoupi.components.messengers][acoupi.components.messengers] for implementation of [types.Messenger][acoupi.components.types.Messenger].
-    3. **message_store.store_response(response)** -> None
-        - Store the response from the remote server in the message store.
-        - See [components.message_stores][acoupi.components.message_stores] for implementation of [types.MessageStore][acoupi.components.types.MessageStore].
+    When ``max_messages`` is ``None``, the task selects all unsent
+    messages. Otherwise, it selects at most ``max_messages`` messages
+    using ``order`` to determine which messages are considered first.
     """
-    if messengers is None:
-        messengers = []
+    if not messengers:
+        raise ValueError("At least one messenger must be provided.")
+
+    if max_messages is not None and max_messages <= 0:
+        raise ValueError("max_messages must be a positive integer or None.")
 
     def send_messages_task() -> None:
         """Send Messages."""
-        messages = message_store.get_unsent_messages()
+        logger.info(
+            (
+                "Starting message send task with %d messenger(s), "
+                "limit=%s, order=%s."
+            ),
+            len(messengers),
+            max_messages,
+            order,
+        )
+        messages = message_store.get_unsent_messages(
+            limit=max_messages,
+            order=order,
+        )
+        logger.info("Selected %d message(s) to be sent.", len(messages))
 
-        for message in messages:
-            logger.info("MESSAGE TASK")
-            logger.info(f"MESSAGE CONTENT: {message.content}")
+        attempted_sends = 0
+        successful_sends = 0
+        failed_sends = 0
 
-            if message.content is None:
-                logger.debug("MESSAGE IS EMPTY")
-                continue
-
-            if len(messengers) == 0:
-                logger.info("NO MESSENGER DEFINED")
-                continue
-                # break
-
-            for messenger in messengers:
+        for messenger in messengers:
+            for message in messages:
+                attempted_sends += 1
+                logger.debug(
+                    "Sending message %s via %s with content %r.",
+                    message.id,
+                    messenger.__class__.__name__,
+                    _format_message_content_for_debug(message.content),
+                )
                 try:
                     response = messenger.send_message(message)
                 except MessageSendError as error:
+                    failed_sends += 1
                     logger.error(
                         "Message send failed for message %s via %s: %s",
                         message.id,
@@ -84,12 +118,35 @@ def generate_send_messages_task(
                     )
                     continue
 
-                logger.info(
-                    "Message sent for message %s via %s - Response Status: %s",
+                successful_sends += 1
+                logger.debug(
+                    (
+                        "Response received for message %s via %s "
+                        "with status %s."
+                    ),
                     message.id,
                     messenger.__class__.__name__,
                     response.status,
                 )
                 message_store.store_response(response)
 
+        logger.info(
+            (
+                "Finished message send task: %d message(s) selected, "
+                "%d send attempt(s), %d successful response(s), "
+                "%d failed send(s)."
+            ),
+            len(messages),
+            attempted_sends,
+            successful_sends,
+            failed_sends,
+        )
+
     return send_messages_task
+
+
+def _format_message_content_for_debug(content: str | bytes) -> str | bytes:
+    if isinstance(content, bytes):
+        return content[:MAX_DEBUG_CONTENT_LENGTH]
+
+    return content[:MAX_DEBUG_CONTENT_LENGTH]

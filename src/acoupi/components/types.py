@@ -7,6 +7,7 @@ from typing import (
     Dict,
     Generic,
     List,
+    Literal,
     Optional,
     ParamSpec,
     Protocol,
@@ -529,13 +530,25 @@ class MessageStore(ABC):
     """Keeps track of messages that have been produced and sent."""
 
     @abstractmethod
-    def get_unsent_messages(self) -> List[data.Message]:
-        """Get the recordings that have not been synced to the server.
+    def get_unsent_messages(
+        self,
+        limit: int | None = None,
+        order: Literal["oldest_first", "newest_first"] = "oldest_first",
+    ) -> list[data.Message]:
+        """Get messages that have not been sent successfully.
+
+        Parameters
+        ----------
+        limit : int | None, optional
+            Maximum number of unsent messages to return. If `None`, all
+            unsent messages are returned.
+        order : {"oldest_first", "newest_first"}, optional
+            Order used to prioritise unsent messages.
 
         Returns
         -------
-        List[data.Message]
-            A list of unsent messages.
+        list[data.Message]
+            Unsent messages matching the requested order and limit.
         """
 
     @abstractmethod
