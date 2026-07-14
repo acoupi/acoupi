@@ -468,7 +468,7 @@ class Summariser(ABC):
     def build_summary(
         self,
         now: datetime.datetime,
-    ) -> data.Message | None:
+    ) -> data.Message | list[data.Message] | None:
         """Build a summary.
 
         Parameters
@@ -478,10 +478,10 @@ class Summariser(ABC):
 
         Returns
         -------
-        data.Message | None
-            The summary as a data.Message object. Built-in summarisers emit
-            JSON text, but custom summarisers may emit raw bytes. Return
-            ``None`` when there is no summary to emit for the requested time.
+        data.Message | list[data.Message] | None
+            The summary as a single data.Message or a list of messages.
+            Return ``None`` when there is no summary to emit for the requested
+            time.
         """
 
 

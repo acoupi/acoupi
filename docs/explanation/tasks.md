@@ -76,7 +76,7 @@ The task builds upon the acoupi components: `ProcessingFilter` to determine if a
     from typing import Optional
 
     from acoupi import components, data, tasks
-    
+
     from acoupi_batdetect2.model import BatDetect2
 
     recording_task = tasks.generate_detection_task(
@@ -109,8 +109,10 @@ This is useful when a recording should stay in temporary storage until other tas
 
 #### Summary
 
-The [Summary](../reference/tasks.md) task is responsible for generating summary messages to be sent to a remote server.
-It uses the `Summariser` component along with the `Messenger` component to define the communication protocol for sending these messages. 
+The [Summary][acoupi.tasks.summary.generate_summariser_task] task is responsible for generating summary messages to be sent to a remote server.
+It uses one or many user-provided [Summariser][acoupi.components.types.Summariser] components to build summary messages, then stores those messages for the [Messaging][acoupi.tasks.messaging.generate_send_messages_task] task to send independently.
+
+Each summariser may return no message, a single message, or multiple messages for a given summary interval. When multiple messages are returned, the summary task stores each one so they can be sent individually.
 
 The summary task is useful for providing aggregated information on detections over specific time periods such as hourly, daily, or weekly.
 
