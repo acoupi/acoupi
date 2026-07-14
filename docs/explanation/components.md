@@ -100,4 +100,5 @@ Each component can be configured to operate in a specific way, and can be combin
 #### Summarisers
 
 The [types.Summariser][acoupi.components.types.Summariser] component is responsible for summarising information related to the deployment of acoupi, its recordings and detections.
-The class implement two subclasses `StatisticsDetectionsSummariser` and `ThresholdsDetectionsSummariser`.
+Depending on the implementation, a summariser may return no message, a single summary message, or multiple summary messages for the same time interval.
+The class implement two subclasses: [StatisticsDetectionsSummariser][acoupi.components.summariser.StatisticsDetectionsSummariser] and [ThresholdsDetectionsSummariser][acoupi.components.summariser.ThresholdsDetectionsSummariser].

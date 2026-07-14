@@ -1,7 +1,8 @@
 """Summariser for acoupi.
 
 Summarisers are responsible for summarising model outputs (i.e., detections).
-Summarisers output a summary of type data.Message. The StatisticsDetectionsSummariser
+Summarisers may output no summary, a single [data.Message][acoupi.data.Message], or multiple
+messages depending on the implementation. The StatisticsDetectionsSummariser
 summarises the detections by calculating the mean, min, max, and count of classifications
 probabilities for each species. The ThresholdsDetectionsSummariser summarises the detections
 by calculating the count and mean of classifications probabilities for each species
@@ -11,7 +12,7 @@ The message output by the Summarisers is then used by the Messenger to send the 
 to a remote server. Summarisers are implemented as classes that inherit from Summariser.
 Implemntation of the Summarisers should refer to the database, where the classifications
 probabilities are stored. The class should implement the build_summary method, which
-takes a datetime.datetime object and returns a message payload.
+takes a datetime.datetime object and returns no message, one [data.Message][acoupi.data.Message], or many messages.
 """
 
 import datetime
