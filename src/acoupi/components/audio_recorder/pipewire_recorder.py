@@ -181,7 +181,12 @@ def _parse_pw_microphone_config(
     prompt: bool = True,
     prefix: str = "",
 ) -> PWRecorderConfig:
-    """Parse PipeWire recorder configuration from command-line arguments."""
+    """Parse PipeWire recorder configuration from command-line arguments.
+
+    When prompting, channel choices are constrained by the selected device's
+    advertised maximum input channels. Samplerate is treated as the requested
+    PipeWire recording rate.
+    """
     parser = ArgumentParser(description="Microphone configuration")
     parser.add_argument(
         f"--{prefix}device-name",
@@ -194,14 +199,14 @@ def _parse_pw_microphone_config(
         f"--{prefix}samplerate",
         dest="samplerate",
         type=int,
-        help="The samplerate of the microphone",
+        help="The requested recording samplerate",
         default=None,
     )
     parser.add_argument(
         f"--{prefix}audio-channels",
         dest="audio_channels",
         type=int,
-        help="The number of audio channels",
+        help="The requested number of input audio channels",
         default=None,
     )
 

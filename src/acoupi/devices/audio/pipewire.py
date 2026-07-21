@@ -17,7 +17,7 @@ class DeviceInfo(BaseModel):
     """Normalized description of a PipeWire audio input device."""
 
     description: str
-    """The input index of the audio device."""
+    """Human-readable description of the audio device."""
 
     name: str
     """The name of the audio device."""
@@ -26,7 +26,7 @@ class DeviceInfo(BaseModel):
     """The maximum number of input channels."""
 
     samplerates: list[int]
-    """Listed supported sampling rates"""
+    """Advertised sampling-rate candidates derived from PipeWire formats."""
 
 
 def get_input_devices() -> list[DeviceInfo]:
