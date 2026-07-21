@@ -1,6 +1,6 @@
 [project]
 name = "acoupi"
-version = "0.5.3"
+version = "0.5.4"
 description = "Classifier for bioacoustic devices"
 authors = [
   { name = "Aude Vuilli", email = "aude.vuilliomenet.18@ucl.ac.uk" },
