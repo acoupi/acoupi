@@ -272,7 +272,10 @@ def _parse_pw_microphone_config(
 
         choice = click.prompt(
             "How many audio channels do you want to use?",
-            type=click.Choice([1, 2]),
+            type=click.IntRange(
+                min=1,
+                max=max(1, selected_device.max_input_channels),
+            ),
             default=1,
         )
         parsed.audio_channels = choice

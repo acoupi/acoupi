@@ -166,6 +166,10 @@ def _extract_channels(format_field: EnumFormatItem) -> int:
     return default
 
 
+def _extract_max_channels(formats: list[EnumFormatItem]) -> int:
+    return max(_extract_channels(format_field) for format_field in formats)
+
+
 def _parse_pw_info(pw_info: dict) -> DeviceInfo:
     """Convert raw ``pw-dump`` node information into ``DeviceInfo``."""
     props = pw_info["props"]
@@ -175,7 +179,6 @@ def _parse_pw_info(pw_info: dict) -> DeviceInfo:
     adapter = TypeAdapter(list[EnumFormatItem])
     formats = adapter.validate_python(pw_info["params"]["EnumFormat"])
 
-    default_format = formats[0]
     samplerates = set()
     for f in formats:
         samplerates.update(_extract_rate(f))
@@ -183,7 +186,7 @@ def _parse_pw_info(pw_info: dict) -> DeviceInfo:
     return DeviceInfo(
         name=name,
         description=description,
-        max_input_channels=_extract_channels(default_format),
+        max_input_channels=_extract_max_channels(formats),
         samplerates=list(samplerates),
     )
 
