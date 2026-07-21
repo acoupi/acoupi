@@ -399,3 +399,52 @@ class TestParsePWRecorderConfig:
                 ],
                 prompt=False,
             )
+
+    def test_prompts_for_channels_up_to_selected_device_maximum(
+        self, monkeypatch
+    ):
+        device = DeviceInfo(
+            name="alsa_input.usb-Surround_Device-00.analog-surround-51",
+            description="Surround Device",
+            max_input_channels=6,
+            samplerates=[48000, 96000],
+        )
+        prompts = []
+
+        monkeypatch.setattr(
+            "acoupi.components.audio_recorder.pipewire_recorder.get_input_devices",
+            lambda: [device],
+        )
+
+        def fake_prompt(text, **kwargs):
+            prompts.append((text, kwargs))
+
+            if text == "What samplerate do you want to use?":
+                return 48000
+
+            if text == "How many audio channels do you want to use?":
+                prompt_type = kwargs["type"]
+                assert prompt_type.min == 1
+                assert prompt_type.max == 6
+                return 6
+
+            raise AssertionError(f"Unexpected prompt: {text}")
+
+        monkeypatch.setattr(
+            "acoupi.components.audio_recorder.pipewire_recorder.click.prompt",
+            fake_prompt,
+        )
+
+        config = _parse_pw_microphone_config(
+            [
+                "--device-name=alsa_input.usb-Surround_Device-00.analog-surround-51"
+            ],
+            prompt=True,
+        )
+
+        assert config.samplerate == 48000
+        assert config.audio_channels == 6
+        assert [text for text, _ in prompts] == [
+            "What samplerate do you want to use?",
+            "How many audio channels do you want to use?",
+        ]

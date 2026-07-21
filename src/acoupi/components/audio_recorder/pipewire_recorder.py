@@ -181,7 +181,12 @@ def _parse_pw_microphone_config(
     prompt: bool = True,
     prefix: str = "",
 ) -> PWRecorderConfig:
-    """Parse PipeWire recorder configuration from command-line arguments."""
+    """Parse PipeWire recorder configuration from command-line arguments.
+
+    When prompting, channel choices are constrained by the selected device's
+    advertised maximum input channels. Samplerate is treated as the requested
+    PipeWire recording rate.
+    """
     parser = ArgumentParser(description="Microphone configuration")
     parser.add_argument(
         f"--{prefix}device-name",
@@ -194,14 +199,14 @@ def _parse_pw_microphone_config(
         f"--{prefix}samplerate",
         dest="samplerate",
         type=int,
-        help="The samplerate of the microphone",
+        help="The requested recording samplerate",
         default=None,
     )
     parser.add_argument(
         f"--{prefix}audio-channels",
         dest="audio_channels",
         type=int,
-        help="The number of audio channels",
+        help="The requested number of input audio channels",
         default=None,
     )
 
@@ -257,7 +262,7 @@ def _parse_pw_microphone_config(
 
         choice = click.prompt(
             "What samplerate do you want to use?",
-            type=click.Choice(rates),
+            type=click.IntRange(min=8_000, max=384_000),
             default=default,
         )
         parsed.samplerate = choice
@@ -272,7 +277,10 @@ def _parse_pw_microphone_config(
 
         choice = click.prompt(
             "How many audio channels do you want to use?",
-            type=click.Choice([1, 2]),
+            type=click.IntRange(
+                min=1,
+                max=max(1, selected_device.max_input_channels),
+            ),
             default=1,
         )
         parsed.audio_channels = choice

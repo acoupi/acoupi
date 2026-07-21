@@ -112,8 +112,8 @@ The table below provides detailed information about the parameters available whe
 |---|---|---|---|---|
 | __Microphone__| | | Microphone configuration.| |
 | `microphone.device_name`| string | - | Will show the name of the connected usb microphone.| Ensure it matches the device in use.|
-| `microphone.samplerate`| int (Hz) | - | Sampling rate of the microphone in Hz. | Set the sampling rate according to the microphone's specifications.|
-|`microphone.audio_channels`| int | - | Number of audio channels (i.e., 1 for mono).| Configure according to the microphone's capabilities.|
+| `microphone.samplerate`| int (Hz) | - | Requested recording sample rate in Hz. | Use a rate appropriate for your microphone and recording workflow.|
+|`microphone.audio_channels`| int | - | Number of input audio channels to record. | Do not exceed the microphone's supported channel count.|
 | __Recording__| | | Microphone configuration.| |
 | `recording.duration`| int (sec.) | 3 | Duration in seconds for each audio recording. | Best kept at 3 seconds when using acoupi with ML classifiers models (e.g., batdetect2, birdnet) for optimal performance.|
 | `recording.interval`| int (sec.) | 10 | Interval in seconds between recordings. | Some pre-built programs with ML models (e.g., batdetect2) require processing time. This interval helps maintain good performance.|

@@ -82,6 +82,63 @@ class TestGetInputDevices:
         ):
             get_input_devices()
 
+    def test_parses_enumformat_choice_objects_and_aggregates_channels(
+        self, monkeypatch, make_completed_process
+    ):
+        payload = [
+            {
+                "id": 60,
+                "type": "PipeWire:Interface:Node",
+                "info": {
+                    "props": {
+                        "media.class": "Audio/Source",
+                        "node.name": "alsa_input.usb-test_device.analog-surround-51",
+                        "node.description": "Test Device",
+                    },
+                    "params": {
+                        "EnumFormat": [
+                            {
+                                "mediaType": "audio",
+                                "mediaSubtype": "raw",
+                                "rate": {
+                                    "default": 48000,
+                                    "min": 44100,
+                                    "max": 96000,
+                                },
+                                "channels": {
+                                    "default": 1,
+                                    "min": 1,
+                                    "max": 1,
+                                },
+                            },
+                            {
+                                "mediaType": "audio",
+                                "mediaSubtype": "raw",
+                                "rate": 192000,
+                                "channels": {
+                                    "default": 6,
+                                    "min": 2,
+                                    "max": 6,
+                                },
+                            },
+                        ]
+                    },
+                },
+            }
+        ]
+        monkeypatch.setattr(
+            "acoupi.devices.audio.pipewire.run",
+            lambda *args, **kwargs: make_completed_process(
+                json.dumps(payload)
+            ),
+        )
+
+        devices = get_input_devices()
+
+        assert len(devices) == 1
+        assert devices[0].max_input_channels == 6
+        assert sorted(devices[0].samplerates) == [44100, 48000, 96000, 192000]
+
 
 class TestGetInputDeviceByName:
     def test_returns_matching_device(

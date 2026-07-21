@@ -2,8 +2,9 @@
 
 import json
 from subprocess import CalledProcessError, run
+from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, TypeAdapter
 
 from acoupi.system.exceptions import DeviceUnavailableError
 
@@ -16,7 +17,7 @@ class DeviceInfo(BaseModel):
     """Normalized description of a PipeWire audio input device."""
 
     description: str
-    """The input index of the audio device."""
+    """Human-readable description of the audio device."""
 
     name: str
     """The name of the audio device."""
@@ -25,7 +26,7 @@ class DeviceInfo(BaseModel):
     """The maximum number of input channels."""
 
     samplerates: list[int]
-    """Listed supported sampling rates"""
+    """Advertised sampling-rate candidates derived from PipeWire formats."""
 
 
 def get_input_devices() -> list[DeviceInfo]:
@@ -61,43 +62,131 @@ def get_input_devices() -> list[DeviceInfo]:
     ]
 
 
-def _extract_rate(rate_field) -> list[int]:
-    if isinstance(rate_field, int):
-        return [rate_field]
-    if isinstance(rate_field, list):
-        return [r for r in rate_field if isinstance(r, int)]
-    if isinstance(rate_field, dict):
-        default = rate_field.get("default")
-        min_rate = rate_field.get("min")
-        max_rate = rate_field.get("max")
-        rates = []
-        if isinstance(default, int):
-            rates.append(default)
-        if isinstance(min_rate, int) and isinstance(max_rate, int):
-            for r in [16000, 32000, 44100, 48000, 96000, 192000]:
-                if min_rate <= r <= max_rate:
-                    rates.append(r)
-        if not rates:
-            if isinstance(min_rate, int):
-                rates.append(min_rate)
-            if isinstance(max_rate, int):
-                rates.append(max_rate)
-        return rates
-    return [48000]
+class IntChoice(BaseModel):
+    default: int
+    min: int | None = None
+    max: int | None = None
+    step: int | None = None
+    model_config = ConfigDict(extra="allow")
+
+
+class FloatChoice(BaseModel):
+    default: float
+    min: float | None = None
+    max: float | None = None
+    step: float | None = None
+    model_config = ConfigDict(extra="allow")
+
+
+class StrChoice(BaseModel):
+    default: str
+    model_config = ConfigDict(extra="allow")
+
+
+class BoolChoice(BaseModel):
+    default: bool
+    model_config = ConfigDict(extra="allow")
+
+
+IntValue = int | IntChoice
+FloatValue = float | FloatChoice
+StrValue = str | StrChoice
+BoolValue = bool | BoolChoice
+
+
+class EnumFormatItem(BaseModel):
+    mediaType: Literal["audio"]
+    mediaSubtype: str
+
+    format: StrValue | None = None
+    rate: IntValue | None = None
+    channels: IntValue | None = None
+    position: list[str] | None = None
+
+    model_config = ConfigDict(extra="allow")
+
+
+DEFAULT_SAMPLERATE = 48000
+DEFAULT_SAMPLERATE_CHOICES = [
+    16000,
+    32000,
+    44100,
+    48000,
+    96000,
+    192000,
+]
+
+
+def _extract_rate(rate_field: EnumFormatItem) -> list[int]:
+    rate_info = rate_field.rate
+
+    if isinstance(rate_info, int):
+        return [rate_info]
+
+    if rate_info is None:
+        return [DEFAULT_SAMPLERATE]
+
+    default = rate_info.default
+    min_rate = rate_info.min
+    max_rate = rate_info.max
+
+    rates = []
+    if isinstance(default, int):
+        rates.append(default)
+
+    if isinstance(min_rate, int):
+        rates.append(min_rate)
+
+    if isinstance(max_rate, int):
+        rates.append(max_rate)
+
+    if isinstance(min_rate, int) and isinstance(max_rate, int):
+        rates.extend(
+            r for r in DEFAULT_SAMPLERATE_CHOICES if min_rate <= r <= max_rate
+        )
+
+    return rates
+
+
+def _extract_channels(format_field: EnumFormatItem) -> int:
+    channels_info = format_field.channels
+
+    if isinstance(channels_info, int):
+        return channels_info
+
+    if channels_info is None:
+        return 1
+
+    default = channels_info.default
+    max_channels = channels_info.max
+
+    if isinstance(max_channels, int):
+        return max_channels
+
+    return default
+
+
+def _extract_max_channels(formats: list[EnumFormatItem]) -> int:
+    return max(_extract_channels(format_field) for format_field in formats)
 
 
 def _parse_pw_info(pw_info: dict) -> DeviceInfo:
     """Convert raw ``pw-dump`` node information into ``DeviceInfo``."""
     props = pw_info["props"]
-    formats = pw_info["params"]["EnumFormat"]
-    default_format = formats[0]
+    name = props["node.name"]
+    description = props.get("node.description", name)
+
+    adapter = TypeAdapter(list[EnumFormatItem])
+    formats = adapter.validate_python(pw_info["params"]["EnumFormat"])
+
     samplerates = set()
     for f in formats:
-        samplerates.update(_extract_rate(f.get("rate", 48_000)))
+        samplerates.update(_extract_rate(f))
+
     return DeviceInfo(
-        name=props["node.name"],
-        description=props["node.description"],
-        max_input_channels=default_format["channels"],
+        name=name,
+        description=description,
+        max_input_channels=_extract_max_channels(formats),
         samplerates=list(samplerates),
     )
 
