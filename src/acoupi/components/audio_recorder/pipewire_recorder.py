@@ -257,7 +257,7 @@ def _parse_pw_microphone_config(
 
         choice = click.prompt(
             "What samplerate do you want to use?",
-            type=click.Choice(rates),
+            type=click.IntRange(min=8_000, max=384_000),
             default=default,
         )
         parsed.samplerate = choice
