@@ -132,4 +132,4 @@ def add_guano_metadata(recording: data.Recording) -> None:
             recording.deployment.longitude,
         )
 
-    g.write()
+    g.write(make_backup=False)
