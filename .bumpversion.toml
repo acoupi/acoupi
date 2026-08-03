@@ -1,5 +1,5 @@
 [tool.bumpversion]
-current_version = "0.6.0"
+current_version = "0.6.1"
 commit = true
 tag = true
 pre_commit_hooks = ["uv lock", "git add uv.lock"]
