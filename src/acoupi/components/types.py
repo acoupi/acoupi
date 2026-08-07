@@ -434,13 +434,13 @@ class MessageBuilder(ABC, Generic[P]):
         self,
         *args: P.args,
         **kwargs: P.kwargs,
-    ) -> Optional[data.Message]:
+    ) -> None | data.Message | list[data.Message]:
         """Will build a message or return None depending on the input data.
 
         Returns
         -------
-        Optional[data.Message]
-            The assembled message or None if the input data is not suitable.
+        data.Message | list[data.Message] | None
+            One message, multiple messages, or None if there is nothing to send.
 
         """
 

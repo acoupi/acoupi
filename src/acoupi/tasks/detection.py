@@ -73,14 +73,14 @@ def generate_detection_task(
         - Store the cleaned outputs of the model in the store.
         - See [components.stores][acoupi.components.stores] for implementation
         of [types.Store][acoupi.components.types.Store].
-    5. **message_factory.build_message(model_output)** -> data.Message
-        - Create messages to be sent using the Messenger.
+    5. **message_factory.build_message(model_output)** -> data.Message | list[data.Message] | None
+        - Create one or more messages to be sent using the Messenger.
         - See
         [components.message_factories][acoupi.components.message_factories] for
         implementations of
         [types.MessageBuilder][acoupi.components.types.MessageBuilder].
     6. **message_store.store_message(message)** -> None
-        - Store the message in the message store.
+        - Store each message in the message store.
         - See [components.message_stores][acoupi.components.message_stores] for
         implementation of [types.Store][acoupi.components.types.Store].
     """
@@ -112,9 +112,15 @@ def generate_detection_task(
 
         # Create messages
         for message_factory in message_factories or []:
-            message = message_factory.build_message(model_output)
+            messages = message_factory.build_message(model_output)
 
-            if message is not None:
+            if messages is None:
+                continue
+
+            if not isinstance(messages, list):
+                messages = [messages]
+
+            for message in messages:
                 logger.info("Storing message.")
                 message_store.store_message(message)
 
