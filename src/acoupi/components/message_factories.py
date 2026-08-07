@@ -10,8 +10,9 @@ when connectivity is limited. For example, message factories
 can be used to filter detections with low score.
 
 Message factories are implemented as classes that inherit from MessageBuilder. The class should
-implement the build_message method, which takes a model output and returns a message. Built-in
-message factories emit JSON text, but custom factories may emit raw bytes for binary transports.
+implement the build_message method, which takes a model output and returns no message, one message,
+or multiple messages. Built-in message factories emit JSON text, but custom factories may emit raw
+bytes for binary transports.
 """
 
 from typing import List, Optional, Sequence
