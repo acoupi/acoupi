@@ -63,7 +63,7 @@ The recording task builds upon the acoupi components: `AudioRecorder` to capture
 #### Detection
 
 The [Detection](../reference/tasks.md) task is responsible for processing audio files.
-The task builds upon the acoupi components: `ProcessingFilter` to determine if a recording should be processed, `Model` to run an audio classifier model, `ModelOutputCleaner` to cleans the model outputs, `MessageBuilder` to generate messages with the detected information, and `Store` and `MessageStore` to save the metadata of the procesed recordings and store the messages to be sent.
+The task builds upon the acoupi components: `ProcessingFilter` to determine if a recording should be processed, `Model` to run an audio classifier model, `ModelOutputCleaner` to cleans the model outputs, `MessageBuilder` to generate no message, one message, or multiple messages with the detected information, and `Store` and `MessageStore` to save the metadata of the procesed recordings and store the messages to be sent.
 
 <figure markdown="span">
     ![Figure 2: Overview of the detection task](../img/task_02_model.png){ width="110%" }
