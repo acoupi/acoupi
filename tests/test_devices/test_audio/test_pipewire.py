@@ -139,6 +139,32 @@ class TestGetInputDevices:
         assert devices[0].max_input_channels == 6
         assert sorted(devices[0].samplerates) == [44100, 48000, 96000, 192000]
 
+    def test_skips_devices_when_no_formats_are_listed(
+        self, monkeypatch, make_completed_process
+    ):
+        payload = [
+            {
+                "id": 60,
+                "type": "PipeWire:Interface:Node",
+                "info": {
+                    "props": {
+                        "media.class": "Audio/Source",
+                        "node.name": "alsa_input.empty-formats",
+                        "node.description": "Empty Formats Device",
+                    },
+                    "params": {"EnumFormat": []},
+                },
+            }
+        ]
+        monkeypatch.setattr(
+            "acoupi.devices.audio.pipewire.run",
+            lambda *args, **kwargs: make_completed_process(
+                json.dumps(payload)
+            ),
+        )
+
+        assert get_input_devices() == []
+
 
 class TestGetInputDeviceByName:
     def test_returns_matching_device(
