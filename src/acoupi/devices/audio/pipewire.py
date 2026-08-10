@@ -59,6 +59,7 @@ def get_input_devices() -> list[DeviceInfo]:
         if device.get("type") == "PipeWire:Interface:Node"
         and (info := device.get("info")) is not None
         and info.get("props", {}).get("media.class") == "Audio/Source"
+        and info.get("params", {}).get("EnumFormat")
     ]
 
 

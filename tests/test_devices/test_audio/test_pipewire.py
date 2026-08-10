@@ -139,7 +139,7 @@ class TestGetInputDevices:
         assert devices[0].max_input_channels == 6
         assert sorted(devices[0].samplerates) == [44100, 48000, 96000, 192000]
 
-    def test_defaults_channels_when_no_formats_are_listed(
+    def test_skips_devices_when_no_formats_are_listed(
         self, monkeypatch, make_completed_process
     ):
         payload = [
@@ -163,10 +163,7 @@ class TestGetInputDevices:
             ),
         )
 
-        devices = get_input_devices()
-
-        assert len(devices) == 1
-        assert devices[0].max_input_channels == 1
+        assert get_input_devices() == []
 
 
 class TestGetInputDeviceByName:
