@@ -1,6 +1,7 @@
 """Test the SQLite Message store."""
 
 import datetime
+import shutil
 import sqlite3
 from pathlib import Path
 from typing import Generator
@@ -30,6 +31,7 @@ def test_message_table_has_correct_columns(
         "id",
         "content",
         "created_on",
+        "message_type",
     }
     db_path = sqlite_message_store.db_path
 
@@ -226,3 +228,73 @@ def test_get_unsent_messages_applies_newest_first_order(
         b"test message 3",
         b"test message 2",
     ]
+
+
+def test_store_message_with_message_type(
+    sqlite_message_store: components.SqliteMessageStore,
+):
+    """Test storing a message with message_type."""
+    message = data.Message(
+        content="test message",
+        message_type=data.MessageType.DETECTION,
+    )
+    sqlite_message_store.store_message(message)
+
+    db_path = sqlite_message_store.db_path
+    with sqlite3.connect(str(db_path)) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT message_type FROM message;")
+        row = cursor.fetchone()
+        assert row[0] == "detection"
+
+    unsent = sqlite_message_store.get_unsent_messages()
+    assert len(unsent) == 1
+    assert unsent[0].message_type == data.MessageType.DETECTION
+
+
+def test_migrate_db_adds_message_type_column_and_updates_version(
+    tmp_path: Path,
+):
+    """Test migrating an older message store database schema from a snapshot fixture."""
+    fixture_path = (
+        Path(__file__).resolve().parents[3]
+        / "fixtures"
+        / "databases"
+        / "message_store_v1.db"
+    )
+    db_path = tmp_path / "migrated_message_store.db"
+    shutil.copy2(fixture_path, db_path)
+
+    # Initialise SqliteMessageStore which triggers migration
+    store = components.SqliteMessageStore(db_path)
+
+    # Verify migration applied and PRAGMA user_version updated
+    with sqlite3.connect(str(db_path)) as conn:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA user_version;")
+        assert cursor.fetchone()[0] == 2
+
+        cursor.execute("PRAGMA table_info(message);")
+        columns = {row[1] for row in cursor.fetchall()}
+        assert "message_type" in columns
+
+    # Verify historical unsent messages are readable with message_type=None
+    unsent = store.get_unsent_messages()
+    assert len(unsent) == 2
+    assert {message.content for message in unsent} == {
+        b"unsent legacy message 1",
+        b"failed legacy message 3",
+    }
+    assert all(message.message_type is None for message in unsent)
+
+    # Verify new message with message_type can be stored and retrieved
+    new_message = data.Message(
+        content="new message",
+        message_type=data.MessageType.HEARTBEAT,
+    )
+    store.store_message(new_message)
+
+    unsent = store.get_unsent_messages()
+    assert len(unsent) == 3
+    heartbeat_msg = [m for m in unsent if m.content == b"new message"][0]
+    assert heartbeat_msg.message_type == data.MessageType.HEARTBEAT

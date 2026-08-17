@@ -622,3 +622,109 @@ def test_mqtt_check_fails_with_bad_host():
     # Act
     with pytest.raises(HealthCheckError):
         messenger.check()
+
+
+def test_mqtt_config_defaults_use_message_type_to_false():
+    """Test MQTTConfig defaults use_message_type to False."""
+    config = messengers.MQTTConfig(
+        host="localhost",
+        username="test",
+    )
+    assert config.use_message_type is False
+
+
+def test_mqtt_messenger_default_does_not_use_message_type():
+    """Test MQTTMessenger defaults use_message_type to False and uses base topic."""
+    mock_response = mock.MagicMock()
+    mock_response.rc = 0
+
+    with mock.patch("paho.mqtt.client.Client", spec=True) as mock_client:
+        mock_client.return_value.is_connected.return_value = True
+        mock_client.return_value.publish.return_value = mock_response
+
+        messenger = messengers.MQTTMessenger(
+            host="localhost",
+            port=1883,
+            username="test",
+            topic="acoupi",
+        )
+        assert messenger.use_message_type is False
+
+        # Even with message_type set, default use_message_type=False uses base topic
+        message = data.Message(
+            content='"Hello, world!"',
+            message_type=data.MessageType.DETECTION,
+        )
+        response = messenger.send_message(message)
+
+        assert response.status == data.ResponseStatus.SUCCESS
+        mock_client.return_value.publish.assert_called_once_with(
+            topic="acoupi",
+            payload='"Hello, world!"',
+        )
+
+
+def test_mqtt_messenger_uses_message_type_when_enabled():
+    """Test MQTTMessenger publishes to topic/{message_type} when enabled."""
+    mock_response = mock.MagicMock()
+    mock_response.rc = 0
+
+    with mock.patch("paho.mqtt.client.Client", spec=True) as mock_client:
+        mock_client.return_value.is_connected.return_value = True
+        mock_client.return_value.publish.return_value = mock_response
+
+        messenger = messengers.MQTTMessenger(
+            host="localhost",
+            port=1883,
+            username="test",
+            topic="acoupi",
+            use_message_type=True,
+        )
+
+        message = data.Message(
+            content='"Hello, world!"',
+            message_type=data.MessageType.DETECTION,
+        )
+        response = messenger.send_message(message)
+
+        assert response.status == data.ResponseStatus.SUCCESS
+        mock_client.return_value.publish.assert_called_once_with(
+            topic="acoupi/detection",
+            payload='"Hello, world!"',
+        )
+
+
+@pytest.mark.parametrize("use_msg_type", [True, False])
+def test_mqtt_messenger_from_config_passes_use_message_type(
+    use_msg_type: bool,
+):
+    """Test MQTTMessenger.from_config correctly initializes use_message_type."""
+    mock_response = mock.MagicMock()
+    mock_response.rc = 0
+
+    config = messengers.MQTTConfig(
+        host="localhost",
+        port=1883,
+        username="test",
+        topic="acoupi",
+        use_message_type=use_msg_type,
+    )
+
+    with mock.patch("paho.mqtt.client.Client", spec=True) as mock_client:
+        mock_client.return_value.is_connected.return_value = True
+        mock_client.return_value.publish.return_value = mock_response
+
+        messenger = messengers.MQTTMessenger.from_config(config)
+        assert messenger.use_message_type is use_msg_type
+
+        message = data.Message(
+            content='"Hello, world!"',
+            message_type=data.MessageType.SUMMARY,
+        )
+        messenger.send_message(message)
+
+        expected_topic = "acoupi/summary" if use_msg_type else "acoupi"
+        mock_client.return_value.publish.assert_called_once_with(
+            topic=expected_topic,
+            payload='"Hello, world!"',
+        )

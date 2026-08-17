@@ -35,6 +35,7 @@ __all__ = [
     "EventDetection",
     "ModelOutput",
     "ModelOutputInfo",
+    "MessageType",
     "Message",
     "ResponseStatus",
     "Response",
@@ -415,8 +416,33 @@ class ModelOutputInfo(BaseModel):
     """The datetime when the model output was created."""
 
 
+class MessageType(str, Enum):
+    """The type of message."""
+
+    DEPLOYMENT = "deployment"
+    """A deployment message."""
+
+    HEARTBEAT = "heartbeat"
+    """A heartbeat message."""
+
+    RECORDING = "recording"
+    """A recording message."""
+
+    SUMMARY = "summary"
+    """A summary message."""
+
+    DETECTION = "detection"
+    """A detection message."""
+
+    def __str__(self) -> str:
+        return self.value
+
+
 class Message(BaseModel):
     """The message to be sent to the remote server."""
+
+    message_type: MessageType | None = None
+    """Extra flag to indicate the type of message. Defaults to None."""
 
     id: UUID = Field(default_factory=uuid4)
     """The unique ID of the message."""

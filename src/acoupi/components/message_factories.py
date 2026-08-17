@@ -122,7 +122,10 @@ class DetectionThresholdMessageBuilder(types.MessageBuilder):
             recording=model_output.recording,
             detections=filtered_detections,
         )
-        return data.Message(content=filtered_model_output.model_dump_json())
+        return data.Message(
+            content=filtered_model_output.model_dump_json(),
+            message_type=data.MessageType.DETECTION,
+        )
 
 
 class FullModelOutputMessageBuilder(types.MessageBuilder):
@@ -144,4 +147,7 @@ class FullModelOutputMessageBuilder(types.MessageBuilder):
         -------
             A message containing the full model output.
         """
-        return data.Message(content=model_output.model_dump_json())
+        return data.Message(
+            content=model_output.model_dump_json(),
+            message_type=data.MessageType.DETECTION,
+        )
