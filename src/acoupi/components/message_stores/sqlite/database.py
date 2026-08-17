@@ -37,7 +37,9 @@ def migrate_db(
 
     if current_version < 2:
         apply_add_message_type_migration(connection)
-        set_db_version(connection, 2)
+
+    if current_version < target_version:
+        set_db_version(connection, target_version)
 
 
 def create_message_schema(
