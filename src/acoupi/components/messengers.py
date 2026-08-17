@@ -51,6 +51,7 @@ class MQTTConfig(BaseModel):
     timeout: int = 5
     use_tls: bool = False
     transport: MQTTTransport = MQTTTransport.TCP
+    use_message_type: bool = False
 
     @field_serializer("password", when_used="json")
     def dump_password(self, value):
@@ -82,6 +83,7 @@ class MQTTMessenger(types.Messenger):
         use_tls: bool = False,
         logger: Optional[logging.Logger] = None,
         transport: Literal["tcp", "websockets", "unix"] = "tcp",
+        use_message_type: bool = False,
     ) -> None:
         """Initialise the MQTT messenger.
 
@@ -99,6 +101,8 @@ class MQTTMessenger(types.Messenger):
             The password to authenticate with, by default None.
         use_tls: bool
             Use TLS is host requires this with local certs (eg. HiveHQ) - default sets to false
+        use_message_type: bool
+            Use message type as part of the topic. Defaults to False.
 
         Notes
         -----
@@ -111,6 +115,7 @@ class MQTTMessenger(types.Messenger):
         self.client_id = get_device_id()
         self.use_tls = use_tls
         self.transport = transport
+        self.use_message_type = use_message_type
 
         self.client = mqtt.Client(
             callback_api_version=CallbackAPIVersion.VERSION2,
@@ -151,6 +156,7 @@ class MQTTMessenger(types.Messenger):
             use_tls=config.use_tls,
             transport=config.transport.value,
             logger=logger,
+            use_message_type=config.use_message_type,
         )
 
     def check_connection(self) -> MQTTErrorCode:
@@ -206,8 +212,12 @@ class MQTTMessenger(types.Messenger):
                 f"MQTT connection error: {MQTTErrorCode(mqtt_status).name}"
             )
 
+        topic = self.topic
+        if self.use_message_type and message.message_type is not None:
+            topic = f"{topic}/{message.message_type}"
+
         response = self.client.publish(
-            topic=self.topic,
+            topic=topic,
             payload=message.content,
         )
 
