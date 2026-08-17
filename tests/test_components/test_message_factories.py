@@ -133,3 +133,4 @@ def test_message_builder_detections_with_mixthreshold(
 
     message = message_builder.build_message(model_output)
     assert message is not None
+    assert message.message_type == data.MessageType.DETECTION

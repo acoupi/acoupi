@@ -66,6 +66,7 @@ def test_build_summary(tmp_path: Path) -> None:
     summary = summariser.build_summary(now)
 
     assert isinstance(summary, data.Message)
+    assert summary.message_type == data.MessageType.SUMMARY
     payload = json.loads(summary.content)
     assert payload["specie_a"] == {
         "count_low_threshold": 1,

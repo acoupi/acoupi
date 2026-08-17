@@ -5,7 +5,7 @@ from typing import Callable
 from pydantic import BaseModel, Field
 
 from acoupi.components import types
-from acoupi.data import Message, Metric, utc_now
+from acoupi.data import Message, MessageType, Metric, utc_now
 from acoupi.devices import get_device_id
 
 logger = logging.getLogger(__name__)
@@ -108,7 +108,11 @@ def generate_heartbeat_task(
             metrics=measurements,
         )
         content = serializer(heartbeat)
-        message = Message(content=content, created_on=now)
+        message = Message(
+            content=content,
+            created_on=now,
+            message_type=MessageType.HEARTBEAT,
+        )
 
         for messenger in messengers:
             response = messenger.send_message(message)

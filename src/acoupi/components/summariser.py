@@ -121,7 +121,10 @@ class StatisticsDetectionsSummariser(types.Summariser):
             "endtime": now.isoformat(),
         }
 
-        return data.Message(content=json.dumps(db_species_stats))
+        return data.Message(
+            content=json.dumps(db_species_stats),
+            message_type=data.MessageType.SUMMARY,
+        )
 
 
 class ThresholdsDetectionsSummariser(types.Summariser):
@@ -259,4 +262,7 @@ class ThresholdsDetectionsSummariser(types.Summariser):
             "endtime": now.isoformat(),
         }
 
-        return data.Message(content=json.dumps(db_species_stats))
+        return data.Message(
+            content=json.dumps(db_species_stats),
+            message_type=data.MessageType.SUMMARY,
+        )

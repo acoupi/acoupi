@@ -35,6 +35,7 @@ class TestHeartbeatTask:
         call = calls[0]
         message = call[1][0]
         assert isinstance(message, data.Message)
+        assert message.message_type == data.MessageType.HEARTBEAT
         assert isinstance(message.content, str)
         assert device_id in message.content
         payload = json.loads(message.content)

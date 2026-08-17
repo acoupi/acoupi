@@ -75,6 +75,7 @@ def test_full_model_output_message_builder_returns_a_message():
     builder = components.FullModelOutputMessageBuilder()
     message = builder.build_message(TEST_MODEL_OUTPUT)
     assert isinstance(message, data.Message)
+    assert message.message_type == data.MessageType.DETECTION
 
 
 def test_full_model_output_message_builder_returns_the_correct_message():
