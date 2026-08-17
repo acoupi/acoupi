@@ -15,11 +15,14 @@ def store_message(
     content: bytes,
 ) -> None:
     connection.execute(
-        "INSERT INTO message (id, content, created_on) VALUES (?, ?, ?)",
+        "INSERT INTO message (id, content, created_on, message_type) VALUES (?, ?, ?, ?)",
         (
             message.id.bytes,
             content,
             serialise_datetime(message.created_on),
+            message.message_type.value
+            if message.message_type is not None
+            else None,
         ),
     )
 
@@ -31,7 +34,7 @@ def get_unsent_messages(
 ) -> list[data.Message]:
     order_by = "DESC" if order == "newest_first" else "ASC"
     query = f"""
-        SELECT m.id, m.content, m.created_on
+        SELECT m.id, m.content, m.created_on, m.message_type
         FROM message AS m
         WHERE NOT EXISTS (
             SELECT 1
@@ -53,6 +56,7 @@ def get_unsent_messages(
             id=UUID(bytes=row["id"]),
             content=row["content"],
             created_on=parse_datetime(row["created_on"]),
+            message_type=row["message_type"],
         )
         for row in rows
     ]

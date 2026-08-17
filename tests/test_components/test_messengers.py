@@ -728,6 +728,3 @@ def test_mqtt_messenger_from_config_passes_use_message_type(
             topic=expected_topic,
             payload='"Hello, world!"',
         )
-
-
-
