@@ -1,7 +1,7 @@
 """Path constants for acoupi system."""
 
 from pathlib import Path
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -130,3 +130,11 @@ class CeleryConfig(BaseModel):
     Keeping this low allows beat to dispatch second-aligned periodic tasks with
     predictable timing.
     """
+
+    worker_max_tasks_per_child: Optional[int] = 20
+    """Maximum number of tasks a worker process can execute before being replaced.
+
+    Setting this to a finite number (e.g., 20) helps prevent memory leaks and
+    resource bloat in long-running worker processes on embedded hardware.
+    """
+
