@@ -13,7 +13,7 @@ from typing import (
 )
 
 from omegaconf import OmegaConf
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, SecretStr, ValidationError
 
 from acoupi.system import exceptions
 
@@ -29,6 +29,21 @@ __all__ = [
 S = TypeVar("S", bound=BaseModel)
 
 
+def _unwrap_secrets(val: Any) -> Any:
+    from enum import Enum
+    if isinstance(val, SecretStr):
+        return val.get_secret_value()
+    if isinstance(val, Enum):
+        return val.value
+    if isinstance(val, Path):
+        return str(val)
+    if isinstance(val, dict):
+        return {k: _unwrap_secrets(v) for k, v in val.items()}
+    if isinstance(val, list):
+        return [_unwrap_secrets(v) for v in val]
+    return val
+
+
 def write_config(
     config: Optional[BaseModel],
     path: Path,
@@ -40,8 +55,9 @@ def write_config(
     if not path.parent.exists():
         path.parent.mkdir(parents=True)
 
+    raw_dict = _unwrap_secrets(config.model_dump())
     with open(path, "w") as file:
-        file.write(config.model_dump_json(indent=2))
+        file.write(json.dumps(raw_dict, indent=2, default=str))
 
 
 def load_config(path: Path, schema: Type[S]) -> S:

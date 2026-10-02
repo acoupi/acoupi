@@ -5,7 +5,7 @@ import datetime
 import enum
 import re
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Literal, Dict, List, Optional, Type, TypeVar, Union
 
 import click
 from pydantic import BaseModel, SecretStr, ValidationError
@@ -34,6 +34,7 @@ def parse_config_from_args(
     schema: Type[A],
     args: Optional[List[str]] = None,
     prompt: bool = True,
+    existing_defaults: Optional[Dict[str, Any]] = None,
 ) -> A:
     """Parse configurations from user provided arguments.
 
@@ -66,6 +67,7 @@ def parse_config_from_args(
             field,
             args,
             prompt=prompt,
+            existing_defaults=existing_defaults,
         )
         values[field_name] = instance
     try:
@@ -83,18 +85,43 @@ def parse_field_from_args(
     args: List[str],
     prompt: bool = True,
     prefix: str = "",
+    existing_defaults: Optional[Dict[str, Any]] = None,
 ) -> object:
     """Parse a field from the command line arguments."""
+    annotation = field.annotation
+    if annotation is not None:
+        origin = get_origin(annotation)
+        if origin == Annotated:
+            annotation = get_args(annotation)[0]
+            origin = get_origin(annotation)
+        
+        import types
+        if origin in (Union, getattr(types, "UnionType", None)):
+            non_none = [a for a in get_args(annotation) if a is not type(None)]
+            if non_none:
+                origin = get_origin(non_none[0])
+
+        if origin is Literal:
+            return parse_literal_field(
+                field_name,
+                field,
+                args,
+                prompt=should_prompt(field, prompt=prompt),
+                prefix=prefix,
+                existing_defaults=existing_defaults,
+            )
+
     field_type = get_field_dtype(field)
 
     for dtype, _parse_argument in FIELD_PARSERS.items():
-        if issubclass(field_type, dtype):
+        if isinstance(field_type, type) and issubclass(field_type, dtype):
             return _parse_argument(
                 field_name,
                 field,
                 args,
                 prompt=should_prompt(field, prompt=prompt),
                 prefix=prefix,
+                existing_defaults=existing_defaults,
             )
 
     raise NotImplementedError(f"Cannot parse argument for field {field}.")
@@ -106,17 +133,27 @@ def parse_pydantic_model_field_from_args(
     args: List[str],
     prompt: bool = True,
     prefix: str = "",
+    existing_defaults: Optional[Dict[str, Any]] = None,
 ) -> Optional[BaseModel]:
     """Parse a pydantic model field from the command line arguments."""
     model = get_field_dtype(field)
 
-    assert issubclass(model, BaseModel)
+    if not isinstance(model, type) or not issubclass(model, BaseModel):
+        raise ValueError(f"Field {field} is not a BaseModel class.")
 
-    prefix = f"{prefix}.{field_name}" if prefix else field_name
+    sub_defaults = None
+    if isinstance(existing_defaults, dict):
+        raw = existing_defaults.get(field_name)
+        if isinstance(raw, BaseModel):
+            sub_defaults = raw.model_dump(exclude_none=True)
+        elif isinstance(raw, dict):
+            sub_defaults = raw
+
+    full_prefix = f"{prefix}.{field_name}" if prefix else field_name
 
     custom_setup = getattr(model, "setup", None)
     if custom_setup is not None and callable(custom_setup):
-        config = custom_setup(args, prompt=prompt, prefix=prefix)
+        config = custom_setup(args, prompt=prompt, prefix=full_prefix)
 
         if config is not None and not isinstance(config, BaseModel):
             raise RuntimeError("Setup function must return a BaseModel.")
@@ -124,19 +161,20 @@ def parse_pydantic_model_field_from_args(
         return config
 
     if not field.is_required():
-        has_some_arg = any(arg.startswith(f"--{prefix}") for arg in args)
+        has_some_arg = any(arg.startswith(f"--{full_prefix}") for arg in args)
         if not has_some_arg:
             default_value = field.get_default(call_default_factory=True)
 
             if not prompt:
                 return default_value
 
+            confirm_default = True if sub_defaults is not None else False
             if not click.confirm(
                 (
                     "Would you like to set "
                     f"{click.style(field_name, fg='blue', bold=True)}?"
                 ),
-                default=False,
+                default=confirm_default,
             ):
                 return default_value
 
@@ -148,19 +186,20 @@ def parse_pydantic_model_field_from_args(
     if model is None:
         raise ValueError(f"Field {field} has no annotation.")
 
-    if not issubclass(model, BaseModel):
+    if not isinstance(model, type) or not issubclass(model, BaseModel):
         raise ValueError(f"Field {field} is not a pydantic model.")
 
     values = {}
-    for field_name, field in model.model_fields.items():
+    for sub_field_name, sub_field in model.model_fields.items():
         instance = parse_field_from_args(
-            field_name,
-            field,
+            sub_field_name,
+            sub_field,
             args,
             prompt=prompt,
-            prefix=prefix,
+            prefix=full_prefix,
+            existing_defaults=sub_defaults,
         )
-        values[field_name] = instance
+        values[sub_field_name] = instance
 
     return model(**values)
 
@@ -172,6 +211,7 @@ def parse_list_field_from_args(
     prompt: bool = True,
     prefix: str = "",
     max_items: int = 20,
+    existing_defaults: Optional[Dict[str, Any]] = None,
 ) -> list:
     """Parse a list field from the command line arguments.
 
@@ -207,6 +247,7 @@ def parse_tuple_field_from_args(
     args: List[str],
     prompt: bool = True,
     prefix: str = "",
+    existing_defaults: Optional[Dict[str, Any]] = None,
 ) -> tuple:
     """Parse a tuple field from the command line arguments."""
     parser = argparse.ArgumentParser()
@@ -250,6 +291,7 @@ class FieldParser(Protocol):
         args: List[str],
         prompt: bool = True,
         prefix: str = "",
+        existing_defaults: Optional[Dict[str, Any]] = None,
     ) -> object:
         """Parse a field from the command line arguments."""
 
@@ -288,10 +330,13 @@ def parse_simple_field_from_args(
     field: FieldInfo,
     dtype: DType,
     raise_on_missing: bool = True,
+    fallback_default: Any = None,
 ):
     parser = argparse.ArgumentParser()
 
     default = get_field_default(field)
+    if default is None and fallback_default is not None:
+        default = fallback_default
 
     action = parser.add_argument(
         f"--{name}",
@@ -325,8 +370,13 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
         args: List[str],
         prompt: bool = True,
         prefix: str = "",
+        existing_defaults: Optional[Dict[str, Any]] = None,
     ):
         name = f"{prefix}.{field_name}" if prefix else f"{field_name}"
+
+        fallback = None
+        if isinstance(existing_defaults, dict):
+            fallback = existing_defaults.get(field_name)
 
         value = parse_simple_field_from_args(
             args,
@@ -334,6 +384,7 @@ def build_simple_field_parser(dtype: DType) -> FieldParser:
             field,
             dtype,
             raise_on_missing=not prompt,
+            fallback_default=fallback,
         )
 
         if not prompt:
@@ -478,9 +529,16 @@ def parse_secret_str_field(
     args: List[str],
     prompt: bool = True,
     prefix: str = "",
+    existing_defaults: Optional[Dict[str, Any]] = None,
 ) -> SecretStr:
     """Parse a SecretStr field from the command line arguments."""
     name = f"{prefix}.{field_name}" if prefix else field_name
+
+    fallback = None
+    if isinstance(existing_defaults, dict):
+        fallback = existing_defaults.get(field_name)
+        if isinstance(fallback, SecretStr):
+            fallback = fallback.get_secret_value()
 
     value = parse_simple_field_from_args(
         args,
@@ -488,6 +546,7 @@ def parse_secret_str_field(
         field,
         str,  # We treat it as a string for the prompt
         raise_on_missing=not prompt,
+        fallback_default=fallback,
     )
 
     if not prompt:
@@ -538,6 +597,7 @@ def parse_enum_field(
     args: List[str],
     prompt: bool = True,
     prefix: str = "",
+    existing_defaults: Optional[Dict[str, Any]] = None,
 ) -> object:
     parser = argparse.ArgumentParser()
     name = f"--{prefix}.{field_name}" if prefix else f"--{field_name}"
@@ -552,7 +612,7 @@ def parse_enum_field(
 
     field_enum = field.annotation
 
-    if not issubclass(field_enum, enum.Enum):  # type: ignore
+    if not isinstance(field_enum, type) or not issubclass(field_enum, enum.Enum):  # type: ignore
         raise ValueError(f"Field {field} is not an enum.")
 
     if not prompt:
@@ -567,6 +627,69 @@ def parse_enum_field(
         type=click.Choice([m.value for m in field_enum], case_sensitive=False),
     )
     return field_enum(value)
+
+
+
+
+def parse_literal_field(
+    field_name: str,
+    field: FieldInfo,
+    args: List[str],
+    prompt: bool = True,
+    prefix: str = "",
+    existing_defaults: Optional[Dict[str, Any]] = None,
+) -> Any:
+    annotation = field.annotation
+    origin = get_origin(annotation)
+    if origin == Annotated:
+        annotation = get_args(annotation)[0]
+        origin = get_origin(annotation)
+    
+    import types
+    if origin in (Union, getattr(types, "UnionType", None)):
+        non_none = [a for a in get_args(annotation) if a is not type(None)]
+        if non_none:
+            annotation = non_none[0]
+
+    choices = [str(c) for c in get_args(annotation)]
+    cli_name = f"--{prefix}.{field_name}" if prefix else f"--{field_name}"
+    display_name = f"{prefix}.{field_name}" if prefix else field_name
+
+    parser = argparse.ArgumentParser()
+    default_val = get_field_default(field)
+    if default_val is None and isinstance(existing_defaults, dict):
+        default_val = existing_defaults.get(field_name)
+
+    parser.add_argument(
+        cli_name,
+        dest="value",
+        type=str,
+        default=default_val,
+        help=field.description,
+    )
+    parsed_args, _ = parser.parse_known_args(args)
+    value = parsed_args.value
+
+    if not prompt:
+        return value
+
+    if value is not None and str(value) in choices:
+        if click.confirm(
+            "Would you like to set "
+            f"{click.style(display_name, fg='blue', bold=True)}="
+            f"{click.style(repr(value), fg='yellow', bold=True)}?",
+            default=True,
+        ):
+            return value
+
+    return click.prompt(
+        (
+            "Please provide a value for "
+            f"{click.style(display_name, fg='blue', bold=True)}."
+        ),
+        type=click.Choice(choices, case_sensitive=False),
+        default=str(value) if (value is not None and str(value) in choices) else (choices[0] if choices else None),
+    )
 
 
 FIELD_PARSERS: Dict[type, FieldParser] = {

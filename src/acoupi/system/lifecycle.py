@@ -65,8 +65,23 @@ def setup_program(
     # Get program config schema
     config_schema = program_class.get_config_schema()
     if config_schema is not None:
+        # Load existing program config if available to reuse defaults
+        existing_program_defaults = None
+        if settings.program_config_file.exists():
+            try:
+                import json
+                with open(settings.program_config_file) as f:
+                    existing_program_defaults = json.load(f)
+            except Exception:
+                pass
+
         # Generate program configuration from arguments
-        config = parse_config_from_args(config_schema, args, prompt=prompt)
+        config = parse_config_from_args(
+            config_schema,
+            args,
+            prompt=prompt,
+            existing_defaults=existing_program_defaults,
+        )
 
         # Write program configuration to file
         write_config(config, settings.program_config_file)
@@ -75,8 +90,23 @@ def setup_program(
     worker_config = program_class.get_worker_config()
     write_scripts(worker_config, settings)
 
+    # Load existing celery config if available to reuse defaults
+    existing_celery_defaults = None
+    if settings.celery_config_file.exists():
+        try:
+            import json
+            with open(settings.celery_config_file) as f:
+                existing_celery_defaults = json.load(f)
+        except Exception:
+            pass
+
     # Generate celery configuration from arguments and write to file
-    celery_config = parse_config_from_args(CeleryConfig, args, prompt=False)
+    celery_config = parse_config_from_args(
+        CeleryConfig,
+        args,
+        prompt=False,
+        existing_defaults=existing_celery_defaults,
+    )
     write_config(celery_config, settings.celery_config_file)
 
     # Make sure run and log directories exist

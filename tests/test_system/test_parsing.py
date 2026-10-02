@@ -531,3 +531,77 @@ def test_parse_enum_field_fails_if_not_valid_value():
             ["--c", "c"],
             prompt=False,
         )
+
+
+def test_parse_config_with_existing_defaults():
+    class NestedConfig(BaseModel):
+        host: str
+        port: int = 1883
+
+    class Schema(BaseModel):
+        name: str
+        latitude: float
+        mqtt: Optional[NestedConfig] = None
+
+    existing = {
+        "name": "sensor-01",
+        "latitude": 51.5074,
+        "mqtt": {"host": "mqtt.example.org", "port": 8883},
+    }
+
+    # Should use existing_defaults without needing CLI flags
+    parsed = parse_config_from_args(
+        Schema,
+        [],
+        prompt=False,
+        existing_defaults=existing,
+    )
+
+    assert parsed.name == "sensor-01"
+    assert parsed.latitude == 51.5074
+    assert parsed.mqtt is not None
+    assert parsed.mqtt.host == "mqtt.example.org"
+    assert parsed.mqtt.port == 8883
+
+
+def test_parse_config_cli_args_override_existing_defaults():
+    class Schema(BaseModel):
+        name: str
+        latitude: float
+
+    existing = {
+        "name": "sensor-01",
+        "latitude": 51.5074,
+    }
+
+    # CLI args override existing defaults
+    parsed = parse_config_from_args(
+        Schema,
+        ["--name", "sensor-override", "--latitude", "52.0"],
+        prompt=False,
+        existing_defaults=existing,
+    )
+
+    assert parsed.name == "sensor-override"
+    assert parsed.latitude == 52.0
+
+
+def test_parse_literal_field():
+    from typing import Literal
+
+    class Schema(BaseModel):
+        order: Literal["oldest_first", "newest_first"] = "oldest_first"
+
+    # Default
+    parsed = parse_config_from_args(Schema, [], prompt=False)
+    assert parsed.order == "oldest_first"
+
+    # From CLI args
+    parsed = parse_config_from_args(Schema, ["--order", "newest_first"], prompt=False)
+    assert parsed.order == "newest_first"
+
+    # From existing defaults
+    parsed = parse_config_from_args(
+        Schema, [], prompt=False, existing_defaults={"order": "newest_first"}
+    )
+    assert parsed.order == "newest_first"

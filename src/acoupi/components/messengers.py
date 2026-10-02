@@ -52,6 +52,7 @@ class MQTTConfig(BaseModel):
     use_tls: bool = False
     transport: MQTTTransport = MQTTTransport.TCP
     use_message_type: bool = False
+    retain_heartbeat: bool = True
 
     @field_serializer("password", when_used="json")
     def dump_password(self, value):
@@ -84,6 +85,7 @@ class MQTTMessenger(types.Messenger):
         logger: Optional[logging.Logger] = None,
         transport: Literal["tcp", "websockets", "unix"] = "tcp",
         use_message_type: bool = False,
+        retain_heartbeat: bool = True,
     ) -> None:
         """Initialise the MQTT messenger.
 
@@ -116,6 +118,7 @@ class MQTTMessenger(types.Messenger):
         self.use_tls = use_tls
         self.transport = transport
         self.use_message_type = use_message_type
+        self.retain_heartbeat = retain_heartbeat
 
         self.client = mqtt.Client(
             callback_api_version=CallbackAPIVersion.VERSION2,
@@ -157,6 +160,7 @@ class MQTTMessenger(types.Messenger):
             transport=config.transport.value,
             logger=logger,
             use_message_type=config.use_message_type,
+            retain_heartbeat=config.retain_heartbeat,
         )
 
     def check_connection(self) -> MQTTErrorCode:
@@ -216,9 +220,17 @@ class MQTTMessenger(types.Messenger):
         if self.use_message_type and message.message_type is not None:
             topic = f"{topic}/{message.message_type}"
 
+        retain = False
+        if self.retain_heartbeat and (
+            message.message_type == data.MessageType.HEARTBEAT
+            or str(message.message_type).lower() in ("heartbeat", "messagetype.heartbeat")
+        ):
+            retain = True
+
         response = self.client.publish(
             topic=topic,
             payload=message.content,
+            retain=retain,
         )
 
         status = data.ResponseStatus.SUCCESS
