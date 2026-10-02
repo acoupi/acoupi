@@ -1,8 +1,11 @@
 """PipeWire-backed audio recorder and recorder configuration."""
 
+import tempfile
+import wave
 from argparse import ArgumentParser
 from pathlib import Path
 from subprocess import TimeoutExpired, run
+from typing import Optional, Union
 
 import click
 from pydantic import BaseModel, Field
@@ -14,6 +17,66 @@ from acoupi.system.exceptions import (
     ParameterError,
     RecordingError,
 )
+
+
+def trim_wav(
+    filepath: Union[Path, str],
+    target_samples: Optional[int] = None,
+    target_duration: Optional[float] = None,
+    samplerate: Optional[int] = None,
+) -> None:
+    """Trim a WAV file precisely to the target number of samples or duration.
+
+    Parameters
+    ----------
+    filepath : Path or str
+        Path to the WAV file to trim.
+    target_samples : int, optional
+        Exact number of audio frames to keep.
+    target_duration : float, optional
+        Target duration in seconds.
+    samplerate : int, optional
+        Sample rate in Hz (used if target_duration is specified).
+    """
+    path = Path(filepath)
+    if not path.exists():
+        raise FileNotFoundError(f"File not found: {path}")
+
+    if path.stat().st_size == 0:
+        return
+
+    with wave.open(str(path), "rb") as reader:
+        params = reader.getparams()
+        n_frames = reader.getnframes()
+        sr = params.framerate
+
+        if target_samples is None:
+            if target_duration is not None:
+                eff_sr = samplerate if samplerate is not None else sr
+                target_samples = int(target_duration * eff_sr)
+            else:
+                return
+
+        if n_frames <= target_samples:
+            return
+
+        frames_to_read = min(n_frames, target_samples)
+        audio_data = reader.readframes(frames_to_read)
+
+    with tempfile.NamedTemporaryFile(
+        dir=path.parent, delete=False, suffix=".wav"
+    ) as tmp_file:
+        tmp_path = Path(tmp_file.name)
+
+    try:
+        with wave.open(str(tmp_path), "wb") as writer:
+            writer.setparams(params)
+            writer.setnframes(frames_to_read)
+            writer.writeframes(audio_data)
+        tmp_path.replace(path)
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink(missing_ok=True)
 
 
 class PWRecorder(BaseAudioRecorder):
@@ -34,29 +97,26 @@ class PWRecorder(BaseAudioRecorder):
         device_name: str,
         audio_dir: Path = TMP_PATH,
         time_expansion: float = 1,
+        buffer_seconds: float = 0.5,
     ):
         """Initialise a PipeWire recorder.
 
         Parameters
         ----------
         duration:
-            Default recording duration in seconds.
+            Recording duration in seconds.
         samplerate:
             Recording samplerate in Hz.
         audio_channels:
-            Number of input channels to capture.
+            Number of audio channels.
         device_name:
             PipeWire target device name.
         audio_dir:
-            Directory where recorded WAV files will be written.
+            Directory where recordings will be saved.
         time_expansion:
-            Metadata factor used to reinterpret the recording timescale
-            downstream.
-
-        Raises
-        ------
-        ValueError
-            If ``time_expansion`` is not greater than zero.
+            Hardware-level time expansion factor.
+        buffer_seconds:
+            Startup latency buffer added to pw-record duration (default: 0.5s).
         """
         super().__init__(
             duration=duration,
@@ -66,6 +126,7 @@ class PWRecorder(BaseAudioRecorder):
             audio_dir=audio_dir,
             time_expansion=time_expansion,
         )
+        self.buffer_seconds = buffer_seconds
 
     def generate_recording(
         self,
@@ -87,6 +148,7 @@ class PWRecorder(BaseAudioRecorder):
             audio_channels=self.audio_channels,
             device_name=self.device_name,
             duration=duration or self.duration,
+            buffer_seconds=self.buffer_seconds,
         )
 
 
@@ -96,8 +158,9 @@ def record_audio(
     audio_channels: int,
     device_name: str,
     duration: float,
+    buffer_seconds: float = 0.5,
 ) -> None:
-    """Record audio with ``pw-record``.
+    """Record audio with ``pw-record`` and trim to exact sample length.
 
     Parameters
     ----------
@@ -111,6 +174,8 @@ def record_audio(
         PipeWire target device name.
     duration:
         Recording duration in seconds.
+    buffer_seconds:
+        Startup latency buffer added to pw-record duration (default: 0.5s).
 
     Raises
     ------
@@ -119,17 +184,20 @@ def record_audio(
     RecordingError
         If the command times out or does not produce an output file.
     """
-    samples = int(duration * samplerate)
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    target_samples = int(duration * samplerate)
+    buffer_samples = int((duration + buffer_seconds) * samplerate)
+
     cmd = [
         "pw-record",
         f"--rate={samplerate}",
         f"--channels={audio_channels}",
-        f"--sample-count={samples}",
+        f"--sample-count={buffer_samples}",
         f"--target={device_name}",
         str(path),
     ]
-
-    path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
         run(
@@ -137,7 +205,7 @@ def record_audio(
             capture_output=True,
             text=True,
             check=False,
-            timeout=duration + 2,
+            timeout=duration + buffer_seconds + 2,
         )
     except FileNotFoundError as error:
         raise DeviceUnavailableError(
@@ -155,6 +223,8 @@ def record_audio(
             message="PipeWire failed to record audio",
             help="Check that the selected microphone exists and supports the requested settings.",
         )
+
+    trim_wav(path, target_samples=target_samples)
 
 
 class PWRecorderConfig(BaseModel):
@@ -183,7 +253,7 @@ def _parse_pw_microphone_config(
 ) -> PWRecorderConfig:
     """Parse PipeWire recorder configuration from command-line arguments.
 
-    When prompting, channel choices are constrained by the selected device's
+    When prompting, channel choices are constrained by the selected device"s
     advertised maximum input channels. Samplerate is treated as the requested
     PipeWire recording rate.
     """

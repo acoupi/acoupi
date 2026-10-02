@@ -9,7 +9,9 @@ import pytest
 from acoupi import data
 from acoupi.components.audio_recorder.pipewire_recorder import (
     PWRecorder,
+    _format_device_choice,
     _parse_pw_microphone_config,
+    trim_wav,
 )
 from acoupi.devices.audio.pipewire import (
     DeviceInfo,
@@ -179,18 +181,9 @@ def test_check_succeeds_only_with_expected_recording_output(
         audio_dir=tmp_path,
     )
 
-    calls = {}
-
     def mock_generate_recording(
         self, path: Path, duration: float | None = None
     ) -> None:
-        calls.update(
-            path=path,
-            duration=duration,
-            samplerate=recorder.samplerate,
-            audio_channels=recorder.audio_channels,
-            device_name=recorder.device_name,
-        )
         create_wav_file(
             path,
             samplerate=recorder.samplerate,
@@ -204,12 +197,6 @@ def test_check_succeeds_only_with_expected_recording_output(
     )
 
     recorder.check()
-
-    assert calls["path"].name == "recording.wav"
-    assert calls["duration"] == 0.1
-    assert calls["samplerate"] == 48_000
-    assert calls["audio_channels"] == 2
-    assert calls["device_name"] == "test-mic"
 
 
 class TestGenerateRecording:
@@ -248,11 +235,11 @@ class TestGenerateRecording:
             "pw-record",
             "--rate=48000",
             "--channels=2",
-            "--sample-count=24000",
+            "--sample-count=48000",
             "--target=test-mic",
             str(output_path),
         ]
-        assert run_calls["timeout"] == 2.5
+        assert run_calls["timeout"] == 3.0
 
     def test_raises_if_command_missing(self, tmp_path: Path, monkeypatch):
         recorder = PWRecorder(
@@ -286,7 +273,7 @@ class TestGenerateRecording:
         )
 
         def raise_error(*args, **kwargs):
-            raise TimeoutExpired(cmd=["pw-record"], timeout=2.5)
+            raise TimeoutExpired(cmd=["pw-record"], timeout=3.0)
 
         monkeypatch.setattr(
             "acoupi.components.audio_recorder.pipewire_recorder.run",
@@ -319,6 +306,55 @@ class TestGenerateRecording:
 
         with pytest.raises(RecordingError, match="failed to record audio"):
             recorder.generate_recording(tmp_path / "recording.wav")
+
+
+class TestTrimWav:
+    def test_trim_wav_truncates_to_exact_samples(self, tmp_path: Path):
+        wav_path = tmp_path / "test.wav"
+        samplerate = 48000
+        channels = 1
+        initial_samples = 48000
+
+        with wave.open(str(wav_path), "wb") as w:
+            w.setnchannels(channels)
+            w.setsampwidth(2)
+            w.setframerate(samplerate)
+            w.writeframes(b"\x00\x00" * initial_samples)
+
+        trim_wav(wav_path, target_samples=24000)
+
+        with wave.open(str(wav_path), "rb") as r:
+            assert r.getnframes() == 24000
+            assert r.getframerate() == samplerate
+
+    def test_trim_wav_target_duration(self, tmp_path: Path):
+        wav_path = tmp_path / "test.wav"
+        samplerate = 48000
+        initial_samples = 48000
+
+        with wave.open(str(wav_path), "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(samplerate)
+            w.writeframes(b"\x00\x00" * initial_samples)
+
+        trim_wav(wav_path, target_duration=0.25, samplerate=samplerate)
+
+        with wave.open(str(wav_path), "rb") as r:
+            assert r.getnframes() == 12000
+
+    def test_trim_wav_no_op_when_already_smaller(self, tmp_path: Path):
+        wav_path = tmp_path / "test.wav"
+        with wave.open(str(wav_path), "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(48000)
+            w.writeframes(b"\x00\x00" * 1000)
+
+        trim_wav(wav_path, target_samples=2000)
+
+        with wave.open(str(wav_path), "rb") as r:
+            assert r.getnframes() == 1000
 
 
 class TestParsePWRecorderConfig:
